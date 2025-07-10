@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -186,7 +185,8 @@ export default function LandingPage() {
           background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          backgroundClip: 'text',
+          lineHeight: '1.1'
         }}>
           Get early access
         </h1>
@@ -195,9 +195,12 @@ export default function LandingPage() {
           fontSize: '1.5rem',
           marginBottom: '2rem',
           color: '#e0e0e0',
-          fontWeight: '400'
+          fontWeight: '400',
+          lineHeight: '1.3',
+          wordWrap: 'break-word',
+          hyphens: 'none'
         }}>
-          See your stream like never before.
+          See your stream like never&nbsp;before.
         </h2>
 
         {/* Description */}
@@ -419,6 +422,12 @@ export default function LandingPage() {
         @media (max-width: 768px) {
           h1 {
             font-size: 2.5rem !important;
+            line-height: 1.1 !important;
+          }
+          
+          h2 {
+            font-size: 1.2rem !important;
+            line-height: 1.3 !important;
           }
           
           form {
