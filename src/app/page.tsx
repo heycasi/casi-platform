@@ -382,7 +382,7 @@ export default function LandingPage() {
             Want more info?
           </p>
           <button 
-            onClick={() => window.location.href = 'mailto:hello@heycasi.com'}
+            onClick={() => window.location.href = 'mailto:casi@heycasi.com'}
             style={{
               padding: '0.75rem 2rem',
               borderRadius: '50px',
