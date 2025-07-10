@@ -1,165 +1,435 @@
+
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
-export default function HomePage() {
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default function LandingPage() {
   const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [waitlistCount, setWaitlistCount] = useState(172) // Starting number
+
+  // Load actual waitlist count from Supabase
+  useEffect(() => {
+    loadWaitlistCount()
+  }, [])
+
+  // Live counter effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Randomly increment the counter (simulates real signups)
+      if (Math.random() < 0.3) { // 30% chance every 10 seconds
+        setWaitlistCount(prev => prev + 1)
+      }
+    }, 10000) // Check every 10 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const loadWaitlistCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('waitlist')
+        .select('*', { count: 'exact', head: true })
+
+      if (error) {
+        console.error('Error loading count:', error)
+        return
+      }
+
+      // Use actual count + starting number to make it look more impressive
+      setWaitlistCount((count || 0) + 150)
+    } catch (error) {
+      console.error('Error loading waitlist count:', error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!email || !email.includes('@')) {
-      setMessage('❌ Please enter a valid email address.')
+      setError('Please enter a valid email address')
       return
     }
 
-    setMessage('🎉 Thanks! We\'ll be in touch soon!')
-    setEmail('')
-    
-    console.log('Waitlist signup:', email)
-  }
+    setIsSubmitting(true)
+    setError('')
 
-  const handleContactClick = () => {
-    window.location.href = 'mailto:hello@heycasi.com?subject=Casi Platform Inquiry'
+    try {
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('waitlist')
+        .insert([
+          {
+            email: email.toLowerCase().trim(),
+            source: 'landing_page',
+            user_agent: navigator.userAgent
+          }
+        ])
+        .select()
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          setError('This email is already on the waitlist!')
+        } else {
+          throw error
+        }
+        return
+      }
+
+      // Success!
+      setIsSubmitted(true)
+      setEmail('')
+      
+      // Increment counter when someone signs up
+      setWaitlistCount(prev => prev + 1)
+      
+      // Track signup event (optional)
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'waitlist_signup', {
+          event_category: 'engagement',
+          event_label: 'email_signup'
+        })
+      }
+
+    } catch (error) {
+      console.error('Submission error:', error)
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-20">
-        <div 
-          className="absolute inset-0" 
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
-            backgroundSize: '20px 20px'
-          }}
-        />
-      </div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+      color: 'white',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem',
+      fontFamily: 'Poppins, Arial, sans-serif',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
       
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '20%',
+        right: '10%',
+        width: '200px',
+        height: '200px',
+        background: 'linear-gradient(45deg, #B8EE8A, #5EEAD4)',
+        borderRadius: '50%',
+        opacity: 0.1,
+        filter: 'blur(40px)'
+      }} />
+      
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        left: '10%',
+        width: '300px',
+        height: '300px',
+        background: 'linear-gradient(45deg, #FF9F9F, #6932FF)',
+        borderRadius: '50%',
+        opacity: 0.1,
+        filter: 'blur(60px)'
+      }} />
+
+      {/* Main content */}
+      <div style={{
+        maxWidth: '900px',
+        textAlign: 'center',
+        zIndex: 1
+      }}>
         
-        {/* Logo Section */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
-              <img 
-                src="/landing-logo.png" 
-                alt="Casi Platform Logo" 
-                className="w-16 h-16 object-contain"
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement
-                  target.style.display = 'none'
-                  const fallback = target.nextElementSibling as HTMLElement
-                  if (fallback) fallback.style.display = 'block'
-                }}
-              />
-              <span className="text-4xl font-bold text-white hidden">🎮</span>
-            </div>
-          </div>
-          
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent mb-6">
-            Casi Platform
-          </h1>
-          
-          <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Real-time AI-powered streaming analytics that help creators{' '}
-            <span className="text-green-400 font-semibold">understand their audience</span>,{' '}
-            <span className="text-blue-400 font-semibold">catch every question</span>, and{' '}
-            <span className="text-purple-400 font-semibold">grow their community</span>
-          </p>
+        {/* Logo */}
+        <div style={{ marginBottom: '3rem' }}>
+          <img 
+            src="/landing-logo.png" 
+            alt="Casi Platform" 
+            style={{ 
+              width: '300px', 
+              height: 'auto',
+              maxWidth: '100%'
+            }}
+            onError={(e) => {
+              // Fallback if image doesn't load
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              target.insertAdjacentHTML('afterend', `
+                <div style="font-size: 3rem; font-weight: bold; color: white; margin-bottom: 2rem;">
+                  🎮 Casi Platform
+                </div>
+              `)
+            }}
+          />
         </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-          
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold mb-3 text-green-400">Real-time Analytics</h3>
-            <p className="text-gray-300">Live sentiment tracking and engagement scoring for every message in your chat</p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105">
-            <div className="text-4xl mb-4">🤖</div>
-            <h3 className="text-xl font-semibold mb-3 text-blue-400">AI Question Detection</h3>
-            <p className="text-gray-300">Never miss important questions again with intelligent priority scoring</p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105">
-            <div className="text-4xl mb-4">📺</div>
-            <h3 className="text-xl font-semibold mb-3 text-purple-400">OBS Integration</h3>
-            <p className="text-gray-300">Beautiful stream overlays that show your community engagement live</p>
-          </div>
-          
-        </div>
+        {/* Headline */}
+        <h1 style={{
+          fontSize: '3.5rem',
+          fontWeight: 'bold',
+          marginBottom: '1rem',
+          background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          Get early access
+        </h1>
 
-        {/* Robot Mascot */}
-        <div className="mb-12">
-          <div className="w-32 h-32 mx-auto">
-            <img 
-              src="/landing-robot.png" 
-              alt="Casi Robot" 
-              className="w-full h-full object-contain animate-bounce"
-              onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement
-                target.style.display = 'none'
-                const fallback = target.nextElementSibling as HTMLElement
-                if (fallback) fallback.style.display = 'block'
+        <h2 style={{
+          fontSize: '1.5rem',
+          marginBottom: '2rem',
+          color: '#e0e0e0',
+          fontWeight: '400'
+        }}>
+          See your stream like never before.
+        </h2>
+
+        {/* Description */}
+        <p style={{
+          fontSize: '1.1rem',
+          lineHeight: '1.6',
+          marginBottom: '3rem',
+          color: '#b0b0b0',
+          maxWidth: '600px',
+          margin: '0 auto 3rem auto'
+        }}>
+          Hey there, I'm Casi, your stream's brainy sidekick! I'll keep an eye 
+          on your viewers, chat vibes, and highlight what's working best. 
+          Ready to get smarter with your stream?
+        </p>
+
+        {/* Email form */}
+        {!isSubmitted ? (
+          <form onSubmit={handleSubmit} style={{
+            display: 'flex',
+            gap: '1rem',
+            marginBottom: '3rem',
+            maxWidth: '500px',
+            margin: '0 auto 3rem auto',
+            flexWrap: 'wrap'
+          }}>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              disabled={isSubmitting}
+              style={{
+                flex: 1,
+                minWidth: '250px',
+                padding: '1rem 1.5rem',
+                borderRadius: '50px',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                fontSize: '1rem',
+                outline: 'none',
+                backdropFilter: 'blur(10px)'
               }}
             />
-            <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-6xl animate-bounce hidden">
-              🤖
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                padding: '1rem 2rem',
+                borderRadius: '50px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                color: 'white',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.7 : 1,
+                transition: 'all 0.3s ease',
+                minWidth: '150px'
+              }}
+            >
+              {isSubmitting ? 'Joining...' : 'Join waitlist'}
+            </button>
+          </form>
+        ) : (
+          <div style={{
+            padding: '2rem',
+            background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.2))',
+            borderRadius: '20px',
+            marginBottom: '3rem',
+            border: '2px solid rgba(184, 238, 138, 0.3)'
+          }}>
+            <h3 style={{ 
+              fontSize: '1.5rem', 
+              marginBottom: '0.5rem',
+              color: '#B8EE8A'
+            }}>
+              🎉 You're in!
+            </h3>
+            <p style={{ 
+              color: '#e0e0e0',
+              margin: 0
+            }}>
+              Thanks for joining the waitlist! We'll notify you when Casi is ready to boost your stream.
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div style={{
+            color: '#FF9F9F',
+            marginBottom: '2rem',
+            fontSize: '0.9rem',
+            padding: '1rem',
+            background: 'rgba(255, 159, 159, 0.1)',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 159, 159, 0.3)'
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* Stats */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '2rem',
+          marginBottom: '3rem',
+          flexWrap: 'wrap'
+        }}>
+          <div>
+            <div style={{
+              fontSize: '4rem',
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              lineHeight: 1,
+              transition: 'all 0.5s ease'
+            }}>
+              {waitlistCount}
+            </div>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              marginBottom: '0.5rem'
+            }}>
+              streamers
+            </div>
+            <div style={{
+              color: '#b0b0b0',
+              fontSize: '1.1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              justifyContent: 'center'
+            }}>
+              <div style={{
+                width: '8px',
+                height: '8px',
+                backgroundColor: '#4ade80',
+                borderRadius: '50%',
+                animation: 'pulse 2s infinite'
+              }} />
+              currently waiting
             </div>
           </div>
+          
+          {/* Casi Robot */}
+          <img 
+            src="/landing-robot.png" 
+            alt="Casi Robot" 
+            style={{ 
+              width: '300px', 
+              height: 'auto',
+              maxWidth: '100%',
+              animation: 'float 3s ease-in-out infinite'
+            }}
+            onError={(e) => {
+              // Fallback if image doesn't load
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              target.insertAdjacentHTML('afterend', `
+                <div style="font-size: 8rem; animation: float 3s ease-in-out infinite;">
+                  🤖
+                </div>
+              `)
+            }}
+          />
         </div>
 
-        {/* CTA Section */}
-        <div className="text-center max-w-md mx-auto">
-          <h2 className="text-3xl font-bold mb-6">Ready to level up your streams?</h2>
-          
-          <form onSubmit={handleSubmit} className="mb-6">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="flex-1 px-4 py-3 rounded-lg bg-white/10 backdrop-blur-lg border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                Join Waitlist
-              </button>
-            </div>
-          </form>
-
-          {message && (
-            <div className={`p-3 rounded-lg mb-4 ${
-              message.includes('🎉') 
-                ? 'bg-green-500/20 border border-green-500/50 text-green-400' 
-                : 'bg-red-500/20 border border-red-500/50 text-red-400'
-            }`}>
-              {message}
-            </div>
-          )}
-
-          <button
-            onClick={handleContactClick}
-            className="w-full px-6 py-3 bg-white/10 backdrop-blur-lg border border-white/30 text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
-          >
-            Contact Us
-          </button>
-          
-          <p className="text-sm text-gray-400 mt-4">
-            Join 1,000+ streamers already using Casi Platform
+        {/* Contact */}
+        <div style={{ marginTop: '2rem' }}>
+          <p style={{ 
+            color: '#b0b0b0', 
+            marginBottom: '1rem',
+            fontSize: '1.1rem'
+          }}>
+            Want more info?
           </p>
+          <button 
+            onClick={() => window.location.href = 'mailto:hello@heycasi.com'}
+            style={{
+              padding: '0.75rem 2rem',
+              borderRadius: '50px',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              background: 'transparent',
+              color: 'white',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'transparent'
+            }}
+          >
+            Contact us
+          </button>
         </div>
-
       </div>
+
+      {/* Floating animation styles */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 768px) {
+          h1 {
+            font-size: 2.5rem !important;
+          }
+          
+          form {
+            flex-direction: column !important;
+          }
+          
+          input, button {
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
