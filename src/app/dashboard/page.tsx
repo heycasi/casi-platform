@@ -26,25 +26,25 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
 
-  // Simulate incoming messages
-  useEffect(() => {
-    if (!isConnected) return
+  // Simulate incoming messages - DISABLED FOR NOW
+  // useEffect(() => {
+  //   if (!isConnected) return
 
-    const interval = setInterval(() => {
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        username: `User${Math.floor(Math.random() * 1000)}`,
-        message: getRandomMessage(),
-        timestamp: new Date(),
-        sentiment: getRandomSentiment(),
-        isQuestion: Math.random() > 0.7,
-        priority: Math.floor(Math.random() * 10) + 1
-      }
-      setMessages(prev => [newMessage, ...prev].slice(0, 50)) // Keep last 50 messages
-    }, 3000)
+  //   const interval = setInterval(() => {
+  //     const newMessage: ChatMessage = {
+  //       id: Date.now().toString(),
+  //       username: `User${Math.floor(Math.random() * 1000)}`,
+  //       message: getRandomMessage(),
+  //       timestamp: new Date(),
+  //       sentiment: getRandomSentiment(),
+  //       isQuestion: Math.random() > 0.7,
+  //       priority: Math.floor(Math.random() * 10) + 1
+  //     }
+  //     setMessages(prev => [newMessage, ...prev].slice(0, 50)) // Keep last 50 messages
+  //   }, 3000)
 
-    return () => clearInterval(interval)
-  }, [isConnected])
+  //   return () => clearInterval(interval)
+  // }, [isConnected])
 
   const getRandomMessage = () => {
     const messages = [
@@ -122,12 +122,13 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {/* Casi Logo matching your landing page */}
+            {/* Casi Robot Logo */}
             <div style={{ 
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
             }}>
+              {/* Robot from your landing page */}
               <div style={{
                 width: '40px',
                 height: '40px',
@@ -136,11 +137,9 @@ export default function Dashboard() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                color: '#333'
+                fontSize: '1.5rem'
               }}>
-                C
+                🤖
               </div>
               <span style={{ 
                 fontSize: '1.5rem', 
@@ -258,9 +257,22 @@ export default function Dashboard() {
               padding: '0.75rem',
               background: 'rgba(16, 185, 129, 0.1)',
               borderRadius: '8px',
-              border: '1px solid rgba(16, 185, 129, 0.2)'
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
             }}>
-              ✅ Connected to #{channelName} • {messages.length} messages analyzed
+              <span>✅ Connected to #{channelName} • {messages.length} messages analyzed</span>
+              <span style={{ 
+                background: 'rgba(251, 191, 36, 0.2)', 
+                color: '#fbbf24', 
+                padding: '0.25rem 0.5rem', 
+                borderRadius: '4px', 
+                fontSize: '0.8rem',
+                fontWeight: '600'
+              }}>
+                DEMO MODE
+              </span>
             </div>
           )}
         </div>
