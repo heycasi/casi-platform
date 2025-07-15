@@ -1,97 +1,4 @@
-  // Real Twitch IRC Connection
-  useEffect(() => {
-    if (!isConnected || !channelName) return
-
-    let ws: WebSocket | null = null
-    
-    const connectToTwitch = () => {
-      // Connect to Twitch IRC WebSocket
-      ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
-      
-      ws.onopen = () => {
-        console.log('Connected to Twitch IRC')
-        // Send authentication (anonymous)
-        ws?.send('PASS SCHMOOPIIE') // Anonymous login
-        ws?.send('NICK justinfan12345') // Anonymous username
-        ws?.send(`JOIN #${channelName.toLowerCase()}`) // Join the channel
-      }
-      
-      ws.onmessage = (event) => {
-        const message = event.data.trim()
-        console.log('Raw IRC message:', message)
-        
-        // Handle PING/PONG to stay connected
-        if (message.startsWith('PING')) {
-          ws?.send('PONG :tmi.twitch.tv')
-          return
-        }
-        
-        // Parse chat messages
-        if (message.includes('PRIVMSG')) {
-          const parsedMessage = parseIRCMessage(message)
-          if (parsedMessage) {
-            setMessages(prev => [parsedMessage, ...prev].slice(0, 100)) // Keep last 100 messages
-          }
-        }
-      }
-      
-      ws.onerror = (error) => {
-        console.error('Twitch IRC error:', error)
-      }
-      
-      ws.onclose = () => {
-        console.log('Disconnected from Twitch IRC')
-      }
-    }
-    
-    connectToTwitch()
-    
-    return () => {
-      if (ws) {
-        ws.close()
-      }
-    }
-  }, [isConnected, channelName])
-
-  // Parse IRC message into our ChatMessage format
-  const parseIRCMessage = (rawMessage: string): ChatMessage | null => {
-    try {
-      // Example IRC message format:
-      // :username!username@username.tmi.twitch.tv PRIVMSG #channel :message text
-      const messageRegex = /:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/
-      const match = rawMessage.match(messageRegex)
-      
-      if (!match) return null
-      
-      const [, username, messageText] = match
-      
-      // Skip bot messages and commands
-      if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
-        return null
-      }
-      
-      // Analyze the message
-      const isQuestion = detectQuestion(messageText)
-      const sentiment = analyzeSentiment(messageText)
-      const priority = calculatePriority(messageText, isQuestion, sentiment)
-      
-      return {
-        id: Date.now().toString() + Math.random(),
-        username,
-        message: messageText,
-        timestamp: new Date(),
-        sentiment,
-        isQuestion,
-        priority
-      }
-    } catch (error) {
-      console.error('Error parsing IRC message:', error)
-      return null
-    }
-  }
-
-  // Improved question detection
-  const detectQuestion = (message: string): boolean =>'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -106,193 +13,56 @@ interface ChatMessage {
   priority?: number
 }
 
+// Mock messages for demo
+const mockMessages: ChatMessage[] = [
+  { id: '1', username: 'StreamFan123', message: 'Great stream today!', timestamp: new Date(), sentiment: 'positive', isQuestion: false, priority: 3 },
+  { id: '2', username: 'CuriousViewer', message: 'What game are you playing next?', timestamp: new Date(), sentiment: 'neutral', isQuestion: true, priority: 8 },
+  { id: '3', username: 'RegularWatcher', message: 'This is awesome!', timestamp: new Date(), sentiment: 'positive', isQuestion: false, priority: 4 },
+  { id: '4', username: 'NewFollower', message: 'How long have you been streaming?', timestamp: new Date(), sentiment: 'neutral', isQuestion: true, priority: 7 },
+]
+
 export default function Dashboard() {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>(mockMessages)
   const [channelName, setChannelName] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
 
-  // Real Twitch IRC Connection
+  // Simple demo mode - add a few messages when connected
   useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') return
-    if (!isConnected || !channelName) return
+    if (!isConnected) return
 
-    let ws: WebSocket | null = null
-    
-    const connectToTwitch = () => {
-      console.log(`Connecting to Twitch IRC for channel: ${channelName}`)
+    const interval = setInterval(() => {
+      const demoMessages = [
+        'Amazing gameplay!',
+        'What settings do you use?',
+        'Love this content',
+        'How do you get so good?',
+        'This is so entertaining',
+        'Can you play my request next?',
+        'Great stream as always',
+        'What keyboard do you use?'
+      ]
       
-      try {
-        // Connect to Twitch IRC WebSocket
-        ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
-        
-        ws.onopen = () => {
-          console.log('Connected to Twitch IRC')
-          // Send authentication (anonymous)
-          ws?.send('PASS SCHMOOPIIE') // Anonymous login
-          ws?.send('NICK justinfan12345') // Anonymous username
-          ws?.send(`JOIN #${channelName.toLowerCase()}`) // Join the channel
-        }
-        
-        ws.onmessage = (event) => {
-          const message = event.data.trim()
-          
-          // Handle PING/PONG to stay connected
-          if (message.startsWith('PING')) {
-            ws?.send('PONG :tmi.twitch.tv')
-            return
-          }
-          
-          // Parse chat messages
-          if (message.includes('PRIVMSG')) {
-            const parsedMessage = parseIRCMessage(message)
-            if (parsedMessage) {
-              setMessages(prev => [parsedMessage, ...prev].slice(0, 100)) // Keep last 100 messages
-            }
-          }
-        }
-        
-        ws.onerror = (error) => {
-          console.error('Twitch IRC error:', error)
-        }
-        
-        ws.onclose = () => {
-          console.log('Disconnected from Twitch IRC')
-        }
-      } catch (error) {
-        console.error('Failed to connect to Twitch IRC:', error)
-      }
-    }
-    
-    connectToTwitch()
-    
-    return () => {
-      if (ws) {
-        ws.close()
-      }
-    }
-  }, [isConnected, channelName])
-
-  // Parse IRC message into our ChatMessage format
-  const parseIRCMessage = (rawMessage: string): ChatMessage | null => {
-    try {
-      // Example IRC message format:
-      // :username!username@username.tmi.twitch.tv PRIVMSG #channel :message text
-      const messageRegex = /:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/
-      const match = rawMessage.match(messageRegex)
-      
-      if (!match) return null
-      
-      const [, username, messageText] = match
-      
-      // Skip bot messages and commands
-      if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
-        return null
-      }
-      
-      // Analyze the message
-      const isQuestion = detectQuestion(messageText)
-      const sentiment = analyzeSentiment(messageText)
-      const priority = calculatePriority(messageText, isQuestion, sentiment)
-      
-      return {
-        id: Date.now().toString() + Math.random(),
-        username,
-        message: messageText,
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        username: `User${Math.floor(Math.random() * 1000)}`,
+        message: demoMessages[Math.floor(Math.random() * demoMessages.length)],
         timestamp: new Date(),
-        sentiment,
-        isQuestion,
-        priority
+        sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'neutral' : 'negative',
+        isQuestion: Math.random() > 0.7,
+        priority: Math.floor(Math.random() * 10) + 1
       }
-    } catch (error) {
-      console.error('Error parsing IRC message:', error)
-      return null
-    }
-  }
+      
+      setMessages(prev => [newMessage, ...prev].slice(0, 50))
+    }, 3000)
 
-  // Improved question detection
-  const detectQuestion = (message: string): boolean => {
-    const lowerMessage = message.toLowerCase()
-    
-    // Direct question indicators
-    if (message.includes('?')) return true
-    
-    // Question words
-    const questionWords = ['what', 'how', 'when', 'where', 'why', 'who', 'which', 'can you', 'could you', 'would you', 'do you', 'did you', 'are you', 'is it', 'will you']
-    
-    return questionWords.some(word => lowerMessage.includes(word))
-  }
-
-  // Improved sentiment analysis
-  const analyzeSentiment = (message: string): 'positive' | 'negative' | 'neutral' => {
-    const lowerMessage = message.toLowerCase()
-    
-    const positiveWords = ['good', 'great', 'awesome', 'amazing', 'love', 'best', 'nice', 'cool', 'fantastic', 'excellent', 'perfect', 'beautiful', 'wonderful', 'incredible', 'fun', 'exciting', 'happy', 'thanks', 'thank you', 'appreciate', 'wow', 'poggers', 'pog', 'lit', 'fire', '❤️', '😍', '😊', '👍', '🔥', '💯']
-    
-    const negativeWords = ['bad', 'terrible', 'awful', 'hate', 'worst', 'boring', 'stupid', 'dumb', 'sucks', 'trash', 'garbage', 'wtf', 'annoying', 'frustrated', 'angry', 'mad', 'disappointed', 'sad', '😢', '😡', '😞', '👎', '💩']
-    
-    let positiveScore = 0
-    let negativeScore = 0
-    
-    positiveWords.forEach(word => {
-      if (lowerMessage.includes(word)) positiveScore++
-    })
-    
-    negativeWords.forEach(word => {
-      if (lowerMessage.includes(word)) negativeScore++
-    })
-    
-    if (positiveScore > negativeScore) return 'positive'
-    if (negativeScore > positiveScore) return 'negative'
-    return 'neutral'
-  }
-
-  // Calculate message priority
-  const calculatePriority = (message: string, isQuestion: boolean, sentiment: 'positive' | 'negative' | 'neutral'): number => {
-    let priority = 5 // Base priority
-    
-    if (isQuestion) priority += 3
-    if (sentiment === 'negative') priority += 2
-    if (sentiment === 'positive') priority += 1
-    
-    // High priority keywords
-    const urgentWords = ['help', 'issue', 'problem', 'bug', 'broken', 'error', 'crash']
-    if (urgentWords.some(word => message.toLowerCase().includes(word))) {
-      priority += 2
-    }
-    
-    return Math.min(priority, 10) // Cap at 10
-  }
-
-  const getRandomMessage = () => {
-    const messages = [
-      'Hello everyone!',
-      'What game is this?',
-      'Great content!',
-      'How do you do that trick?',
-      'Amazing stream!',
-      'Can you play some music?',
-      'This is so cool!',
-      'When did you start streaming?',
-      'Love this game!',
-      'What settings do you use?'
-    ]
-    return messages[Math.floor(Math.random() * messages.length)]
-  }
-
-  const getRandomSentiment = (): 'positive' | 'negative' | 'neutral' => {
-    const sentiments: ('positive' | 'negative' | 'neutral')[] = ['positive', 'negative', 'neutral']
-    return sentiments[Math.floor(Math.random() * sentiments.length)]
-  }
+    return () => clearInterval(interval)
+  }, [isConnected])
 
   const handleConnect = () => {
     if (!channelName.trim()) return
     
     setConnectionStatus('connecting')
-    setMessages([]) // Clear previous messages
-    
-    // Simulate connection delay
     setTimeout(() => {
       setConnectionStatus('connected')
       setIsConnected(true)
@@ -302,22 +72,22 @@ export default function Dashboard() {
   const handleDisconnect = () => {
     setIsConnected(false)
     setConnectionStatus('disconnected')
-    setMessages([]) // Clear messages when disconnecting
+    setMessages(mockMessages)
   }
 
   const getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
-      case 'positive': return '#10B981' // Green
-      case 'negative': return '#EF4444' // Red
-      default: return '#6B7280' // Gray
+      case 'positive': return '#10B981'
+      case 'negative': return '#EF4444'
+      default: return '#6B7280'
     }
   }
 
   const getPriorityColor = (priority?: number) => {
     if (!priority) return '#6B7280'
-    if (priority >= 8) return '#EF4444' // High priority - Red
-    if (priority >= 6) return '#F59E0B' // Medium priority - Yellow
-    return '#10B981' // Low priority - Green
+    if (priority >= 8) return '#EF4444'
+    if (priority >= 6) return '#F59E0B'
+    return '#10B981'
   }
 
   const questions = messages.filter(msg => msg.isQuestion)
@@ -344,7 +114,7 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {/* Casi Robot Logo - matching your landing page */}
+            {/* Casi Robot Logo */}
             <div style={{ 
               display: 'flex',
               alignItems: 'center',
@@ -358,7 +128,6 @@ export default function Dashboard() {
                   height: '40px'
                 }}
                 onError={(e) => {
-                  // Fallback if image doesn't load
                   const target = e.target as HTMLImageElement
                   target.style.display = 'none'
                   target.insertAdjacentHTML('afterend', `
@@ -500,17 +269,17 @@ export default function Dashboard() {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <span>✅ Connected to #{channelName} • {messages.length} messages analyzed • LIVE CHAT</span>
+              <span>✅ Connected to #{channelName} • {messages.length} messages analyzed</span>
               <span style={{ 
-                background: 'rgba(16, 185, 129, 0.2)', 
-                color: '#10B981', 
+                background: 'rgba(255, 159, 159, 0.2)', 
+                color: '#FF9F9F', 
                 padding: '0.25rem 0.75rem', 
                 borderRadius: '20px', 
                 fontSize: '0.8rem',
                 fontWeight: 'bold',
-                border: '1px solid rgba(16, 185, 129, 0.3)'
+                border: '1px solid rgba(255, 159, 159, 0.3)'
               }}>
-                LIVE IRC
+                DEMO MODE
               </span>
             </div>
           )}
@@ -533,7 +302,14 @@ export default function Dashboard() {
                 textAlign: 'center',
                 border: '2px solid rgba(255, 255, 255, 0.2)'
               }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                <div style={{ 
+                  fontSize: '2rem', 
+                  fontWeight: 'bold', 
+                  background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
                   {questions.length}
                 </div>
                 <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Questions Detected</div>
@@ -542,10 +318,10 @@ export default function Dashboard() {
               <div style={{ 
                 background: 'rgba(255, 255, 255, 0.1)', 
                 backdropFilter: 'blur(10px)',
-                borderRadius: '12px', 
+                borderRadius: '20px', 
                 padding: '1.5rem',
                 textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '2px solid rgba(255, 255, 255, 0.2)'
               }}>
                 <div style={{ 
                   fontSize: '2rem', 
@@ -563,12 +339,19 @@ export default function Dashboard() {
               <div style={{ 
                 background: 'rgba(255, 255, 255, 0.1)', 
                 backdropFilter: 'blur(10px)',
-                borderRadius: '12px', 
+                borderRadius: '20px', 
                 padding: '1.5rem',
                 textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '2px solid rgba(255, 255, 255, 0.2)'
               }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3B82F6' }}>
+                <div style={{ 
+                  fontSize: '2rem', 
+                  fontWeight: 'bold', 
+                  background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
                   {messages.length}
                 </div>
                 <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Total Messages</div>
@@ -582,9 +365,9 @@ export default function Dashboard() {
               <div style={{ 
                 background: 'rgba(255, 255, 255, 0.1)', 
                 backdropFilter: 'blur(10px)',
-                borderRadius: '12px', 
+                borderRadius: '20px', 
                 padding: '1.5rem',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '2px solid rgba(255, 255, 255, 0.2)'
               }}>
                 <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
                   📊 Live Chat Analysis
@@ -594,7 +377,7 @@ export default function Dashboard() {
                   height: '400px', 
                   overflowY: 'auto',
                   background: 'rgba(0, 0, 0, 0.2)',
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   padding: '1rem'
                 }}>
                   {messages.map((msg) => (
@@ -649,9 +432,9 @@ export default function Dashboard() {
               <div style={{ 
                 background: 'rgba(255, 255, 255, 0.1)', 
                 backdropFilter: 'blur(10px)',
-                borderRadius: '12px', 
+                borderRadius: '20px', 
                 padding: '1.5rem',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '2px solid rgba(255, 255, 255, 0.2)'
               }}>
                 <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
                   ❓ Priority Questions
@@ -667,7 +450,7 @@ export default function Dashboard() {
                         style={{
                           background: 'rgba(59, 130, 246, 0.2)',
                           border: '1px solid rgba(59, 130, 246, 0.3)',
-                          borderRadius: '8px',
+                          borderRadius: '12px',
                           padding: '1rem',
                           marginBottom: '0.75rem'
                         }}
@@ -717,11 +500,11 @@ export default function Dashboard() {
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
             <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Ready to Analyze Your Stream</h2>
             <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto' }}>
-              Connect to any live Twitch channel to start getting real-time chat analysis, 
+              Connect to any Twitch channel to start getting chat analysis, 
               question detection, and audience sentiment tracking.
             </p>
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', marginTop: '1rem' }}>
-              Try channels like: shroud, pokimane, summit1g, or any active streamer
+              Demo mode with simulated chat analysis
             </p>
           </div>
         )}
