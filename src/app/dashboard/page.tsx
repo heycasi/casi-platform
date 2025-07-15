@@ -13,16 +13,11 @@ interface ChatMessage {
   priority?: number
 }
 
-// Mock messages for demo
-const mockMessages: ChatMessage[] = [
-  { id: '1', username: 'StreamFan123', message: 'Great stream today!', timestamp: new Date(), sentiment: 'positive', isQuestion: false, priority: 3 },
-  { id: '2', username: 'CuriousViewer', message: 'What game are you playing next?', timestamp: new Date(), sentiment: 'neutral', isQuestion: true, priority: 8 },
-  { id: '3', username: 'RegularWatcher', message: 'This is awesome!', timestamp: new Date(), sentiment: 'positive', isQuestion: false, priority: 4 },
-  { id: '4', username: 'NewFollower', message: 'How long have you been streaming?', timestamp: new Date(), sentiment: 'neutral', isQuestion: true, priority: 7 },
-]
+// Mock messages for initial state (empty now)
+const mockMessages: ChatMessage[] = []
 
 export default function Dashboard() {
-  const [messages, setMessages] = useState<ChatMessage[]>(mockMessages)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [channelName, setChannelName] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
@@ -107,38 +102,6 @@ export default function Dashboard() {
     }
   }, [isConnected, channelName])
 
-  // Simple demo mode - add a few messages when connected (as fallback)
-  useEffect(() => {
-    if (!isConnected) return
-
-    const interval = setInterval(() => {
-      const demoMessages = [
-        'Amazing gameplay!',
-        'What settings do you use?',
-        'Love this content',
-        'How do you get so good?',
-        'This is so entertaining',
-        'Can you play my request next?',
-        'Great stream as always',
-        'What keyboard do you use?'
-      ]
-      
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        username: `User${Math.floor(Math.random() * 1000)}`,
-        message: demoMessages[Math.floor(Math.random() * demoMessages.length)],
-        timestamp: new Date(),
-        sentiment: Math.random() > 0.7 ? 'positive' : Math.random() > 0.5 ? 'neutral' : 'negative',
-        isQuestion: Math.random() > 0.7,
-        priority: Math.floor(Math.random() * 10) + 1
-      }
-      
-      setMessages(prev => [newMessage, ...prev].slice(0, 50))
-    }, 8000) // Slower than IRC to not overwhelm
-
-    return () => clearInterval(interval)
-  }, [isConnected])
-
   const handleConnect = () => {
     if (!channelName.trim()) return
     
@@ -152,7 +115,7 @@ export default function Dashboard() {
   const handleDisconnect = () => {
     setIsConnected(false)
     setConnectionStatus('disconnected')
-    setMessages(mockMessages)
+    setMessages([]) // Clear all messages when disconnecting
   }
 
   const getSentimentColor = (sentiment?: string) => {
@@ -349,7 +312,7 @@ export default function Dashboard() {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <span>✅ Connected to #{channelName} • {messages.length} messages • LIVE IRC + DEMO</span>
+              <span>✅ Connected to #{channelName} • {messages.length} live messages</span>
               <span style={{ 
                 background: 'rgba(16, 185, 129, 0.2)', 
                 color: '#10B981', 
@@ -580,11 +543,11 @@ export default function Dashboard() {
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
             <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Ready to Analyze Your Stream</h2>
             <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto' }}>
-              Connect to any Twitch channel to start getting chat analysis, 
-              question detection, and audience sentiment tracking.
+              Connect to any live Twitch channel to start getting real-time chat analysis, 
+              question detection, and audience sentiment tracking from actual viewers.
             </p>
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', marginTop: '1rem' }}>
-              Demo mode with simulated chat analysis
+              Try popular channels like: shroud, pokimane, summit1g, xqc, or any active streamer
             </p>
           </div>
         )}
