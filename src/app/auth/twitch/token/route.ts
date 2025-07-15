@@ -10,7 +10,14 @@ export async function POST(request: NextRequest) {
 
     const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
     const clientSecret = process.env.TWITCH_CLIENT_SECRET
-    const redirectUri = `${process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'http://localhost:3000'}/auth/twitch/callback`
+    
+    // Fix redirect URI to use production URL
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://heycasi.com' 
+      : 'http://localhost:3000'
+    const redirectUri = `${baseUrl}/auth/twitch/callback`
+
+    console.log('Using redirect URI:', redirectUri) // Debug log
 
     // Exchange authorization code for access token
     const tokenResponse = await fetch('https://id.twitch.tv/oauth2/token', {
@@ -28,7 +35,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (!tokenResponse.ok) {
-      throw new Error('Failed to exchange code for token')
+      const errorData = await tokenResponse.text()
+      console.error('Token exchange failed:', errorData)
+      throw new Error(`Failed to exchange code for token: ${errorData}`)
     }
 
     const tokenData = await tokenResponse.json()
@@ -67,4 +76,3 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
