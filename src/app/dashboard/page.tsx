@@ -93,11 +93,17 @@ export default function Dashboard() {
   // Twitch OAuth Integration
   const handleTwitchLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/twitch/callback`)
+    
+    // Fix redirect URI for production
+    const baseUrl = window.location.origin.includes('localhost') 
+      ? 'http://localhost:3000' 
+      : 'https://heycasi.com'
+    const redirectUri = encodeURIComponent(`${baseUrl}/auth/twitch/callback`)
     const scope = encodeURIComponent('user:read:email')
     
     const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&force_verify=true`
     
+    console.log('OAuth URL:', twitchAuthUrl) // Debug log
     window.location.href = twitchAuthUrl
   }
 
