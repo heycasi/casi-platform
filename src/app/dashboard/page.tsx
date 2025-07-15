@@ -1,4 +1,97 @@
-'use client'
+  // Real Twitch IRC Connection
+  useEffect(() => {
+    if (!isConnected || !channelName) return
+
+    let ws: WebSocket | null = null
+    
+    const connectToTwitch = () => {
+      // Connect to Twitch IRC WebSocket
+      ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
+      
+      ws.onopen = () => {
+        console.log('Connected to Twitch IRC')
+        // Send authentication (anonymous)
+        ws?.send('PASS SCHMOOPIIE') // Anonymous login
+        ws?.send('NICK justinfan12345') // Anonymous username
+        ws?.send(`JOIN #${channelName.toLowerCase()}`) // Join the channel
+      }
+      
+      ws.onmessage = (event) => {
+        const message = event.data.trim()
+        console.log('Raw IRC message:', message)
+        
+        // Handle PING/PONG to stay connected
+        if (message.startsWith('PING')) {
+          ws?.send('PONG :tmi.twitch.tv')
+          return
+        }
+        
+        // Parse chat messages
+        if (message.includes('PRIVMSG')) {
+          const parsedMessage = parseIRCMessage(message)
+          if (parsedMessage) {
+            setMessages(prev => [parsedMessage, ...prev].slice(0, 100)) // Keep last 100 messages
+          }
+        }
+      }
+      
+      ws.onerror = (error) => {
+        console.error('Twitch IRC error:', error)
+      }
+      
+      ws.onclose = () => {
+        console.log('Disconnected from Twitch IRC')
+      }
+    }
+    
+    connectToTwitch()
+    
+    return () => {
+      if (ws) {
+        ws.close()
+      }
+    }
+  }, [isConnected, channelName])
+
+  // Parse IRC message into our ChatMessage format
+  const parseIRCMessage = (rawMessage: string): ChatMessage | null => {
+    try {
+      // Example IRC message format:
+      // :username!username@username.tmi.twitch.tv PRIVMSG #channel :message text
+      const messageRegex = /:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/
+      const match = rawMessage.match(messageRegex)
+      
+      if (!match) return null
+      
+      const [, username, messageText] = match
+      
+      // Skip bot messages and commands
+      if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
+        return null
+      }
+      
+      // Analyze the message
+      const isQuestion = detectQuestion(messageText)
+      const sentiment = analyzeSentiment(messageText)
+      const priority = calculatePriority(messageText, isQuestion, sentiment)
+      
+      return {
+        id: Date.now().toString() + Math.random(),
+        username,
+        message: messageText,
+        timestamp: new Date(),
+        sentiment,
+        isQuestion,
+        priority
+      }
+    } catch (error) {
+      console.error('Error parsing IRC message:', error)
+      return null
+    }
+  }
+
+  // Improved question detection
+  const detectQuestion = (message: string): boolean =>'use client'
 import React, { useState, useEffect } from 'react'
 
 // Types
@@ -26,25 +119,152 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
 
-  // Simulate incoming messages - DISABLED FOR NOW
-  // useEffect(() => {
-  //   if (!isConnected) return
+  // Real Twitch IRC Connection
+  useEffect(() => {
+    if (!isConnected || !channelName) return
 
-  //   const interval = setInterval(() => {
-  //     const newMessage: ChatMessage = {
-  //       id: Date.now().toString(),
-  //       username: `User${Math.floor(Math.random() * 1000)}`,
-  //       message: getRandomMessage(),
-  //       timestamp: new Date(),
-  //       sentiment: getRandomSentiment(),
-  //       isQuestion: Math.random() > 0.7,
-  //       priority: Math.floor(Math.random() * 10) + 1
-  //     }
-  //     setMessages(prev => [newMessage, ...prev].slice(0, 50)) // Keep last 50 messages
-  //   }, 3000)
+    let ws: WebSocket | null = null
+    
+    const connectToTwitch = () => {
+      console.log(`Connecting to Twitch IRC for channel: ${channelName}`)
+      
+      // Connect to Twitch IRC WebSocket
+      ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
+      
+      ws.onopen = () => {
+        console.log('Connected to Twitch IRC')
+        // Send authentication (anonymous)
+        ws?.send('PASS SCHMOOPIIE') // Anonymous login
+        ws?.send('NICK justinfan12345') // Anonymous username
+        ws?.send(`JOIN #${channelName.toLowerCase()}`) // Join the channel
+      }
+      
+      ws.onmessage = (event) => {
+        const message = event.data.trim()
+        
+        // Handle PING/PONG to stay connected
+        if (message.startsWith('PING')) {
+          ws?.send('PONG :tmi.twitch.tv')
+          return
+        }
+        
+        // Parse chat messages
+        if (message.includes('PRIVMSG')) {
+          const parsedMessage = parseIRCMessage(message)
+          if (parsedMessage) {
+            setMessages(prev => [parsedMessage, ...prev].slice(0, 100)) // Keep last 100 messages
+          }
+        }
+      }
+      
+      ws.onerror = (error) => {
+        console.error('Twitch IRC error:', error)
+      }
+      
+      ws.onclose = () => {
+        console.log('Disconnected from Twitch IRC')
+      }
+    }
+    
+    connectToTwitch()
+    
+    return () => {
+      if (ws) {
+        ws.close()
+      }
+    }
+  }, [isConnected, channelName])
 
-  //   return () => clearInterval(interval)
-  // }, [isConnected])
+  // Parse IRC message into our ChatMessage format
+  const parseIRCMessage = (rawMessage: string): ChatMessage | null => {
+    try {
+      // Example IRC message format:
+      // :username!username@username.tmi.twitch.tv PRIVMSG #channel :message text
+      const messageRegex = /:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/
+      const match = rawMessage.match(messageRegex)
+      
+      if (!match) return null
+      
+      const [, username, messageText] = match
+      
+      // Skip bot messages and commands
+      if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
+        return null
+      }
+      
+      // Analyze the message
+      const isQuestion = detectQuestion(messageText)
+      const sentiment = analyzeSentiment(messageText)
+      const priority = calculatePriority(messageText, isQuestion, sentiment)
+      
+      return {
+        id: Date.now().toString() + Math.random(),
+        username,
+        message: messageText,
+        timestamp: new Date(),
+        sentiment,
+        isQuestion,
+        priority
+      }
+    } catch (error) {
+      console.error('Error parsing IRC message:', error)
+      return null
+    }
+  }
+
+  // Improved question detection
+  const detectQuestion = (message: string): boolean => {
+    const lowerMessage = message.toLowerCase()
+    
+    // Direct question indicators
+    if (message.includes('?')) return true
+    
+    // Question words
+    const questionWords = ['what', 'how', 'when', 'where', 'why', 'who', 'which', 'can you', 'could you', 'would you', 'do you', 'did you', 'are you', 'is it', 'will you']
+    
+    return questionWords.some(word => lowerMessage.includes(word))
+  }
+
+  // Improved sentiment analysis
+  const analyzeSentiment = (message: string): 'positive' | 'negative' | 'neutral' => {
+    const lowerMessage = message.toLowerCase()
+    
+    const positiveWords = ['good', 'great', 'awesome', 'amazing', 'love', 'best', 'nice', 'cool', 'fantastic', 'excellent', 'perfect', 'beautiful', 'wonderful', 'incredible', 'fun', 'exciting', 'happy', 'thanks', 'thank you', 'appreciate', 'wow', 'poggers', 'pog', 'lit', 'fire', '❤️', '😍', '😊', '👍', '🔥', '💯']
+    
+    const negativeWords = ['bad', 'terrible', 'awful', 'hate', 'worst', 'boring', 'stupid', 'dumb', 'sucks', 'trash', 'garbage', 'wtf', 'annoying', 'frustrated', 'angry', 'mad', 'disappointed', 'sad', '😢', '😡', '😞', '👎', '💩']
+    
+    let positiveScore = 0
+    let negativeScore = 0
+    
+    positiveWords.forEach(word => {
+      if (lowerMessage.includes(word)) positiveScore++
+    })
+    
+    negativeWords.forEach(word => {
+      if (lowerMessage.includes(word)) negativeScore++
+    })
+    
+    if (positiveScore > negativeScore) return 'positive'
+    if (negativeScore > positiveScore) return 'negative'
+    return 'neutral'
+  }
+
+  // Calculate message priority
+  const calculatePriority = (message: string, isQuestion: boolean, sentiment: 'positive' | 'negative' | 'neutral'): number => {
+    let priority = 5 // Base priority
+    
+    if (isQuestion) priority += 3
+    if (sentiment === 'negative') priority += 2
+    if (sentiment === 'positive') priority += 1
+    
+    // High priority keywords
+    const urgentWords = ['help', 'issue', 'problem', 'bug', 'broken', 'error', 'crash']
+    if (urgentWords.some(word => message.toLowerCase().includes(word))) {
+      priority += 2
+    }
+    
+    return Math.min(priority, 10) // Cap at 10
+  }
 
   const getRandomMessage = () => {
     const messages = [
@@ -71,6 +291,9 @@ export default function Dashboard() {
     if (!channelName.trim()) return
     
     setConnectionStatus('connecting')
+    setMessages([]) // Clear previous messages
+    
+    // Simulate connection delay
     setTimeout(() => {
       setConnectionStatus('connected')
       setIsConnected(true)
@@ -80,7 +303,7 @@ export default function Dashboard() {
   const handleDisconnect = () => {
     setIsConnected(false)
     setConnectionStatus('disconnected')
-    setMessages(mockMessages)
+    setMessages([]) // Clear messages when disconnecting
   }
 
   const getSentimentColor = (sentiment?: string) => {
@@ -153,7 +376,7 @@ export default function Dashboard() {
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
                 }}>
-                  Casi Platform
+                  Casi
                 </div>
                 <div style={{ 
                   fontSize: '0.7rem', 
@@ -278,17 +501,17 @@ export default function Dashboard() {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <span>✅ Connected to #{channelName} • {messages.length} messages analyzed</span>
+              <span>✅ Connected to #{channelName} • {messages.length} messages analyzed • LIVE CHAT</span>
               <span style={{ 
-                background: 'rgba(255, 159, 159, 0.2)', 
-                color: '#FF9F9F', 
+                background: 'rgba(16, 185, 129, 0.2)', 
+                color: '#10B981', 
                 padding: '0.25rem 0.75rem', 
                 borderRadius: '20px', 
                 fontSize: '0.8rem',
                 fontWeight: 'bold',
-                border: '1px solid rgba(255, 159, 159, 0.3)'
+                border: '1px solid rgba(16, 185, 129, 0.3)'
               }}>
-                DEMO MODE
+                LIVE IRC
               </span>
             </div>
           )}
@@ -489,14 +712,17 @@ export default function Dashboard() {
             padding: '4rem 2rem',
             background: 'rgba(255, 255, 255, 0.1)', 
             backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            borderRadius: '20px',
+            border: '2px solid rgba(255, 255, 255, 0.2)'
           }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
             <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Ready to Analyze Your Stream</h2>
             <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto' }}>
-              Connect to your Twitch channel above to start getting real-time chat analysis, 
+              Connect to any live Twitch channel to start getting real-time chat analysis, 
               question detection, and audience sentiment tracking.
+            </p>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', marginTop: '1rem' }}>
+              Try channels like: shroud, pokimane, summit1g, or any active streamer
             </p>
           </div>
         )}
