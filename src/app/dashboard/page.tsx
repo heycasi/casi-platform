@@ -105,22 +105,16 @@ interface ChatMessage {
   priority?: number
 }
 
-// Mock chat messages for demo
-const mockMessages: ChatMessage[] = [
-  { id: '1', username: 'StreamFan123', message: 'Great stream today!', timestamp: new Date(), sentiment: 'positive', isQuestion: false, priority: 3 },
-  { id: '2', username: 'CuriousViewer', message: 'What game are you playing next?', timestamp: new Date(), sentiment: 'neutral', isQuestion: true, priority: 8 },
-  { id: '3', username: 'RegularWatcher', message: 'This is boring tbh', timestamp: new Date(), sentiment: 'negative', isQuestion: false, priority: 6 },
-  { id: '4', username: 'NewFollower', message: 'How long have you been streaming?', timestamp: new Date(), sentiment: 'neutral', isQuestion: true, priority: 7 },
-]
-
 export default function Dashboard() {
-  const [messages, setMessages] = useState<ChatMessage[]>(mockMessages)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [channelName, setChannelName] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
 
   // Real Twitch IRC Connection
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return
     if (!isConnected || !channelName) return
 
     let ws: WebSocket | null = null
@@ -128,41 +122,45 @@ export default function Dashboard() {
     const connectToTwitch = () => {
       console.log(`Connecting to Twitch IRC for channel: ${channelName}`)
       
-      // Connect to Twitch IRC WebSocket
-      ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
-      
-      ws.onopen = () => {
-        console.log('Connected to Twitch IRC')
-        // Send authentication (anonymous)
-        ws?.send('PASS SCHMOOPIIE') // Anonymous login
-        ws?.send('NICK justinfan12345') // Anonymous username
-        ws?.send(`JOIN #${channelName.toLowerCase()}`) // Join the channel
-      }
-      
-      ws.onmessage = (event) => {
-        const message = event.data.trim()
+      try {
+        // Connect to Twitch IRC WebSocket
+        ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
         
-        // Handle PING/PONG to stay connected
-        if (message.startsWith('PING')) {
-          ws?.send('PONG :tmi.twitch.tv')
-          return
+        ws.onopen = () => {
+          console.log('Connected to Twitch IRC')
+          // Send authentication (anonymous)
+          ws?.send('PASS SCHMOOPIIE') // Anonymous login
+          ws?.send('NICK justinfan12345') // Anonymous username
+          ws?.send(`JOIN #${channelName.toLowerCase()}`) // Join the channel
         }
         
-        // Parse chat messages
-        if (message.includes('PRIVMSG')) {
-          const parsedMessage = parseIRCMessage(message)
-          if (parsedMessage) {
-            setMessages(prev => [parsedMessage, ...prev].slice(0, 100)) // Keep last 100 messages
+        ws.onmessage = (event) => {
+          const message = event.data.trim()
+          
+          // Handle PING/PONG to stay connected
+          if (message.startsWith('PING')) {
+            ws?.send('PONG :tmi.twitch.tv')
+            return
+          }
+          
+          // Parse chat messages
+          if (message.includes('PRIVMSG')) {
+            const parsedMessage = parseIRCMessage(message)
+            if (parsedMessage) {
+              setMessages(prev => [parsedMessage, ...prev].slice(0, 100)) // Keep last 100 messages
+            }
           }
         }
-      }
-      
-      ws.onerror = (error) => {
-        console.error('Twitch IRC error:', error)
-      }
-      
-      ws.onclose = () => {
-        console.log('Disconnected from Twitch IRC')
+        
+        ws.onerror = (error) => {
+          console.error('Twitch IRC error:', error)
+        }
+        
+        ws.onclose = () => {
+          console.log('Disconnected from Twitch IRC')
+        }
+      } catch (error) {
+        console.error('Failed to connect to Twitch IRC:', error)
       }
     }
     
