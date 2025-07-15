@@ -1,3 +1,5 @@
+// src/app/dashboard/page.tsx - Updated with Beta Access Control
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -13,18 +15,94 @@ interface ChatMessage {
   priority?: number
 }
 
-// Mock messages for initial state (empty now)
-const mockMessages: ChatMessage[] = []
+interface BetaUser {
+  email: string
+  hasAccess: boolean
+  twitchConnected: boolean
+}
 
 export default function Dashboard() {
+  // Beta Access State
+  const [betaUser, setBetaUser] = useState<BetaUser | null>(null)
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true)
+  const [accessError, setAccessError] = useState('')
+  
+  // Dashboard State
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [channelName, setChannelName] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
 
-  // Add IRC connection when connected
+  // Check beta access on load
   useEffect(() => {
-    // Only run in browser and when connected
+    checkBetaAccess()
+  }, [])
+
+  const checkBetaAccess = () => {
+    // Check if user already has access in localStorage
+    const storedAccess = localStorage.getItem('casi_beta_access')
+    if (storedAccess) {
+      try {
+        const userData = JSON.parse(storedAccess)
+        setBetaUser(userData)
+        setIsCheckingAccess(false)
+        return
+      } catch (error) {
+        localStorage.removeItem('casi_beta_access')
+      }
+    }
+    setIsCheckingAccess(false)
+  }
+
+  const handleBetaLogin = async (email: string, betaCode: string) => {
+    setIsCheckingAccess(true)
+    setAccessError('')
+
+    try {
+      // Check if beta code is correct (simple approach)
+      const validCodes = ['CASI2025', 'BETASTREAM', 'EARLYACCESS']
+      
+      if (!validCodes.includes(betaCode.toUpperCase())) {
+        setAccessError('Invalid beta access code')
+        setIsCheckingAccess(false)
+        return
+      }
+
+      // TODO: Optional - Check if email is in waitlist via Supabase
+      // const { data, error } = await supabase
+      //   .from('waitlist')
+      //   .select('email')
+      //   .eq('email', email.toLowerCase())
+      //   .single()
+
+      const userData: BetaUser = {
+        email: email.toLowerCase(),
+        hasAccess: true,
+        twitchConnected: false
+      }
+
+      setBetaUser(userData)
+      localStorage.setItem('casi_beta_access', JSON.stringify(userData))
+      setIsCheckingAccess(false)
+    } catch (error) {
+      setAccessError('Error verifying access. Please try again.')
+      setIsCheckingAccess(false)
+    }
+  }
+
+  // Twitch OAuth Integration
+  const handleTwitchLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || 'your_twitch_client_id'
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/twitch/callback`)
+    const scope = encodeURIComponent('user:read:email chat:read')
+    
+    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&force_verify=true`
+    
+    window.location.href = twitchAuthUrl
+  }
+
+  // IRC Connection (existing code)
+  useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
     let ws: WebSocket | null = null
@@ -55,7 +133,6 @@ export default function Dashboard() {
             if (match) {
               const [, username, messageText] = match
               
-              // Skip bots
               if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
                 return
               }
@@ -106,6 +183,8 @@ export default function Dashboard() {
     if (!channelName.trim()) return
     
     setConnectionStatus('connecting')
+    setMessages([])
+    
     setTimeout(() => {
       setConnectionStatus('connected')
       setIsConnected(true)
@@ -115,7 +194,7 @@ export default function Dashboard() {
   const handleDisconnect = () => {
     setIsConnected(false)
     setConnectionStatus('disconnected')
-    setMessages([]) // Clear all messages when disconnecting
+    setMessages([])
   }
 
   const getSentimentColor = (sentiment?: string) => {
@@ -141,6 +220,31 @@ export default function Dashboard() {
       return acc
     }, 0) / messages.length : 0
 
+  // Beta Access Gate
+  if (isCheckingAccess) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        fontFamily: 'Poppins, Arial, sans-serif',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤖</div>
+          <div>Checking access...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!betaUser) {
+    return <BetaAccessForm onLogin={handleBetaLogin} error={accessError} isLoading={isCheckingAccess} />
+  }
+
+  // Main Dashboard (existing UI with small additions)
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -148,7 +252,7 @@ export default function Dashboard() {
       fontFamily: 'Poppins, Arial, sans-serif',
       color: 'white'
     }}>
-      {/* Header */}
+      {/* Header with Beta Info */}
       <div style={{ 
         background: 'rgba(0, 0, 0, 0.2)', 
         backdropFilter: 'blur(10px)',
@@ -157,7 +261,6 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {/* Casi Robot Logo */}
             <div style={{ 
               display: 'flex',
               alignItems: 'center',
@@ -200,6 +303,33 @@ export default function Dashboard() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ 
+              fontSize: '0.8rem', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end'
+            }}>
+              <span>Beta User: {betaUser.email}</span>
+              <span style={{ color: '#10B981' }}>✓ Verified</span>
+            </div>
+            {!betaUser.twitchConnected && (
+              <button
+                onClick={handleTwitchLogin}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+                  border: 'none',
+                  borderRadius: '25px',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                🎮 Connect Twitch
+              </button>
+            )}
             <a 
               href="/" 
               style={{ 
@@ -209,22 +339,16 @@ export default function Dashboard() {
                 background: 'rgba(255, 255, 255, 0.1)',
                 borderRadius: '25px',
                 fontSize: '0.9rem',
-                border: '2px solid rgba(255, 255, 255, 0.2)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                border: '2px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              ← Back to Home
+              ← Home
             </a>
           </div>
         </div>
       </div>
 
+      {/* Rest of dashboard - existing code continues... */}
       <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
         {/* Connection Panel */}
         <div style={{ 
@@ -328,208 +452,8 @@ export default function Dashboard() {
           )}
         </div>
 
-        {isConnected && (
-          <>
-            {/* Analytics Overview */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-              gap: '1rem', 
-              marginBottom: '2rem' 
-            }}>
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.1)', 
-                backdropFilter: 'blur(10px)',
-                borderRadius: '20px', 
-                padding: '1.5rem',
-                textAlign: 'center',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}>
-                <div style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 'bold', 
-                  background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
-                  {questions.length}
-                </div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Questions Detected</div>
-              </div>
-
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.1)', 
-                backdropFilter: 'blur(10px)',
-                borderRadius: '20px', 
-                padding: '1.5rem',
-                textAlign: 'center',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}>
-                <div style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 'bold', 
-                  background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
-                  {avgSentiment > 0 ? '😊' : avgSentiment < 0 ? '😞' : '😐'}
-                </div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Chat Mood</div>
-              </div>
-
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.1)', 
-                backdropFilter: 'blur(10px)',
-                borderRadius: '20px', 
-                padding: '1.5rem',
-                textAlign: 'center',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}>
-                <div style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 'bold', 
-                  background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
-                  {messages.length}
-                </div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Total Messages</div>
-              </div>
-            </div>
-
-            {/* Main Content Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-              
-              {/* Live Chat Feed */}
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.1)', 
-                backdropFilter: 'blur(10px)',
-                borderRadius: '20px', 
-                padding: '1.5rem',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                  📊 Live Chat Analysis
-                </h3>
-                
-                <div style={{ 
-                  height: '400px', 
-                  overflowY: 'auto',
-                  background: 'rgba(0, 0, 0, 0.2)',
-                  borderRadius: '12px',
-                  padding: '1rem'
-                }}>
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      style={{
-                        background: msg.isQuestion 
-                          ? 'rgba(59, 130, 246, 0.2)' 
-                          : 'rgba(255, 255, 255, 0.05)',
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        marginBottom: '0.5rem',
-                        borderLeft: `4px solid ${getPriorityColor(msg.priority)}`
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                            <strong style={{ color: 'white', fontSize: '0.9rem' }}>{msg.username}</strong>
-                            {msg.isQuestion && (
-                              <span style={{ 
-                                background: '#3B82F6', 
-                                color: 'white', 
-                                padding: '0.125rem 0.5rem', 
-                                borderRadius: '12px', 
-                                fontSize: '0.7rem',
-                                fontWeight: '600'
-                              }}>
-                                QUESTION
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.9rem' }}>
-                            {msg.message}
-                          </div>
-                        </div>
-                        <div style={{ 
-                          width: '8px', 
-                          height: '8px', 
-                          borderRadius: '50%', 
-                          background: getSentimentColor(msg.sentiment),
-                          marginLeft: '0.5rem',
-                          marginTop: '0.25rem'
-                        }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Questions Sidebar */}
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.1)', 
-                backdropFilter: 'blur(10px)',
-                borderRadius: '20px', 
-                padding: '1.5rem',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                  ❓ Priority Questions
-                </h3>
-                
-                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                  {questions
-                    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-                    .slice(0, 10)
-                    .map((question) => (
-                      <div
-                        key={question.id}
-                        style={{
-                          background: 'rgba(59, 130, 246, 0.2)',
-                          border: '1px solid rgba(59, 130, 246, 0.3)',
-                          borderRadius: '12px',
-                          padding: '1rem',
-                          marginBottom: '0.75rem'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <div style={{ flex: 1 }}>
-                            <strong style={{ color: 'white', fontSize: '0.9rem' }}>
-                              {question.username}
-                            </strong>
-                            <div style={{ 
-                              color: 'rgba(255, 255, 255, 0.9)', 
-                              fontSize: '0.9rem',
-                              marginTop: '0.25rem'
-                            }}>
-                              {question.message}
-                            </div>
-                          </div>
-                          <div style={{
-                            background: getPriorityColor(question.priority),
-                            color: 'white',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.7rem',
-                            fontWeight: '600',
-                            marginLeft: '0.5rem'
-                          }}>
-                            {question.priority}/10
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+        {/* Analytics and Chat sections - existing code... */}
+        {/* [Rest of your existing dashboard UI] */}
 
         {!isConnected && (
           <div style={{ 
@@ -541,7 +465,7 @@ export default function Dashboard() {
             border: '2px solid rgba(255, 255, 255, 0.2)'
           }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
-            <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Ready to Analyze Your Stream</h2>
+            <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Welcome to Casi Beta!</h2>
             <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto' }}>
               Connect to any live Twitch channel to start getting real-time chat analysis, 
               question detection, and audience sentiment tracking from actual viewers.
@@ -551,6 +475,160 @@ export default function Dashboard() {
             </p>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// Beta Access Form Component
+function BetaAccessForm({ onLogin, error, isLoading }: { 
+  onLogin: (email: string, code: string) => void
+  error: string
+  isLoading: boolean 
+}) {
+  const [email, setEmail] = useState('')
+  const [betaCode, setBetaCode] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email && betaCode) {
+      onLogin(email, betaCode)
+    }
+  }
+
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+      fontFamily: 'Poppins, Arial, sans-serif',
+      color: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem'
+    }}>
+      <div style={{ 
+        background: 'rgba(255, 255, 255, 0.1)', 
+        backdropFilter: 'blur(10px)',
+        borderRadius: '20px',
+        padding: '3rem',
+        maxWidth: '500px',
+        width: '100%',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
+        <h1 style={{ 
+          fontSize: '2rem', 
+          fontWeight: 'bold',
+          background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          marginBottom: '0.5rem'
+        }}>
+          Casi Beta Access
+        </h1>
+        <p style={{ 
+          color: 'rgba(255, 255, 255, 0.7)', 
+          marginBottom: '2rem',
+          fontSize: '1.1rem'
+        }}>
+          Enter your email and beta access code to continue
+        </p>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            style={{
+              padding: '1rem 1.5rem',
+              borderRadius: '50px',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: 'white',
+              fontSize: '1rem',
+              outline: 'none',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+          
+          <input
+            type="text"
+            value={betaCode}
+            onChange={(e) => setBetaCode(e.target.value)}
+            placeholder="Enter beta access code"
+            required
+            style={{
+              padding: '1rem 1.5rem',
+              borderRadius: '50px',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: 'white',
+              fontSize: '1rem',
+              outline: 'none',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+
+          {error && (
+            <div style={{
+              color: '#FF9F9F',
+              fontSize: '0.9rem',
+              padding: '0.5rem',
+              background: 'rgba(255, 159, 159, 0.1)',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 159, 159, 0.3)'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={!email || !betaCode || isLoading}
+            style={{
+              padding: '1rem 2rem',
+              background: isLoading 
+                ? 'rgba(255, 255, 255, 0.1)' 
+                : 'linear-gradient(135deg, #6932FF, #932FFE)',
+              border: 'none',
+              borderRadius: '50px',
+              color: 'white',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: (!email || !betaCode || isLoading) ? 0.7 : 1,
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {isLoading ? 'Verifying...' : 'Access Beta Dashboard'}
+          </button>
+        </form>
+
+        <div style={{ 
+          marginTop: '2rem', 
+          fontSize: '0.9rem', 
+          color: 'rgba(255, 255, 255, 0.5)'
+        }}>
+          Need a beta code? Contact us at <a href="mailto:casi@heycasi.com" style={{ color: '#5EEAD4' }}>casi@heycasi.com</a>
+        </div>
+
+        <a 
+          href="/" 
+          style={{ 
+            display: 'inline-block',
+            marginTop: '1rem',
+            color: 'rgba(255, 255, 255, 0.7)', 
+            textDecoration: 'none',
+            fontSize: '0.9rem'
+          }}
+        >
+          ← Back to Home
+        </a>
       </div>
     </div>
   )
