@@ -109,28 +109,57 @@ export default function Dashboard() {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#0a0a0a',
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, sans-serif',
       color: 'white'
     }}>
       {/* Header */}
       <div style={{ 
-        background: 'rgba(255, 255, 255, 0.1)', 
+        background: 'rgba(0, 0, 0, 0.3)', 
         backdropFilter: 'blur(10px)',
         padding: '1rem 2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Casi Logo matching your landing page */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #10B981, #3B82F6)',
-              padding: '0.5rem',
-              borderRadius: '8px',
-              fontSize: '1.5rem'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              🤖
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                color: '#333'
+              }}>
+                C
+              </div>
+              <span style={{ 
+                fontSize: '1.5rem', 
+                fontWeight: '600',
+                background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                asi
+              </span>
             </div>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>Casi Platform</h1>
+            <span style={{ 
+              fontSize: '0.8rem', 
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontWeight: '300'
+            }}>
+              chat analysis & stream intelligence
+            </span>
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <a 
@@ -139,9 +168,10 @@ export default function Dashboard() {
                 color: 'white', 
                 textDecoration: 'none',
                 padding: '0.5rem 1rem',
-                background: 'rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.1)',
                 borderRadius: '6px',
-                fontSize: '0.9rem'
+                fontSize: '0.9rem',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
               ← Back to Home
@@ -153,12 +183,12 @@ export default function Dashboard() {
       <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
         {/* Connection Panel */}
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.1)', 
+          background: 'rgba(255, 255, 255, 0.05)', 
           backdropFilter: 'blur(10px)',
           borderRadius: '12px', 
           padding: '1.5rem', 
           marginBottom: '2rem',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
           <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
             Connect to Twitch Channel
@@ -190,8 +220,8 @@ export default function Dashboard() {
                 style={{
                   padding: '0.75rem 1.5rem',
                   background: connectionStatus === 'connecting' 
-                    ? 'linear-gradient(135deg, #F59E0B, #EF4444)' 
-                    : 'linear-gradient(135deg, #10B981, #3B82F6)',
+                    ? 'linear-gradient(135deg, #fed6e3, #d299c2)' 
+                    : 'linear-gradient(135deg, #8b5cf6, #a855f7)',
                   border: 'none',
                   borderRadius: '8px',
                   color: 'white',
@@ -208,7 +238,7 @@ export default function Dashboard() {
                 onClick={handleDisconnect}
                 style={{
                   padding: '0.75rem 1.5rem',
-                  background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+                  background: 'linear-gradient(135d35deg, #ef4444, #dc2626)',
                   border: 'none',
                   borderRadius: '8px',
                   color: 'white',
@@ -226,9 +256,9 @@ export default function Dashboard() {
             <div style={{ 
               marginTop: '1rem', 
               padding: '0.75rem',
-              background: 'rgba(16, 185, 129, 0.2)',
+              background: 'rgba(16, 185, 129, 0.1)',
               borderRadius: '8px',
-              border: '1px solid rgba(16, 185, 129, 0.3)'
+              border: '1px solid rgba(16, 185, 129, 0.2)'
             }}>
               ✅ Connected to #{channelName} • {messages.length} messages analyzed
             </div>
@@ -245,14 +275,14 @@ export default function Dashboard() {
               marginBottom: '2rem' 
             }}>
               <div style={{ 
-                background: 'rgba(255, 255, 255, 0.1)', 
+                background: 'rgba(255, 255, 255, 0.05)', 
                 backdropFilter: 'blur(10px)',
                 borderRadius: '12px', 
                 padding: '1.5rem',
                 textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10B981' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
                   {questions.length}
                 </div>
                 <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Questions Detected</div>
@@ -269,7 +299,7 @@ export default function Dashboard() {
                 <div style={{ 
                   fontSize: '2rem', 
                   fontWeight: 'bold', 
-                  color: avgSentiment > 0 ? '#10B981' : avgSentiment < 0 ? '#EF4444' : '#F59E0B'
+                  color: avgSentiment > 0 ? '#8b5cf6' : avgSentiment < 0 ? '#ef4444' : '#fed6e3'
                 }}>
                   {avgSentiment > 0 ? '😊' : avgSentiment < 0 ? '😞' : '😐'}
                 </div>
