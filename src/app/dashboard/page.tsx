@@ -92,7 +92,8 @@
 
   // Improved question detection
   const detectQuestion = (message: string): boolean =>'use client'
-import React, { useState, useEffect } from 'react'
+
+import { useState, useEffect } from 'react'
 
 // Types
 interface ChatMessage {
