@@ -4,10 +4,10 @@ export default function LoginPage() {
   const handleTwitchLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
     
-    // Detect if we're in production or development
-    const baseUrl = typeof window !== 'undefined' 
-      ? window.location.origin 
-      : 'https://heycasi.com'
+    // Force production URL to avoid localhost issues
+    const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'  // Only use localhost if actually on localhost
+      : 'https://heycasi.com'    // Always use production URL otherwise
     
     const redirectUri = `${baseUrl}/auth/callback`
     
@@ -21,7 +21,9 @@ export default function LoginPage() {
 
     const authUrl = `https://id.twitch.tv/oauth2/authorize?${params.toString()}`
     
-    console.log('Redirecting to:', authUrl)
+    console.log('Base URL detected:', baseUrl)
+    console.log('Redirect URI:', redirectUri)
+    console.log('Full auth URL:', authUrl)
     window.location.href = authUrl
   }
 
