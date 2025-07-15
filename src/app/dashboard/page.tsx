@@ -517,18 +517,49 @@ function BetaAccessForm({ onLogin, error, isLoading }: {
         border: '2px solid rgba(255, 255, 255, 0.2)',
         textAlign: 'center'
       }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
+        {/* Casi Robot */}
+        <div style={{ marginBottom: '2rem' }}>
+          <img 
+            src="/landing-robot.png" 
+            alt="Casi Robot" 
+            style={{ 
+              width: '80px', 
+              height: '80px',
+              marginBottom: '1rem'
+            }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              target.insertAdjacentHTML('afterend', `
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>
+              `)
+            }}
+          />
+        </div>
+
+        {/* Title */}
         <h1 style={{ 
-          fontSize: '2rem', 
+          fontSize: '2.5rem', 
           fontWeight: 'bold',
           background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
-          marginBottom: '0.5rem'
+          marginBottom: '0.5rem',
+          lineHeight: '1.2'
         }}>
-          Casi Beta Access
+          Casi
         </h1>
+        <h2 style={{ 
+          fontSize: '1.5rem', 
+          fontWeight: '600',
+          color: 'rgba(255, 255, 255, 0.9)',
+          marginBottom: '2rem',
+          lineHeight: '1.2'
+        }}>
+          Beta Access
+        </h2>
+
         <p style={{ 
           color: 'rgba(255, 255, 255, 0.7)', 
           marginBottom: '2rem',
