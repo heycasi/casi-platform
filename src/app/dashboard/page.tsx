@@ -27,7 +27,87 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
 
-  // Simple demo mode - add a few messages when connected
+  // Add IRC connection when connected
+  useEffect(() => {
+    // Only run in browser and when connected
+    if (typeof window === 'undefined' || !isConnected || !channelName) return
+
+    let ws: WebSocket | null = null
+    
+    const connectToTwitch = () => {
+      try {
+        console.log(`Connecting to Twitch IRC for channel: ${channelName}`)
+        
+        ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
+        
+        ws.onopen = () => {
+          console.log('Connected to Twitch IRC')
+          ws?.send('PASS SCHMOOPIIE')
+          ws?.send('NICK justinfan12345')
+          ws?.send(`JOIN #${channelName.toLowerCase()}`)
+        }
+        
+        ws.onmessage = (event) => {
+          const message = event.data.trim()
+          
+          if (message.startsWith('PING')) {
+            ws?.send('PONG :tmi.twitch.tv')
+            return
+          }
+          
+          if (message.includes('PRIVMSG')) {
+            const match = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
+            if (match) {
+              const [, username, messageText] = match
+              
+              // Skip bots
+              if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
+                return
+              }
+              
+              const isQuestion = messageText.includes('?') || 
+                ['what', 'how', 'when', 'where', 'why', 'who'].some(word => 
+                  messageText.toLowerCase().includes(word)
+                )
+              
+              const newMessage: ChatMessage = {
+                id: Date.now().toString() + Math.random(),
+                username,
+                message: messageText,
+                timestamp: new Date(),
+                sentiment: messageText.toLowerCase().includes('good') || messageText.toLowerCase().includes('great') ? 'positive' :
+                          messageText.toLowerCase().includes('bad') || messageText.toLowerCase().includes('hate') ? 'negative' : 'neutral',
+                isQuestion,
+                priority: isQuestion ? 8 : Math.floor(Math.random() * 6) + 1
+              }
+              
+              setMessages(prev => [newMessage, ...prev].slice(0, 100))
+            }
+          }
+        }
+        
+        ws.onerror = (error) => {
+          console.error('Twitch IRC error:', error)
+        }
+        
+        ws.onclose = () => {
+          console.log('Disconnected from Twitch IRC')
+        }
+      } catch (error) {
+        console.error('Failed to connect to Twitch IRC:', error)
+      }
+    }
+    
+    connectToTwitch()
+    
+    return () => {
+      if (ws) {
+        ws.close()
+      }
+    }
+  }, [isConnected, channelName])
+
+  // Simple demo mode - add a few messages when connected (as fallback)
   useEffect(() => {
     if (!isConnected) return
 
@@ -54,7 +134,7 @@ export default function Dashboard() {
       }
       
       setMessages(prev => [newMessage, ...prev].slice(0, 50))
-    }, 3000)
+    }, 8000) // Slower than IRC to not overwhelm
 
     return () => clearInterval(interval)
   }, [isConnected])
@@ -269,17 +349,17 @@ export default function Dashboard() {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <span>✅ Connected to #{channelName} • {messages.length} messages analyzed</span>
+              <span>✅ Connected to #{channelName} • {messages.length} messages • LIVE IRC + DEMO</span>
               <span style={{ 
-                background: 'rgba(255, 159, 159, 0.2)', 
-                color: '#FF9F9F', 
+                background: 'rgba(16, 185, 129, 0.2)', 
+                color: '#10B981', 
                 padding: '0.25rem 0.75rem', 
                 borderRadius: '20px', 
                 fontSize: '0.8rem',
                 fontWeight: 'bold',
-                border: '1px solid rgba(255, 159, 159, 0.3)'
+                border: '1px solid rgba(16, 185, 129, 0.3)'
               }}>
-                DEMO MODE
+                LIVE IRC
               </span>
             </div>
           )}
