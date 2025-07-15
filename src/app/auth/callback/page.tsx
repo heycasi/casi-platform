@@ -69,21 +69,84 @@ export default function AuthCallback() {
   }, [searchParams, router])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md mx-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          🎮 Casi Platform
-        </h1>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'Poppins, sans-serif',
+      padding: '1rem'
+    }}>
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '20px',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        padding: '3rem 2rem',
+        textAlign: 'center',
+        maxWidth: '400px',
+        width: '100%'
+      }}>
+        {/* Casi Logo */}
+        <div style={{ marginBottom: '2rem' }}>
+          <img 
+            src="/landing-logo.png" 
+            alt="Casi" 
+            style={{ 
+              width: '200px', 
+              height: 'auto',
+              maxWidth: '100%'
+            }} 
+          />
+        </div>
         
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-lg text-gray-700 leading-relaxed">{status}</p>
+        {/* Processing Status */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '15px',
+          padding: '2rem 1.5rem',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid rgba(105, 50, 255, 0.3)',
+            borderTop: '4px solid #6932FF',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1.5rem auto'
+          }}></div>
+          
+          <p style={{
+            fontSize: '1.1rem',
+            color: 'white',
+            fontWeight: '500',
+            lineHeight: '1.6',
+            margin: 0
+          }}>
+            {status}
+          </p>
         </div>
 
-        <div className="mt-6 text-sm text-gray-500">
-          <p>Connecting your Twitch account securely...</p>
+        {/* Footer Text */}
+        <div style={{
+          marginTop: '1.5rem',
+          fontSize: '0.9rem',
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontWeight: '400'
+        }}>
+          <p style={{ margin: 0 }}>Connecting your Twitch account securely...</p>
         </div>
       </div>
+
+      {/* CSS Animation */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
