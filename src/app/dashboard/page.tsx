@@ -223,7 +223,7 @@ export default function Dashboard() {
                 width: '80px',
                 height: '80px',
                 borderRadius: '50%',
-                background: '#B8EE8A',
+                background: 'transparent',
                 padding: '10px'
               }}
               onError={(e) => {
@@ -405,7 +405,7 @@ export default function Dashboard() {
               width: '50px',
               height: '50px',
               borderRadius: '50%',
-              background: '#B8EE8A',
+              background: 'transparent',
               padding: '8px'
             }}
             onError={(e) => {
