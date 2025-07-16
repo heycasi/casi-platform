@@ -462,6 +462,271 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Priority Questions Panel - ADD THIS BEFORE THE CHAT FEED */}
+        {isConnected && questions.length > 0 && (
+          <div style={{ 
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1))', 
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px', 
+            padding: '1.5rem', 
+            marginBottom: '2rem',
+            border: '2px solid rgba(239, 68, 68, 0.3)',
+            boxShadow: '0 8px 32px rgba(239, 68, 68, 0.2)'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ 
+                fontSize: '1.5rem',
+                animation: 'pulse 2s infinite'
+              }}>
+                🚨
+              </div>
+              <h3 style={{ 
+                margin: 0, 
+                fontSize: '1.3rem', 
+                fontWeight: '700',
+                color: '#FFF'
+              }}>
+                Priority Questions ({questions.length})
+              </h3>
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.8)',
+                color: 'white',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                animation: 'pulse 2s infinite'
+              }}>
+                NEEDS ATTENTION
+              </div>
+            </div>
+            
+            <div style={{ 
+              display: 'grid', 
+              gap: '12px',
+              maxHeight: '300px',
+              overflowY: 'auto'
+            }}>
+              {questions.slice(0, 5).map((msg) => (
+                <div
+                  key={msg.id}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    padding: '16px 20px',
+                    borderRadius: '15px',
+                    border: '2px solid rgba(239, 68, 68, 0.4)',
+                    backdropFilter: 'blur(5px)',
+                    position: 'relative',
+                    boxShadow: '0 4px 20px rgba(239, 68, 68, 0.1)'
+                  }}
+                >
+                  {/* Priority Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '12px',
+                    background: '#EF4444',
+                    color: 'white',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
+                  }}>
+                    HIGH PRIORITY
+                  </div>
+
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        background: '#EF4444',
+                        borderRadius: '50%',
+                        animation: 'pulse 1.5s infinite'
+                      }}></div>
+                      <span style={{ 
+                        fontWeight: 'bold',
+                        color: '#FFF',
+                        fontSize: '1rem'
+                      }}>
+                        {msg.username}
+                      </span>
+                      <span style={{
+                        background: 'rgba(239, 68, 68, 0.8)',
+                        color: 'white',
+                        padding: '3px 8px',
+                        borderRadius: '12px',
+                        fontSize: '0.7rem',
+                        fontWeight: 'bold'
+                      }}>
+                        QUESTION
+                      </span>
+                    </div>
+                    <span style={{ 
+                      fontSize: '0.9rem', 
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontWeight: '500'
+                    }}>
+                      {msg.timestamp.toLocaleTimeString()}
+                    </span>
+                  </div>
+                  
+                  <p style={{ 
+                    margin: 0, 
+                    color: '#FFF',
+                    fontSize: '1.1rem',
+                    lineHeight: '1.5',
+                    fontWeight: '500'
+                  }}>
+                    {msg.message}
+                  </p>
+                </div>
+              ))}
+              
+              {questions.length > 5 && (
+                <div style={{
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.9rem',
+                  fontStyle: 'italic',
+                  padding: '12px'
+                }}>
+                  +{questions.length - 5} more questions in chat feed below
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Updated Chat Messages Display */}
+        {isConnected && (
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px', 
+            padding: '1.5rem', 
+            marginBottom: '2rem',
+            border: '2px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
+              Live Chat Feed
+            </h3>
+            
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '15px',
+              padding: '1rem',
+              maxHeight: '400px',
+              overflowY: 'auto',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              {messages.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  padding: '2rem',
+                  fontSize: '1rem'
+                }}>
+                  {isConnected ? 'Waiting for chat messages...' : 'Connect to see live chat'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        background: msg.isQuestion 
+                          ? 'rgba(239, 68, 68, 0.1)' 
+                          : 'rgba(255, 255, 255, 0.05)',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        borderLeft: msg.isQuestion 
+                          ? '4px solid #EF4444' 
+                          : `3px solid ${getSentimentColor(msg.sentiment)}`,
+                        backdropFilter: 'blur(5px)',
+                        opacity: msg.isQuestion ? 0.6 : 1, // Dim questions since they're highlighted above
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: '6px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ 
+                            fontWeight: 'bold',
+                            color: msg.isQuestion ? '#EF4444' : '#9146FF',
+                            fontSize: '0.9rem'
+                          }}>
+                            {msg.username}
+                          </span>
+                          {msg.isQuestion && (
+                            <span style={{
+                              background: 'rgba(239, 68, 68, 0.8)',
+                              color: 'white',
+                              padding: '2px 6px',
+                              borderRadius: '10px',
+                              fontSize: '0.6rem',
+                              fontWeight: 'bold'
+                            }}>
+                              Q
+                            </span>
+                          )}
+                          <span style={{
+                            background: getSentimentColor(msg.sentiment) + '40',
+                            color: getSentimentColor(msg.sentiment),
+                            padding: '2px 6px',
+                            borderRadius: '10px',
+                            fontSize: '0.6rem',
+                            fontWeight: 'bold'
+                          }}>
+                            {msg.sentiment?.charAt(0).toUpperCase() || 'N'}
+                          </span>
+                        </div>
+                        <span style={{ 
+                          fontSize: '0.75rem', 
+                          color: 'rgba(255, 255, 255, 0.4)'
+                        }}>
+                          {msg.timestamp.toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <p style={{ 
+                        margin: 0, 
+                        color: msg.isQuestion ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.3'
+                      }}>
+                        {msg.message}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* CSS Animations */}
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+        `}</style>
+
 {/* Chat Messages Display - ADD THIS SECTION */}
         {isConnected && (
           <div style={{ 
