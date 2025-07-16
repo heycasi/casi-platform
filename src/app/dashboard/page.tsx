@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx - Updated with Beta Access Control
+// src/app/dashboard/page.tsx - Complete Fixed Version
 
 'use client'
 
@@ -68,13 +68,6 @@ export default function Dashboard() {
         return
       }
 
-      // TODO: Optional - Check if email is in waitlist via Supabase
-      // const { data, error } = await supabase
-      //   .from('waitlist')
-      //   .select('email')
-      //   .eq('email', email.toLowerCase())
-      //   .single()
-
       const userData: BetaUser = {
         email: email.toLowerCase(),
         hasAccess: true,
@@ -103,11 +96,11 @@ export default function Dashboard() {
     
     const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&force_verify=true`
     
-    console.log('OAuth URL:', twitchAuthUrl) // Debug log
+    console.log('OAuth URL:', twitchAuthUrl)
     window.location.href = twitchAuthUrl
   }
 
-  // IRC Connection (existing code)
+  // IRC Connection
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
@@ -211,13 +204,6 @@ export default function Dashboard() {
     }
   }
 
-  const getPriorityColor = (priority?: number) => {
-    if (!priority) return '#6B7280'
-    if (priority >= 8) return '#EF4444'
-    if (priority >= 6) return '#F59E0B'
-    return '#10B981'
-  }
-
   const questions = messages.filter(msg => msg.isQuestion)
   const avgSentiment = messages.length > 0 ? 
     messages.reduce((acc, msg) => {
@@ -250,7 +236,7 @@ export default function Dashboard() {
     return <BetaAccessForm onLogin={handleBetaLogin} error={accessError} isLoading={isCheckingAccess} />
   }
 
-  // Main Dashboard (existing UI with small additions)
+  // Main Dashboard
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -258,7 +244,7 @@ export default function Dashboard() {
       fontFamily: 'Poppins, Arial, sans-serif',
       color: 'white'
     }}>
-      {/* Header with Beta Info */}
+      {/* Header */}
       <div style={{ 
         background: 'rgba(0, 0, 0, 0.2)', 
         backdropFilter: 'blur(10px)',
@@ -267,24 +253,15 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <img 
                 src="/landing-robot.png" 
                 alt="Casi Robot" 
-                style={{ 
-                  width: '40px', 
-                  height: '40px'
-                }}
+                style={{ width: '40px', height: '40px' }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement
                   target.style.display = 'none'
-                  target.insertAdjacentHTML('afterend', `
-                    <div style="font-size: 2rem;">🤖</div>
-                  `)
+                  target.insertAdjacentHTML('afterend', '<div style="font-size: 2rem;">🤖</div>')
                 }}
               />
               <div>
@@ -358,7 +335,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Rest of dashboard - existing code continues... */}
+      {/* Main Content */}
       <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
         {/* Connection Panel */}
         <div style={{ 
@@ -462,7 +439,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Priority Questions Panel - ADD THIS BEFORE THE CHAT FEED */}
+        {/* Priority Questions Panel */}
         {isConnected && questions.length > 0 && (
           <div style={{ 
             background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1))', 
@@ -525,7 +502,6 @@ export default function Dashboard() {
                     boxShadow: '0 4px 20px rgba(239, 68, 68, 0.1)'
                   }}
                 >
-                  {/* Priority Badge */}
                   <div style={{
                     position: 'absolute',
                     top: '-8px',
@@ -609,7 +585,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Updated Chat Messages Display */}
+        {/* Live Chat Feed - SINGLE VERSION */}
         {isConnected && (
           <div style={{ 
             background: 'rgba(255, 255, 255, 0.1)', 
@@ -655,7 +631,7 @@ export default function Dashboard() {
                           ? '4px solid #EF4444' 
                           : `3px solid ${getSentimentColor(msg.sentiment)}`,
                         backdropFilter: 'blur(5px)',
-                        opacity: msg.isQuestion ? 0.6 : 1, // Dim questions since they're highlighted above
+                        opacity: msg.isQuestion ? 0.6 : 1,
                         transition: 'all 0.3s ease'
                       }}
                     >
@@ -719,119 +695,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* CSS Animations */}
-        <style jsx>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-        `}</style>
-
-{/* Chat Messages Display - ADD THIS SECTION */}
-        {isConnected && (
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.1)', 
-            backdropFilter: 'blur(10px)',
-            borderRadius: '20px', 
-            padding: '1.5rem', 
-            marginBottom: '2rem',
-            border: '2px solid rgba(255, 255, 255, 0.2)'
-          }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
-              Live Chat Feed
-            </h3>
-            
-            <div style={{
-              background: 'rgba(0, 0, 0, 0.3)',
-              borderRadius: '15px',
-              padding: '1rem',
-              maxHeight: '500px',
-              overflowY: 'auto',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              {messages.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  padding: '2rem',
-                  fontSize: '1rem'
-                }}>
-                  {isConnected ? 'Waiting for chat messages...' : 'Connect to see live chat'}
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        borderLeft: `4px solid ${msg.isQuestion ? '#EF4444' : getSentimentColor(msg.sentiment)}`,
-                        backdropFilter: 'blur(5px)'
-                      }}
-                    >
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        marginBottom: '8px'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ 
-                            fontWeight: 'bold',
-                            color: '#9146FF',
-                            fontSize: '0.9rem'
-                          }}>
-                            {msg.username}
-                          </span>
-                          {msg.isQuestion && (
-                            <span style={{
-                              background: '#EF4444',
-                              color: 'white',
-                              padding: '2px 8px',
-                              borderRadius: '12px',
-                              fontSize: '0.7rem',
-                              fontWeight: 'bold'
-                            }}>
-                              QUESTION
-                            </span>
-                          )}
-                          <span style={{
-                            background: getSentimentColor(msg.sentiment),
-                            color: 'white',
-                            padding: '2px 8px',
-                            borderRadius: '12px',
-                            fontSize: '0.7rem',
-                            fontWeight: 'bold'
-                          }}>
-                            {msg.sentiment?.toUpperCase() || 'NEUTRAL'}
-                          </span>
-                        </div>
-                        <span style={{ 
-                          fontSize: '0.8rem', 
-                          color: 'rgba(255, 255, 255, 0.5)'
-                        }}>
-                          {msg.timestamp.toLocaleTimeString()}
-                        </span>
-                      </div>
-                      <p style={{ 
-                        margin: 0, 
-                        color: 'white',
-                        fontSize: '1rem',
-                        lineHeight: '1.4'
-                      }}>
-                        {msg.message}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Analytics Panel - ADD THIS SECTION */}
+        {/* Analytics Panel */}
         {isConnected && messages.length > 0 && (
           <div style={{ 
             display: 'grid', 
@@ -839,7 +703,6 @@ export default function Dashboard() {
             gap: '1.5rem',
             marginBottom: '2rem'
           }}>
-            {/* Questions Counter */}
             <div style={{
               background: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
@@ -865,7 +728,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Sentiment */}
             <div style={{
               background: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
@@ -891,7 +753,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Activity */}
             <div style={{
               background: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
@@ -919,6 +780,7 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Welcome Message */}
         {!isConnected && (
           <div style={{ 
             textAlign: 'center', 
@@ -940,6 +802,14 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
     </div>
   )
 }
@@ -981,7 +851,6 @@ function BetaAccessForm({ onLogin, error, isLoading }: {
         border: '2px solid rgba(255, 255, 255, 0.2)',
         textAlign: 'center'
       }}>
-        {/* Casi Robot */}
         <div style={{ marginBottom: '2rem' }}>
           <img 
             src="/landing-robot.png" 
@@ -994,14 +863,11 @@ function BetaAccessForm({ onLogin, error, isLoading }: {
             onError={(e) => {
               const target = e.target as HTMLImageElement
               target.style.display = 'none'
-              target.insertAdjacentHTML('afterend', `
-                <div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>
-              `)
+              target.insertAdjacentHTML('afterend', '<div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>')
             }}
           />
         </div>
 
-        {/* Title */}
         <h1 style={{ 
           fontSize: '2.5rem', 
           fontWeight: 'bold',
