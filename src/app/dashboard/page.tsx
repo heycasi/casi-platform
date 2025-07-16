@@ -217,7 +217,7 @@ export default function Dashboard() {
             marginBottom: '2rem'
           }}>
             <img 
-              src="/casi-robot.png"
+              src="/landing-robot.png"
               alt="Casi Robot"
               style={{
                 width: '80px',
@@ -368,7 +368,7 @@ export default function Dashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {/* Casi Full Logo */}
           <img 
-            src="/casi-full-logo.png"
+            src="/landing-logo.png"
             alt="Casi"
             style={{
               height: '40px',
@@ -398,7 +398,7 @@ export default function Dashboard() {
           
           {/* Casi Robot */}
           <img 
-            src="/casi-robot.png"
+            src="/landing-robot.png"
             alt="Casi Robot"
             style={{
               width: '50px',
