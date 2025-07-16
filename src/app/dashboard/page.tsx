@@ -372,7 +372,8 @@ export default function Dashboard() {
             alt="Casi"
             style={{
               height: '40px',
-              width: 'auto'
+              width: 'auto',
+              background: 'transparent'
             }}
             onError={(e) => {
               // Fallback text if logo doesn't exist
