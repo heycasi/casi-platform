@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx - Complete Dashboard with Multilingual Support
+// src/app/dashboard/page.tsx - COMPLETE Dashboard with Correct Casi Branding & Multilingual Support
 'use client'
 import { useState, useEffect } from 'react'
 import { analyzeMessage } from '../../lib/multilingual'
@@ -82,7 +82,7 @@ export default function Dashboard() {
     }
   }, [])
 
-  // Enhanced IRC Connection with Multilingual Support
+  // Real Twitch IRC Connection with Multilingual Support
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
@@ -90,10 +90,12 @@ export default function Dashboard() {
 
     const connectToTwitch = () => {
       try {
+        console.log(`Connecting to Twitch IRC for channel: ${channelName}`)
         ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
         
         ws.onopen = () => {
-          console.log('Connected to Twitch IRC')
+          console.log('✅ Connected to Twitch IRC')
+          // Anonymous login to Twitch IRC
           ws?.send('PASS SCHMOOPIIE')
           ws?.send('NICK justinfan12345')
           ws?.send(`JOIN #${channelName.toLowerCase()}`)
@@ -108,7 +110,7 @@ export default function Dashboard() {
             return
           }
 
-          // Parse chat messages
+          // Parse chat messages using proper IRC format
           const chatMatch = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
           if (chatMatch) {
             const [, username, messageText] = chatMatch
@@ -128,6 +130,7 @@ export default function Dashboard() {
               priority: analysis.isQuestion ? 'high' : 'low'
             }
 
+            console.log('📨 New message:', chatMessage)
             setMessages(prev => [...prev.slice(-49), chatMessage])
             
             // Add to questions queue if it's a question
@@ -138,17 +141,19 @@ export default function Dashboard() {
         }
 
         ws.onerror = (error) => {
-          console.error('WebSocket error:', error)
+          console.error('❌ WebSocket error:', error)
         }
 
-        ws.onclose = () => {
-          console.log('Disconnected from Twitch IRC')
-          // Auto-reconnect after 3 seconds
-          setTimeout(connectToTwitch, 3000)
+        ws.onclose = (event) => {
+          console.log('🔌 Disconnected from Twitch IRC', event.code, event.reason)
+          // Auto-reconnect after 3 seconds if still connected
+          if (isConnected) {
+            setTimeout(connectToTwitch, 3000)
+          }
         }
 
       } catch (error) {
-        console.error('Connection error:', error)
+        console.error('🚨 Connection error:', error)
         setTimeout(connectToTwitch, 3000)
       }
     }
@@ -157,6 +162,7 @@ export default function Dashboard() {
 
     return () => {
       if (ws) {
+        console.log('🔌 Closing WebSocket connection')
         ws.close()
       }
     }
@@ -186,28 +192,66 @@ export default function Dashboard() {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
+        fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, sans-serif',
+        padding: '2rem'
       }}>
         <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
           borderRadius: '20px',
           padding: '3rem',
           maxWidth: '400px',
-          width: '90%',
+          width: '100%',
           textAlign: 'center',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
         }}>
+          {/* Casi Robot Logo */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginBottom: '2rem'
+          }}>
+            <img 
+              src="/casi-robot.png"
+              alt="Casi Robot"
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: '#B8EE8A',
+                padding: '10px'
+              }}
+              onError={(e) => {
+                // Fallback if image doesn't exist
+                e.currentTarget.style.display = 'none'
+                e.currentTarget.nextElementSibling!.style.display = 'flex'
+              }}
+            />
+            <div style={{
+              display: 'none',
+              width: '80px',
+              height: '80px',
+              background: '#B8EE8A',
+              borderRadius: '50%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '2.5rem'
+            }}>
+              🤖
+            </div>
+          </div>
+          
           <h1 style={{
             color: 'white',
             fontSize: '2.5rem',
             fontWeight: 'bold',
             margin: '0 0 1rem 0',
-            background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+            background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
@@ -217,7 +261,8 @@ export default function Dashboard() {
           <p style={{
             color: 'rgba(255, 255, 255, 0.8)',
             margin: '0 0 2rem 0',
-            fontSize: '1.1rem'
+            fontSize: '1.1rem',
+            fontFamily: 'Poppins, sans-serif'
           }}>
             Access the future of streaming analytics
           </p>
@@ -231,12 +276,14 @@ export default function Dashboard() {
               width: '100%',
               padding: '1rem',
               margin: '0 0 1rem 0',
-              borderRadius: '12px',
+              borderRadius: '50px',
               border: 'none',
               background: 'rgba(255, 255, 255, 0.1)',
               color: 'white',
               fontSize: '1rem',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(10px)',
+              fontFamily: 'Poppins, sans-serif',
+              boxSizing: 'border-box'
             }}
           />
 
@@ -249,12 +296,14 @@ export default function Dashboard() {
               width: '100%',
               padding: '1rem',
               margin: '0 0 1.5rem 0',
-              borderRadius: '12px',
+              borderRadius: '50px',
               border: 'none',
               background: 'rgba(255, 255, 255, 0.1)',
               color: 'white',
               fontSize: '1rem',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(10px)',
+              fontFamily: 'Poppins, sans-serif',
+              boxSizing: 'border-box'
             }}
           />
 
@@ -263,14 +312,15 @@ export default function Dashboard() {
             style={{
               width: '100%',
               padding: '1rem',
-              background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '50px',
               color: 'white',
               fontSize: '1.1rem',
               fontWeight: '600',
               cursor: 'pointer',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              fontFamily: 'Poppins, sans-serif'
             }}
           >
             Access Beta Dashboard
@@ -279,10 +329,11 @@ export default function Dashboard() {
           <p style={{
             color: 'rgba(255, 255, 255, 0.6)',
             fontSize: '0.9rem',
-            margin: '1.5rem 0 0 0'
+            margin: '1.5rem 0 0 0',
+            fontFamily: 'Poppins, sans-serif'
           }}>
             Need a beta code? Join our waitlist at{' '}
-            <a href="/" style={{ color: '#9146FF', textDecoration: 'none' }}>
+            <a href="/" style={{ color: '#5EEAD4', textDecoration: 'none' }}>
               heycasi.com
             </a>
           </p>
@@ -295,47 +346,96 @@ export default function Dashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+      fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, sans-serif',
       color: 'white'
     }}>
-      {/* Header */}
+      {/* Header with Casi Logo and Robot */}
       <div style={{
         padding: '1.5rem 2rem',
-        background: 'rgba(255, 255, 255, 0.1)',
+        background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap'
       }}>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          {/* Casi Full Logo */}
+          <img 
+            src="/casi-full-logo.png"
+            alt="Casi"
+            style={{
+              height: '40px',
+              width: 'auto'
+            }}
+            onError={(e) => {
+              // Fallback text if logo doesn't exist
+              e.currentTarget.style.display = 'none'
+              e.currentTarget.nextElementSibling!.style.display = 'block'
+            }}
+          />
           <h1 style={{
+            display: 'none',
             margin: 0,
             fontSize: '2rem',
             fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+            background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Casi Dashboard
+            Casi
           </h1>
-          <p style={{
-            margin: '0.5rem 0 0 0',
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.9rem'
+          
+          {/* Casi Robot */}
+          <img 
+            src="/casi-robot.png"
+            alt="Casi Robot"
+            style={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              background: '#B8EE8A',
+              padding: '8px'
+            }}
+            onError={(e) => {
+              // Fallback emoji if robot doesn't exist
+              e.currentTarget.style.display = 'none'
+              e.currentTarget.nextElementSibling!.style.display = 'flex'
+            }}
+          />
+          <div style={{
+            display: 'none',
+            width: '50px',
+            height: '50px',
+            background: '#B8EE8A',
+            borderRadius: '50%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.8rem'
           }}>
-            Welcome back, {email}
-          </p>
+            🤖
+          </div>
+          
+          <div>
+            <p style={{
+              margin: '0',
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '0.9rem'
+            }}>
+              Welcome back, {email}
+            </p>
+          </div>
         </div>
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{
             padding: '0.5rem 1rem',
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(184, 238, 138, 0.2)',
             borderRadius: '20px',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
+            border: '1px solid rgba(184, 238, 138, 0.3)'
           }}>
             {stats.languages.length} languages detected
           </div>
@@ -352,7 +452,8 @@ export default function Dashboard() {
               borderRadius: '20px',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              fontFamily: 'Poppins, sans-serif'
             }}
           >
             Logout
@@ -364,13 +465,18 @@ export default function Dashboard() {
         
         {/* Connection Panel */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
           borderRadius: '20px',
           padding: '2rem',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
-          <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
+          <h2 style={{ 
+            margin: '0 0 1.5rem 0', 
+            fontSize: '1.5rem', 
+            fontWeight: '600',
+            color: '#F7F7F7'
+          }}>
             🎮 Connect to Twitch Channel
           </h2>
           
@@ -384,11 +490,12 @@ export default function Dashboard() {
                 flex: 1,
                 minWidth: '200px',
                 padding: '1rem',
-                borderRadius: '12px',
+                borderRadius: '50px',
                 border: 'none',
                 background: 'rgba(255, 255, 255, 0.1)',
                 color: 'white',
-                fontSize: '1rem'
+                fontSize: '1rem',
+                fontFamily: 'Poppins, sans-serif'
               }}
             />
             
@@ -407,14 +514,15 @@ export default function Dashboard() {
                 padding: '1rem 2rem',
                 background: isConnected 
                   ? 'linear-gradient(135deg, #EF4444, #DC2626)' 
-                  : 'linear-gradient(135deg, #10B981, #059669)',
+                  : 'linear-gradient(135deg, #6932FF, #932FFE)',
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '50px',
                 color: 'white',
                 fontSize: '1rem',
                 fontWeight: '600',
                 cursor: channelName.trim() ? 'pointer' : 'not-allowed',
-                opacity: channelName.trim() ? 1 : 0.5
+                opacity: channelName.trim() ? 1 : 0.5,
+                fontFamily: 'Poppins, sans-serif'
               }}
             >
               {isConnected ? 'Disconnect' : 'Connect'}
@@ -425,20 +533,23 @@ export default function Dashboard() {
             <div style={{
               marginTop: '1rem',
               padding: '1rem',
-              background: 'rgba(16, 185, 129, 0.2)',
+              background: 'rgba(184, 238, 138, 0.2)',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              border: '1px solid rgba(184, 238, 138, 0.3)'
             }}>
               <div style={{
                 width: '8px',
                 height: '8px',
-                background: '#10B981',
+                background: '#B8EE8A',
                 borderRadius: '50%',
                 animation: 'pulse 2s infinite'
               }} />
-              <span>Connected to #{channelName} • Analyzing chat in real-time</span>
+              <span style={{ color: '#F7F7F7' }}>
+                Connected to #{channelName} • Analyzing chat in real-time with multilingual support
+              </span>
             </div>
           )}
         </div>
@@ -446,19 +557,19 @@ export default function Dashboard() {
         {/* Enhanced Priority Questions Panel with Language Info */}
         {isConnected && questions.length > 0 && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1))',
+            background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
             backdropFilter: 'blur(10px)',
             borderRadius: '20px',
             padding: '2rem',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            border: '1px solid rgba(255, 159, 159, 0.3)',
             position: 'relative'
           }}>
             <div style={{
               position: 'absolute',
               top: '-8px',
               right: '12px',
-              background: '#EF4444',
-              color: 'white',
+              background: '#FF9F9F',
+              color: '#151E3C',
               padding: '0.25rem 0.75rem',
               borderRadius: '12px',
               fontSize: '0.8rem',
@@ -471,7 +582,7 @@ export default function Dashboard() {
               margin: '0 0 1.5rem 0', 
               fontSize: '1.5rem', 
               fontWeight: '600',
-              color: '#FEF2F2'
+              color: '#F7F7F7'
             }}>
               🚨 Questions Detected ({questions.length})
             </h2>
@@ -484,7 +595,7 @@ export default function Dashboard() {
                     background: 'rgba(255, 255, 255, 0.1)',
                     borderRadius: '12px',
                     padding: '1rem',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    border: '1px solid rgba(255, 159, 159, 0.3)',
                     animation: 'pulse 2s infinite'
                   }}
                 >
@@ -495,29 +606,30 @@ export default function Dashboard() {
                     marginBottom: '0.5rem'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: '600', color: '#FEF2F2' }}>
+                      <span style={{ fontWeight: '600', color: '#F7F7F7' }}>
                         {getLanguageFlag(q.language || 'english')} {q.username}
                       </span>
                       <span style={{
                         fontSize: '0.8rem',
-                        background: 'rgba(239, 68, 68, 0.3)',
+                        background: 'rgba(94, 234, 212, 0.3)',
                         padding: '0.25rem 0.5rem',
                         borderRadius: '8px',
-                        color: '#FEF2F2'
+                        color: '#5EEAD4',
+                        border: '1px solid rgba(94, 234, 212, 0.3)'
                       }}>
                         {q.language || 'english'}
                       </span>
                     </div>
                     <span style={{
                       fontSize: '0.8rem',
-                      color: 'rgba(254, 242, 242, 0.7)'
+                      color: 'rgba(247, 247, 247, 0.7)'
                     }}>
                       {Math.round((q.confidence || 0) * 100)}% confidence
                     </span>
                   </div>
                   <p style={{
                     margin: 0,
-                    color: '#FEF2F2',
+                    color: '#F7F7F7',
                     fontSize: '1rem',
                     lineHeight: '1.4'
                   }}>
@@ -536,15 +648,15 @@ export default function Dashboard() {
           gap: '1.5rem'
         }}>
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>💬</div>
-            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#5EEAD4' }}>
               {stats.totalMessages}
             </p>
             <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
@@ -553,15 +665,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>❓</div>
-            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#FF9F9F' }}>
               {stats.questions}
             </p>
             <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
@@ -570,17 +682,22 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>
               {stats.avgSentiment > 0 ? '😊' : stats.avgSentiment < 0 ? '😢' : '😐'}
             </div>
-            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#2D3748' }}>
+            <p style={{ 
+              margin: 0, 
+              fontSize: '2rem', 
+              fontWeight: 'bold', 
+              color: stats.avgSentiment > 0 ? '#B8EE8A' : stats.avgSentiment < 0 ? '#FF9F9F' : '#F7F7F7'
+            }}>
               {stats.avgSentiment > 0 ? '+' : ''}{stats.avgSentiment}
             </p>
             <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
@@ -589,15 +706,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>🌍</div>
-            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#932FFE' }}>
               {stats.languages.length}
             </p>
             <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
@@ -606,15 +723,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>👥</div>
-            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#5EEAD4' }}>
               {stats.activeUsers}
             </p>
             <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
@@ -626,11 +743,11 @@ export default function Dashboard() {
         {/* Global Audience Panel */}
         {stats.languages.length > 0 && (
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '20px',
             padding: '2rem',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
               🌍 Global Audience
@@ -646,8 +763,8 @@ export default function Dashboard() {
                 <div
                   key={language}
                   style={{
-                    background: 'rgba(145, 70, 255, 0.2)',
-                    border: '1px solid rgba(145, 70, 255, 0.3)',
+                    background: 'rgba(105, 50, 255, 0.2)',
+                    border: '1px solid rgba(105, 50, 255, 0.3)',
                     borderRadius: '12px',
                     padding: '0.75rem 1rem',
                     display: 'flex',
@@ -660,7 +777,8 @@ export default function Dashboard() {
                   </span>
                   <span style={{
                     fontWeight: '600',
-                    textTransform: 'capitalize'
+                    textTransform: 'capitalize',
+                    color: '#F7F7F7'
                   }}>
                     {language}
                   </span>
@@ -673,11 +791,11 @@ export default function Dashboard() {
         {/* Live Chat Feed with Language Detection */}
         {isConnected && (
           <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(10px)',
             borderRadius: '20px',
             padding: '2rem',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
               💬 Live Chat Feed
@@ -686,7 +804,7 @@ export default function Dashboard() {
             <div style={{
               height: '400px',
               overflowY: 'auto',
-              background: 'rgba(0, 0, 0, 0.2)',
+              background: 'rgba(0, 0, 0, 0.3)',
               borderRadius: '12px',
               padding: '1rem'
             }}>
@@ -701,8 +819,8 @@ export default function Dashboard() {
                 }}>
                   <div>
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💭</div>
-                    <p>Waiting for chat messages...</p>
-                    <p style={{ fontSize: '0.9rem' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif' }}>Waiting for chat messages...</p>
+                    <p style={{ fontSize: '0.9rem', fontFamily: 'Poppins, sans-serif' }}>
                       Make sure the channel is live and has active chat
                     </p>
                   </div>
@@ -715,11 +833,11 @@ export default function Dashboard() {
                       style={{
                         padding: '0.75rem',
                         background: msg.isQuestion 
-                          ? 'rgba(239, 68, 68, 0.2)' 
+                          ? 'rgba(255, 159, 159, 0.2)' 
                           : 'rgba(255, 255, 255, 0.05)',
                         borderRadius: '8px',
                         border: msg.isQuestion 
-                          ? '1px solid rgba(239, 68, 68, 0.3)' 
+                          ? '1px solid rgba(255, 159, 159, 0.3)' 
                           : '1px solid rgba(255, 255, 255, 0.1)',
                         animation: msg.isQuestion ? 'pulse 2s infinite' : 'none'
                       }}
@@ -735,26 +853,27 @@ export default function Dashboard() {
                         </span>
                         <span style={{
                           fontWeight: '600',
-                          color: msg.isQuestion ? '#FEF2F2' : '#E5E7EB'
+                          color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB'
                         }}>
                           {msg.username}
                         </span>
                         <span style={{
                           fontSize: '0.7rem',
-                          background: 'rgba(255, 255, 255, 0.1)',
+                          background: 'rgba(94, 234, 212, 0.2)',
                           padding: '0.125rem 0.375rem',
                           borderRadius: '6px',
-                          color: 'rgba(255, 255, 255, 0.7)'
+                          color: '#5EEAD4',
+                          border: '1px solid rgba(94, 234, 212, 0.3)'
                         }}>
                           {msg.language || 'english'}
                         </span>
                         {msg.isQuestion && (
                           <span style={{
                             fontSize: '0.7rem',
-                            background: 'rgba(239, 68, 68, 0.8)',
+                            background: '#FF9F9F',
                             padding: '0.125rem 0.375rem',
                             borderRadius: '6px',
-                            color: 'white',
+                            color: '#151E3C',
                             fontWeight: '600'
                           }}>
                             QUESTION
@@ -766,9 +885,9 @@ export default function Dashboard() {
                           borderRadius: '6px',
                           color: 'white',
                           background: msg.sentiment === 'positive' 
-                            ? 'rgba(16, 185, 129, 0.8)' 
+                            ? '#B8EE8A' 
                             : msg.sentiment === 'negative' 
-                            ? 'rgba(239, 68, 68, 0.8)' 
+                            ? '#FF9F9F' 
                             : 'rgba(107, 114, 128, 0.8)'
                         }}>
                           {msg.sentiment?.toUpperCase()}
@@ -776,8 +895,9 @@ export default function Dashboard() {
                       </div>
                       <p style={{
                         margin: 0,
-                        color: msg.isQuestion ? '#FEF2F2' : '#F3F4F6',
-                        lineHeight: '1.4'
+                        color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
+                        lineHeight: '1.4',
+                        fontFamily: 'Poppins, sans-serif'
                       }}>
                         {msg.message}
                       </p>
@@ -795,7 +915,7 @@ export default function Dashboard() {
           padding: '2rem 0',
           color: 'rgba(255, 255, 255, 0.6)'
         }}>
-          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', fontFamily: 'Poppins, sans-serif' }}>
             Casi Beta Dashboard • Real-time multilingual chat analysis for streamers
           </p>
           <a 
@@ -803,9 +923,10 @@ export default function Dashboard() {
             style={{
               display: 'inline-block',
               marginTop: '1rem',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: '#5EEAD4',
               textDecoration: 'none',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              fontFamily: 'Poppins, sans-serif'
             }}
           >
             ← Back to Landing Page
@@ -824,6 +945,25 @@ export default function Dashboard() {
           color: rgba(255, 255, 255, 0.5);
         }
         
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: rgba(184, 238, 138, 0.5);
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(184, 238, 138, 0.7);
+        }
+        
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
           .analytics-grid {
@@ -836,6 +976,18 @@ export default function Dashboard() {
           
           .connection-form input {
             min-width: 100%;
+          }
+          
+          .header-content {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .analytics-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
