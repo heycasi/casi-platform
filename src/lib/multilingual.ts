@@ -77,38 +77,77 @@ const languagePatterns = {
 export function detectLanguage(text: string): string {
   const lowerText = text.toLowerCase()
   
-  // Check for specific language patterns
+  // Remove usernames and common chat elements that might confuse detection
+  const cleanText = lowerText
+    .replace(/@\w+/g, '') // Remove @mentions
+    .replace(/\b\w*\d+\w*\b/g, '') // Remove words with numbers (usernames)
+    .replace(/[^\w\s]/g, ' ') // Remove special characters
+    .trim()
+  
+  // If message is too short or mostly non-alphabetic, default to English
+  if (cleanText.length < 10 || !/[a-zA-Z]/.test(cleanText)) {
+    return 'english'
+  }
+  
+  // Check for very specific language patterns with higher thresholds
+  let languageScore: { [key: string]: number } = {}
+  
+  // Only detect non-English if we have strong indicators
   for (const [language, pattern] of Object.entries(languagePatterns)) {
     if (pattern.test(text)) {
-      return language
+      languageScore[language] = (languageScore[language] || 0) + 2
     }
   }
   
-  // Check for language-specific question words
+  // Check for language-specific question words (must be exact matches)
   for (const [language, words] of Object.entries(questionWords)) {
-    if (language === 'english') continue // Check English last
+    if (language === 'english') continue
+    
     for (const word of words) {
-      if (lowerText.includes(word.toLowerCase())) {
-        return language
+      // Only count if the word appears as a separate word (not part of username)
+      const wordRegex = new RegExp(`\\b${word.toLowerCase()}\\b`, 'i')
+      if (wordRegex.test(cleanText)) {
+        languageScore[language] = (languageScore[language] || 0) + 1
       }
     }
   }
   
-  // Default to English
-  return 'english'
+  // Require a minimum score to detect non-English languages
+  const minScore = 2
+  const detectedLanguage = Object.entries(languageScore)
+    .filter(([_, score]) => score >= minScore)
+    .sort(([,a], [,b]) => b - a)[0]
+  
+  // Default to English unless we have strong evidence of another language
+  return detectedLanguage ? detectedLanguage[0] : 'english'
 }
 
 export function isQuestion(text: string, language: string): boolean {
   const lowerText = text.toLowerCase()
   
-  // Universal question mark check
+  // Universal question mark check (most reliable)
   if (text.includes('?') || text.includes('？')) {
     return true
   }
   
-  // Language-specific question word check
+  // Clean text for better detection
+  const cleanText = lowerText
+    .replace(/@\w+/g, '') // Remove @mentions
+    .replace(/\b\w*\d+\w*\b/g, '') // Remove words with numbers
+    .trim()
+  
+  // Language-specific question word check (only for detected language)
   const words = questionWords[language as keyof typeof questionWords] || questionWords.english
-  return words.some(word => lowerText.includes(word.toLowerCase()))
+  
+  // Look for question words at the beginning of sentences or after punctuation
+  for (const word of words) {
+    const wordRegex = new RegExp(`(^|[.!]\\s+)${word.toLowerCase()}\\b`, 'i')
+    if (wordRegex.test(cleanText)) {
+      return true
+    }
+  }
+  
+  return false
 }
 
 export function analyzeSentiment(text: string, language: string): 'positive' | 'negative' | 'neutral' {
