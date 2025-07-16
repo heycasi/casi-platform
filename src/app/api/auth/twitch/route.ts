@@ -2,23 +2,38 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = await request.json()
+    console.log('API route called')
+    
+    // Parse request body
+    const body = await request.json()
+    const { code } = body
+    
+    console.log('Request body:', { hasCode: !!code })
     
     if (!code) {
+      console.log('No code provided')
       return NextResponse.json({ error: 'No authorization code provided' }, { status: 400 })
     }
 
-    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
-    const clientSecret = process.env.TWITCH_CLIENT_SECRET || '3vvx7u5vuqdy7zbic8et8fvtmafrj'
+    // Get environment variables
+    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
+    const clientSecret = process.env.TWITCH_CLIENT_SECRET
     
-    // Determine the correct redirect URI based on environment
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://heycasi.com' 
-      : 'http://localhost:3000'
+    console.log('Environment check:', { 
+      hasClientId: !!clientId, 
+      hasClientSecret: !!clientSecret,
+      clientId: clientId?.substring(0, 8) + '...' // Log first 8 chars only
+    })
     
-    const redirectUri = `${baseUrl}/auth/callback`
+    if (!clientId || !clientSecret) {
+      console.log('Missing environment variables')
+      return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 })
+    }
 
-    console.log('Token exchange attempt:', { clientId, redirectUri, hasCode: !!code })
+    // Force production URL
+    const redirectUri = 'https://heycasi.com/auth/callback'
+    
+    console.log('Token exchange params:', { clientId, redirectUri })
 
     // Exchange code for access token
     const tokenResponse = await fetch('https://id.twitch.tv/oauth2/token', {
@@ -36,9 +51,15 @@ export async function POST(request: NextRequest) {
     })
 
     const tokenData = await tokenResponse.json()
+    
+    console.log('Twitch token response:', { 
+      ok: tokenResponse.ok, 
+      status: tokenResponse.status,
+      hasError: !!tokenData.error 
+    })
 
     if (tokenData.error) {
-      console.error('Token exchange error:', tokenData)
+      console.log('Twitch token error:', tokenData.error)
       return NextResponse.json({ error: tokenData.error }, { status: 400 })
     }
 
@@ -51,17 +72,24 @@ export async function POST(request: NextRequest) {
     })
 
     const userData = await userResponse.json()
-
-    console.log('User data received:', userData.data?.[0]?.login)
+    
+    console.log('User data response:', { 
+      ok: userResponse.ok, 
+      status: userResponse.status,
+      hasData: !!userData.data?.[0] 
+    })
 
     return NextResponse.json({
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
-      user: userData.data[0],
+      user: userData.data?.[0] || null,
     })
 
   } catch (error) {
-    console.error('Token exchange error:', error)
-    return NextResponse.json({ error: 'Token exchange failed' }, { status: 500 })
+    console.error('API route error:', error)
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 })
   }
 }
