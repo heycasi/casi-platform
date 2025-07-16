@@ -1,115 +1,95 @@
-// src/app/dashboard/page.tsx - Complete Fixed Version
-
+// src/app/dashboard/page.tsx - Complete Dashboard with Multilingual Support
 'use client'
-
 import { useState, useEffect } from 'react'
+import { analyzeMessage } from '../../lib/multilingual'
 
 // Types
 interface ChatMessage {
   id: string
   username: string
   message: string
-  timestamp: Date
+  timestamp: number
   sentiment?: 'positive' | 'negative' | 'neutral'
   isQuestion?: boolean
-  priority?: number
+  priority?: 'high' | 'medium' | 'low'
+  language?: string
+  confidence?: number
 }
 
-interface BetaUser {
-  email: string
-  hasAccess: boolean
-  twitchConnected: boolean
+interface DashboardStats {
+  totalMessages: number
+  questions: number
+  avgSentiment: number
+  languages: string[]
+  activeUsers: number
 }
 
 export default function Dashboard() {
-  // Beta Access State
-  const [betaUser, setBetaUser] = useState<BetaUser | null>(null)
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true)
-  const [accessError, setAccessError] = useState('')
-  
-  // Dashboard State
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [channelName, setChannelName] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [betaCode, setBetaCode] = useState('')
+  const [email, setEmail] = useState('')
   const [isConnected, setIsConnected] = useState(false)
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
+  const [channelName, setChannelName] = useState('')
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [questions, setQuestions] = useState<ChatMessage[]>([])
+  const [stats, setStats] = useState<DashboardStats>({
+    totalMessages: 0,
+    questions: 0,
+    avgSentiment: 0,
+    languages: [],
+    activeUsers: 0
+  })
 
-  // Check beta access on load
+  // Valid beta codes
+  const validCodes = ['CASI2025', 'BETASTREAM', 'EARLYACCESS']
+
+  // Language flag helper function
+  const getLanguageFlag = (language: string): string => {
+    const flags: { [key: string]: string } = {
+      'english': '🇺🇸',
+      'spanish': '🇪🇸',
+      'french': '🇫🇷',
+      'german': '🇩🇪',
+      'portuguese': '🇵🇹',
+      'italian': '🇮🇹',
+      'dutch': '🇳🇱',
+      'japanese': '🇯🇵',
+      'korean': '🇰🇷',
+      'chinese': '🇨🇳',
+      'russian': '🇷🇺',
+      'arabic': '🇸🇦',
+      'hindi': '🇮🇳'
+    }
+    return flags[language] || '🌍'
+  }
+
+  // Beta authentication
+  const handleBetaAccess = () => {
+    if (validCodes.includes(betaCode.toUpperCase()) && email.trim()) {
+      setIsAuthenticated(true)
+      localStorage.setItem('casi_beta_access', 'true')
+      localStorage.setItem('casi_user_email', email)
+    }
+  }
+
+  // Check for existing beta access
   useEffect(() => {
-    checkBetaAccess()
+    const hasAccess = localStorage.getItem('casi_beta_access')
+    const savedEmail = localStorage.getItem('casi_user_email')
+    if (hasAccess && savedEmail) {
+      setIsAuthenticated(true)
+      setEmail(savedEmail)
+    }
   }, [])
 
-  const checkBetaAccess = () => {
-    // Check if user already has access in localStorage
-    const storedAccess = localStorage.getItem('casi_beta_access')
-    if (storedAccess) {
-      try {
-        const userData = JSON.parse(storedAccess)
-        setBetaUser(userData)
-        setIsCheckingAccess(false)
-        return
-      } catch (error) {
-        localStorage.removeItem('casi_beta_access')
-      }
-    }
-    setIsCheckingAccess(false)
-  }
-
-  const handleBetaLogin = async (email: string, betaCode: string) => {
-    setIsCheckingAccess(true)
-    setAccessError('')
-
-    try {
-      // Check if beta code is correct (simple approach)
-      const validCodes = ['CASI2025', 'BETASTREAM', 'EARLYACCESS']
-      
-      if (!validCodes.includes(betaCode.toUpperCase())) {
-        setAccessError('Invalid beta access code')
-        setIsCheckingAccess(false)
-        return
-      }
-
-      const userData: BetaUser = {
-        email: email.toLowerCase(),
-        hasAccess: true,
-        twitchConnected: false
-      }
-
-      setBetaUser(userData)
-      localStorage.setItem('casi_beta_access', JSON.stringify(userData))
-      setIsCheckingAccess(false)
-    } catch (error) {
-      setAccessError('Error verifying access. Please try again.')
-      setIsCheckingAccess(false)
-    }
-  }
-
-  // Twitch OAuth Integration
-  const handleTwitchLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
-    
-    // Fix redirect URI for production
-    const baseUrl = window.location.origin.includes('localhost') 
-      ? 'http://localhost:3000' 
-      : 'https://heycasi.com'
-    const redirectUri = encodeURIComponent(`${baseUrl}/auth/twitch/callback`)
-    const scope = encodeURIComponent('user:read:email')
-    
-    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&force_verify=true`
-    
-    console.log('OAuth URL:', twitchAuthUrl)
-    window.location.href = twitchAuthUrl
-  }
-
-// Enhanced IRC Connection with Multilingual Support
+  // Enhanced IRC Connection with Multilingual Support
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
     let ws: WebSocket | null = null
-    
+
     const connectToTwitch = () => {
       try {
-        console.log(`Connecting to Twitch IRC for channel: ${channelName}`)
-        
         ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
         
         ws.onopen = () => {
@@ -118,55 +98,63 @@ export default function Dashboard() {
           ws?.send('NICK justinfan12345')
           ws?.send(`JOIN #${channelName.toLowerCase()}`)
         }
-        
+
         ws.onmessage = (event) => {
           const message = event.data.trim()
           
+          // Handle PING to keep connection alive
           if (message.startsWith('PING')) {
             ws?.send('PONG :tmi.twitch.tv')
             return
           }
-          
-          if (message.includes('PRIVMSG')) {
-            const match = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
-            if (match) {
-              const [, username, messageText] = match
-              
-              // Skip bots and commands
-              if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
-                return
-              }
-              
-              // Use multilingual analysis
-              const analyzedMessage = analyzeMessage(username, messageText)
-              
-              console.log('Multilingual analysis:', {
-                language: analyzedMessage.language,
-                confidence: analyzedMessage.confidence,
-                isQuestion: analyzedMessage.isQuestion,
-                sentiment: analyzedMessage.sentiment,
-                questionType: analyzedMessage.questionType
-              })
-              
-              setMessages(prev => [analyzedMessage, ...prev].slice(0, 100))
+
+          // Parse chat messages
+          const chatMatch = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
+          if (chatMatch) {
+            const [, username, messageText] = chatMatch
+            
+            // Analyze message with multilingual support
+            const analysis = analyzeMessage(messageText)
+            
+            const chatMessage: ChatMessage = {
+              id: Date.now().toString() + Math.random(),
+              username,
+              message: messageText,
+              timestamp: Date.now(),
+              sentiment: analysis.sentiment,
+              isQuestion: analysis.isQuestion,
+              language: analysis.language,
+              confidence: analysis.confidence,
+              priority: analysis.isQuestion ? 'high' : 'low'
+            }
+
+            setMessages(prev => [...prev.slice(-49), chatMessage])
+            
+            // Add to questions queue if it's a question
+            if (analysis.isQuestion) {
+              setQuestions(prev => [...prev.slice(-9), chatMessage])
             }
           }
         }
-        
+
         ws.onerror = (error) => {
-          console.error('Twitch IRC error:', error)
+          console.error('WebSocket error:', error)
         }
-        
+
         ws.onclose = () => {
           console.log('Disconnected from Twitch IRC')
+          // Auto-reconnect after 3 seconds
+          setTimeout(connectToTwitch, 3000)
         }
+
       } catch (error) {
-        console.error('Failed to connect to Twitch IRC:', error)
+        console.error('Connection error:', error)
+        setTimeout(connectToTwitch, 3000)
       }
     }
-    
+
     connectToTwitch()
-    
+
     return () => {
       if (ws) {
         ws.close()
@@ -174,574 +162,622 @@ export default function Dashboard() {
     }
   }, [isConnected, channelName])
 
-  // Helper function for multilingual analysis (include this in your dashboard component)
-  const analyzeMessage = (username: string, messageText: string) => {
-    // Multilingual question detection
-    const questionPatterns = {
-      english: /\b(what|how|when|where|why|who|which|whose|whom)\b/i,
-      spanish: /\b(qué|que|cómo|como|cuándo|cuando|dónde|donde|por qué|por que|quién|quien|cuál|cual)\b/i,
-      french: /\b(quoi|comment|quand|où|ou|pourquoi|qui|quel|quelle|quels|quelles)\b/i,
-      german: /\b(was|wie|wann|wo|warum|wer|welche|welcher|welches)\b/i,
-      portuguese: /\b(o que|que|como|quando|onde|por que|porque|quem|qual)\b/i,
-      italian: /\b(cosa|come|quando|dove|perché|perche|chi|quale|quali)\b/i,
-      japanese: /(何|なに|なん|どう|いつ|どこ|なぜ|だれ|どれ|どの)/,
-      korean: /(뭐|무엇|어떻게|언제|어디|왜|누구|어느)/,
-      chinese: /(什么|怎么|什么时候|哪里|为什么|谁|哪个)/,
-      russian: /\b(что|как|когда|где|почему|кто|какой|какая)\b/i,
-      arabic: /(ما|كيف|متى|أين|لماذا|من|أي)/
-    }
-    
-    // Multilingual sentiment detection
-    const sentimentPatterns = {
-      positive: {
-        english: /\b(good|great|awesome|amazing|excellent|perfect|love|best|cool|nice|fantastic|brilliant|wonderful)\b/i,
-        spanish: /\b(bueno|genial|increíble|excelente|perfecto|amor|mejor|guay|fantástico|maravilloso)\b/i,
-        french: /\b(bon|génial|incroyable|excellent|parfait|amour|meilleur|cool|fantastique|merveilleux)\b/i,
-        german: /\b(gut|toll|unglaublich|ausgezeichnet|perfekt|liebe|beste|cool|fantastisch|wunderbar)\b/i,
-        portuguese: /\b(bom|ótimo|incrível|excelente|perfeito|amor|melhor|legal|fantástico|maravilhoso)\b/i,
-        italian: /\b(buono|fantastico|incredibile|eccellente|perfetto|amore|migliore|figo|meraviglioso)\b/i,
-        universal: /[😊😄😆🤣😂🥰😍🤩😎👍👏🔥💯❤️💕✨🎉🥳🙌💪]/
-      },
-      negative: {
-        english: /\b(bad|terrible|awful|horrible|hate|worst|stupid|boring|lame|trash|garbage|annoying)\b/i,
-        spanish: /\b(malo|terrible|horrible|odio|peor|estúpido|aburrido|basura|molesto|frustrante)\b/i,
-        french: /\b(mauvais|terrible|horrible|déteste|pire|stupide|ennuyeux|nul|agaçant|frustrant)\b/i,
-        german: /\b(schlecht|schrecklich|furchtbar|hasse|schlechteste|dumm|langweilig|müll|nervig)\b/i,
-        portuguese: /\b(ruim|terrível|horrível|odeio|pior|estúpido|chato|lixo|irritante|frustrante)\b/i,
-        italian: /\b(cattivo|terribile|orribile|odio|peggiore|stupido|noioso|spazzatura|fastidioso)\b/i,
-        universal: /[😢😭😞😔😒😤😠😡🤬👎💔😩😫🙄😬😰😨😱]/
-      }
-    }
-    
-    // Detect language and question
-    let detectedLanguage = 'english'
-    let isQuestion = messageText.includes('?') || messageText.includes('？') || messageText.includes('؟')
-    
-    // Check each language for question patterns
-    Object.entries(questionPatterns).forEach(([language, pattern]) => {
-      if (pattern.test(messageText)) {
-        detectedLanguage = language
-        isQuestion = true
-      }
-    })
-    
-    // Analyze sentiment
-    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
-    let sentimentScore = 0
-    
-    // Check positive sentiment
-    Object.entries(sentimentPatterns.positive).forEach(([language, pattern]) => {
-      if (pattern.test(messageText)) {
-        sentimentScore += 1
-        if (language !== 'universal') detectedLanguage = language
-      }
-    })
-    
-    // Check negative sentiment
-    Object.entries(sentimentPatterns.negative).forEach(([language, pattern]) => {
-      if (pattern.test(messageText)) {
-        sentimentScore -= 1
-        if (language !== 'universal') detectedLanguage = language
-      }
-    })
-    
-    if (sentimentScore > 0) sentiment = 'positive'
-    else if (sentimentScore < 0) sentiment = 'negative'
-    
-    // Calculate priority
-    let priority = Math.floor(Math.random() * 6) + 1
-    if (isQuestion) {
-      priority = Math.floor(Math.random() * 3) + 8 // 8-10 for questions
-    }
-    if (sentiment === 'negative') {
-      priority += 1 // Boost negative sentiment priority
-    }
-    
-    return {
-      id: Date.now().toString() + Math.random(),
-      username,
-      message: messageText,
-      timestamp: new Date(),
-      sentiment,
-      isQuestion,
-      priority,
-      language: detectedLanguage,
-      confidence: isQuestion || sentimentScore !== 0 ? 0.8 : 0.3
-    }
-  }
+  // Update stats with multilingual tracking
+  useEffect(() => {
+    const uniqueUsers = new Set(messages.map(m => m.username)).size
+    const languageSet = new Set(messages.map(m => m.language).filter(Boolean))
+    const sentimentValues = messages
+      .map(m => m.sentiment === 'positive' ? 1 : m.sentiment === 'negative' ? -1 : 0)
+    const avgSentiment = sentimentValues.length > 0 
+      ? Math.round((sentimentValues.reduce((a, b) => a + b, 0) / sentimentValues.length) * 100) / 100
+      : 0
 
-  // Beta Access Gate
-  if (isCheckingAccess) {
+    setStats({
+      totalMessages: messages.length,
+      questions: questions.length,
+      avgSentiment,
+      languages: Array.from(languageSet),
+      activeUsers: uniqueUsers
+    })
+  }, [messages, questions])
+
+  // Beta access gate
+  if (!isAuthenticated) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        fontFamily: 'Poppins, Arial, sans-serif',
-        color: 'white',
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
       }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤖</div>
-          <div>Checking access...</div>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          padding: '3rem',
+          maxWidth: '400px',
+          width: '90%',
+          textAlign: 'center',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
+        }}>
+          <h1 style={{
+            color: 'white',
+            fontSize: '2.5rem',
+            fontWeight: 'bold',
+            margin: '0 0 1rem 0',
+            background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Casi Beta
+          </h1>
+          
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            margin: '0 0 2rem 0',
+            fontSize: '1.1rem'
+          }}>
+            Access the future of streaming analytics
+          </p>
+
+          <input
+            type="email"
+            placeholder="Your email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              margin: '0 0 1rem 0',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: 'white',
+              fontSize: '1rem',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+
+          <input
+            type="text"
+            placeholder="Beta access code"
+            value={betaCode}
+            onChange={(e) => setBetaCode(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              margin: '0 0 1.5rem 0',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: 'white',
+              fontSize: '1rem',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+
+          <button
+            onClick={handleBetaAccess}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Access Beta Dashboard
+          </button>
+
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.9rem',
+            margin: '1.5rem 0 0 0'
+          }}>
+            Need a beta code? Join our waitlist at{' '}
+            <a href="/" style={{ color: '#9146FF', textDecoration: 'none' }}>
+              heycasi.com
+            </a>
+          </p>
         </div>
       </div>
     )
   }
 
-  if (!betaUser) {
-    return <BetaAccessForm onLogin={handleBetaLogin} error={accessError} isLoading={isCheckingAccess} />
-  }
-
   // Main Dashboard
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
       color: 'white'
     }}>
       {/* Header */}
-      <div style={{ 
-        background: 'rgba(0, 0, 0, 0.2)', 
+      <div style={{
+        padding: '1.5rem 2rem',
+        background: 'rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(10px)',
-        padding: '1rem 2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <img 
-                src="/landing-robot.png" 
-                alt="Casi Robot" 
-                style={{ width: '40px', height: '40px' }}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-                  target.insertAdjacentHTML('afterend', '<div style="font-size: 2rem;">🤖</div>')
-                }}
-              />
-              <div>
-                <div style={{ 
-                  fontSize: '1.5rem', 
-                  fontWeight: 'bold',
-                  background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
-                  Casi
-                </div>
-                <div style={{ 
-                  fontSize: '0.7rem', 
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontWeight: '300'
-                }}>
-                  chat analysis & stream intelligence
-                </div>
-              </div>
-            </div>
+        <div>
+          <h1 style={{
+            margin: 0,
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Casi Dashboard
+          </h1>
+          <p style={{
+            margin: '0.5rem 0 0 0',
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.9rem'
+          }}>
+            Welcome back, {email}
+          </p>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{
+            padding: '0.5rem 1rem',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '20px',
+            fontSize: '0.9rem'
+          }}>
+            {stats.languages.length} languages detected
           </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div style={{ 
-              fontSize: '0.8rem', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end'
-            }}>
-              <span>Beta User: {betaUser.email}</span>
-              {betaUser.twitchConnected ? (
-                <span style={{ color: '#9146FF' }}>🎮 Twitch Connected</span>
-              ) : (
-                <span style={{ color: '#10B981' }}>✓ Verified</span>
-              )}
-            </div>
-            {!betaUser.twitchConnected && (
-              <button
-                onClick={handleTwitchLogin}
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: 'linear-gradient(135deg, #9146FF, #772CE8)',
-                  border: 'none',
-                  borderRadius: '25px',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                🎮 Connect Twitch
-              </button>
-            )}
-            <a 
-              href="/" 
-              style={{ 
-                color: 'white', 
-                textDecoration: 'none',
-                padding: '0.5rem 1rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '25px',
-                fontSize: '0.9rem',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              ← Home
-            </a>
-          </div>
+          <button
+            onClick={() => {
+              localStorage.removeItem('casi_beta_access')
+              localStorage.removeItem('casi_user_email')
+              setIsAuthenticated(false)
+            }}
+            style={{
+              padding: '0.5rem 1rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              borderRadius: '20px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.9rem'
+            }}
+          >
+            Logout
+          </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '2rem', display: 'grid', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+        
         {/* Connection Panel */}
-        <div style={{ 
-          background: 'rgba(255, 255, 255, 0.1)', 
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '20px', 
-          padding: '1.5rem', 
-          marginBottom: '2rem',
-          border: '2px solid rgba(255, 255, 255, 0.2)'
+          borderRadius: '20px',
+          padding: '2rem',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
         }}>
-          <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
-            Connect to Twitch Channel
+          <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
+            🎮 Connect to Twitch Channel
           </h2>
           
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <input
               type="text"
-              placeholder="Enter Twitch channel name"
+              placeholder="Enter channel name (e.g., shroud)"
               value={channelName}
               onChange={(e) => setChannelName(e.target.value)}
-              disabled={isConnected}
               style={{
-                padding: '1rem 1.5rem',
-                borderRadius: '50px',
-                border: '2px solid rgba(255, 255, 255, 0.2)',
+                flex: 1,
+                minWidth: '200px',
+                padding: '1rem',
+                borderRadius: '12px',
+                border: 'none',
                 background: 'rgba(255, 255, 255, 0.1)',
                 color: 'white',
-                fontSize: '1rem',
-                minWidth: '250px',
-                outline: 'none',
-                backdropFilter: 'blur(10px)'
+                fontSize: '1rem'
               }}
             />
             
-            {!isConnected ? (
-              <button
-                onClick={handleConnect}
-                disabled={!channelName.trim() || connectionStatus === 'connecting'}
-                style={{
-                  padding: '1rem 2rem',
-                  background: connectionStatus === 'connecting' 
-                    ? 'linear-gradient(135deg, #FF9F9F, #932FFE)' 
-                    : 'linear-gradient(135deg, #6932FF, #932FFE)',
-                  border: 'none',
-                  borderRadius: '50px',
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  cursor: connectionStatus === 'connecting' ? 'not-allowed' : 'pointer',
-                  opacity: (!channelName.trim() || connectionStatus === 'connecting') ? 0.7 : 1,
-                  transition: 'all 0.3s ease',
-                  minWidth: '150px'
-                }}
-              >
-                {connectionStatus === 'connecting' ? 'Connecting...' : 'Connect'}
-              </button>
-            ) : (
-              <button
-                onClick={handleDisconnect}
-                style={{
-                  padding: '1rem 2rem',
-                  background: 'linear-gradient(135deg, #FF9F9F, #6932FF)',
-                  border: 'none',
-                  borderRadius: '50px',
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                Disconnect
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (channelName.trim()) {
+                  setIsConnected(!isConnected)
+                  if (!isConnected) {
+                    setMessages([])
+                    setQuestions([])
+                  }
+                }
+              }}
+              disabled={!channelName.trim()}
+              style={{
+                padding: '1rem 2rem',
+                background: isConnected 
+                  ? 'linear-gradient(135deg, #EF4444, #DC2626)' 
+                  : 'linear-gradient(135deg, #10B981, #059669)',
+                border: 'none',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: channelName.trim() ? 'pointer' : 'not-allowed',
+                opacity: channelName.trim() ? 1 : 0.5
+              }}
+            >
+              {isConnected ? 'Disconnect' : 'Connect'}
+            </button>
           </div>
-
-          {connectionStatus === 'connected' && (
-            <div style={{ 
-              marginTop: '1rem', 
+          
+          {isConnected && (
+            <div style={{
+              marginTop: '1rem',
               padding: '1rem',
-              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.2))',
-              borderRadius: '20px',
-              border: '2px solid rgba(184, 238, 138, 0.3)',
+              background: 'rgba(16, 185, 129, 0.2)',
+              borderRadius: '12px',
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              <span>✅ Connected to #{channelName} • {messages.length} live messages</span>
-              <span style={{ 
-                background: 'rgba(16, 185, 129, 0.2)', 
-                color: '#10B981', 
-                padding: '0.25rem 0.75rem', 
-                borderRadius: '20px', 
-                fontSize: '0.8rem',
-                fontWeight: 'bold',
-                border: '1px solid rgba(16, 185, 129, 0.3)'
-              }}>
-                LIVE IRC
-              </span>
+              <div style={{
+                width: '8px',
+                height: '8px',
+                background: '#10B981',
+                borderRadius: '50%',
+                animation: 'pulse 2s infinite'
+              }} />
+              <span>Connected to #{channelName} • Analyzing chat in real-time</span>
             </div>
           )}
         </div>
 
-        {/* Priority Questions Panel */}
+        {/* Enhanced Priority Questions Panel with Language Info */}
         {isConnected && questions.length > 0 && (
-          <div style={{ 
-            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1))', 
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1))',
             backdropFilter: 'blur(10px)',
-            borderRadius: '20px', 
-            padding: '1.5rem', 
-            marginBottom: '2rem',
-            border: '2px solid rgba(239, 68, 68, 0.3)',
-            boxShadow: '0 8px 32px rgba(239, 68, 68, 0.2)'
+            borderRadius: '20px',
+            padding: '2rem',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            position: 'relative'
           }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px',
-              marginBottom: '1rem'
+            <div style={{
+              position: 'absolute',
+              top: '-8px',
+              right: '12px',
+              background: '#EF4444',
+              color: 'white',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '12px',
+              fontSize: '0.8rem',
+              fontWeight: '600'
             }}>
-              <div style={{ 
-                fontSize: '1.5rem',
-                animation: 'pulse 2s infinite'
-              }}>
-                🚨
-              </div>
-              <h3 style={{ 
-                margin: 0, 
-                fontSize: '1.3rem', 
-                fontWeight: '700',
-                color: '#FFF'
-              }}>
-                Priority Questions ({questions.length})
-              </h3>
-              <div style={{
-                background: 'rgba(239, 68, 68, 0.8)',
-                color: 'white',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '0.8rem',
-                fontWeight: 'bold',
-                animation: 'pulse 2s infinite'
-              }}>
-                NEEDS ATTENTION
-              </div>
+              PRIORITY
             </div>
             
-            <div style={{ 
-              display: 'grid', 
-              gap: '12px',
-              maxHeight: '300px',
-              overflowY: 'auto'
+            <h2 style={{ 
+              margin: '0 0 1.5rem 0', 
+              fontSize: '1.5rem', 
+              fontWeight: '600',
+              color: '#FEF2F2'
             }}>
-              {questions.slice(0, 5).map((msg) => (
+              🚨 Questions Detected ({questions.length})
+            </h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {questions.slice(-5).map((q) => (
                 <div
-                  key={msg.id}
+                  key={q.id}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    padding: '16px 20px',
-                    borderRadius: '15px',
-                    border: '2px solid rgba(239, 68, 68, 0.4)',
-                    backdropFilter: 'blur(5px)',
-                    position: 'relative',
-                    boxShadow: '0 4px 20px rgba(239, 68, 68, 0.1)'
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    animation: 'pulse 2s infinite'
                   }}
                 >
                   <div style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    right: '12px',
-                    background: '#EF4444',
-                    color: 'white',
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.7rem',
-                    fontWeight: 'bold',
-                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
-                  }}>
-                    HIGH PRIORITY
-                  </div>
-
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '12px'
+                    marginBottom: '0.5rem'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        background: '#EF4444',
-                        borderRadius: '50%',
-                        animation: 'pulse 1.5s infinite'
-                      }}></div>
-                      <span style={{ 
-                        fontWeight: 'bold',
-                        color: '#FFF',
-                        fontSize: '1rem'
-                      }}>
-                        {msg.username}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontWeight: '600', color: '#FEF2F2' }}>
+                        {getLanguageFlag(q.language || 'english')} {q.username}
                       </span>
                       <span style={{
-                        background: 'rgba(239, 68, 68, 0.8)',
-                        color: 'white',
-                        padding: '3px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.7rem',
-                        fontWeight: 'bold'
+                        fontSize: '0.8rem',
+                        background: 'rgba(239, 68, 68, 0.3)',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '8px',
+                        color: '#FEF2F2'
                       }}>
-                        QUESTION
+                        {q.language || 'english'}
                       </span>
                     </div>
-                    <span style={{ 
-                      fontSize: '0.9rem', 
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontWeight: '500'
+                    <span style={{
+                      fontSize: '0.8rem',
+                      color: 'rgba(254, 242, 242, 0.7)'
                     }}>
-                      {msg.timestamp.toLocaleTimeString()}
+                      {Math.round((q.confidence || 0) * 100)}% confidence
                     </span>
                   </div>
-                  
-                  <p style={{ 
-                    margin: 0, 
-                    color: '#FFF',
-                    fontSize: '1.1rem',
-                    lineHeight: '1.5',
-                    fontWeight: '500'
+                  <p style={{
+                    margin: 0,
+                    color: '#FEF2F2',
+                    fontSize: '1rem',
+                    lineHeight: '1.4'
                   }}>
-                    {msg.message}
+                    {q.message}
                   </p>
                 </div>
               ))}
-              
-              {questions.length > 5 && (
-                <div style={{
-                  textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.9rem',
-                  fontStyle: 'italic',
-                  padding: '12px'
-                }}>
-                  +{questions.length - 5} more questions in chat feed below
-                </div>
-              )}
             </div>
           </div>
         )}
 
-        {/* Live Chat Feed - SINGLE VERSION */}
-        {isConnected && (
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.1)', 
+        {/* Analytics Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1.5rem'
+        }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(10px)',
-            borderRadius: '20px', 
-            padding: '1.5rem', 
-            marginBottom: '2rem',
-            border: '2px solid rgba(255, 255, 255, 0.2)'
+            borderRadius: '16px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
           }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
-              Live Chat Feed
-            </h3>
+            <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>💬</div>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+              {stats.totalMessages}
+            </p>
+            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+              Total Messages
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>❓</div>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+              {stats.questions}
+            </p>
+            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+              Questions
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>
+              {stats.avgSentiment > 0 ? '😊' : stats.avgSentiment < 0 ? '😢' : '😐'}
+            </div>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#2D3748' }}>
+              {stats.avgSentiment > 0 ? '+' : ''}{stats.avgSentiment}
+            </p>
+            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+              Mood Score
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>🌍</div>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+              {stats.languages.length}
+            </p>
+            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+              Languages
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>👥</div>
+            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+              {stats.activeUsers}
+            </p>
+            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
+              Active Users
+            </p>
+          </div>
+        </div>
+
+        {/* Global Audience Panel */}
+        {stats.languages.length > 0 && (
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '2rem',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
+              🌍 Global Audience
+            </h2>
             
             <div style={{
-              background: 'rgba(0, 0, 0, 0.3)',
-              borderRadius: '15px',
-              padding: '1rem',
-              maxHeight: '400px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              alignItems: 'center'
+            }}>
+              {stats.languages.map((language) => (
+                <div
+                  key={language}
+                  style={{
+                    background: 'rgba(145, 70, 255, 0.2)',
+                    border: '1px solid rgba(145, 70, 255, 0.3)',
+                    borderRadius: '12px',
+                    padding: '0.75rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>
+                    {getLanguageFlag(language)}
+                  </span>
+                  <span style={{
+                    fontWeight: '600',
+                    textTransform: 'capitalize'
+                  }}>
+                    {language}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Live Chat Feed with Language Detection */}
+        {isConnected && (
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '2rem',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
+              💬 Live Chat Feed
+            </h2>
+            
+            <div style={{
+              height: '400px',
               overflowY: 'auto',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
+              background: 'rgba(0, 0, 0, 0.2)',
+              borderRadius: '12px',
+              padding: '1rem'
             }}>
               {messages.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
                   color: 'rgba(255, 255, 255, 0.5)',
-                  padding: '2rem',
-                  fontSize: '1rem'
+                  textAlign: 'center'
                 }}>
-                  {isConnected ? 'Waiting for chat messages...' : 'Connect to see live chat'}
+                  <div>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💭</div>
+                    <p>Waiting for chat messages...</p>
+                    <p style={{ fontSize: '0.9rem' }}>
+                      Make sure the channel is live and has active chat
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {messages.map((msg) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {messages.slice(-20).map((msg) => (
                     <div
                       key={msg.id}
                       style={{
+                        padding: '0.75rem',
                         background: msg.isQuestion 
-                          ? 'rgba(239, 68, 68, 0.1)' 
+                          ? 'rgba(239, 68, 68, 0.2)' 
                           : 'rgba(255, 255, 255, 0.05)',
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        borderLeft: msg.isQuestion 
-                          ? '4px solid #EF4444' 
-                          : `3px solid ${getSentimentColor(msg.sentiment)}`,
-                        backdropFilter: 'blur(5px)',
-                        opacity: msg.isQuestion ? 0.6 : 1,
-                        transition: 'all 0.3s ease'
+                        borderRadius: '8px',
+                        border: msg.isQuestion 
+                          ? '1px solid rgba(239, 68, 68, 0.3)' 
+                          : '1px solid rgba(255, 255, 255, 0.1)',
+                        animation: msg.isQuestion ? 'pulse 2s infinite' : 'none'
                       }}
                     >
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
+                      <div style={{
+                        display: 'flex',
                         alignItems: 'center',
-                        marginBottom: '6px'
+                        gap: '0.5rem',
+                        marginBottom: '0.25rem'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ 
-                            fontWeight: 'bold',
-                            color: msg.isQuestion ? '#EF4444' : '#9146FF',
-                            fontSize: '0.9rem'
-                          }}>
-                            {msg.username}
-                          </span>
-                          {msg.isQuestion && (
-                            <span style={{
-                              background: 'rgba(239, 68, 68, 0.8)',
-                              color: 'white',
-                              padding: '2px 6px',
-                              borderRadius: '10px',
-                              fontSize: '0.6rem',
-                              fontWeight: 'bold'
-                            }}>
-                              Q
-                            </span>
-                          )}
-                          <span style={{
-                            background: getSentimentColor(msg.sentiment) + '40',
-                            color: getSentimentColor(msg.sentiment),
-                            padding: '2px 6px',
-                            borderRadius: '10px',
-                            fontSize: '0.6rem',
-                            fontWeight: 'bold'
-                          }}>
-                            {msg.sentiment?.charAt(0).toUpperCase() || 'N'}
-                          </span>
-                        </div>
-                        <span style={{ 
-                          fontSize: '0.75rem', 
-                          color: 'rgba(255, 255, 255, 0.4)'
+                        <span style={{ fontSize: '0.9rem' }}>
+                          {getLanguageFlag(msg.language || 'english')}
+                        </span>
+                        <span style={{
+                          fontWeight: '600',
+                          color: msg.isQuestion ? '#FEF2F2' : '#E5E7EB'
                         }}>
-                          {msg.timestamp.toLocaleTimeString()}
+                          {msg.username}
+                        </span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          padding: '0.125rem 0.375rem',
+                          borderRadius: '6px',
+                          color: 'rgba(255, 255, 255, 0.7)'
+                        }}>
+                          {msg.language || 'english'}
+                        </span>
+                        {msg.isQuestion && (
+                          <span style={{
+                            fontSize: '0.7rem',
+                            background: 'rgba(239, 68, 68, 0.8)',
+                            padding: '0.125rem 0.375rem',
+                            borderRadius: '6px',
+                            color: 'white',
+                            fontWeight: '600'
+                          }}>
+                            QUESTION
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: '0.7rem',
+                          padding: '0.125rem 0.375rem',
+                          borderRadius: '6px',
+                          color: 'white',
+                          background: msg.sentiment === 'positive' 
+                            ? 'rgba(16, 185, 129, 0.8)' 
+                            : msg.sentiment === 'negative' 
+                            ? 'rgba(239, 68, 68, 0.8)' 
+                            : 'rgba(107, 114, 128, 0.8)'
+                        }}>
+                          {msg.sentiment?.toUpperCase()}
                         </span>
                       </div>
-                      <p style={{ 
-                        margin: 0, 
-                        color: msg.isQuestion ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.9)',
-                        fontSize: '0.95rem',
-                        lineHeight: '1.3'
+                      <p style={{
+                        margin: 0,
+                        color: msg.isQuestion ? '#FEF2F2' : '#F3F4F6',
+                        lineHeight: '1.4'
                       }}>
                         {msg.message}
                       </p>
@@ -753,302 +789,56 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Analytics Panel */}
-        {isConnected && messages.length > 0 && (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-            gap: '1.5rem',
-            marginBottom: '2rem'
-          }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              textAlign: 'center',
-              border: '2px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <div style={{ 
-                fontSize: '2.5rem', 
-                fontWeight: 'bold', 
-                color: '#EF4444',
-                marginBottom: '0.5rem'
-              }}>
-                {questions.length}
-              </div>
-              <div style={{ 
-                fontSize: '1rem', 
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontWeight: '500'
-              }}>
-                Questions Detected
-              </div>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              textAlign: 'center',
-              border: '2px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <div style={{ 
-                fontSize: '2.5rem', 
-                fontWeight: 'bold', 
-                color: avgSentiment > 0 ? '#10B981' : avgSentiment < 0 ? '#EF4444' : '#6B7280',
-                marginBottom: '0.5rem'
-              }}>
-                {avgSentiment > 0 ? '😊' : avgSentiment < 0 ? '😞' : '😐'}
-              </div>
-              <div style={{ 
-                fontSize: '1rem', 
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontWeight: '500'
-              }}>
-                Overall Mood
-              </div>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              padding: '1.5rem',
-              textAlign: 'center',
-              border: '2px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <div style={{ 
-                fontSize: '2.5rem', 
-                fontWeight: 'bold', 
-                color: '#5EEAD4',
-                marginBottom: '0.5rem'
-              }}>
-                {messages.length}
-              </div>
-              <div style={{ 
-                fontSize: '1rem', 
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontWeight: '500'
-              }}>
-                Total Messages
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Welcome Message */}
-        {!isConnected && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '4rem 2rem',
-            background: 'rgba(255, 255, 255, 0.1)', 
-            backdropFilter: 'blur(10px)',
-            borderRadius: '20px',
-            border: '2px solid rgba(255, 255, 255, 0.2)'
-          }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
-            <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Welcome to Casi Beta!</h2>
-            <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto' }}>
-              Connect to any live Twitch channel to start getting real-time chat analysis, 
-              question detection, and audience sentiment tracking from actual viewers.
-            </p>
-            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', marginTop: '1rem' }}>
-              Try popular channels like: shroud, pokimane, summit1g, xqc, or any active streamer
-            </p>
-          </div>
-        )}
+        {/* Footer */}
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem 0',
+          color: 'rgba(255, 255, 255, 0.6)'
+        }}>
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            Casi Beta Dashboard • Real-time multilingual chat analysis for streamers
+          </p>
+          <a 
+            href="/" 
+            style={{
+              display: 'inline-block',
+              marginTop: '1rem',
+              color: 'rgba(255, 255, 255, 0.7)',
+              textDecoration: 'none',
+              fontSize: '0.9rem'
+            }}
+          >
+            ← Back to Landing Page
+          </a>
+        </div>
       </div>
 
       {/* CSS Animations */}
       <style jsx>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          50% { opacity: 0.7; }
+        }
+        
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+          .analytics-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          
+          .connection-form {
+            flex-direction: column;
+          }
+          
+          .connection-form input {
+            min-width: 100%;
+          }
         }
       `}</style>
-    </div>
-  )
-}
-
-// Beta Access Form Component
-function BetaAccessForm({ onLogin, error, isLoading }: { 
-  onLogin: (email: string, code: string) => void
-  error: string
-  isLoading: boolean 
-}) {
-  const [email, setEmail] = useState('')
-  const [betaCode, setBetaCode] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (email && betaCode) {
-      onLogin(email, betaCode)
-    }
-  }
-
-  return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      color: 'white',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
-    }}>
-      <div style={{ 
-        background: 'rgba(255, 255, 255, 0.1)', 
-        backdropFilter: 'blur(10px)',
-        borderRadius: '20px',
-        padding: '3rem',
-        maxWidth: '500px',
-        width: '100%',
-        border: '2px solid rgba(255, 255, 255, 0.2)',
-        textAlign: 'center'
-      }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <img 
-            src="/landing-robot.png" 
-            alt="Casi Robot" 
-            style={{ 
-              width: '80px', 
-              height: '80px',
-              marginBottom: '1rem'
-            }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.style.display = 'none'
-              target.insertAdjacentHTML('afterend', '<div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>')
-            }}
-          />
-        </div>
-
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: 'bold',
-          background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          marginBottom: '0.5rem',
-          lineHeight: '1.2'
-        }}>
-          Casi
-        </h1>
-        <h2 style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: '600',
-          color: 'rgba(255, 255, 255, 0.9)',
-          marginBottom: '2rem',
-          lineHeight: '1.2'
-        }}>
-          Beta Access
-        </h2>
-
-        <p style={{ 
-          color: 'rgba(255, 255, 255, 0.7)', 
-          marginBottom: '2rem',
-          fontSize: '1.1rem'
-        }}>
-          Enter your email and beta access code to continue
-        </p>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            required
-            style={{
-              padding: '1rem 1.5rem',
-              borderRadius: '50px',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              fontSize: '1rem',
-              outline: 'none',
-              backdropFilter: 'blur(10px)'
-            }}
-          />
-          
-          <input
-            type="text"
-            value={betaCode}
-            onChange={(e) => setBetaCode(e.target.value)}
-            placeholder="Enter beta access code"
-            required
-            style={{
-              padding: '1rem 1.5rem',
-              borderRadius: '50px',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              fontSize: '1rem',
-              outline: 'none',
-              backdropFilter: 'blur(10px)'
-            }}
-          />
-
-          {error && (
-            <div style={{
-              color: '#FF9F9F',
-              fontSize: '0.9rem',
-              padding: '0.5rem',
-              background: 'rgba(255, 159, 159, 0.1)',
-              borderRadius: '10px',
-              border: '1px solid rgba(255, 159, 159, 0.3)'
-            }}>
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={!email || !betaCode || isLoading}
-            style={{
-              padding: '1rem 2rem',
-              background: isLoading 
-                ? 'rgba(255, 255, 255, 0.1)' 
-                : 'linear-gradient(135deg, #6932FF, #932FFE)',
-              border: 'none',
-              borderRadius: '50px',
-              color: 'white',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: (!email || !betaCode || isLoading) ? 0.7 : 1,
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {isLoading ? 'Verifying...' : 'Access Beta Dashboard'}
-          </button>
-        </form>
-
-        <div style={{ 
-          marginTop: '2rem', 
-          fontSize: '0.9rem', 
-          color: 'rgba(255, 255, 255, 0.5)'
-        }}>
-          Need a beta code? Contact us at <a href="mailto:casi@heycasi.com" style={{ color: '#5EEAD4' }}>casi@heycasi.com</a>
-        </div>
-
-        <a 
-          href="/" 
-          style={{ 
-            display: 'inline-block',
-            marginTop: '1rem',
-            color: 'rgba(255, 255, 255, 0.7)', 
-            textDecoration: 'none',
-            fontSize: '0.9rem'
-          }}
-        >
-          ← Back to Home
-        </a>
-      </div>
     </div>
   )
 }
