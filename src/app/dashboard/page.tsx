@@ -228,8 +228,12 @@ export default function Dashboard() {
               }}
               onError={(e) => {
                 // Fallback if image doesn't exist
-                e.currentTarget.style.display = 'none'
-                e.currentTarget.nextElementSibling!.style.display = 'flex'
+                const target = e.currentTarget
+                const fallback = target.nextElementSibling as HTMLElement
+                if (fallback) {
+                  target.style.display = 'none'
+                  fallback.style.display = 'flex'
+                }
               }}
             />
             <div style={{
@@ -372,8 +376,12 @@ export default function Dashboard() {
             }}
             onError={(e) => {
               // Fallback text if logo doesn't exist
-              e.currentTarget.style.display = 'none'
-              e.currentTarget.nextElementSibling!.style.display = 'block'
+              const target = e.currentTarget
+              const fallback = target.nextElementSibling as HTMLElement
+              if (fallback) {
+                target.style.display = 'none'
+                fallback.style.display = 'block'
+              }
             }}
           />
           <h1 style={{
@@ -401,8 +409,12 @@ export default function Dashboard() {
             }}
             onError={(e) => {
               // Fallback emoji if robot doesn't exist
-              e.currentTarget.style.display = 'none'
-              e.currentTarget.nextElementSibling!.style.display = 'flex'
+              const target = e.currentTarget
+              const fallback = target.nextElementSibling as HTMLElement
+              if (fallback) {
+                target.style.display = 'none'
+                fallback.style.display = 'flex'
+              }
             }}
           />
           <div style={{
