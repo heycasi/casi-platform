@@ -100,7 +100,7 @@ export default function Dashboard() {
     window.location.href = twitchAuthUrl
   }
 
-  // IRC Connection
+// Enhanced IRC Connection with Multilingual Support
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
@@ -132,27 +132,23 @@ export default function Dashboard() {
             if (match) {
               const [, username, messageText] = match
               
+              // Skip bots and commands
               if (username === 'streamlabs' || username === 'nightbot' || messageText.startsWith('!')) {
                 return
               }
               
-              const isQuestion = messageText.includes('?') || 
-                ['what', 'how', 'when', 'where', 'why', 'who'].some(word => 
-                  messageText.toLowerCase().includes(word)
-                )
+              // Use multilingual analysis
+              const analyzedMessage = analyzeMessage(username, messageText)
               
-              const newMessage: ChatMessage = {
-                id: Date.now().toString() + Math.random(),
-                username,
-                message: messageText,
-                timestamp: new Date(),
-                sentiment: messageText.toLowerCase().includes('good') || messageText.toLowerCase().includes('great') ? 'positive' :
-                          messageText.toLowerCase().includes('bad') || messageText.toLowerCase().includes('hate') ? 'negative' : 'neutral',
-                isQuestion,
-                priority: isQuestion ? 8 : Math.floor(Math.random() * 6) + 1
-              }
+              console.log('Multilingual analysis:', {
+                language: analyzedMessage.language,
+                confidence: analyzedMessage.confidence,
+                isQuestion: analyzedMessage.isQuestion,
+                sentiment: analyzedMessage.sentiment,
+                questionType: analyzedMessage.questionType
+              })
               
-              setMessages(prev => [newMessage, ...prev].slice(0, 100))
+              setMessages(prev => [analyzedMessage, ...prev].slice(0, 100))
             }
           }
         }
@@ -178,39 +174,101 @@ export default function Dashboard() {
     }
   }, [isConnected, channelName])
 
-  const handleConnect = () => {
-    if (!channelName.trim()) return
+  // Helper function for multilingual analysis (include this in your dashboard component)
+  const analyzeMessage = (username: string, messageText: string) => {
+    // Multilingual question detection
+    const questionPatterns = {
+      english: /\b(what|how|when|where|why|who|which|whose|whom)\b/i,
+      spanish: /\b(qué|que|cómo|como|cuándo|cuando|dónde|donde|por qué|por que|quién|quien|cuál|cual)\b/i,
+      french: /\b(quoi|comment|quand|où|ou|pourquoi|qui|quel|quelle|quels|quelles)\b/i,
+      german: /\b(was|wie|wann|wo|warum|wer|welche|welcher|welches)\b/i,
+      portuguese: /\b(o que|que|como|quando|onde|por que|porque|quem|qual)\b/i,
+      italian: /\b(cosa|come|quando|dove|perché|perche|chi|quale|quali)\b/i,
+      japanese: /(何|なに|なん|どう|いつ|どこ|なぜ|だれ|どれ|どの)/,
+      korean: /(뭐|무엇|어떻게|언제|어디|왜|누구|어느)/,
+      chinese: /(什么|怎么|什么时候|哪里|为什么|谁|哪个)/,
+      russian: /\b(что|как|когда|где|почему|кто|какой|какая)\b/i,
+      arabic: /(ما|كيف|متى|أين|لماذا|من|أي)/
+    }
     
-    setConnectionStatus('connecting')
-    setMessages([])
+    // Multilingual sentiment detection
+    const sentimentPatterns = {
+      positive: {
+        english: /\b(good|great|awesome|amazing|excellent|perfect|love|best|cool|nice|fantastic|brilliant|wonderful)\b/i,
+        spanish: /\b(bueno|genial|increíble|excelente|perfecto|amor|mejor|guay|fantástico|maravilloso)\b/i,
+        french: /\b(bon|génial|incroyable|excellent|parfait|amour|meilleur|cool|fantastique|merveilleux)\b/i,
+        german: /\b(gut|toll|unglaublich|ausgezeichnet|perfekt|liebe|beste|cool|fantastisch|wunderbar)\b/i,
+        portuguese: /\b(bom|ótimo|incrível|excelente|perfeito|amor|melhor|legal|fantástico|maravilhoso)\b/i,
+        italian: /\b(buono|fantastico|incredibile|eccellente|perfetto|amore|migliore|figo|meraviglioso)\b/i,
+        universal: /[😊😄😆🤣😂🥰😍🤩😎👍👏🔥💯❤️💕✨🎉🥳🙌💪]/
+      },
+      negative: {
+        english: /\b(bad|terrible|awful|horrible|hate|worst|stupid|boring|lame|trash|garbage|annoying)\b/i,
+        spanish: /\b(malo|terrible|horrible|odio|peor|estúpido|aburrido|basura|molesto|frustrante)\b/i,
+        french: /\b(mauvais|terrible|horrible|déteste|pire|stupide|ennuyeux|nul|agaçant|frustrant)\b/i,
+        german: /\b(schlecht|schrecklich|furchtbar|hasse|schlechteste|dumm|langweilig|müll|nervig)\b/i,
+        portuguese: /\b(ruim|terrível|horrível|odeio|pior|estúpido|chato|lixo|irritante|frustrante)\b/i,
+        italian: /\b(cattivo|terribile|orribile|odio|peggiore|stupido|noioso|spazzatura|fastidioso)\b/i,
+        universal: /[😢😭😞😔😒😤😠😡🤬👎💔😩😫🙄😬😰😨😱]/
+      }
+    }
     
-    setTimeout(() => {
-      setConnectionStatus('connected')
-      setIsConnected(true)
-    }, 2000)
-  }
-
-  const handleDisconnect = () => {
-    setIsConnected(false)
-    setConnectionStatus('disconnected')
-    setMessages([])
-  }
-
-  const getSentimentColor = (sentiment?: string) => {
-    switch (sentiment) {
-      case 'positive': return '#10B981'
-      case 'negative': return '#EF4444'
-      default: return '#6B7280'
+    // Detect language and question
+    let detectedLanguage = 'english'
+    let isQuestion = messageText.includes('?') || messageText.includes('？') || messageText.includes('؟')
+    
+    // Check each language for question patterns
+    Object.entries(questionPatterns).forEach(([language, pattern]) => {
+      if (pattern.test(messageText)) {
+        detectedLanguage = language
+        isQuestion = true
+      }
+    })
+    
+    // Analyze sentiment
+    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
+    let sentimentScore = 0
+    
+    // Check positive sentiment
+    Object.entries(sentimentPatterns.positive).forEach(([language, pattern]) => {
+      if (pattern.test(messageText)) {
+        sentimentScore += 1
+        if (language !== 'universal') detectedLanguage = language
+      }
+    })
+    
+    // Check negative sentiment
+    Object.entries(sentimentPatterns.negative).forEach(([language, pattern]) => {
+      if (pattern.test(messageText)) {
+        sentimentScore -= 1
+        if (language !== 'universal') detectedLanguage = language
+      }
+    })
+    
+    if (sentimentScore > 0) sentiment = 'positive'
+    else if (sentimentScore < 0) sentiment = 'negative'
+    
+    // Calculate priority
+    let priority = Math.floor(Math.random() * 6) + 1
+    if (isQuestion) {
+      priority = Math.floor(Math.random() * 3) + 8 // 8-10 for questions
+    }
+    if (sentiment === 'negative') {
+      priority += 1 // Boost negative sentiment priority
+    }
+    
+    return {
+      id: Date.now().toString() + Math.random(),
+      username,
+      message: messageText,
+      timestamp: new Date(),
+      sentiment,
+      isQuestion,
+      priority,
+      language: detectedLanguage,
+      confidence: isQuestion || sentimentScore !== 0 ? 0.8 : 0.3
     }
   }
-
-  const questions = messages.filter(msg => msg.isQuestion)
-  const avgSentiment = messages.length > 0 ? 
-    messages.reduce((acc, msg) => {
-      if (msg.sentiment === 'positive') return acc + 1
-      if (msg.sentiment === 'negative') return acc - 1
-      return acc
-    }, 0) / messages.length : 0
 
   // Beta Access Gate
   if (isCheckingAccess) {
