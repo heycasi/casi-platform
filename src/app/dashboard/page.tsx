@@ -462,8 +462,197 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Analytics and Chat sections - existing code... */}
-        {/* [Rest of your existing dashboard UI] */}
+{/* Chat Messages Display - ADD THIS SECTION */}
+        {isConnected && (
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px', 
+            padding: '1.5rem', 
+            marginBottom: '2rem',
+            border: '2px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
+              Live Chat Feed
+            </h3>
+            
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '15px',
+              padding: '1rem',
+              maxHeight: '500px',
+              overflowY: 'auto',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              {messages.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  padding: '2rem',
+                  fontSize: '1rem'
+                }}>
+                  {isConnected ? 'Waiting for chat messages...' : 'Connect to see live chat'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        borderLeft: `4px solid ${msg.isQuestion ? '#EF4444' : getSentimentColor(msg.sentiment)}`,
+                        backdropFilter: 'blur(5px)'
+                      }}
+                    >
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: '8px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ 
+                            fontWeight: 'bold',
+                            color: '#9146FF',
+                            fontSize: '0.9rem'
+                          }}>
+                            {msg.username}
+                          </span>
+                          {msg.isQuestion && (
+                            <span style={{
+                              background: '#EF4444',
+                              color: 'white',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '0.7rem',
+                              fontWeight: 'bold'
+                            }}>
+                              QUESTION
+                            </span>
+                          )}
+                          <span style={{
+                            background: getSentimentColor(msg.sentiment),
+                            color: 'white',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold'
+                          }}>
+                            {msg.sentiment?.toUpperCase() || 'NEUTRAL'}
+                          </span>
+                        </div>
+                        <span style={{ 
+                          fontSize: '0.8rem', 
+                          color: 'rgba(255, 255, 255, 0.5)'
+                        }}>
+                          {msg.timestamp.toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <p style={{ 
+                        margin: 0, 
+                        color: 'white',
+                        fontSize: '1rem',
+                        lineHeight: '1.4'
+                      }}>
+                        {msg.message}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Analytics Panel - ADD THIS SECTION */}
+        {isConnected && messages.length > 0 && (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '1.5rem',
+            marginBottom: '2rem'
+          }}>
+            {/* Questions Counter */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              textAlign: 'center',
+              border: '2px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <div style={{ 
+                fontSize: '2.5rem', 
+                fontWeight: 'bold', 
+                color: '#EF4444',
+                marginBottom: '0.5rem'
+              }}>
+                {questions.length}
+              </div>
+              <div style={{ 
+                fontSize: '1rem', 
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontWeight: '500'
+              }}>
+                Questions Detected
+              </div>
+            </div>
+
+            {/* Sentiment */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              textAlign: 'center',
+              border: '2px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <div style={{ 
+                fontSize: '2.5rem', 
+                fontWeight: 'bold', 
+                color: avgSentiment > 0 ? '#10B981' : avgSentiment < 0 ? '#EF4444' : '#6B7280',
+                marginBottom: '0.5rem'
+              }}>
+                {avgSentiment > 0 ? '😊' : avgSentiment < 0 ? '😞' : '😐'}
+              </div>
+              <div style={{ 
+                fontSize: '1rem', 
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontWeight: '500'
+              }}>
+                Overall Mood
+              </div>
+            </div>
+
+            {/* Activity */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              padding: '1.5rem',
+              textAlign: 'center',
+              border: '2px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <div style={{ 
+                fontSize: '2.5rem', 
+                fontWeight: 'bold', 
+                color: '#5EEAD4',
+                marginBottom: '0.5rem'
+              }}>
+                {messages.length}
+              </div>
+              <div style={{ 
+                fontSize: '1rem', 
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontWeight: '500'
+              }}>
+                Total Messages
+              </div>
+            </div>
+          </div>
+        )}
 
         {!isConnected && (
           <div style={{ 
