@@ -483,7 +483,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ padding: '2rem', display: 'grid', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '1rem 2rem 2rem 2rem', display: 'grid', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
         
         {/* Connection Panel */}
         <div style={{
@@ -987,81 +987,6 @@ export default function Dashboard() {
         
         ::-webkit-scrollbar-thumb:hover {
           background: rgba(184, 238, 138, 0.7);
-        }
-        
-        /* Mobile responsive adjustments */
-        @media (max-width: 768px) {
-          div[style*="padding: 2rem"] {
-            padding: 1rem !important;
-          }
-          
-          div[style*="gap: 2rem"] {
-            gap: 1rem !important;
-          }
-          
-          .connection-form {
-            flex-direction: column;
-          }
-          
-          .connection-form input {
-            min-width: 100% !important;
-            margin-bottom: 1rem;
-          }
-          
-          .header-content {
-            flex-direction: column;
-            gap: 1rem !important;
-            text-align: center;
-          }
-          
-          /* Analytics grid mobile optimization */
-          div[style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 1rem !important;
-          }
-          
-          /* Priority questions mobile */
-          div[style*="Priority"] {
-            padding: 1rem !important;
-          }
-          
-          /* Chat feed mobile */
-          div[style*="height: 400px"] {
-            height: 300px !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          /* Single column layout for very small screens */
-          div[style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
-            grid-template-columns: 1fr !important;
-          }
-          
-          /* Smaller text on mobile */
-          h2 {
-            font-size: 1.2rem !important;
-          }
-          
-          /* Smaller logos on mobile */
-          img[alt="Casi"] {
-            height: 32px !important;
-          }
-          
-          img[alt="Casi Robot"] {
-            width: 36px !important;
-            height: 36px !important;
-          }
-          
-          /* Better mobile touch targets */
-          button {
-            min-height: 44px !important;
-            padding: 0.75rem 1rem !important;
-          }
-          
-          input {
-            min-height: 44px !important;
-            padding: 0.75rem 1rem !important;
-          }
         }
       `}</style>
     </div>
