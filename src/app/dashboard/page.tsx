@@ -432,11 +432,12 @@ export default function Dashboard() {
             🤖
           </div>
           
-          <div style={{ display: 'none', '@media (min-width: 768px)': { display: 'block' } }}>
+          <div>
             <p style={{
               margin: '0',
               color: 'rgba(255, 255, 255, 0.7)',
-              fontSize: '0.8rem'
+              fontSize: '0.8rem',
+              display: 'none'
             }}>
               Welcome back, {email}
             </p>
