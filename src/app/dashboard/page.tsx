@@ -366,7 +366,7 @@ export default function Dashboard() {
         flexWrap: 'wrap',
         gap: '1rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1', minWidth: '200px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1', minWidth: '200px' }}>
           {/* Casi Full Logo */}
           <img 
             src="/landing-logo.png"
@@ -398,16 +398,15 @@ export default function Dashboard() {
             Casi
           </h1>
           
-          {/* Casi Robot */}
+          {/* Casi Robot - Right next to logo */}
           <img 
             src="/landing-robot.png"
             alt="Casi Robot"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
               background: 'transparent',
-              padding: '6px'
+              flexShrink: 0
             }}
             onError={(e) => {
               // Fallback emoji if robot doesn't exist
@@ -421,13 +420,14 @@ export default function Dashboard() {
           />
           <div style={{
             display: 'none',
-            width: '40px',
-            height: '40px',
+            width: '36px',
+            height: '36px',
             background: '#B8EE8A',
             borderRadius: '50%',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.5rem'
+            fontSize: '1.2rem',
+            flexShrink: 0
           }}>
             🤖
           </div>
