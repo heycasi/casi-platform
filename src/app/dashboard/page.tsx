@@ -484,7 +484,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ padding: '1rem 2rem 2rem 2rem', display: 'grid', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
         
         {/* Connection Panel */}
         <div style={{
@@ -574,7 +574,7 @@ export default function Dashboard() {
                 animation: 'pulse 2s infinite'
               }} />
               <span style={{ color: '#F7F7F7' }}>
-                Hey @{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
+                Hey #{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
               </span>
             </div>
           )}
@@ -667,11 +667,12 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Analytics Grid */}
+        {/* Analytics Grid - Mobile Optimized */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1.5rem'
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          justifyContent: 'space-between'
         }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
@@ -679,7 +680,9 @@ export default function Dashboard() {
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flex: '1 1 calc(50% - 0.5rem)',
+            minWidth: '150px'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>💬</div>
             <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#5EEAD4' }}>
@@ -696,7 +699,9 @@ export default function Dashboard() {
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flex: '1 1 calc(50% - 0.5rem)',
+            minWidth: '150px'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>❓</div>
             <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#FF9F9F' }}>
@@ -713,7 +718,9 @@ export default function Dashboard() {
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flex: '1 1 calc(50% - 0.5rem)',
+            minWidth: '150px'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>
               {stats.avgSentiment > 0 ? '😊' : stats.avgSentiment < 0 ? '😢' : '😐'}
@@ -737,7 +744,9 @@ export default function Dashboard() {
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flex: '1 1 calc(50% - 0.5rem)',
+            minWidth: '150px'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>🌍</div>
             <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#932FFE' }}>
@@ -754,7 +763,9 @@ export default function Dashboard() {
             borderRadius: '16px',
             padding: '1.5rem',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flex: '1 1 calc(50% - 0.5rem)',
+            minWidth: '150px'
           }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>👥</div>
             <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#5EEAD4' }}>
