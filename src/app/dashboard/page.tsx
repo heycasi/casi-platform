@@ -451,16 +451,6 @@ export default function Dashboard() {
           flexWrap: 'wrap',
           justifyContent: 'flex-end'
         }}>
-          <div style={{
-            padding: '0.4rem 0.8rem',
-            background: 'rgba(184, 238, 138, 0.2)',
-            borderRadius: '20px',
-            fontSize: '0.8rem',
-            border: '1px solid rgba(184, 238, 138, 0.3)',
-            whiteSpace: 'nowrap'
-          }}>
-            {stats.languages.length} languages
-          </div>
           <button
             onClick={() => {
               localStorage.removeItem('casi_beta_access')
@@ -574,7 +564,7 @@ export default function Dashboard() {
                 animation: 'pulse 2s infinite'
               }} />
               <span style={{ color: '#F7F7F7' }}>
-                Hey #{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
+                Hey @{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
               </span>
             </div>
           )}
@@ -748,25 +738,6 @@ export default function Dashboard() {
             flex: '1 1 calc(50% - 0.5rem)',
             minWidth: '150px'
           }}>
-            <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>🌍</div>
-            <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#932FFE' }}>
-              {stats.languages.length}
-            </p>
-            <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.7 }}>
-              Languages
-            </p>
-          </div>
-
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            flex: '1 1 calc(50% - 0.5rem)',
-            minWidth: '150px'
-          }}>
             <div style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>👥</div>
             <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#5EEAD4' }}>
               {stats.activeUsers}
@@ -776,54 +747,6 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-
-        {/* Global Audience Panel */}
-        {stats.languages.length > 0 && (
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '20px',
-            padding: '2rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>
-              🌍 Global Audience
-            </h2>
-            
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              alignItems: 'center'
-            }}>
-              {stats.languages.map((language) => (
-                <div
-                  key={language}
-                  style={{
-                    background: 'rgba(105, 50, 255, 0.2)',
-                    border: '1px solid rgba(105, 50, 255, 0.3)',
-                    borderRadius: '12px',
-                    padding: '0.75rem 1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <span style={{ fontSize: '1.2rem' }}>
-                    {getLanguageFlag(language)}
-                  </span>
-                  <span style={{
-                    fontWeight: '600',
-                    textTransform: 'capitalize',
-                    color: '#F7F7F7'
-                  }}>
-                    {language}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Live Chat Feed with Language Detection */}
         {isConnected && (
