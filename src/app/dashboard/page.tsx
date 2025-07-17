@@ -354,24 +354,25 @@ export default function Dashboard() {
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, sans-serif',
       color: 'white'
     }}>
-      {/* Header with Casi Logo and Robot */}
+      {/* Header with Casi Logo and Robot - Mobile Optimized */}
       <div style={{
-        padding: '1.5rem 2rem',
+        padding: '1rem 1rem',
         background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        gap: '1rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1', minWidth: '200px' }}>
           {/* Casi Full Logo */}
           <img 
             src="/landing-logo.png"
             alt="Casi"
             style={{
-              height: '40px',
+              height: '36px',
               width: 'auto',
               background: 'transparent'
             }}
@@ -388,7 +389,7 @@ export default function Dashboard() {
           <h1 style={{
             display: 'none',
             margin: 0,
-            fontSize: '2rem',
+            fontSize: '1.5rem',
             fontWeight: 'bold',
             background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
             WebkitBackgroundClip: 'text',
@@ -402,11 +403,11 @@ export default function Dashboard() {
             src="/landing-robot.png"
             alt="Casi Robot"
             style={{
-              width: '50px',
-              height: '50px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               background: 'transparent',
-              padding: '8px'
+              padding: '6px'
             }}
             onError={(e) => {
               // Fallback emoji if robot doesn't exist
@@ -420,37 +421,44 @@ export default function Dashboard() {
           />
           <div style={{
             display: 'none',
-            width: '50px',
-            height: '50px',
+            width: '40px',
+            height: '40px',
             background: '#B8EE8A',
             borderRadius: '50%',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.8rem'
+            fontSize: '1.5rem'
           }}>
             🤖
           </div>
           
-          <div>
+          <div style={{ display: 'none', '@media (min-width: 768px)': { display: 'block' } }}>
             <p style={{
               margin: '0',
               color: 'rgba(255, 255, 255, 0.7)',
-              fontSize: '0.9rem'
+              fontSize: '0.8rem'
             }}>
               Welcome back, {email}
             </p>
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '0.5rem', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-end'
+        }}>
           <div style={{
-            padding: '0.5rem 1rem',
+            padding: '0.4rem 0.8rem',
             background: 'rgba(184, 238, 138, 0.2)',
             borderRadius: '20px',
-            fontSize: '0.9rem',
-            border: '1px solid rgba(184, 238, 138, 0.3)'
+            fontSize: '0.8rem',
+            border: '1px solid rgba(184, 238, 138, 0.3)',
+            whiteSpace: 'nowrap'
           }}>
-            {stats.languages.length} languages detected
+            {stats.languages.length} languages
           </div>
           <button
             onClick={() => {
@@ -459,14 +467,15 @@ export default function Dashboard() {
               setIsAuthenticated(false)
             }}
             style={{
-              padding: '0.5rem 1rem',
+              padding: '0.4rem 0.8rem',
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '20px',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontFamily: 'Poppins, sans-serif'
+              fontSize: '0.8rem',
+              fontFamily: 'Poppins, sans-serif',
+              minHeight: '44px'
             }}
           >
             Logout
@@ -501,14 +510,15 @@ export default function Dashboard() {
               onChange={(e) => setChannelName(e.target.value)}
               style={{
                 flex: 1,
-                minWidth: '200px',
+                minWidth: '250px',
                 padding: '1rem',
                 borderRadius: '50px',
                 border: 'none',
                 background: 'rgba(255, 255, 255, 0.1)',
                 color: 'white',
                 fontSize: '1rem',
-                fontFamily: 'Poppins, sans-serif'
+                fontFamily: 'Poppins, sans-serif',
+                minHeight: '44px'
               }}
             />
             
@@ -535,7 +545,9 @@ export default function Dashboard() {
                 fontWeight: '600',
                 cursor: channelName.trim() ? 'pointer' : 'not-allowed',
                 opacity: channelName.trim() ? 1 : 0.5,
-                fontFamily: 'Poppins, sans-serif'
+                fontFamily: 'Poppins, sans-serif',
+                minHeight: '44px',
+                whiteSpace: 'nowrap'
               }}
             >
               {isConnected ? 'Disconnect' : 'Connect'}
@@ -561,7 +573,7 @@ export default function Dashboard() {
                 animation: 'pulse 2s infinite'
               }} />
               <span style={{ color: '#F7F7F7' }}>
-                Connected to #{channelName} • Analyzing chat in real-time with multilingual support
+                Hey #{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
               </span>
             </div>
           )}
@@ -929,7 +941,7 @@ export default function Dashboard() {
           color: 'rgba(255, 255, 255, 0.6)'
         }}>
           <p style={{ margin: 0, fontSize: '0.9rem', fontFamily: 'Poppins, sans-serif' }}>
-            Casi Beta Dashboard • Real-time multilingual chat analysis for streamers
+            Casi Beta Dashboard • Your stream's brainy co-pilot. Reads the room so you don't have to.
           </p>
           <a 
             href="/" 
@@ -979,8 +991,12 @@ export default function Dashboard() {
         
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
-          .analytics-grid {
-            grid-template-columns: repeat(2, 1fr);
+          div[style*="padding: 2rem"] {
+            padding: 1rem !important;
+          }
+          
+          div[style*="gap: 2rem"] {
+            gap: 1rem !important;
           }
           
           .connection-form {
@@ -988,19 +1004,63 @@ export default function Dashboard() {
           }
           
           .connection-form input {
-            min-width: 100%;
+            min-width: 100% !important;
+            margin-bottom: 1rem;
           }
           
           .header-content {
             flex-direction: column;
-            gap: 1rem;
+            gap: 1rem !important;
             text-align: center;
+          }
+          
+          /* Analytics grid mobile optimization */
+          div[style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1rem !important;
+          }
+          
+          /* Priority questions mobile */
+          div[style*="Priority"] {
+            padding: 1rem !important;
+          }
+          
+          /* Chat feed mobile */
+          div[style*="height: 400px"] {
+            height: 300px !important;
           }
         }
         
         @media (max-width: 480px) {
-          .analytics-grid {
-            grid-template-columns: 1fr;
+          /* Single column layout for very small screens */
+          div[style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* Smaller text on mobile */
+          h2 {
+            font-size: 1.2rem !important;
+          }
+          
+          /* Smaller logos on mobile */
+          img[alt="Casi"] {
+            height: 32px !important;
+          }
+          
+          img[alt="Casi Robot"] {
+            width: 36px !important;
+            height: 36px !important;
+          }
+          
+          /* Better mobile touch targets */
+          button {
+            min-height: 44px !important;
+            padding: 0.75rem 1rem !important;
+          }
+          
+          input {
+            min-height: 44px !important;
+            padding: 0.75rem 1rem !important;
           }
         }
       `}</style>
