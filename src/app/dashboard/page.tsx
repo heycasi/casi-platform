@@ -574,7 +574,7 @@ export default function Dashboard() {
                 animation: 'pulse 2s infinite'
               }} />
               <span style={{ color: '#F7F7F7' }}>
-                Hey #{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
+                Hey @{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
               </span>
             </div>
           )}
