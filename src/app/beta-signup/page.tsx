@@ -302,7 +302,7 @@ export default function BetaSignup() {
                 margin: 0,
                 lineHeight: '1.4'
               }}>
-                If you love Casi and want to continue, it's just <strong style={{ color: '#5EEAD4' }}>£19/month</strong>. 
+                If you love Casi and want to continue, plans start from just <strong style={{ color: '#5EEAD4' }}>£19/month</strong> with higher tiers available for larger streamers. 
                 No pressure - we'll contact you before your trial ends to see if you'd like to continue.
               </p>
             </div>
