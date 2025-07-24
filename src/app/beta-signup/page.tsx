@@ -12,7 +12,7 @@ export default function BetaSignup() {
     name: '',
     email: '',
     twitch_channel: '',
-    payment_reference: ''
+    beta_reason: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -39,8 +39,8 @@ export default function BetaSignup() {
             email: formData.email.toLowerCase(),
             twitch_channel: cleanChannel,
             tier: 'creator',
-            payment_reference: formData.payment_reference,
-            payment_status: 'pending'
+            beta_reason: formData.beta_reason,
+            payment_status: 'beta_free'
           }
         ])
 
@@ -60,7 +60,7 @@ export default function BetaSignup() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -111,7 +111,7 @@ export default function BetaSignup() {
             lineHeight: '1.6',
             marginBottom: '2rem'
           }}>
-            We'll verify your payment and activate your account within 24 hours. You'll receive an email confirmation once your access is ready.
+            Your free 2-week beta access starts as soon as we activate your account. We'll email you with login details and getting started instructions.
           </p>
           <button
             onClick={() => window.location.href = '/'}
@@ -208,35 +208,88 @@ export default function BetaSignup() {
             </p>
           </div>
 
-          {/* Pricing Box */}
+          {/* Free Beta Box */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
+            background: 'rgba(94, 234, 212, 0.1)',
             borderRadius: '15px',
             padding: '1.5rem',
             marginBottom: '2rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '2px solid rgba(94, 234, 212, 0.3)'
           }}>
-            <h3 style={{
-              color: '#5EEAD4',
-              fontSize: '1.3rem',
-              marginBottom: '0.5rem',
-              fontWeight: '600'
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '1.5rem' }}>🎉</div>
+              <h3 style={{
+                color: '#5EEAD4',
+                fontSize: '1.4rem',
+                margin: 0,
+                fontWeight: '700'
+              }}>
+                FREE Beta Access - Limited to 10 Users!
+              </h3>
+            </div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '10px',
+              padding: '1rem',
+              marginBottom: '1rem'
             }}>
-              Creator Plan - £19/month
-            </h3>
+              <p style={{
+                color: '#FFD700',
+                fontSize: '1rem',
+                fontWeight: '600',
+                margin: '0 0 0.5rem 0'
+              }}>
+                🚀 2-Week Free Trial
+              </p>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '0.95rem',
+                margin: 0,
+                lineHeight: '1.4'
+              }}>
+                Get complete access to all Creator Plan features absolutely free for 2 weeks. No payment required to start!
+              </p>
+            </div>
             <ul style={{
               color: 'rgba(255, 255, 255, 0.8)',
               listStyle: 'none',
               padding: 0,
-              margin: 0
+              margin: '0 0 1rem 0'
             }}>
               <li style={{ marginBottom: '0.5rem' }}>✅ Up to 100 viewers</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Real-time chat analysis</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Question detection & highlighting</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Sentiment tracking</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Discord notifications</li>
-              <li>✅ Email support</li>
+              <li style={{ marginBottom: '0.5rem' }}>✅ Email support</li>
+              <li style={{ marginBottom: '0.5rem' }}>✅ Priority feedback channel</li>
             </ul>
+            
+            {/* After Beta Pricing */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '8px',
+              padding: '1rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '0.9rem',
+                margin: '0 0 0.5rem 0',
+                fontWeight: '600'
+              }}>
+                After your 2-week trial:
+              </p>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.85rem',
+                margin: 0,
+                lineHeight: '1.4'
+              }}>
+                If you love Casi and want to continue, it's just <strong style={{ color: '#5EEAD4' }}>£19/month</strong>. 
+                No pressure - we'll contact you before your trial ends to see if you'd like to continue.
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -337,59 +390,65 @@ export default function BetaSignup() {
               </p>
             </div>
 
-            {/* Payment Instructions */}
+            {/* Beta Access Instructions */}
             <div style={{
-              background: 'rgba(255, 204, 0, 0.1)',
-              border: '1px solid rgba(255, 204, 0, 0.3)',
+              background: 'rgba(94, 234, 212, 0.1)',
+              border: '1px solid rgba(94, 234, 212, 0.3)',
               borderRadius: '10px',
               padding: '1.5rem',
               marginBottom: '1.5rem'
             }}>
               <h4 style={{
-                color: '#FFD700',
+                color: '#5EEAD4',
                 fontSize: '1.1rem',
                 marginBottom: '1rem',
                 fontWeight: '600'
               }}>
-                Payment Instructions
+                🎯 How to Get Your Free Beta Access
               </h4>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: '0.95rem',
-                lineHeight: '1.5',
-                marginBottom: '1rem'
-              }}>
-                To secure your beta access, transfer £19 to:
-              </p>
               <div style={{
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(255, 255, 255, 0.05)',
                 padding: '1rem',
                 borderRadius: '8px',
                 marginBottom: '1rem'
               }}>
-                <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Account Name:</strong> HeyCasi Ltd
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.95rem',
+                  margin: '0 0 1rem 0',
+                  lineHeight: '1.5'
+                }}>
+                  <strong>Step 1:</strong> Fill out the form below with your details
                 </p>
-                <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Sort Code:</strong> 04-00-03
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.95rem',
+                  margin: '0 0 1rem 0',
+                  lineHeight: '1.5'
+                }}>
+                  <strong>Step 2:</strong> We'll review your application and activate your account within 24 hours
                 </p>
-                <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Account Number:</strong> 06558637
-                </p>
-                <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Reference:</strong> CASI-YourTwitchUsername
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.95rem',
+                  margin: 0,
+                  lineHeight: '1.5'
+                }}>
+                  <strong>Step 3:</strong> Start using Casi immediately - completely free for 2 weeks!
                 </p>
               </div>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.7)',
                 fontSize: '0.85rem',
-                lineHeight: '1.4'
+                lineHeight: '1.4',
+                margin: 0
               }}>
-                Use your Twitch username in the reference so we can match your payment to your application.
+                <strong>Limited spots:</strong> Only 10 beta users will be selected for this exclusive free trial. 
+                Apply now to secure your spot!
               </p>
             </div>
 
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
               <label style={{
                 color: 'white',
                 fontSize: '1rem',
@@ -397,14 +456,14 @@ export default function BetaSignup() {
                 display: 'block',
                 marginBottom: '0.5rem'
               }}>
-                Payment Reference *
+                Why do you want to join the Casi beta? *
               </label>
-              <input
-                type="text"
-                name="payment_reference"
-                value={formData.payment_reference}
+              <textarea
+                name="beta_reason"
+                value={formData.beta_reason}
                 onChange={handleChange}
                 required
+                rows={3}
                 style={{
                   width: '100%',
                   padding: '1rem',
@@ -413,16 +472,17 @@ export default function BetaSignup() {
                   background: 'rgba(255, 255, 255, 0.1)',
                   color: 'white',
                   fontSize: '1rem',
-                  fontFamily: 'Poppins, sans-serif'
+                  fontFamily: 'Poppins, sans-serif',
+                  resize: 'vertical'
                 }}
-                placeholder="CASI-your_twitch_username"
+                placeholder="Tell us why you'd be a great beta tester and how you plan to use Casi..."
               />
               <p style={{
                 color: 'rgba(255, 255, 255, 0.6)',
                 fontSize: '0.9rem',
                 marginTop: '0.5rem'
               }}>
-                Enter the reference you used for the bank transfer
+                Help us understand your streaming goals and how Casi can help you grow
               </p>
             </div>
 
@@ -459,7 +519,7 @@ export default function BetaSignup() {
                 transition: 'all 0.3s ease'
               }}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Beta Application'}
+              {isSubmitting ? 'Submitting Application...' : 'Apply for Free Beta Access'}
             </button>
           </form>
 
@@ -470,7 +530,7 @@ export default function BetaSignup() {
             marginTop: '1.5rem',
             lineHeight: '1.4'
           }}>
-            By submitting this form, you agree to our terms of service. We'll activate your account within 24 hours of payment verification.
+            By applying, you agree to provide feedback during the beta period. Only 10 spots available - we'll contact successful applicants within 24 hours.
           </p>
         </div>
       </div>
