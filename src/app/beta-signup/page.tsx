@@ -8,7 +8,7 @@ const supabase = createClient(
 )
 
 export default function BetaSignup() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({ 
     name: '',
     email: '',
     twitch_channel: '',
