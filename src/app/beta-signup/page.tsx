@@ -444,3 +444,36 @@ export default function BetaSignup() {
               type="submit"
               disabled={isSubmitting}
               style={{
+                width: '100%',
+                background: isSubmitting 
+                  ? 'rgba(105, 50, 255, 0.5)' 
+                  : 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '1.25rem',
+                borderRadius: '50px',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                fontFamily: 'Poppins, sans-serif',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Beta Application'}
+            </button>
+          </form>
+
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.85rem',
+            textAlign: 'center',
+            marginTop: '1.5rem',
+            lineHeight: '1.4'
+          }}>
+            By submitting this form, you agree to our terms of service. We'll activate your account within 24 hours of payment verification.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
