@@ -208,14 +208,30 @@ export default function BetaSignup() {
             </p>
           </div>
 
-          {/* Free Beta Box */}
+          {/* Free Beta Box with Matching Gradient Background */}
           <div style={{
-            background: 'rgba(94, 234, 212, 0.1)',
+            background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(147, 47, 254, 0.15) 35%, rgba(255, 159, 159, 0.15) 70%, rgba(184, 238, 138, 0.15) 100%)',
             borderRadius: '15px',
             padding: '1.5rem',
             marginBottom: '2rem',
-            border: '2px solid rgba(94, 234, 212, 0.3)'
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
+            {/* Robot Logo */}
+            <div style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1rem',
+              opacity: 0.7
+            }}>
+              <img 
+                src="/landing-robot.png" 
+                alt="Casi Robot" 
+                style={{ height: '60px', width: 'auto' }}
+              />
+            </div>
+            
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
               <div style={{ fontSize: '1.5rem' }}>🎉</div>
               <h3 style={{
@@ -228,7 +244,7 @@ export default function BetaSignup() {
               </h3>
             </div>
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '10px',
               padding: '1rem',
               marginBottom: '1rem'
@@ -256,21 +272,21 @@ export default function BetaSignup() {
               padding: 0,
               margin: '0 0 1rem 0'
             }}>
-              <li style={{ marginBottom: '0.5rem' }}>✅ Up to 100 viewers</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Real-time chat analysis</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Question detection & highlighting</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Sentiment tracking</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Discord notifications</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Email support</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Priority feedback channel</li>
+              <li style={{ marginBottom: '0.5rem' }}>✅ End of stream report! (Normally only available in Pro tier and above)</li>
             </ul>
             
             {/* After Beta Pricing */}
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               padding: '1rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.7)',
