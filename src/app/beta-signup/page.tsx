@@ -368,13 +368,13 @@ export default function BetaSignup() {
                 marginBottom: '1rem'
               }}>
                 <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Account Name:</strong> [Your Business Name]
+                  <strong>Account Name:</strong> [HeyCasi Ltd]
                 </p>
                 <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Sort Code:</strong> XX-XX-XX
+                  <strong>Sort Code:</strong> 04-00-03
                 </p>
                 <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
-                  <strong>Account Number:</strong> XXXXXXXX
+                  <strong>Account Number:</strong> 06558637
                 </p>
                 <p style={{ color: 'white', margin: '0.25rem 0', fontSize: '0.9rem' }}>
                   <strong>Reference:</strong> CASI-[YourTwitchUsername]
