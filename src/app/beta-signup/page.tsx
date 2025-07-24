@@ -256,13 +256,15 @@ export default function BetaSignup() {
               padding: 0,
               margin: '0 0 1rem 0'
             }}>
-              <li style={{ marginBottom: '0.5rem' }}>✅ Up to 100 viewers</li>
+              
               <li style={{ marginBottom: '0.5rem' }}>✅ Real-time chat analysis</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Question detection & highlighting</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Sentiment tracking</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Discord notifications</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Email support</li>
               <li style={{ marginBottom: '0.5rem' }}>✅ Priority feedback channel</li>
+              <li style={{ marginBottom: '0.5rem' }}>✅ End of stream report! (Normally only available in Pro tier and above)</li>
+
             </ul>
             
             {/* After Beta Pricing */}
