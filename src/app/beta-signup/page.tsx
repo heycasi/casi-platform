@@ -72,7 +72,7 @@ export default function BetaSignup() {
       <div style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        padding: '2rem',
+        padding: 'clamp(1rem, 4vw, 2rem)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -81,33 +81,35 @@ export default function BetaSignup() {
         <div style={{
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          padding: '3rem',
+          borderRadius: 'clamp(15px, 3vw, 20px)',
+          padding: 'clamp(2rem, 6vw, 3rem)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           textAlign: 'center',
-          maxWidth: '500px',
+          maxWidth: '90vw',
           width: '100%'
         }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✅</div>
+          <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>✅</div>
           <h1 style={{
             color: 'white',
-            fontSize: '2rem',
+            fontSize: 'clamp(1.5rem, 5vw, 2rem)',
             marginBottom: '1rem',
-            fontWeight: '700'
+            fontWeight: '700',
+            lineHeight: '1.2'
           }}>
             Application Submitted!
           </h1>
           <p style={{
             color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '1.1rem',
+            fontSize: 'clamp(1rem, 3vw, 1.1rem)',
             lineHeight: '1.6',
-            marginBottom: '1.5rem'
+            marginBottom: '1.5rem',
+            wordWrap: 'break-word'
           }}>
             Thanks {formData.name}! We've received your beta application for channel <strong>@{formData.twitch_channel}</strong>.
           </p>
           <p style={{
             color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '1rem',
+            fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
             lineHeight: '1.6',
             marginBottom: '2rem'
           }}>
@@ -119,12 +121,14 @@ export default function BetaSignup() {
               background: 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
               color: 'white',
               border: 'none',
-              padding: '1rem 2rem',
+              padding: 'clamp(0.8rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem)',
               borderRadius: '50px',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
               fontWeight: '600',
               cursor: 'pointer',
-              fontFamily: 'Poppins, sans-serif'
+              fontFamily: 'Poppins, sans-serif',
+              width: '100%',
+              maxWidth: '300px'
             }}
           >
             Return to Home
@@ -138,32 +142,35 @@ export default function BetaSignup() {
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      padding: '2rem',
+      padding: 'clamp(1rem, 3vw, 2rem)',
       fontFamily: 'Poppins, sans-serif'
     }}>
       {/* Header */}
       <div style={{
-        padding: '1rem 2rem',
+        padding: 'clamp(0.5rem, 2vw, 1rem) clamp(1rem, 4vw, 2rem)',
         background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        marginBottom: 'clamp(1rem, 3vw, 2rem)'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           maxWidth: '1200px',
-          margin: '0 auto'
+          margin: '0 auto',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 2vw, 1rem)' }}>
             <img 
               src="/landing-logo.png" 
               alt="Casi Logo" 
-              style={{ height: '40px', width: 'auto' }}
+              style={{ height: 'clamp(30px, 6vw, 40px)', width: 'auto' }}
             />
             <h1 style={{
               color: 'white',
-              fontSize: '1.5rem',
+              fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
               fontWeight: '700',
               margin: 0
             }}>
@@ -178,30 +185,31 @@ export default function BetaSignup() {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        minHeight: 'calc(100vh - 200px)',
-        padding: '3rem 1rem'
+        padding: 'clamp(1rem, 3vw, 3rem) 0'
       }}>
         <div style={{
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          padding: '2rem',
+          borderRadius: 'clamp(15px, 3vw, 20px)',
+          padding: 'clamp(1.5rem, 4vw, 2rem)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
-          maxWidth: '800px',
-          width: '100%'
+          maxWidth: '95vw',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 5vw, 3rem)' }}>
             <h2 style={{
               color: 'white',
-              fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+              fontSize: 'clamp(1.8rem, 6vw, 2.5rem)',
               marginBottom: '1.5rem',
-              fontWeight: '700'
+              fontWeight: '700',
+              lineHeight: '1.2'
             }}>
               Join Casi Beta
             </h2>
             <p style={{
               color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: 'clamp(1rem, 2.5vw, 1.1rem)',
+              fontSize: 'clamp(1rem, 3vw, 1.1rem)',
               lineHeight: '1.6',
               maxWidth: '600px',
               margin: '0 auto'
@@ -213,9 +221,9 @@ export default function BetaSignup() {
           {/* Free Beta Box with Matching Gradient Background */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(147, 47, 254, 0.15) 35%, rgba(255, 159, 159, 0.15) 70%, rgba(184, 238, 138, 0.15) 100%)',
-            borderRadius: '15px',
-            padding: '2rem',
-            marginBottom: '3rem',
+            borderRadius: 'clamp(12px, 3vw, 15px)',
+            padding: 'clamp(1.5rem, 4vw, 2rem)',
+            marginBottom: 'clamp(2rem, 5vw, 3rem)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             position: 'relative',
             overflow: 'hidden'
@@ -223,37 +231,38 @@ export default function BetaSignup() {
             {/* Robot Logo */}
             <div style={{
               position: 'absolute',
-              top: '1.5rem',
-              right: '1.5rem',
+              top: 'clamp(1rem, 3vw, 1.5rem)',
+              right: 'clamp(1rem, 3vw, 1.5rem)',
               opacity: 0.7
             }}>
               <img 
                 src="/landing-robot.png" 
                 alt="Casi Robot" 
-                style={{ height: 'clamp(50px, 8vw, 70px)', width: 'auto' }}
+                style={{ height: 'clamp(40px, 8vw, 70px)', width: 'auto' }}
               />
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: '1.5rem' }}>🎉</div>
+              <div style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)' }}>🎉</div>
               <h3 style={{
                 color: '#5EEAD4',
-                fontSize: 'clamp(1.2rem, 3vw, 1.4rem)',
+                fontSize: 'clamp(1.1rem, 4vw, 1.4rem)',
                 margin: 0,
-                fontWeight: '700'
+                fontWeight: '700',
+                lineHeight: '1.2'
               }}>
                 FREE Beta Access - Limited to 10 Users!
               </h3>
             </div>
             <div style={{
               background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '10px',
-              padding: '1.5rem',
+              borderRadius: 'clamp(8px, 2vw, 10px)',
+              padding: 'clamp(1rem, 3vw, 1.5rem)',
               marginBottom: '1.5rem'
             }}>
               <p style={{
                 color: '#FFD700',
-                fontSize: 'clamp(0.95rem, 2.5vw, 1rem)',
+                fontSize: 'clamp(0.9rem, 3vw, 1rem)',
                 fontWeight: '600',
                 margin: '0 0 0.75rem 0'
               }}>
@@ -261,7 +270,7 @@ export default function BetaSignup() {
               </p>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: 'clamp(0.9rem, 2.2vw, 0.95rem)',
+                fontSize: 'clamp(0.85rem, 2.5vw, 0.95rem)',
                 margin: 0,
                 lineHeight: '1.5'
               }}>
@@ -269,45 +278,51 @@ export default function BetaSignup() {
               </p>
             </div>
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              display: 'flex',
+              flexDirection: 'column',
               gap: '0.75rem',
               marginBottom: '1.5rem'
             }}>
-              <ul style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                listStyle: 'none',
-                padding: 0,
-                margin: 0
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '0.75rem'
               }}>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ Real-time chat analysis</li>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ Question detection & highlighting</li>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ Sentiment tracking</li>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ Discord notifications</li>
-              </ul>
-              <ul style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                listStyle: 'none',
-                padding: 0,
-                margin: 0
-              }}>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ Email support</li>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ Priority feedback channel</li>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.85rem, 2vw, 0.9rem)' }}>✅ End of stream report!</li>
-                <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 1.8vw, 0.85rem)', fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.6)' }}>(Normally only available in Pro tier and above)</li>
-              </ul>
+                <ul style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0
+                }}>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Real-time chat analysis</li>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Question detection & highlighting</li>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Sentiment tracking</li>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Discord notifications</li>
+                </ul>
+                <ul style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0
+                }}>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Email support</li>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Priority feedback channel</li>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ End of stream report!</li>
+                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.75rem, 2vw, 0.85rem)', fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.6)' }}>(Normally only available in Pro tier and above)</li>
+                </ul>
+              </div>
             </div>
             
             {/* After Beta Pricing */}
             <div style={{
               background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '1.5rem',
+              borderRadius: 'clamp(6px, 2vw, 8px)',
+              padding: 'clamp(1rem, 3vw, 1.5rem)',
               border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: 'clamp(0.85rem, 2vw, 0.9rem)',
+                fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
                 margin: '0 0 0.75rem 0',
                 fontWeight: '600'
               }}>
@@ -315,7 +330,7 @@ export default function BetaSignup() {
               </p>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: 'clamp(0.8rem, 1.8vw, 0.85rem)',
+                fontSize: 'clamp(0.75rem, 2.2vw, 0.85rem)',
                 margin: 0,
                 lineHeight: '1.5'
               }}>
@@ -327,154 +342,164 @@ export default function BetaSignup() {
 
           <form onSubmit={handleSubmit}>
             <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1.5rem',
-              marginBottom: '2rem'
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'clamp(1rem, 3vw, 1.5rem)',
+              marginBottom: 'clamp(1.5rem, 4vw, 2rem)'
             }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: 'clamp(1rem, 3vw, 1.5rem)'
+              }}>
+                <div>
+                  <label style={{
+                    color: 'white',
+                    fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+                    fontWeight: '600',
+                    display: 'block',
+                    marginBottom: '0.75rem'
+                  }}>
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: 'clamp(0.8rem, 3vw, 1rem)',
+                      borderRadius: 'clamp(8px, 2vw, 10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+                      fontFamily: 'Poppins, sans-serif',
+                      boxSizing: 'border-box'
+                    }}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    color: 'white',
+                    fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+                    fontWeight: '600',
+                    display: 'block',
+                    marginBottom: '0.75rem'
+                  }}>
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: 'clamp(0.8rem, 3vw, 1rem)',
+                      borderRadius: 'clamp(8px, 2vw, 10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+                      fontFamily: 'Poppins, sans-serif',
+                      boxSizing: 'border-box'
+                    }}
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label style={{
                   color: 'white',
-                  fontSize: 'clamp(0.9rem, 2vw, 1rem)',
+                  fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
                   fontWeight: '600',
                   display: 'block',
                   marginBottom: '0.75rem'
                 }}>
-                  Full Name *
+                  Twitch Channel Username *
                 </label>
                 <input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="twitch_channel"
+                  value={formData.twitch_channel}
                   onChange={handleChange}
                   required
                   style={{
                     width: '100%',
-                    padding: '1rem',
-                    borderRadius: '10px',
+                    padding: 'clamp(0.8rem, 3vw, 1rem)',
+                    borderRadius: 'clamp(8px, 2vw, 10px)',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     background: 'rgba(255, 255, 255, 0.1)',
                     color: 'white',
-                    fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                    fontFamily: 'Poppins, sans-serif'
+                    fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+                    fontFamily: 'Poppins, sans-serif',
+                    boxSizing: 'border-box'
                   }}
-                  placeholder="Enter your full name"
+                  placeholder="your_twitch_username"
                 />
-              </div>
-
-              <div>
-                <label style={{
-                  color: 'white',
-                  fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                  fontWeight: '600',
-                  display: 'block',
-                  marginBottom: '0.75rem'
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: 'clamp(0.75rem, 2.2vw, 0.9rem)',
+                  marginTop: '0.75rem'
                 }}>
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    color: 'white',
-                    fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                    fontFamily: 'Poppins, sans-serif'
-                  }}
-                  placeholder="your@email.com"
-                />
+                  Enter just your username (no @ or twitch.tv/)
+                </p>
               </div>
-            </div>
-
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{
-                color: 'white',
-                fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                fontWeight: '600',
-                display: 'block',
-                marginBottom: '0.75rem'
-              }}>
-                Twitch Channel Username *
-              </label>
-              <input
-                type="text"
-                name="twitch_channel"
-                value={formData.twitch_channel}
-                onChange={handleChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'white',
-                  fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                  fontFamily: 'Poppins, sans-serif'
-                }}
-                placeholder="your_twitch_username"
-              />
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
-                marginTop: '0.75rem'
-              }}>
-                Enter just your username (no @ or twitch.tv/)
-              </p>
             </div>
 
             {/* Beta Access Instructions with Gradient Background */}
             <div style={{
               background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(147, 47, 254, 0.15) 35%, rgba(255, 159, 159, 0.15) 70%, rgba(184, 238, 138, 0.15) 100%)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '10px',
-              padding: '2rem',
-              marginBottom: '2rem',
+              borderRadius: 'clamp(8px, 2vw, 10px)',
+              padding: 'clamp(1.5rem, 4vw, 2rem)',
+              marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
               position: 'relative'
             }}>
               {/* Small Robot Logo */}
               <div style={{
                 position: 'absolute',
-                top: '1.5rem',
-                right: '1.5rem',
+                top: 'clamp(1rem, 3vw, 1.5rem)',
+                right: 'clamp(1rem, 3vw, 1.5rem)',
                 opacity: 0.6
               }}>
                 <img 
                   src="/landing-robot.png" 
                   alt="Casi Robot" 
-                  style={{ height: 'clamp(35px, 6vw, 45px)', width: 'auto' }}
+                  style={{ height: 'clamp(30px, 6vw, 45px)', width: 'auto' }}
                 />
               </div>
               
               <h4 style={{
                 color: '#5EEAD4',
-                fontSize: 'clamp(1rem, 2.5vw, 1.1rem)',
+                fontSize: 'clamp(0.95rem, 3vw, 1.1rem)',
                 marginBottom: '1.5rem',
-                fontWeight: '600'
+                fontWeight: '600',
+                lineHeight: '1.2'
               }}>
                 🎯 How to Get Your Free Beta Access
               </h4>
               <div style={{
                 background: 'rgba(255, 255, 255, 0.1)',
-                padding: '1.5rem',
-                borderRadius: '8px',
+                padding: 'clamp(1rem, 3vw, 1.5rem)',
+                borderRadius: 'clamp(6px, 2vw, 8px)',
                 marginBottom: '1.5rem'
               }}>
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  display: 'flex',
+                  flexDirection: 'column',
                   gap: '1rem'
                 }}>
                   <p style={{
                     color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
+                    fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
                     margin: 0,
                     lineHeight: '1.6'
                   }}>
@@ -482,7 +507,7 @@ export default function BetaSignup() {
                   </p>
                   <p style={{
                     color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
+                    fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
                     margin: 0,
                     lineHeight: '1.6'
                   }}>
@@ -490,7 +515,7 @@ export default function BetaSignup() {
                   </p>
                   <p style={{
                     color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
+                    fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
                     margin: 0,
                     lineHeight: '1.6'
                   }}>
@@ -500,7 +525,7 @@ export default function BetaSignup() {
               </div>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: 'clamp(0.8rem, 1.8vw, 0.85rem)',
+                fontSize: 'clamp(0.75rem, 2.2vw, 0.85rem)',
                 lineHeight: '1.5',
                 margin: 0,
                 textAlign: 'center'
@@ -510,10 +535,10 @@ export default function BetaSignup() {
               </p>
             </div>
 
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}>
               <label style={{
                 color: 'white',
-                fontSize: 'clamp(0.9rem, 2vw, 1rem)',
+                fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
                 fontWeight: '600',
                 display: 'block',
                 marginBottom: '0.75rem'
@@ -528,21 +553,22 @@ export default function BetaSignup() {
                 rows={4}
                 style={{
                   width: '100%',
-                  padding: '1rem',
-                  borderRadius: '10px',
+                  padding: 'clamp(0.8rem, 3vw, 1rem)',
+                  borderRadius: 'clamp(8px, 2vw, 10px)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   background: 'rgba(255, 255, 255, 0.1)',
                   color: 'white',
-                  fontSize: 'clamp(0.9rem, 2vw, 1rem)',
+                  fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
                   fontFamily: 'Poppins, sans-serif',
                   resize: 'vertical',
-                  minHeight: '120px'
+                  minHeight: 'clamp(100px, 15vw, 120px)',
+                  boxSizing: 'border-box'
                 }}
                 placeholder="Tell us why you'd be a great beta tester and how you plan to use Casi..."
               />
               <p style={{
                 color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
+                fontSize: 'clamp(0.75rem, 2.2vw, 0.9rem)',
                 marginTop: '0.75rem'
               }}>
                 Help us understand your streaming goals and how Casi can help you grow
@@ -553,12 +579,13 @@ export default function BetaSignup() {
               <div style={{
                 background: 'rgba(255, 0, 0, 0.1)',
                 border: '1px solid rgba(255, 0, 0, 0.3)',
-                borderRadius: '10px',
-                padding: '1.5rem',
-                marginBottom: '2rem',
+                borderRadius: 'clamp(8px, 2vw, 10px)',
+                padding: 'clamp(1rem, 3vw, 1.5rem)',
+                marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
                 color: '#ff6b6b',
-                fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
-                textAlign: 'center'
+                fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
+                textAlign: 'center',
+                wordWrap: 'break-word'
               }}>
                 {error}
               </div>
@@ -574,14 +601,15 @@ export default function BetaSignup() {
                   : 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
                 color: 'white',
                 border: 'none',
-                padding: '1.5rem 2rem',
+                padding: 'clamp(1rem, 4vw, 1.5rem) clamp(1.5rem, 4vw, 2rem)',
                 borderRadius: '50px',
-                fontSize: 'clamp(1rem, 2.5vw, 1.1rem)',
+                fontSize: 'clamp(0.9rem, 3vw, 1.1rem)',
                 fontWeight: '600',
                 cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 fontFamily: 'Poppins, sans-serif',
                 transition: 'all 0.3s ease',
-                marginBottom: '2rem'
+                marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
+                boxSizing: 'border-box'
               }}
             >
               {isSubmitting ? 'Submitting Application...' : 'Apply for Free Beta Access'}
@@ -590,11 +618,12 @@ export default function BetaSignup() {
 
           <p style={{
             color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: 'clamp(0.8rem, 1.8vw, 0.85rem)',
+            fontSize: 'clamp(0.75rem, 2.2vw, 0.85rem)',
             textAlign: 'center',
             lineHeight: '1.5',
-            maxWidth: '600px',
-            margin: '0 auto'
+            maxWidth: '100%',
+            margin: '0 auto',
+            wordWrap: 'break-word'
           }}>
             By applying, you agree to provide feedback during the beta period. Only 10 spots available - we'll contact successful applicants within 24 hours.
           </p>
