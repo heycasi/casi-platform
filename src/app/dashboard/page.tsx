@@ -940,7 +940,7 @@ export default function Dashboard() {
                   flex: 1,
                   overflowY: 'auto',
                   minHeight: 0
-                }}>
+                }} className="dashboard-scrollbar">
                   {questions.slice(-10).map((q) => (
                     <div
                       key={q.id}
@@ -1013,7 +1013,7 @@ export default function Dashboard() {
                 borderRadius: 'clamp(8px, 1.5vw, 10px)',
                 padding: 'clamp(0.8rem, 1.5vw, 1rem)',
                 minHeight: 0
-              }}>
+              }} className="dashboard-scrollbar">
                 {messages.length === 0 ? (
                   <div style={{
                     display: 'flex',
