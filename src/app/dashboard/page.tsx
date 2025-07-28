@@ -255,9 +255,8 @@ export default function Dashboard() {
           backdropFilter: 'blur(10px)',
           borderRadius: 'clamp(15px, 3vw, 20px)',
           padding: 'clamp(2rem, 6vw, 3rem)',
-          maxWidth: '90vw',
+          maxWidth: 'min(90vw, 400px)',
           width: '100%',
-          maxWidth: '400px',
           textAlign: 'center',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
