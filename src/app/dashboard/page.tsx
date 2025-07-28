@@ -555,66 +555,6 @@ export default function Dashboard() {
                 Disconnect
               </button>
             </div>
-            {/* Combined Status & Welcome Banner - Compact */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.15))',
-              borderRadius: '8px',
-              padding: '0.6rem 1rem',
-              border: '1px solid rgba(184, 238, 138, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.75rem',
-              maxWidth: '800px',
-              margin: '0 auto'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{
-                    width: '6px',
-                    height: '6px',
-                    background: '#B8EE8A',
-                    borderRadius: '50%'
-                  }} />
-                  <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
-                    Connected to @{channelName}
-                  </span>
-                </div>
-                
-                <div style={{
-                  height: '12px',
-                  width: '1px',
-                  background: 'rgba(255, 255, 255, 0.2)'
-                }} />
-                
-                <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
-                  Hey! Your friendly stream sidekick is analyzing chat 🎮✨
-                </span>
-              </div>
-              
-              <button
-                onClick={() => {
-                  setIsConnected(false)
-                  setMessages([])
-                  setQuestions([])
-                  setMotivationalMessage(null)
-                }}
-                style={{
-                  padding: '0.3rem 0.6rem',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontSize: '0.7rem',
-                  fontFamily: 'Poppins, Arial, sans-serif'
-                }}
-              >
-                Disconnect
-              </button>
-            </div>
-
             {/* AI Motivational Message */}
             {motivationalMessage && (
               <div style={{
