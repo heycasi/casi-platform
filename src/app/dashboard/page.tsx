@@ -498,11 +498,11 @@ export default function Dashboard() {
         {/* Connected State */}
         {isConnected && (
           <>
-            {/* Status Bar */}
+            {/* Status Bar - Compact */}
             <div style={{
               background: 'rgba(184, 238, 138, 0.2)',
-              borderRadius: '12px',
-              padding: '0.75rem 1rem',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -512,12 +512,12 @@ export default function Dashboard() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{
-                  width: '8px',
-                  height: '8px',
+                  width: '6px',
+                  height: '6px',
                   background: '#B8EE8A',
                   borderRadius: '50%'
                 }} />
-                <span style={{ color: '#F7F7F7', fontSize: '0.9rem', fontWeight: '500' }}>
+                <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
                   Connected to @{channelName} • Live monitoring active
                 </span>
               </div>
@@ -530,13 +530,13 @@ export default function Dashboard() {
                   setMotivationalMessage(null)
                 }}
                 style={{
-                  padding: '0.4rem 0.8rem',
+                  padding: '0.3rem 0.6rem',
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: 'none',
-                  borderRadius: '15px',
+                  borderRadius: '12px',
                   color: 'white',
                   cursor: 'pointer',
-                  fontSize: '0.8rem',
+                  fontSize: '0.7rem',
                   fontFamily: 'Poppins, Arial, sans-serif'
                 }}
               >
@@ -544,30 +544,14 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Welcome Message */}
+            {/* Welcome Message - Compact */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.2))',
-              borderRadius: '12px',
-              padding: '1rem',
-              border: '1px solid rgba(184, 238, 138, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
+              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.15), rgba(94, 234, 212, 0.15))',
+              borderRadius: '8px',
+              padding: '0.6rem 1rem',
+              border: '1px solid rgba(184, 238, 138, 0.2)'
             }}>
-              <div style={{
-                background: '#B8EE8A',
-                color: '#151E3C',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '12px',
-                fontSize: '0.7rem',
-                fontWeight: '600',
-                whiteSpace: 'nowrap'
-              }}>
-                🤖 CASI
-              </div>
-              
-              <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.9rem', flex: 1 }}>
+              <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.85rem' }}>
                 Hey @{channelName}! Your friendly stream sidekick is here to analyze your chat! 🎮✨
               </p>
             </div>
@@ -632,7 +616,16 @@ export default function Dashboard() {
                 { icon: '👥', value: stats.viewerCount, label: 'Viewers', color: '#5EEAD4' },
                 { icon: '💬', value: stats.totalMessages, label: 'Messages', color: '#5EEAD4' },
                 { icon: '❓', value: stats.questions, label: 'Questions', color: '#FF9F9F' },
-                { icon: stats.avgSentiment > 0.5 ? '😊' : stats.avgSentiment < -0.5 ? '😢' : '😐', value: stats.currentMood, label: 'Mood', color: stats.avgSentiment > 0.5 ? '#B8EE8A' : stats.avgSentiment < -0.5 ? '#FF9F9F' : '#F7F7F7' },
+                { 
+                  icon: stats.currentMood === 'Very Positive' ? '😊' : 
+                        stats.currentMood === 'Positive' ? '🙂' : 
+                        stats.currentMood === 'Negative' ? '😢' : 
+                        stats.currentMood === 'Slightly Negative' ? '😕' : '😐', 
+                  value: stats.currentMood, 
+                  label: 'Mood', 
+                  color: stats.currentMood.includes('Positive') ? '#B8EE8A' : 
+                         stats.currentMood.includes('Negative') ? '#FF9F9F' : '#F7F7F7' 
+                },
                 { icon: '✨', value: stats.positiveMessages, label: 'Positive', color: '#B8EE8A' },
                 { icon: '💔', value: stats.negativeMessages, label: 'Negative', color: '#FF9F9F' }
               ].map((stat, index) => (
