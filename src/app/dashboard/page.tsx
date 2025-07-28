@@ -498,27 +498,39 @@ export default function Dashboard() {
         {/* Connected State */}
         {isConnected && (
           <>
-            {/* Status Bar - Compact */}
+            {/* Combined Status & Welcome Banner - Full Width */}
             <div style={{
-              background: 'rgba(184, 238, 138, 0.2)',
+              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.15))',
               borderRadius: '8px',
-              padding: '0.5rem 1rem',
+              padding: '0.6rem 1rem',
+              border: '1px solid rgba(184, 238, 138, 0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              border: '1px solid rgba(184, 238, 138, 0.3)',
               flexWrap: 'wrap',
-              gap: '0.5rem'
+              gap: '0.75rem'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{
+                    width: '6px',
+                    height: '6px',
+                    background: '#B8EE8A',
+                    borderRadius: '50%'
+                  }} />
+                  <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
+                    Connected to @{channelName}
+                  </span>
+                </div>
+                
                 <div style={{
-                  width: '6px',
-                  height: '6px',
-                  background: '#B8EE8A',
-                  borderRadius: '50%'
+                  height: '12px',
+                  width: '1px',
+                  background: 'rgba(255, 255, 255, 0.2)'
                 }} />
-                <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
-                  Connected to @{channelName} • Live monitoring active
+                
+                <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
+                  Hey! Your friendly stream sidekick is analyzing chat 🎮✨
                 </span>
               </div>
               
@@ -543,17 +555,64 @@ export default function Dashboard() {
                 Disconnect
               </button>
             </div>
-
-            {/* Welcome Message - Compact */}
+            {/* Combined Status & Welcome Banner - Compact */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.15), rgba(94, 234, 212, 0.15))',
+              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.15))',
               borderRadius: '8px',
               padding: '0.6rem 1rem',
-              border: '1px solid rgba(184, 238, 138, 0.2)'
+              border: '1px solid rgba(184, 238, 138, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              maxWidth: '800px',
+              margin: '0 auto'
             }}>
-              <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.85rem' }}>
-                Hey @{channelName}! Your friendly stream sidekick is here to analyze your chat! 🎮✨
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{
+                    width: '6px',
+                    height: '6px',
+                    background: '#B8EE8A',
+                    borderRadius: '50%'
+                  }} />
+                  <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
+                    Connected to @{channelName}
+                  </span>
+                </div>
+                
+                <div style={{
+                  height: '12px',
+                  width: '1px',
+                  background: 'rgba(255, 255, 255, 0.2)'
+                }} />
+                
+                <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
+                  Hey! Your friendly stream sidekick is analyzing chat 🎮✨
+                </span>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setIsConnected(false)
+                  setMessages([])
+                  setQuestions([])
+                  setMotivationalMessage(null)
+                }}
+                style={{
+                  padding: '0.3rem 0.6rem',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '0.7rem',
+                  fontFamily: 'Poppins, Arial, sans-serif'
+                }}
+              >
+                Disconnect
+              </button>
             </div>
 
             {/* AI Motivational Message */}
@@ -844,14 +903,13 @@ export default function Dashboard() {
                               fontSize: '0.6rem',
                               padding: '0.1rem 0.25rem',
                               borderRadius: '3px',
-                              color: 'white',
                               background: msg.sentiment === 'positive' 
                                 ? '#B8EE8A' 
                                 : msg.sentiment === 'negative' 
                                 ? '#FF9F9F' 
                                 : 'rgba(107, 114, 128, 0.8)'
                             }}>
-                              {msg.sentiment?.charAt(0).toUpperCase()}
+                              {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😢' : '😐'}
                             </span>
                             {msg.engagementLevel === 'high' && (
                               <span style={{
