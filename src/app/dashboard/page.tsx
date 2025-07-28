@@ -43,6 +43,15 @@ export default function Dashboard() {
   // Valid beta codes
   const validCodes = ['CASI2025', 'BETASTREAM', 'EARLYACCESS']
 
+  // Bot usernames to filter out (expanded list)
+  const botUsernames = [
+    'nightbot', 'streamelements', 'moobot', 'fossabot', 'wizebot', 
+    'streamlabs', 'botisimo', 'deepbot', 'ankhbot', 'revlobot',
+    'phantombot', 'coebot', 'ohbot', 'tipeeebot', 'chatty',
+    'streamdeckerbot', 'vivbot', 'soundalerts', 'own3dbot',
+    'pretzelrocks', 'songrequestbot', 'musicbot'
+  ]
+
   // Language flag helper function
   const getLanguageFlag = (language: string): string => {
     const flags: { [key: string]: string } = {
@@ -114,6 +123,12 @@ export default function Dashboard() {
           const chatMatch = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
           if (chatMatch) {
             const [, username, messageText] = chatMatch
+            
+            // Filter out bot messages
+            if (botUsernames.includes(username.toLowerCase())) {
+              console.log(`🤖 Filtered bot message from: ${username}`)
+              return
+            }
             
             // Analyze message with multilingual support
             const analysis = analyzeMessage(messageText)
@@ -570,7 +585,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Enhanced Priority Questions Panel with Language Info */}
+        {/* Enhanced Priority Questions Panel - REMOVED CONFIDENCE PERCENTAGE */}
         {isConnected && questions.length > 0 && (
           <div style={{
             background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
@@ -636,12 +651,7 @@ export default function Dashboard() {
                         {q.language || 'english'}
                       </span>
                     </div>
-                    <span style={{
-                      fontSize: '0.8rem',
-                      color: 'rgba(247, 247, 247, 0.7)'
-                    }}>
-                      {Math.round((q.confidence || 0) * 100)}% confidence
-                    </span>
+                    {/* REMOVED THE CONFIDENCE PERCENTAGE DISPLAY */}
                   </div>
                   <p style={{
                     margin: 0,
