@@ -817,9 +817,6 @@ export default function Dashboard() {
                             marginBottom: '0.25rem',
                             flexWrap: 'wrap'
                           }}>
-                            <span style={{ fontSize: '0.7rem' }}>
-                              {getLanguageFlag(msg.language || 'english')}
-                            </span>
                             <span style={{
                               fontWeight: '600',
                               color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
