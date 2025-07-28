@@ -430,20 +430,22 @@ export default function Dashboard() {
         
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isConnected ? '1fr 400px' : '1fr',
-          gap: '1rem'
+          gridTemplateColumns: isConnected ? '2fr 1fr' : '1fr',
+          gap: '1rem',
+          alignItems: 'start'
         }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '16px',
             padding: '1.5rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            maxWidth: '600px'
           }}>
             <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
               🎮 Connect to Twitch Channel
             </h2>
             
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <input
                 type="text"
                 placeholder="Enter channel name (e.g., shroud)"
@@ -451,7 +453,8 @@ export default function Dashboard() {
                 onChange={(e) => setChannelName(e.target.value)}
                 style={{
                   flex: 1,
-                  minWidth: '200px',
+                  minWidth: '250px',
+                  maxWidth: '350px',
                   padding: '1rem',
                   borderRadius: '50px',
                   border: 'none',
@@ -475,7 +478,7 @@ export default function Dashboard() {
                 }}
                 disabled={!channelName.trim()}
                 style={{
-                  padding: '1rem 2rem',
+                  padding: '1rem 1.5rem',
                   background: isConnected 
                     ? 'linear-gradient(135deg, #EF4444, #DC2626)' 
                     : 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -486,7 +489,8 @@ export default function Dashboard() {
                   fontWeight: '600',
                   cursor: channelName.trim() ? 'pointer' : 'not-allowed',
                   opacity: channelName.trim() ? 1 : 0.5,
-                  fontFamily: 'Poppins, sans-serif'
+                  fontFamily: 'Poppins, sans-serif',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {isConnected ? 'Disconnect' : 'Connect'}
@@ -530,7 +534,7 @@ export default function Dashboard() {
               
               <div style={{
                 width: '100%',
-                height: '225px',
+                height: '200px',
                 background: 'rgba(0, 0, 0, 0.5)',
                 borderRadius: '8px',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -539,27 +543,16 @@ export default function Dashboard() {
                 justifyContent: 'center',
                 position: 'relative'
               }}>
-                <iframe
-                  src={`https://player.twitch.tv/?channel=${channelName}&parent=localhost&parent=vercel.app&parent=heycasi.com&autoplay=false&muted=true`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none', borderRadius: '8px' }}
-                  allowFullScreen
-                />
-                
                 <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
                   color: 'rgba(255, 255, 255, 0.6)',
-                  textAlign: 'center',
-                  pointerEvents: 'none',
-                  zIndex: -1
+                  textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📺</div>
-                  <p style={{ margin: 0 }}>Stream Preview</p>
+                  <p style={{ margin: 0, fontSize: '1rem' }}>Stream Preview</p>
                   <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem' }}>@{channelName}</p>
+                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.7rem', opacity: 0.7 }}>
+                    Live preview coming soon
+                  </p>
                 </div>
               </div>
             </div>
@@ -712,7 +705,8 @@ export default function Dashboard() {
             gridTemplateColumns: questions.length > 0 ? '1fr 1fr' : '1fr',
             gap: '1rem',
             flex: 1,
-            minHeight: 0
+            minHeight: '500px',
+            maxHeight: 'calc(100vh - 420px)'
           }}>
             
             {questions.length > 0 && (
@@ -750,7 +744,8 @@ export default function Dashboard() {
                   gap: '0.8rem',
                   flex: 1,
                   overflowY: 'auto',
-                  minHeight: 0
+                  minHeight: 0,
+                  maxHeight: '100%'
                 }}>
                   {questions.slice(-10).map((q) => (
                     <div
@@ -816,7 +811,8 @@ export default function Dashboard() {
                 background: 'rgba(0, 0, 0, 0.3)',
                 borderRadius: '10px',
                 padding: '1rem',
-                minHeight: 0
+                minHeight: '400px',
+                maxHeight: '100%'
               }}>
                 {messages.length === 0 ? (
                   <div style={{
