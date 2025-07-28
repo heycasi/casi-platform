@@ -544,6 +544,34 @@ export default function Dashboard() {
               </button>
             </div>
 
+            {/* Welcome Message */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.2))',
+              borderRadius: '12px',
+              padding: '1rem',
+              border: '1px solid rgba(184, 238, 138, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{
+                background: '#B8EE8A',
+                color: '#151E3C',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+                whiteSpace: 'nowrap'
+              }}>
+                🤖 CASI
+              </div>
+              
+              <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.9rem', flex: 1 }}>
+                Hey @{channelName}! Your friendly stream sidekick is here to analyze your chat! 🎮✨
+              </p>
+            </div>
+
             {/* AI Motivational Message */}
             {motivationalMessage && (
               <div style={{
@@ -864,16 +892,18 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Footer */}
-        {!isConnected && (
-          <div style={{
-            textAlign: 'center',
-            padding: '1rem 0',
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
-            <p style={{ margin: 0, fontSize: '0.8rem' }}>
-              Casi Beta Dashboard • Your stream's brainy co-pilot. Reads the room so you don't have to.
-            </p>
+        {/* Footer - Always visible */}
+        <div style={{
+          textAlign: 'center',
+          padding: '1rem 0',
+          color: 'rgba(255, 255, 255, 0.6)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          marginTop: 'auto'
+        }}>
+          <p style={{ margin: 0, fontSize: '0.8rem' }}>
+            <strong style={{ color: '#5EEAD4' }}>Casi</strong> • Your stream's brainy co-pilot. Reads the room so you don't have to.
+          </p>
+          {!isConnected && (
             <a 
               href="/" 
               style={{
@@ -886,8 +916,8 @@ export default function Dashboard() {
             >
               ← Back to Landing Page
             </a>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
