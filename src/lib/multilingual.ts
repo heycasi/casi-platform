@@ -84,9 +84,9 @@ const negativeWords: { [key: string]: string[] } = {
   ]
 }
 
-// Question words by language
+// Question words by language (more precise lists)
 const questionWords: { [key: string]: string[] } = {
-  english: ['what', 'how', 'when', 'where', 'why', 'who', 'which', 'can', 'could', 'would', 'should', 'will', 'do', 'does', 'did', 'is', 'are', 'was', 'were'],
+  english: ['what', 'how', 'when', 'where', 'why', 'who', 'which', 'can you', 'could you', 'would you', 'should i', 'will you', 'do you', 'does', 'did you', 'is there', 'are there', 'was there', 'were there'],
   spanish: ['qué', 'que', 'cómo', 'como', 'cuándo', 'cuando', 'dónde', 'donde', 'por qué', 'por que', 'porqué', 'porque', 'quién', 'quien', 'cuál', 'cual', 'puedes', 'puedo'],
   french: ['quoi', 'que', 'comment', 'quand', 'où', 'ou', 'pourquoi', 'qui', 'quel', 'quelle', 'peux', 'peut', 'pouvez'],
   german: ['was', 'wie', 'wann', 'wo', 'warum', 'wer', 'welche', 'welcher', 'können', 'kann', 'könntest'],
@@ -323,24 +323,34 @@ export function analyzeMessage(text: string): LanguageDetection {
 
 // Enhanced question detection
 function checkIsQuestion(text: string, language: string): boolean {
-  // Universal question mark
+  // Universal question mark - most reliable indicator
   if (text.includes('?') || text.includes('？')) return true
+  
+  // Must be at least 4 words to avoid false positives
+  const words = text.trim().split(/\s+/)
+  if (words.length < 4) return false
   
   // Language-specific question words
   const qWords = questionWords[language] || questionWords.english
-  const lowerText = text.toLowerCase()
+  const lowerText = text.toLowerCase().trim()
   
-  // Check if text starts with or contains question words
-  return qWords.some(qWord => {
-    // Check at start of sentence
-    if (lowerText.startsWith(qWord + ' ')) return true
-    // Check after punctuation
-    if (lowerText.includes('. ' + qWord + ' ')) return true
-    if (lowerText.includes('! ' + qWord + ' ')) return true
-    // Check for common question patterns
-    if (lowerText.includes(' ' + qWord + ' ')) return true
-    return false
+  // Only check if text STARTS with question words (more precise)
+  const startsWithQuestion = qWords.some(qWord => {
+    // Check if sentence starts with question word followed by space
+    return lowerText.startsWith(qWord.toLowerCase() + ' ')
   })
+  
+  if (!startsWithQuestion) return false
+  
+  // Additional validation - must contain typical question patterns
+  const questionPatterns = [
+    /\b(can|could|would|should|will|do|does|did|is|are|was|were)\s+\w+/i,
+    /\b(how|what|when|where|why|who)\s+\w+/i,
+    /\b(any|anyone|anybody)\s+\w+/i
+  ]
+  
+  // Must match at least one question pattern for extra validation
+  return questionPatterns.some(pattern => pattern.test(text))
 }
 
 // Generate motivational AI suggestions based on chat patterns
