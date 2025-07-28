@@ -224,14 +224,14 @@ export default function Dashboard() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'Poppins, sans-serif',
-        padding: '2rem'
+        fontFamily: 'Poppins, Arial, sans-serif',
+        padding: '1rem'
       }}>
         <div style={{
           background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
           borderRadius: '20px',
-          padding: '3rem',
+          padding: '2rem',
           maxWidth: '400px',
           width: '100%',
           textAlign: 'center',
@@ -240,22 +240,20 @@ export default function Dashboard() {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            marginBottom: '2rem'
+            marginBottom: '1.5rem'
           }}>
             <img 
               src="/landing-robot.png"
               alt="Casi Robot"
               style={{
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-                background: 'transparent'
+                width: '60px',
+                height: '60px'
               }}
               onError={(e) => {
                 const target = e.currentTarget
                 target.style.display = 'none'
                 const fallback = document.createElement('div')
-                fallback.style.cssText = 'width: 80px; height: 80px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;'
+                fallback.style.cssText = 'width: 60px; height: 60px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;'
                 fallback.textContent = '🤖'
                 target.parentNode?.appendChild(fallback)
               }}
@@ -264,7 +262,7 @@ export default function Dashboard() {
           
           <h1 style={{
             color: 'white',
-            fontSize: '2.5rem',
+            fontSize: '2rem',
             fontWeight: 'bold',
             margin: '0 0 1rem 0',
             background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
@@ -276,8 +274,8 @@ export default function Dashboard() {
           
           <p style={{
             color: 'rgba(255, 255, 255, 0.8)',
-            margin: '0 0 2rem 0',
-            fontSize: '1.1rem'
+            margin: '0 0 1.5rem 0',
+            fontSize: '1rem'
           }}>
             Access the future of streaming analytics
           </p>
@@ -289,14 +287,14 @@ export default function Dashboard() {
             onChange={(e) => setEmail(e.target.value)}
             style={{
               width: '100%',
-              padding: '1rem',
+              padding: '0.75rem',
               margin: '0 0 1rem 0',
-              borderRadius: '50px',
+              borderRadius: '25px',
               border: 'none',
               background: 'rgba(255, 255, 255, 0.1)',
               color: 'white',
-              fontSize: '1rem',
-              fontFamily: 'Poppins, sans-serif',
+              fontSize: '0.9rem',
+              fontFamily: 'Poppins, Arial, sans-serif',
               boxSizing: 'border-box'
             }}
           />
@@ -308,14 +306,14 @@ export default function Dashboard() {
             onChange={(e) => setBetaCode(e.target.value)}
             style={{
               width: '100%',
-              padding: '1rem',
+              padding: '0.75rem',
               margin: '0 0 1.5rem 0',
-              borderRadius: '50px',
+              borderRadius: '25px',
               border: 'none',
               background: 'rgba(255, 255, 255, 0.1)',
               color: 'white',
-              fontSize: '1rem',
-              fontFamily: 'Poppins, sans-serif',
+              fontSize: '0.9rem',
+              fontFamily: 'Poppins, Arial, sans-serif',
               boxSizing: 'border-box'
             }}
           />
@@ -324,15 +322,15 @@ export default function Dashboard() {
             onClick={handleBetaAccess}
             style={{
               width: '100%',
-              padding: '1rem',
+              padding: '0.75rem',
               background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               border: 'none',
-              borderRadius: '50px',
+              borderRadius: '25px',
               color: 'white',
-              fontSize: '1.1rem',
+              fontSize: '1rem',
               fontWeight: '600',
               cursor: 'pointer',
-              fontFamily: 'Poppins, sans-serif'
+              fontFamily: 'Poppins, Arial, sans-serif'
             }}
           >
             Access Beta Dashboard
@@ -340,8 +338,8 @@ export default function Dashboard() {
 
           <p style={{
             color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: '0.9rem',
-            margin: '1.5rem 0 0 0'
+            fontSize: '0.8rem',
+            margin: '1rem 0 0 0'
           }}>
             Need a beta code? Join our waitlist at{' '}
             <a href="/" style={{ color: '#5EEAD4', textDecoration: 'none' }}>
@@ -357,11 +355,12 @@ export default function Dashboard() {
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, sans-serif',
+      fontFamily: 'Poppins, Arial, sans-serif',
       color: 'white'
     }}>
+      {/* Header */}
       <div style={{
-        padding: '1rem',
+        padding: '0.75rem 1rem',
         background: 'rgba(255, 255, 255, 0.05)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'flex',
@@ -372,12 +371,12 @@ export default function Dashboard() {
           <img 
             src="/landing-logo.png"
             alt="Casi"
-            style={{ height: '36px', width: 'auto', background: 'transparent' }}
+            style={{ height: '32px', width: 'auto' }}
             onError={(e) => {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('h1')
-              fallback.style.cssText = 'margin: 0; font-size: 1.5rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+              fallback.style.cssText = 'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
               fallback.textContent = 'Casi'
               target.parentNode?.appendChild(fallback)
             }}
@@ -386,12 +385,12 @@ export default function Dashboard() {
           <img 
             src="/landing-robot.png"
             alt="Casi Robot"
-            style={{ width: '36px', height: '36px', background: 'transparent' }}
+            style={{ width: '32px', height: '32px' }}
             onError={(e) => {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('div')
-              fallback.style.cssText = 'width: 36px; height: 36px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;'
+              fallback.style.cssText = 'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
               fallback.textContent = '🤖'
               target.parentNode?.appendChild(fallback)
             }}
@@ -408,11 +407,11 @@ export default function Dashboard() {
             padding: '0.5rem 1rem',
             background: 'rgba(255, 255, 255, 0.1)',
             border: 'none',
-            borderRadius: '20px',
+            borderRadius: '15px',
             color: 'white',
             cursor: 'pointer',
-            fontSize: '0.9rem',
-            fontFamily: 'Poppins, sans-serif'
+            fontSize: '0.8rem',
+            fontFamily: 'Poppins, Arial, sans-serif'
           }}
         >
           Logout
@@ -423,41 +422,46 @@ export default function Dashboard() {
         padding: '1rem', 
         display: 'flex', 
         flexDirection: 'column', 
-        gap: '1rem', 
-        height: 'calc(100vh - 80px)',
-        overflow: 'hidden'
+        gap: '1rem',
+        minHeight: 'calc(100vh - 80px)'
       }}>
         
-        {/* Connection Panel - Only show when NOT connected */}
+        {/* Connection Panel */}
         {!isConnected && (
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '16px',
-            padding: '2rem',
+            padding: '1.5rem',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             maxWidth: '500px',
             margin: '0 auto',
             textAlign: 'center'
           }}>
-            <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', color: '#F7F7F7' }}>
+            <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
               🎮 Connect to Twitch Channel
             </h2>
             
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              gap: '1rem', 
+              alignItems: 'center' 
+            }}>
               <input
                 type="text"
                 placeholder="Enter channel name (e.g., shroud)"
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
                 style={{
-                  width: '280px',
-                  padding: '1rem',
-                  borderRadius: '50px',
+                  width: '100%',
+                  maxWidth: '280px',
+                  padding: '0.75rem',
+                  borderRadius: '25px',
                   border: 'none',
                   background: 'rgba(255, 255, 255, 0.1)',
                   color: 'white',
-                  fontSize: '1rem',
-                  fontFamily: 'Poppins, sans-serif',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Poppins, Arial, sans-serif',
                   textAlign: 'center'
                 }}
               />
@@ -473,17 +477,16 @@ export default function Dashboard() {
                 }}
                 disabled={!channelName.trim()}
                 style={{
-                  padding: '1rem 1.5rem',
+                  padding: '0.75rem 1.5rem',
                   background: 'linear-gradient(135deg, #6932FF, #932FFE)',
                   border: 'none',
-                  borderRadius: '50px',
+                  borderRadius: '25px',
                   color: 'white',
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   fontWeight: '600',
                   cursor: channelName.trim() ? 'pointer' : 'not-allowed',
                   opacity: channelName.trim() ? 1 : 0.5,
-                  fontFamily: 'Poppins, sans-serif',
-                  whiteSpace: 'nowrap'
+                  fontFamily: 'Poppins, Arial, sans-serif'
                 }}
               >
                 Connect
@@ -492,27 +495,29 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Connected State - Full monitoring layout */}
+        {/* Connected State */}
         {isConnected && (
           <>
-            {/* Top Status Bar - Compact */}
+            {/* Status Bar */}
             <div style={{
               background: 'rgba(184, 238, 138, 0.2)',
               borderRadius: '12px',
-              padding: '0.75rem 1.5rem',
+              padding: '0.75rem 1rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              border: '1px solid rgba(184, 238, 138, 0.3)'
+              border: '1px solid rgba(184, 238, 138, 0.3)',
+              flexWrap: 'wrap',
+              gap: '0.5rem'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{
                   width: '8px',
                   height: '8px',
                   background: '#B8EE8A',
                   borderRadius: '50%'
                 }} />
-                <span style={{ color: '#F7F7F7', fontSize: '1rem', fontWeight: '500' }}>
+                <span style={{ color: '#F7F7F7', fontSize: '0.9rem', fontWeight: '500' }}>
                   Connected to @{channelName} • Live monitoring active
                 </span>
               </div>
@@ -525,44 +530,45 @@ export default function Dashboard() {
                   setMotivationalMessage(null)
                 }}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.4rem 0.8rem',
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: 'none',
-                  borderRadius: '20px',
+                  borderRadius: '15px',
                   color: 'white',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontFamily: 'Poppins, sans-serif'
+                  fontSize: '0.8rem',
+                  fontFamily: 'Poppins, Arial, sans-serif'
                 }}
               >
                 Disconnect
               </button>
             </div>
 
-            {/* AI Motivational Suggestions - Compact */}
+            {/* AI Motivational Message */}
             {motivationalMessage && (
               <div style={{
                 background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(94, 234, 212, 0.1))',
                 borderRadius: '12px',
-                padding: '1rem 1.5rem',
+                padding: '1rem',
                 border: '1px solid rgba(94, 234, 212, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem'
+                gap: '1rem',
+                flexWrap: 'wrap'
               }}>
                 <div style={{
                   background: '#5EEAD4',
                   color: '#151E3C',
                   padding: '0.25rem 0.75rem',
                   borderRadius: '12px',
-                  fontSize: '0.8rem',
+                  fontSize: '0.7rem',
                   fontWeight: '600',
                   whiteSpace: 'nowrap'
                 }}>
                   🤖 AI INSIGHT
                 </div>
                 
-                <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.95rem', flex: 1 }}>
+                <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.9rem', flex: 1 }}>
                   {motivationalMessage}
                 </p>
                 
@@ -587,221 +593,159 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Analytics Bar - Horizontal */}
+            {/* Analytics - Mobile Friendly */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(6, 1fr)',
-              gap: '1rem'
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              justifyContent: 'space-between'
             }}>
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>👥</div>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#5EEAD4' }}>
-                  {stats.viewerCount}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>Viewers</p>
-              </div>
-
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>💬</div>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#5EEAD4' }}>
-                  {stats.totalMessages}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>Messages</p>
-              </div>
-
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>❓</div>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#FF9F9F' }}>
-                  {stats.questions}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>Questions</p>
-              </div>
-
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>
-                  {stats.avgSentiment > 0.5 ? '😊' : stats.avgSentiment < -0.5 ? '😢' : '😐'}
-                </div>
-                <p style={{ 
-                  margin: 0, 
-                  fontSize: '1.1rem', 
-                  fontWeight: 'bold', 
-                  color: stats.avgSentiment > 0.5 ? '#B8EE8A' : stats.avgSentiment < -0.5 ? '#FF9F9F' : '#F7F7F7'
+              {[
+                { icon: '👥', value: stats.viewerCount, label: 'Viewers', color: '#5EEAD4' },
+                { icon: '💬', value: stats.totalMessages, label: 'Messages', color: '#5EEAD4' },
+                { icon: '❓', value: stats.questions, label: 'Questions', color: '#FF9F9F' },
+                { icon: stats.avgSentiment > 0.5 ? '😊' : stats.avgSentiment < -0.5 ? '😢' : '😐', value: stats.currentMood, label: 'Mood', color: stats.avgSentiment > 0.5 ? '#B8EE8A' : stats.avgSentiment < -0.5 ? '#FF9F9F' : '#F7F7F7' },
+                { icon: '✨', value: stats.positiveMessages, label: 'Positive', color: '#B8EE8A' },
+                { icon: '💔', value: stats.negativeMessages, label: 'Negative', color: '#FF9F9F' }
+              ].map((stat, index) => (
+                <div key={index} style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
+                  padding: '0.75rem',
+                  textAlign: 'center',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  minWidth: '80px',
+                  flex: '1 1 auto'
                 }}>
-                  {stats.currentMood}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>Mood</p>
-              </div>
-
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>✨</div>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#B8EE8A' }}>
-                  {stats.positiveMessages}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>Positive</p>
-              </div>
-
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{ fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>💔</div>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#FF9F9F' }}>
-                  {stats.negativeMessages}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>Negative</p>
-              </div>
+                  <div style={{ fontSize: '1rem', margin: '0 0 0.25rem 0' }}>{stat.icon}</div>
+                  <p style={{ 
+                    margin: 0, 
+                    fontSize: '1rem', 
+                    fontWeight: 'bold', 
+                    color: stat.color,
+                    wordBreak: 'break-word'
+                  }}>
+                    {stat.value}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.7rem', opacity: 0.7 }}>{stat.label}</p>
+                </div>
+              ))}
             </div>
 
-            {/* Main Monitoring Area - Questions + Chat */}
+            {/* Main Content Area */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: questions.length > 0 ? '1fr 1fr' : '1fr',
+              display: 'flex',
+              flexDirection: window.innerWidth < 768 ? 'column' : 'row',
               gap: '1rem',
               flex: 1,
-              minHeight: 0,
-              height: 'auto'
+              minHeight: '400px'
             }}>
               
-              {/* Priority Questions Panel */}
+              {/* Questions Panel */}
               {questions.length > 0 && (
                 <div style={{
                   background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
                   borderRadius: '16px',
-                  padding: '1.5rem',
+                  padding: '1rem',
                   border: '1px solid rgba(255, 159, 159, 0.3)',
-                  position: 'relative',
+                  flex: '1',
+                  minHeight: '300px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden'
+                  flexDirection: 'column'
                 }}>
                   <div style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    right: '12px',
-                    background: '#FF9F9F',
-                    color: '#151E3C',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '12px',
-                    fontSize: '0.8rem',
-                    fontWeight: '600'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '1rem'
                   }}>
-                    PRIORITY
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
+                      🚨 Questions ({questions.length})
+                    </h3>
+                    <div style={{
+                      background: '#FF9F9F',
+                      color: '#151E3C',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.7rem',
+                      fontWeight: '600'
+                    }}>
+                      PRIORITY
+                    </div>
                   </div>
-                  
-                  <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
-                    🚨 Questions ({questions.length})
-                  </h2>
                   
                   <div style={{ 
                     flex: 1,
                     overflowY: 'auto',
-                    paddingRight: '0.5rem'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem'
                   }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: '0.8rem'
-                    }}>
-                      {questions.slice(-15).map((q) => (
-                        <div
-                          key={q.id}
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            borderRadius: '10px',
-                            padding: '1rem',
-                            border: '1px solid rgba(255, 159, 159, 0.3)'
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            marginBottom: '0.5rem',
-                            flexWrap: 'wrap'
+                    {questions.slice(-10).map((q) => (
+                      <div
+                        key={q.id}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          borderRadius: '8px',
+                          padding: '0.75rem',
+                          border: '1px solid rgba(255, 159, 159, 0.3)'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginBottom: '0.5rem',
+                          flexWrap: 'wrap'
+                        }}>
+                          <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>
+                            {getLanguageFlag(q.language || 'english')} {q.username}
+                          </span>
+                          <span style={{
+                            fontSize: '0.7rem',
+                            background: 'rgba(94, 234, 212, 0.3)',
+                            padding: '0.1rem 0.3rem',
+                            borderRadius: '4px',
+                            color: '#5EEAD4'
                           }}>
-                            <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.95rem' }}>
-                              {getLanguageFlag(q.language || 'english')} {q.username}
-                            </span>
-                            <span style={{
-                              fontSize: '0.75rem',
-                              background: 'rgba(94, 234, 212, 0.3)',
-                              padding: '0.2rem 0.4rem',
-                              borderRadius: '6px',
-                              color: '#5EEAD4',
-                              border: '1px solid rgba(94, 234, 212, 0.3)'
-                            }}>
-                              {q.language || 'english'}
-                            </span>
-                          </div>
-                          <p style={{
-                            margin: 0,
-                            color: '#F7F7F7',
-                            fontSize: '0.95rem',
-                            lineHeight: '1.4'
-                          }}>
-                            {q.message}
-                          </p>
+                            {q.language || 'english'}
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                        <p style={{
+                          margin: 0,
+                          color: '#F7F7F7',
+                          fontSize: '0.8rem',
+                          lineHeight: '1.3'
+                        }}>
+                          {q.message}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Live Chat Feed */}
+              {/* Chat Feed */}
               <div style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 borderRadius: '16px',
-                padding: '1.5rem',
+                padding: '1rem',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
+                flex: questions.length > 0 ? '1' : '1',
+                minHeight: '300px',
                 display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
+                flexDirection: 'column'
               }}>
-                <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem' }}>
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
                   💬 Live Chat Feed
-                </h2>
+                </h3>
                 
                 <div style={{
                   flex: 1,
                   overflowY: 'auto',
                   background: 'rgba(0, 0, 0, 0.3)',
-                  borderRadius: '10px',
-                  padding: '1rem',
-                  paddingRight: '0.5rem'
+                  borderRadius: '8px',
+                  padding: '0.75rem'
                 }}>
                   {messages.length === 0 ? (
                     <div style={{
@@ -813,23 +757,22 @@ export default function Dashboard() {
                       textAlign: 'center'
                     }}>
                       <div>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💭</div>
-                        <p style={{ fontSize: '1rem' }}>Waiting for chat messages...</p>
-                        <p style={{ fontSize: '0.9rem' }}>Make sure the channel is live and has active chat</p>
+                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</div>
+                        <p style={{ fontSize: '0.9rem', margin: 0 }}>Waiting for chat messages...</p>
+                        <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0' }}>Make sure the channel is live and has active chat</p>
                       </div>
                     </div>
                   ) : (
                     <div style={{ 
                       display: 'flex', 
                       flexDirection: 'column', 
-                      gap: '0.6rem',
-                      paddingRight: '0.5rem'
+                      gap: '0.5rem'
                     }}>
-                      {messages.slice(-100).map((msg) => (
+                      {messages.slice(-50).map((msg) => (
                         <div
                           key={msg.id}
                           style={{
-                            padding: '0.7rem',
+                            padding: '0.5rem',
                             background: msg.isQuestion 
                               ? 'rgba(255, 159, 159, 0.2)' 
                               : msg.sentiment === 'positive'
@@ -837,7 +780,7 @@ export default function Dashboard() {
                               : msg.sentiment === 'negative'
                               ? 'rgba(255, 159, 159, 0.1)'
                               : 'rgba(255, 255, 255, 0.05)',
-                            borderRadius: '8px',
+                            borderRadius: '6px',
                             border: msg.isQuestion 
                               ? '1px solid rgba(255, 159, 159, 0.3)' 
                               : msg.sentiment === 'positive'
@@ -850,26 +793,26 @@ export default function Dashboard() {
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '0.4rem',
-                            marginBottom: '0.3rem',
+                            gap: '0.3rem',
+                            marginBottom: '0.25rem',
                             flexWrap: 'wrap'
                           }}>
-                            <span style={{ fontSize: '0.85rem' }}>
+                            <span style={{ fontSize: '0.7rem' }}>
                               {getLanguageFlag(msg.language || 'english')}
                             </span>
                             <span style={{
                               fontWeight: '600',
                               color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
-                              fontSize: '0.9rem'
+                              fontSize: '0.8rem'
                             }}>
                               {msg.username}
                             </span>
                             {msg.isQuestion && (
                               <span style={{
-                                fontSize: '0.7rem',
+                                fontSize: '0.6rem',
                                 background: '#FF9F9F',
-                                padding: '0.1rem 0.3rem',
-                                borderRadius: '4px',
+                                padding: '0.1rem 0.25rem',
+                                borderRadius: '3px',
                                 color: '#151E3C',
                                 fontWeight: '600'
                               }}>
@@ -877,9 +820,9 @@ export default function Dashboard() {
                               </span>
                             )}
                             <span style={{
-                              fontSize: '0.7rem',
-                              padding: '0.1rem 0.3rem',
-                              borderRadius: '4px',
+                              fontSize: '0.6rem',
+                              padding: '0.1rem 0.25rem',
+                              borderRadius: '3px',
                               color: 'white',
                               background: msg.sentiment === 'positive' 
                                 ? '#B8EE8A' 
@@ -891,10 +834,10 @@ export default function Dashboard() {
                             </span>
                             {msg.engagementLevel === 'high' && (
                               <span style={{
-                                fontSize: '0.7rem',
+                                fontSize: '0.6rem',
                                 background: '#FFD700',
-                                padding: '0.1rem 0.3rem',
-                                borderRadius: '4px',
+                                padding: '0.1rem 0.25rem',
+                                borderRadius: '3px',
                                 color: '#000',
                                 fontWeight: '600'
                               }}>
@@ -905,8 +848,9 @@ export default function Dashboard() {
                           <p style={{
                             margin: 0,
                             color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
-                            lineHeight: '1.4',
-                            fontSize: '0.9rem'
+                            lineHeight: '1.3',
+                            fontSize: '0.8rem',
+                            wordBreak: 'break-word'
                           }}>
                             {msg.message}
                           </p>
@@ -920,34 +864,31 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Footer - Only when not connected */}
+        {/* Footer */}
         {!isConnected && (
           <div style={{
             textAlign: 'center',
-            padding: '2rem 0',
+            padding: '1rem 0',
             color: 'rgba(255, 255, 255, 0.6)'
           }}>
-            <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            <p style={{ margin: 0, fontSize: '0.8rem' }}>
               Casi Beta Dashboard • Your stream's brainy co-pilot. Reads the room so you don't have to.
             </p>
             <a 
               href="/" 
               style={{
                 display: 'inline-block',
-                marginTop: '1rem',
+                marginTop: '0.5rem',
                 color: '#5EEAD4',
                 textDecoration: 'none',
-                fontSize: '0.9rem'
+                fontSize: '0.8rem'
               }}
             >
               ← Back to Landing Page
             </a>
           </div>
         )}
-      </div>>
-    </div>
-  )
-}
+      </div>
     </div>
   )
 }
