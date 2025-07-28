@@ -1,294 +1,395 @@
-// src/lib/multilingual.ts - Comprehensive Language Support
+// src/lib/multilingual.ts - Enhanced Multilingual Support with Detailed Sentiment Analysis
+
 export interface LanguageDetection {
   language: string
   confidence: number
   isQuestion: boolean
   sentiment: 'positive' | 'negative' | 'neutral'
-  questionType?: string
   sentimentReason?: string
+  sentimentScore: number
+  topics?: string[]
+  engagementLevel: 'high' | 'medium' | 'low'
+  questionType?: string
 }
 
-// Question words for different languages
-const questionWords = {
-  english: ['what', 'how', 'when', 'where', 'why', 'who', 'which', 'whose', 'whom'],
-  spanish: ['qué', 'cómo', 'cuándo', 'dónde', 'por qué', 'quién', 'cuál', 'cuyo'],
-  french: ['quoi', 'comment', 'quand', 'où', 'pourquoi', 'qui', 'quel', 'dont'],
-  german: ['was', 'wie', 'wann', 'wo', 'warum', 'wer', 'welche', 'wessen'],
-  portuguese: ['o que', 'como', 'quando', 'onde', 'por que', 'quem', 'qual', 'cujo'],
-  italian: ['cosa', 'come', 'quando', 'dove', 'perché', 'chi', 'quale', 'cui'],
-  dutch: ['wat', 'hoe', 'wanneer', 'waar', 'waarom', 'wie', 'welke', 'wiens'],
-  japanese: ['何', 'どう', 'いつ', 'どこ', 'なぜ', 'だれ', 'どの', 'どれ'],
-  korean: ['뭐', '어떻게', '언제', '어디', '왜', '누구', '어느', '무엇'],
-  chinese: ['什么', '怎么', '什么时候', '哪里', '为什么', '谁', '哪个', '多少'],
-  russian: ['что', 'как', 'когда', 'где', 'почему', 'кто', 'какой', 'чей'],
-  arabic: ['ما', 'كيف', 'متى', 'أين', 'لماذا', 'من', 'أي', 'ماذا'],
-  hindi: ['क्या', 'कैसे', 'कब', 'कहाँ', 'क्यों', 'कौन', 'कौन सा', 'कितना']
+// Enhanced positive words by language (expanded lists)
+const positiveWords: { [key: string]: string[] } = {
+  english: [
+    'awesome', 'amazing', 'great', 'excellent', 'fantastic', 'wonderful', 'incredible', 'outstanding',
+    'brilliant', 'perfect', 'superb', 'magnificent', 'spectacular', 'phenomenal', 'marvelous',
+    'love', 'adore', 'enjoy', 'like', 'appreciate', 'cherish', 'treasure',
+    'fun', 'exciting', 'thrilling', 'entertaining', 'engaging', 'captivating', 'fascinating',
+    'cool', 'sweet', 'nice', 'good', 'solid', 'dope', 'fire', 'lit', 'sick', 'beast', 'insane',
+    'wow', 'omg', 'poggers', 'pog', 'pogchamp', 'hype', 'hyped', 'epic', 'legendary',
+    'congratulations', 'congrats', 'well done', 'good job', 'nice work', 'impressive',
+    'beautiful', 'gorgeous', 'stunning', 'pretty', 'cute', 'adorable',
+    'funny', 'hilarious', 'lol', 'lmao', 'rofl', 'comedy', 'genius',
+    'skilled', 'talented', 'gifted', 'pro', 'professional', 'expert', 'master',
+    'clutch', 'clean', 'smooth', 'flawless', 'godlike', 'cracked', 'nuts'
+  ],
+  spanish: [
+    'increíble', 'asombroso', 'genial', 'excelente', 'fantástico', 'maravilloso', 'perfecto',
+    'me encanta', 'amo', 'adoro', 'disfruto', 'divertido', 'emocionante', 'bueno', 'muy bien',
+    'felicidades', 'enhorabuena', 'hermoso', 'precioso', 'gracioso', 'talentoso', 'crack', 'bestial'
+  ],
+  french: [
+    'incroyable', 'génial', 'excellent', 'fantastique', 'merveilleux', 'parfait', 'magnifique',
+    'j\'adore', 'j\'aime', 'amusant', 'passionnant', 'bon', 'très bien', 'félicitations',
+    'beau', 'joli', 'drôle', 'talentueux', 'impressionnant', 'fou', 'ouf'
+  ],
+  german: [
+    'unglaublich', 'erstaunlich', 'toll', 'exzellent', 'fantastisch', 'wunderbar', 'perfekt',
+    'liebe', 'mag', 'spaß', 'aufregend', 'gut', 'sehr gut', 'glückwunsch', 'schön',
+    'lustig', 'talentiert', 'beeindruckend', 'krass', 'geil', 'hammer'
+  ],
+  portuguese: [
+    'incrível', 'incrivel', 'fantástico', 'fantastico', 'maravilhoso', 'perfeito', 'ótimo', 'otimo',
+    'amo', 'adoro', 'gosto', 'divertido', 'emocionante', 'bom', 'muito bom', 'parabéns', 'parabens',
+    'lindo', 'bonito', 'engraçado', 'engraçado', 'talentoso', 'impressionante', 'demais', 'top'
+  ],
+  italian: [
+    'incredibile', 'fantastico', 'meraviglioso', 'perfetto', 'eccellente', 'magnifico',
+    'amo', 'adoro', 'mi piace', 'divertente', 'emozionante', 'buono', 'molto bene',
+    'congratulazioni', 'bello', 'carino', 'divertente', 'talentuoso', 'impressionante', 'pazzesco'
+  ]
 }
 
-// Positive words for sentiment analysis
-const positiveWords = {
-  english: ['good', 'great', 'awesome', 'amazing', 'love', 'best', 'cool', 'nice', 'perfect', 'excellent'],
-  spanish: ['bueno', 'genial', 'increíble', 'asombroso', 'amor', 'mejor', 'guay', 'agradable', 'perfecto'],
-  french: ['bon', 'génial', 'incroyable', 'étonnant', 'amour', 'meilleur', 'cool', 'sympa', 'parfait'],
-  german: ['gut', 'toll', 'unglaublich', 'erstaunlich', 'liebe', 'beste', 'cool', 'schön', 'perfekt'],
-  portuguese: ['bom', 'ótimo', 'incrível', 'surpreendente', 'amor', 'melhor', 'legal', 'agradável', 'perfeito'],
-  italian: ['buono', 'fantastico', 'incredibile', 'sorprendente', 'amore', 'migliore', 'figo', 'carino', 'perfetto'],
-  dutch: ['goed', 'geweldig', 'ongelooflijk', 'verbazingwekkend', 'liefde', 'beste', 'cool', 'leuk', 'perfect'],
-  japanese: ['良い', 'すごい', '信じられない', '驚くべき', '愛', '最高', 'クール', '素敵', '完璧'],
-  korean: ['좋은', '대단한', '믿을 수 없는', '놀라운', '사랑', '최고', '멋진', '좋아', '완벽한'],
-  chinese: ['好', '太棒了', '难以置信', '惊人', '爱', '最好', '酷', '不错', '完美'],
-  russian: ['хорошо', 'отлично', 'невероятно', 'удивительно', 'любовь', 'лучший', 'круто', 'мило', 'идеально'],
-  arabic: ['جيد', 'رائع', 'لا يصدق', 'مدهش', 'حب', 'أفضل', 'رائع', 'لطيف', 'مثالي'],
-  hindi: ['अच्छा', 'बहुत बढ़िया', 'अविश्वसनीय', 'आश्चर्यजनक', 'प्रेम', 'सबसे अच्छा', 'कूल', 'अच्छा', 'परफेक्ट']
+// Enhanced negative words by language
+const negativeWords: { [key: string]: string[] } = {
+  english: [
+    'awful', 'terrible', 'horrible', 'bad', 'worst', 'hate', 'sucks', 'boring', 'annoying',
+    'frustrating', 'disappointing', 'sad', 'angry', 'mad', 'upset', 'confused', 'lost',
+    'lag', 'lagging', 'laggy', 'slow', 'broken', 'bug', 'glitch', 'error', 'fail', 'failing',
+    'trash', 'garbage', 'noob', 'newb', 'cringe', 'yikes', 'oof', 'rip', 'dead', 'died'
+  ],
+  spanish: [
+    'horrible', 'terrible', 'malo', 'odio', 'aburrido', 'molesto', 'frustrante', 'triste',
+    'enojado', 'confundido', 'lag', 'lento', 'roto', 'error', 'fallo', 'basura', 'noob'
+  ],
+  french: [
+    'horrible', 'terrible', 'mauvais', 'déteste', 'ennuyeux', 'agaçant', 'frustrant', 'triste',
+    'en colère', 'confus', 'lag', 'lent', 'cassé', 'erreur', 'échec', 'nul', 'noob'
+  ],
+  german: [
+    'schrecklich', 'furchtbar', 'schlecht', 'hasse', 'langweilig', 'nervig', 'frustrierend',
+    'traurig', 'wütend', 'verwirrt', 'lag', 'langsam', 'kaputt', 'fehler', 'versagen', 'müll'
+  ],
+  portuguese: [
+    'horrível', 'terrível', 'ruim', 'odeio', 'chato', 'irritante', 'frustrante', 'triste',
+    'bravo', 'confuso', 'lag', 'lento', 'quebrado', 'erro', 'falha', 'lixo', 'noob'
+  ],
+  italian: [
+    'orribile', 'terribile', 'cattivo', 'odio', 'noioso', 'fastidioso', 'frustrante', 'triste',
+    'arrabbiato', 'confuso', 'lag', 'lento', 'rotto', 'errore', 'fallimento', 'spazzatura'
+  ]
 }
 
-// Negative words for sentiment analysis
-const negativeWords = {
-  english: ['bad', 'terrible', 'awful', 'hate', 'worst', 'sucks', 'boring', 'stupid', 'annoying'],
-  spanish: ['malo', 'terrible', 'horrible', 'odio', 'peor', 'apesta', 'aburrido', 'estúpido', 'molesto'],
-  french: ['mauvais', 'terrible', 'affreux', 'déteste', 'pire', 'nul', 'ennuyeux', 'stupide', 'agaçant'],
-  german: ['schlecht', 'schrecklich', 'furchtbar', 'hasse', 'schlechteste', 'nervt', 'langweilig', 'dumm', 'nervig'],
-  portuguese: ['ruim', 'terrível', 'horrível', 'ódio', 'pior', 'péssimo', 'chato', 'estúpido', 'irritante'],
-  italian: ['cattivo', 'terribile', 'orribile', 'odio', 'peggiore', 'fa schifo', 'noioso', 'stupido', 'fastidioso'],
-  dutch: ['slecht', 'verschrikkelijk', 'afschuwelijk', 'haat', 'slechtste', 'zuigt', 'saai', 'dom', 'vervelend'],
-  japanese: ['悪い', 'ひどい', '最悪', '嫌い', '最悪', 'つまらない', 'ばか', 'うざい'],
-  korean: ['나쁜', '끔찍한', '최악', '싫어', '최악', '지루한', '바보', '짜증나는'],
-  chinese: ['坏', '可怕', '糟糕', '讨厌', '最差', '无聊', '愚蠢', '烦人'],
-  russian: ['плохо', 'ужасно', 'отвратительно', 'ненавижу', 'худший', 'отстой', 'скучно', 'глупо', 'раздражает'],
-  arabic: ['سيء', 'فظيع', 'مروع', 'أكره', 'أسوأ', 'ممل', 'غبي', 'مزعج'],
-  hindi: ['बुरा', 'भयानक', 'घृणित', 'नफरत', 'सबसे खराब', 'बोरिंग', 'बेवकूफ', 'परेशान करने वाला']
+// Question words by language
+const questionWords: { [key: string]: string[] } = {
+  english: ['what', 'how', 'when', 'where', 'why', 'who', 'which', 'can', 'could', 'would', 'should', 'will', 'do', 'does', 'did', 'is', 'are', 'was', 'were'],
+  spanish: ['qué', 'que', 'cómo', 'como', 'cuándo', 'cuando', 'dónde', 'donde', 'por qué', 'por que', 'porqué', 'porque', 'quién', 'quien', 'cuál', 'cual', 'puedes', 'puedo'],
+  french: ['quoi', 'que', 'comment', 'quand', 'où', 'ou', 'pourquoi', 'qui', 'quel', 'quelle', 'peux', 'peut', 'pouvez'],
+  german: ['was', 'wie', 'wann', 'wo', 'warum', 'wer', 'welche', 'welcher', 'können', 'kann', 'könntest'],
+  portuguese: ['o que', 'oque', 'como', 'quando', 'onde', 'por que', 'porque', 'quem', 'qual', 'pode', 'posso'],
+  italian: ['cosa', 'come', 'quando', 'dove', 'perché', 'perche', 'chi', 'quale', 'puoi', 'posso', 'può'],
+  dutch: ['wat', 'hoe', 'wanneer', 'waar', 'waarom', 'wie', 'welke', 'kun', 'kan', 'zou'],
+  japanese: ['何', 'なに', 'なん', 'どう', 'いつ', 'どこ', 'なぜ', 'だれ', 'どれ', 'できる'],
+  korean: ['뭐', '무엇', '어떻게', '언제', '어디', '왜', '누구', '어느', '할 수 있어'],
+  chinese: ['什么', '怎么', '什么时候', '哪里', '为什么', '谁', '哪个', '可以', '能'],
+  russian: ['что', 'как', 'когда', 'где', 'почему', 'кто', 'какой', 'можешь', 'могу'],
+  arabic: ['ما', 'كيف', 'متى', 'أين', 'لماذا', 'من', 'أي', 'يمكن', 'هل'],
+  hindi: ['क्या', 'कैसे', 'कब', 'कहाँ', 'क्यों', 'कौन', 'कौन सा', 'कर सकते']
 }
 
-// Language patterns for detection
-const languagePatterns = {
-  spanish: /[ñáéíóúü]/,
-  french: /[àâäçéèêëïîôùûüÿ]/,
-  german: /[äöüß]/,
-  portuguese: /[ãáàâéêíóôõúç]/,
-  italian: /[àèéìíîòóù]/,
-  russian: /[а-яё]/,
-  arabic: /[\u0600-\u06FF]/,
-  japanese: /[ひらがなカタカナ一-龯]/,
-  korean: /[가-힣]/,
-  chinese: /[\u4e00-\u9fff]/,
-  hindi: /[\u0900-\u097F]/
+// Topic detection keywords
+const topicKeywords: { [key: string]: string[] } = {
+  gaming: ['game', 'play', 'level', 'boss', 'skill', 'build', 'strategy', 'win', 'lose', 'pvp', 'pve', 'raid', 'quest', 'achievement'],
+  technical: ['setup', 'pc', 'specs', 'fps', 'resolution', 'settings', 'hardware', 'software', 'lag', 'ping', 'internet'],
+  personal: ['life', 'work', 'family', 'story', 'experience', 'opinion', 'feel', 'think', 'believe'],
+  content: ['stream', 'video', 'youtube', 'twitch', 'content', 'upload', 'edit', 'thumbnail', 'title'],
+  music: ['song', 'music', 'artist', 'album', 'playlist', 'beat', 'remix', 'genre', 'lyrics']
 }
 
-export function detectLanguage(text: string): string {
-  const lowerText = text.toLowerCase()
+// Engagement level indicators
+const highEngagementWords = [
+  'poggers', 'pog', 'pogchamp', 'hype', 'hyped', 'lit', 'fire', 'insane', 'nuts', 'cracked',
+  'clutch', 'epic', 'legendary', 'godlike', 'beast', 'sick', 'dope', 'wow', 'omg', 'holy',
+  'amazing', 'incredible', 'unreal', 'no way', 'cant believe', 'mind blown'
+]
+
+// Detect language based on character patterns and common words
+export function detectLanguage(text: string): { language: string; confidence: number } {
+  const cleanText = text.toLowerCase().replace(/[^\w\s]/g, ' ')
+  const words = cleanText.split(/\s+/).filter(word => word.length > 1)
   
-  // Remove usernames and common chat elements that might confuse detection
-  const cleanText = lowerText
-    .replace(/@\w+/g, '') // Remove @mentions
-    .replace(/\b\w*\d+\w*\b/g, '') // Remove words with numbers (usernames)
-    .replace(/[^\w\s]/g, ' ') // Remove special characters
-    .trim()
+  if (words.length === 0) return { language: 'english', confidence: 0.5 }
   
-  // If message is too short or mostly non-alphabetic, default to English
-  if (cleanText.length < 10 || !/[a-zA-Z]/.test(cleanText)) {
-    return 'english'
-  }
+  const scores: { [key: string]: number } = {}
   
-  // Check for very specific language patterns with higher thresholds
-  let languageScore: { [key: string]: number } = {}
-  
-  // Only detect non-English if we have strong indicators
-  for (const [language, pattern] of Object.entries(languagePatterns)) {
-    if (pattern.test(text)) {
-      languageScore[language] = (languageScore[language] || 0) + 2
-    }
-  }
-  
-  // Check for language-specific question words (must be exact matches)
-  for (const [language, words] of Object.entries(questionWords)) {
-    if (language === 'english') continue
+  // Check for language-specific patterns
+  Object.keys(questionWords).forEach(lang => {
+    scores[lang] = 0
     
-    for (const word of words) {
-      // Only count if the word appears as a separate word (not part of username)
-      const wordRegex = new RegExp(`\\b${word.toLowerCase()}\\b`, 'i')
-      if (wordRegex.test(cleanText)) {
-        languageScore[language] = (languageScore[language] || 0) + 1
+    // Check question words
+    questionWords[lang].forEach(qWord => {
+      if (cleanText.includes(qWord)) {
+        scores[lang] += 2
       }
+    })
+    
+    // Check positive words
+    if (positiveWords[lang]) {
+      positiveWords[lang].forEach(pWord => {
+        if (cleanText.includes(pWord)) {
+          scores[lang] += 1
+        }
+      })
     }
-  }
+    
+    // Check negative words
+    if (negativeWords[lang]) {
+      negativeWords[lang].forEach(nWord => {
+        if (cleanText.includes(nWord)) {
+          scores[lang] += 1
+        }
+      })
+    }
+  })
   
-  // Require a minimum score to detect non-English languages
-  const minScore = 2
-  const detectedLanguage = Object.entries(languageScore)
-    .filter(([_, score]) => score >= minScore)
-    .sort(([,a], [,b]) => b - a)[0]
+  // Character-based detection for non-Latin scripts
+  if (/[\u4e00-\u9fff]/.test(text)) scores.chinese = (scores.chinese || 0) + 3
+  if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) scores.japanese = (scores.japanese || 0) + 3
+  if (/[\uac00-\ud7af]/.test(text)) scores.korean = (scores.korean || 0) + 3
+  if (/[\u0600-\u06ff]/.test(text)) scores.arabic = (scores.arabic || 0) + 3
+  if (/[\u0900-\u097f]/.test(text)) scores.hindi = (scores.hindi || 0) + 3
+  if (/[\u0400-\u04ff]/.test(text)) scores.russian = (scores.russian || 0) + 3
   
-  // Default to English unless we have strong evidence of another language
-  return detectedLanguage ? detectedLanguage[0] : 'english'
+  // Find the language with highest score
+  const maxScore = Math.max(...Object.values(scores))
+  const detectedLang = Object.keys(scores).find(lang => scores[lang] === maxScore) || 'english'
+  
+  // Calculate confidence based on score relative to text length
+  const confidence = Math.min(0.9, Math.max(0.3, maxScore / Math.max(words.length, 1)))
+  
+  return { language: detectedLang, confidence }
 }
 
-export function isQuestion(text: string, language: string): boolean {
+// Enhanced sentiment analysis with detailed reasoning
+export function analyzeSentiment(text: string, language: string): {
+  sentiment: 'positive' | 'negative' | 'neutral'
+  score: number
+  reason?: string
+} {
   const lowerText = text.toLowerCase()
-  
-  // Universal question mark check (most reliable)
-  if (text.includes('?') || text.includes('？')) {
-    return true
-  }
-  
-  // Clean text for better detection
-  const cleanText = lowerText
-    .replace(/@\w+/g, '') // Remove @mentions
-    .replace(/\b\w*\d+\w*\b/g, '') // Remove words with numbers
-    .trim()
-  
-  // Language-specific question word check (only for detected language)
-  const words = questionWords[language as keyof typeof questionWords] || questionWords.english
-  
-  // Look for question words at the beginning of sentences or after punctuation
-  for (const word of words) {
-    const wordRegex = new RegExp(`(^|[.!]\\s+)${word.toLowerCase()}\\b`, 'i')
-    if (wordRegex.test(cleanText)) {
-      return true
-    }
-  }
-  
-  return false
-}
-
-export function analyzeSentiment(text: string, language: string): 'positive' | 'negative' | 'neutral' {
-  const lowerText = text.toLowerCase()
+  let score = 0
+  let reasons: string[] = []
   
   // Get language-specific sentiment words
-  const positive = positiveWords[language as keyof typeof positiveWords] || positiveWords.english
-  const negative = negativeWords[language as keyof typeof negativeWords] || negativeWords.english
+  const positive = positiveWords[language] || positiveWords.english
+  const negative = negativeWords[language] || negativeWords.english
   
-  // Count positive and negative words
-  let positiveCount = 0
-  let negativeCount = 0
-  
+  // Check for positive words
   positive.forEach(word => {
-    if (lowerText.includes(word.toLowerCase())) {
-      positiveCount++
+    if (lowerText.includes(word)) {
+      score += 1
+      reasons.push(`positive word: "${word}"`)
     }
   })
   
+  // Check for negative words
   negative.forEach(word => {
-    if (lowerText.includes(word.toLowerCase())) {
-      negativeCount++
+    if (lowerText.includes(word)) {
+      score -= 1
+      reasons.push(`negative word: "${word}"`)
     }
   })
   
-  // Check for universal emoji sentiment
-  const positiveEmojis = ['😊', '😍', '🔥', '👍', '❤️', '💖', '🎉', '✨', '😂', '💪']
-  const negativeEmojis = ['😢', '😠', '👎', '💔', '😞', '😤', '🤮', '💩', '😡', '😭']
+  // Emoji sentiment analysis (universal)
+  const positiveEmojis = ['😊', '😁', '😂', '🤣', '😍', '🥰', '😎', '🔥', '💯', '👍', '👏', '❤️', '💖', '✨', '🎉', '🙌', '💪', '🏆', '⭐']
+  const negativeEmojis = ['😢', '😭', '😠', '😡', '🙄', '😴', '💔', '👎', '😬', '😖', '😤', '🤬', '💀', '😵']
   
   positiveEmojis.forEach(emoji => {
     if (text.includes(emoji)) {
-      positiveCount += 2 // Emojis weight more
+      score += 0.5
+      reasons.push(`positive emoji: ${emoji}`)
     }
   })
   
   negativeEmojis.forEach(emoji => {
     if (text.includes(emoji)) {
-      negativeCount += 2
+      score -= 0.5
+      reasons.push(`negative emoji: ${emoji}`)
     }
   })
   
-  if (positiveCount > negativeCount) return 'positive'
-  if (negativeCount > positiveCount) return 'negative'
-  return 'neutral'
+  // Excitement indicators
+  if (/!{2,}/.test(text)) {
+    score += 0.3
+    reasons.push('excitement (multiple exclamation marks)')
+  }
+  
+  // ALL CAPS excitement
+  if (text === text.toUpperCase() && text.length > 3) {
+    score += 0.2
+    reasons.push('excitement (all caps)')
+  }
+  
+  // Repeated letters (excitement)
+  if (/(.)\1{2,}/.test(text)) {
+    score += 0.2
+    reasons.push('excitement (repeated letters)')
+  }
+  
+  // Determine sentiment
+  let sentiment: 'positive' | 'negative' | 'neutral'
+  if (score > 0.5) sentiment = 'positive'
+  else if (score < -0.5) sentiment = 'negative'
+  else sentiment = 'neutral'
+  
+  const reason = reasons.length > 0 ? reasons.slice(0, 2).join(', ') : undefined
+  
+  return { sentiment, score, reason }
 }
 
-export function getQuestionType(text: string, language: string): string {
+// Detect topics in the message
+export function detectTopics(text: string): string[] {
   const lowerText = text.toLowerCase()
-  const words = questionWords[language as keyof typeof questionWords] || questionWords.english
+  const detectedTopics: string[] = []
   
-  // Map question words to types
-  const typeMap: { [key: string]: string } = {
-    // What/Qué/Quoi/Was/O que/Cosa/Wat/何/뭐/什么/что/ما/क्या
-    'what': 'explanation',
-    'qué': 'explanation',
-    'quoi': 'explanation', 
-    'was': 'explanation',
-    'o que': 'explanation',
-    'cosa': 'explanation',
-    'wat': 'explanation',
-    '何': 'explanation',
-    '뭐': 'explanation',
-    '什么': 'explanation',
-    'что': 'explanation',
-    'ما': 'explanation',
-    'क्या': 'explanation',
-    
-    // How/Cómo/Comment/Wie/Como/Come/Hoe/どう/어떻게/怎么/как/كيف/कैसे
-    'how': 'instruction',
-    'cómo': 'instruction',
-    'comment': 'instruction',
-    'wie': 'instruction',
-    'como': 'instruction',
-    'come': 'instruction',
-    'hoe': 'instruction',
-    'どう': 'instruction',
-    '어떻게': 'instruction',
-    '怎么': 'instruction',
-    'как': 'instruction',
-    'كيف': 'instruction',
-    'कैसे': 'instruction',
-    
-    // Where/Dónde/Où/Wo/Onde/Dove/Waar/どこ/어디/哪里/где/أين/कहाँ
-    'where': 'location',
-    'dónde': 'location',
-    'où': 'location',
-    'wo': 'location',
-    'onde': 'location',
-    'dove': 'location',
-    'waar': 'location',
-    'どこ': 'location',
-    '어디': 'location',
-    '哪里': 'location',
-    'где': 'location',
-    'أين': 'location',
-    'कहाँ': 'location'
-  }
-  
-  for (const word of words) {
-    if (lowerText.includes(word.toLowerCase())) {
-      return typeMap[word.toLowerCase()] || 'general'
+  Object.keys(topicKeywords).forEach(topic => {
+    const keywords = topicKeywords[topic]
+    const matches = keywords.filter(keyword => lowerText.includes(keyword))
+    if (matches.length > 0) {
+      detectedTopics.push(topic)
     }
-  }
+  })
   
-  return 'general'
+  return detectedTopics
 }
 
+// Check if message indicates high engagement
+export function getEngagementLevel(text: string): 'high' | 'medium' | 'low' {
+  const lowerText = text.toLowerCase()
+  
+  // High engagement indicators
+  const highCount = highEngagementWords.filter(word => lowerText.includes(word)).length
+  
+  if (highCount > 0) return 'high'
+  if (text.includes('!') || text.includes('?')) return 'medium'
+  return 'low'
+}
+
+// Main analysis function
 export function analyzeMessage(text: string): LanguageDetection {
-  const language = detectLanguage(text)
-  const isQuestionResult = isQuestion(text, language)
-  const sentiment = analyzeSentiment(text, language)
-  const questionType = isQuestionResult ? getQuestionType(text, language) : undefined
+  // Detect language
+  const { language, confidence } = detectLanguage(text)
   
-  // Calculate confidence based on detection certainty
-  let confidence = 0.7 // Base confidence
+  // Check if it's a question
+  const isQuestion = checkIsQuestion(text, language)
   
-  // Increase confidence for specific patterns
-  if (languagePatterns[language as keyof typeof languagePatterns]?.test(text)) {
-    confidence += 0.2
-  }
+  // Analyze sentiment
+  const sentimentAnalysis = analyzeSentiment(text, language)
   
-  if (isQuestionResult && text.includes('?')) {
-    confidence += 0.1
-  }
+  // Detect topics
+  const topics = detectTopics(text)
   
-  // Generate sentiment reason
-  let sentimentReason = ''
-  if (sentiment === 'positive') {
-    sentimentReason = 'Contains positive words or emojis'
-  } else if (sentiment === 'negative') {
-    sentimentReason = 'Contains negative words or emojis'
-  } else {
-    sentimentReason = 'Neutral tone detected'
+  // Get engagement level
+  const engagementLevel = getEngagementLevel(text)
+  
+  // Determine question type if it's a question
+  let questionType: string | undefined
+  if (isQuestion) {
+    if (text.toLowerCase().includes('how')) questionType = 'how-to'
+    else if (text.toLowerCase().includes('what')) questionType = 'what-is'
+    else if (text.toLowerCase().includes('when')) questionType = 'timing'
+    else if (text.toLowerCase().includes('where')) questionType = 'location'
+    else if (text.toLowerCase().includes('why')) questionType = 'explanation'
+    else if (text.toLowerCase().includes('who')) questionType = 'person'
+    else questionType = 'general'
   }
   
   return {
     language,
-    confidence: Math.min(confidence, 1.0),
-    isQuestion: isQuestionResult,
-    sentiment,
-    questionType,
-    sentimentReason
+    confidence,
+    isQuestion,
+    sentiment: sentimentAnalysis.sentiment,
+    sentimentReason: sentimentAnalysis.reason,
+    sentimentScore: sentimentAnalysis.score,
+    topics,
+    engagementLevel,
+    questionType
   }
+}
+
+// Enhanced question detection
+function checkIsQuestion(text: string, language: string): boolean {
+  // Universal question mark
+  if (text.includes('?') || text.includes('？')) return true
+  
+  // Language-specific question words
+  const qWords = questionWords[language] || questionWords.english
+  const lowerText = text.toLowerCase()
+  
+  // Check if text starts with or contains question words
+  return qWords.some(qWord => {
+    // Check at start of sentence
+    if (lowerText.startsWith(qWord + ' ')) return true
+    // Check after punctuation
+    if (lowerText.includes('. ' + qWord + ' ')) return true
+    if (lowerText.includes('! ' + qWord + ' ')) return true
+    // Check for common question patterns
+    if (lowerText.includes(' ' + qWord + ' ')) return true
+    return false
+  })
+}
+
+// Generate motivational AI suggestions based on chat patterns
+export function generateMotivationalSuggestion(recentMessages: any[]): string | null {
+  if (recentMessages.length < 5) return null
+  
+  const positiveCount = recentMessages.filter(m => m.sentiment === 'positive').length
+  const questionCount = recentMessages.filter(m => m.isQuestion).length
+  const highEngagementCount = recentMessages.filter(m => m.engagementLevel === 'high').length
+  
+  // All topics mentioned recently
+  const allTopics = recentMessages.flatMap(m => m.topics || [])
+  const topicCounts: { [key: string]: number } = {}
+  allTopics.forEach(topic => {
+    topicCounts[topic] = (topicCounts[topic] || 0) + 1
+  })
+  
+  const popularTopic = Object.keys(topicCounts).reduce((a, b) => 
+    topicCounts[a] > topicCounts[b] ? a : b, null
+  )
+  
+  // Generate suggestions based on patterns
+  const totalMessages = recentMessages.length
+  const positiveRatio = positiveCount / totalMessages
+  const questionRatio = questionCount / totalMessages
+  const engagementRatio = highEngagementCount / totalMessages
+  
+  if (positiveRatio > 0.6) {
+    return "🔥 Chat is absolutely loving the content right now! Keep this energy going - maybe ask them what their favorite moment has been so far?"
+  }
+  
+  if (questionRatio > 0.4) {
+    return "❓ Lots of questions coming in! Chat is super engaged and curious - perfect time to do a Q&A session or explain your process."
+  }
+  
+  if (engagementRatio > 0.3) {
+    return "🎉 Chat is hyped! The energy is through the roof - consider doing something interactive like a poll or challenge!"
+  }
+  
+  if (popularTopic && topicCounts[popularTopic] >= 3) {
+    const suggestions = {
+      gaming: "🎮 Chat seems really interested in your gameplay! Maybe share some tips or ask them about their own strategies?",
+      technical: "⚙️ People are curious about your setup! Perfect time to show off your gear or explain your technical choices.",
+      personal: "💭 Chat is connecting with your personal stories! They love getting to know the real you - keep sharing!",
+      content: "📺 Chat is interested in your content creation process! Maybe give them a behind-the-scenes look?",
+      music: "🎵 Everyone's vibing with the music! Ask them what their favorite tracks are or take some requests!"
+    }
+    return suggestions[popularTopic as keyof typeof suggestions] || null
+  }
+  
+  return null
 }
