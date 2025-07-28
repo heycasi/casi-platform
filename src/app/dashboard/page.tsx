@@ -262,7 +262,6 @@ export default function Dashboard() {
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
         }}>
-          {/* Casi Robot Logo */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
@@ -427,7 +426,6 @@ export default function Dashboard() {
           flex: '1',
           minWidth: '150px'
         }}>
-          {/* Casi Full Logo */}
           <img 
             src="/landing-logo.png"
             alt="Casi"
@@ -457,7 +455,6 @@ export default function Dashboard() {
             Casi
           </h1>
           
-          {/* Casi Robot */}
           <img 
             src="/landing-robot.png"
             alt="Casi Robot"
@@ -805,6 +802,57 @@ export default function Dashboard() {
             textAlign: 'center',
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
+            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>👥</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#5EEAD4' }}>
+              {stats.viewerCount}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)', opacity: 0.7 }}>
+              Viewers
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(12px, 3vw, 16px)',
+            padding: 'clamp(1rem, 3vw, 1.5rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>💬</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#5EEAD4' }}>
+              {stats.totalMessages}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)', opacity: 0.7 }}>
+              Messages
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(12px, 3vw, 16px)',
+            padding: 'clamp(1rem, 3vw, 1.5rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>❓</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#FF9F9F' }}>
+              {stats.questions}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)', opacity: 0.7 }}>
+              Questions
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(12px, 3vw, 16px)',
+            padding: 'clamp(1rem, 3vw, 1.5rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
             <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>
               {stats.avgSentiment > 0.5 ? '😊' : stats.avgSentiment < -0.5 ? '😢' : '😐'}
             </div>
@@ -879,7 +927,6 @@ export default function Dashboard() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: 'clamp(1rem, 3vw, 1.5rem)'
             }}>
-              {/* Recent Positive Messages */}
               <div style={{
                 background: 'rgba(184, 238, 138, 0.1)',
                 borderRadius: 'clamp(8px, 2vw, 12px)',
@@ -913,7 +960,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Recent Negative Messages */}
               <div style={{
                 background: 'rgba(255, 159, 159, 0.1)',
                 borderRadius: 'clamp(8px, 2vw, 12px)',
@@ -1167,7 +1213,6 @@ export default function Dashboard() {
           color: rgba(255, 255, 255, 0.5);
         }
         
-        /* Enhanced Scrollbar styling */
         ::-webkit-scrollbar {
           width: clamp(6px, 1.5vw, 8px);
         }
@@ -1185,71 +1230,7 @@ export default function Dashboard() {
         ::-webkit-scrollbar-thumb:hover {
           background: rgba(184, 238, 138, 0.7);
         }
-        
-        /* Mobile responsive adjustments */
-        @media (max-width: 768px) {
-          .analytics-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .analytics-grid {
-            grid-template-columns: 1fr;
-          }
-        }
       `}</style>
     </div>
   )
-}05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: 'clamp(12px, 3vw, 16px)',
-            padding: 'clamp(1rem, 3vw, 1.5rem)',
-            textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>👥</div>
-            <p style={{ margin: 0, fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#5EEAD4' }}>
-              {stats.viewerCount}
-            </p>
-            <p style={{ margin: 0, fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)', opacity: 0.7 }}>
-              Viewers
-            </p>
-          </div>
-
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: 'clamp(12px, 3vw, 16px)',
-            padding: 'clamp(1rem, 3vw, 1.5rem)',
-            textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>💬</div>
-            <p style={{ margin: 0, fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#5EEAD4' }}>
-              {stats.totalMessages}
-            </p>
-            <p style={{ margin: 0, fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)', opacity: 0.7 }}>
-              Messages
-            </p>
-          </div>
-
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: 'clamp(12px, 3vw, 16px)',
-            padding: 'clamp(1rem, 3vw, 1.5rem)',
-            textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', margin: '0 0 0.5rem 0' }}>❓</div>
-            <p style={{ margin: 0, fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#FF9F9F' }}>
-              {stats.questions}
-            </p>
-            <p style={{ margin: 0, fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)', opacity: 0.7 }}>
-              Questions
-            </p>
-          </div>
-
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.
+}
