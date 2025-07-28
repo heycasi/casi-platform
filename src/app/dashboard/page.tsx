@@ -517,21 +517,619 @@ export default function Dashboard() {
       </div>
 
       <div style={{ 
-        padding: 'clamp(0.5rem, 2vw, 1rem)', 
+        padding: 'clamp(0.5rem, 1vw, 1rem)', 
         display: 'flex', 
         flexDirection: 'column', 
-        gap: 'clamp(1rem, 3vw, 1.5rem)', 
-        maxWidth: '1400px', 
-        margin: '0 auto' 
+        gap: 'clamp(0.8rem, 1.5vw, 1rem)', 
+        height: 'calc(100vh - 80px)', // Full height minus header
+        overflow: 'hidden'
       }}>
         
-        {/* Connection Panel */}
+        {/* Top Row: Connection Panel + Stream Preview */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 'clamp(15px, 3vw, 20px)',
-          padding: 'clamp(1rem, 4vw, 2rem)',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
+          display: 'grid',
+          gridTemplateColumns: isConnected ? '1fr 400px' : '1fr',
+          gap: 'clamp(0.8rem, 1.5vw, 1rem)',
+          height: 'auto'
+        }}>
+          {/* Connection Panel */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(12px, 2vw, 16px)',
+            padding: 'clamp(1rem, 2vw, 1.5rem)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            minHeight: 'fit-content'
+          }}>
+            <h2 style={{ 
+              margin: '0 0 1rem 0', 
+              fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)', 
+              fontWeight: '600',
+              color: '#F7F7F7'
+            }}>
+              🎮 Connect to Twitch Channel
+            </h2>
+            
+            <div style={{ 
+              display: 'flex', 
+              gap: 'clamp(0.5rem, 1.5vw, 1rem)', 
+              alignItems: 'center', 
+              flexWrap: 'wrap' 
+            }}>
+              <input
+                type="text"
+                placeholder="Enter channel name (e.g., shroud)"
+                value={channelName}
+                onChange={(e) => setChannelName(e.target.value)}
+                style={{
+                  flex: 1,
+                  minWidth: '200px',
+                  padding: 'clamp(0.7rem, 1.5vw, 0.9rem)',
+                  borderRadius: '50px',
+                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  fontSize: 'clamp(0.85rem, 1.8vw, 0.95rem)',
+                  fontFamily: 'Poppins, sans-serif',
+                  minHeight: '40px',
+                  boxSizing: 'border-box'
+                }}
+              />
+              
+              <button
+                onClick={() => {
+                  if (channelName.trim()) {
+                    setIsConnected(!isConnected)
+                    if (!isConnected) {
+                      setMessages([])
+                      setQuestions([])
+                      setMotivationalMessage(null)
+                    }
+                  }
+                }}
+                disabled={!channelName.trim()}
+                style={{
+                  padding: 'clamp(0.7rem, 1.5vw, 0.9rem) clamp(1.2rem, 2.5vw, 1.5rem)',
+                  background: isConnected 
+                    ? 'linear-gradient(135deg, #EF4444, #DC2626)' 
+                    : 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  border: 'none',
+                  borderRadius: '50px',
+                  color: 'white',
+                  fontSize: 'clamp(0.85rem, 1.8vw, 0.95rem)',
+                  fontWeight: '600',
+                  cursor: channelName.trim() ? 'pointer' : 'not-allowed',
+                  opacity: channelName.trim() ? 1 : 0.5,
+                  fontFamily: 'Poppins, sans-serif',
+                  minHeight: '40px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isConnected ? 'Disconnect' : 'Connect'}
+              </button>
+            </div>
+            
+            {isConnected && (
+              <div style={{
+                marginTop: '1rem',
+                padding: 'clamp(0.7rem, 1.5vw, 0.9rem)',
+                background: 'rgba(184, 238, 138, 0.2)',
+                borderRadius: 'clamp(8px, 1.5vw, 10px)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                border: '1px solid rgba(184, 238, 138, 0.3)'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#B8EE8A',
+                  borderRadius: '50%',
+                  animation: 'pulse 2s infinite'
+                }} />
+                <span style={{ 
+                  color: '#F7F7F7', 
+                  fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
+                  lineHeight: '1.4'
+                }}>
+                  Hey @{channelName}! Your friendly stream sidekick is here to analyze your stream in real-time! 🎮✨
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Stream Preview */}
+          {isConnected && (
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 'clamp(12px, 2vw, 16px)',
+              padding: 'clamp(1rem, 2vw, 1.5rem)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <h3 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: 'clamp(1rem, 2vw, 1.2rem)', 
+                fontWeight: '600',
+                color: '#F7F7F7',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                📺 Stream Preview
+              </h3>
+              
+              <div style={{
+                width: '100%',
+                height: '225px', // 16:9 aspect ratio for 400px width
+                background: 'rgba(0, 0, 0, 0.5)',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {/* Twitch Embed */}
+                <iframe
+                  src={`https://player.twitch.tv/?channel=${channelName}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}&autoplay=false&muted=true`}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    border: 'none',
+                    borderRadius: '8px'
+                  }}
+                  allowFullScreen
+                  onError={() => {
+                    // Fallback if iframe fails
+                  }}
+                />
+                
+                {/* Fallback content */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  textAlign: 'center',
+                  fontSize: 'clamp(0.8rem, 1.5vw, 0.9rem)',
+                  pointerEvents: 'none',
+                  zIndex: -1
+                }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📺</div>
+                  <p style={{ margin: 0 }}>Stream Preview</p>
+                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem' }}>@{channelName}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* AI Motivational Suggestions - Compact */}
+        {motivationalMessage && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(94, 234, 212, 0.1))',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(12px, 2vw, 16px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            border: '1px solid rgba(94, 234, 212, 0.3)',
+            position: 'relative',
+            animation: 'slideIn 0.5s ease-out'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem'
+            }}>
+              <div style={{
+                background: '#5EEAD4',
+                color: '#151E3C',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '12px',
+                fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)',
+                fontWeight: '600',
+                whiteSpace: 'nowrap'
+              }}>
+                🤖 AI INSIGHT
+              </div>
+              
+              <p style={{
+                margin: 0,
+                color: '#F7F7F7',
+                fontSize: 'clamp(0.85rem, 1.8vw, 0.95rem)',
+                lineHeight: '1.4',
+                flex: 1
+              }}>
+                {motivationalMessage}
+              </p>
+              
+              <button
+                onClick={() => setMotivationalMessage(null)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Analytics Grid - Horizontal */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+          gap: 'clamp(0.6rem, 1.2vw, 0.8rem)',
+          height: 'auto'
+        }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', margin: '0 0 0.3rem 0' }}>👥</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', fontWeight: 'bold', color: '#5EEAD4' }}>
+              {stats.viewerCount}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', opacity: 0.7 }}>
+              Viewers
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', margin: '0 0 0.3rem 0' }}>💬</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', fontWeight: 'bold', color: '#5EEAD4' }}>
+              {stats.totalMessages}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', opacity: 0.7 }}>
+              Messages
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', margin: '0 0 0.3rem 0' }}>❓</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', fontWeight: 'bold', color: '#FF9F9F' }}>
+              {stats.questions}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', opacity: 0.7 }}>
+              Questions
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', margin: '0 0 0.3rem 0' }}>
+              {stats.avgSentiment > 0.5 ? '😊' : stats.avgSentiment < -0.5 ? '😢' : '😐'}
+            </div>
+            <p style={{ 
+              margin: 0, 
+              fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)', 
+              fontWeight: 'bold', 
+              color: stats.avgSentiment > 0.5 ? '#B8EE8A' : stats.avgSentiment < -0.5 ? '#FF9F9F' : '#F7F7F7'
+            }}>
+              {stats.currentMood}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', opacity: 0.7 }}>
+              Mood
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', margin: '0 0 0.3rem 0' }}>✨</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', fontWeight: 'bold', color: '#B8EE8A' }}>
+              {stats.positiveMessages}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', opacity: 0.7 }}>
+              Positive
+            </p>
+          </div>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', margin: '0 0 0.3rem 0' }}>💔</div>
+            <p style={{ margin: 0, fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', fontWeight: 'bold', color: '#FF9F9F' }}>
+              {stats.negativeMessages}
+            </p>
+            <p style={{ margin: 0, fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', opacity: 0.7 }}>
+              Negative
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content: Questions + Chat Side by Side */}
+        {isConnected && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: questions.length > 0 ? '1fr 1fr' : '1fr',
+            gap: 'clamp(0.8rem, 1.5vw, 1rem)',
+            flex: 1,
+            minHeight: 0 // Important for proper flexbox behavior
+          }}>
+            
+            {/* Priority Questions Panel */}
+            {questions.length > 0 && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 'clamp(12px, 2vw, 16px)',
+                padding: 'clamp(1rem, 2vw, 1.5rem)',
+                border: '1px solid rgba(255, 159, 159, 0.3)',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 0
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: 'clamp(-6px, -1vw, -8px)',
+                  right: 'clamp(8px, 2vw, 12px)',
+                  background: '#FF9F9F',
+                  color: '#151E3C',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '12px',
+                  fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)',
+                  fontWeight: '600'
+                }}>
+                  PRIORITY
+                </div>
+                
+                <h2 style={{ 
+                  margin: '0 0 1rem 0', 
+                  fontSize: 'clamp(1.1rem, 2.2vw, 1.3rem)', 
+                  fontWeight: '600',
+                  color: '#F7F7F7'
+                }}>
+                  🚨 Questions ({questions.length})
+                </h2>
+                
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 'clamp(0.6rem, 1.2vw, 0.8rem)',
+                  flex: 1,
+                  overflowY: 'auto',
+                  minHeight: 0
+                }}>
+                  {questions.slice(-10).map((q) => (
+                    <div
+                      key={q.id}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: 'clamp(8px, 1.5vw, 10px)',
+                        padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+                        border: '1px solid rgba(255, 159, 159, 0.3)',
+                        animation: 'pulse 2s infinite'
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        marginBottom: '0.5rem',
+                        flexWrap: 'wrap'
+                      }}>
+                        <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: 'clamp(0.85rem, 1.7vw, 0.95rem)' }}>
+                          {getLanguageFlag(q.language || 'english')} {q.username}
+                        </span>
+                        <span style={{
+                          fontSize: 'clamp(0.7rem, 1.4vw, 0.75rem)',
+                          background: 'rgba(94, 234, 212, 0.3)',
+                          padding: '0.2rem 0.4rem',
+                          borderRadius: '6px',
+                          color: '#5EEAD4',
+                          border: '1px solid rgba(94, 234, 212, 0.3)'
+                        }}>
+                          {q.language || 'english'}
+                        </span>
+                      </div>
+                      <p style={{
+                        margin: 0,
+                        color: '#F7F7F7',
+                        fontSize: 'clamp(0.85rem, 1.7vw, 0.95rem)',
+                        lineHeight: '1.4'
+                      }}>
+                        {q.message}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Live Chat Feed */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 'clamp(12px, 2vw, 16px)',
+              padding: 'clamp(1rem, 2vw, 1.5rem)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0
+            }}>
+              <h2 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: 'clamp(1.1rem, 2.2vw, 1.3rem)', 
+                fontWeight: '600'
+              }}>
+                💬 Live Chat Feed
+              </h2>
+              
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: 'clamp(8px, 1.5vw, 10px)',
+                padding: 'clamp(0.8rem, 1.5vw, 1rem)',
+                minHeight: 0
+              }}>
+                {messages.length === 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    textAlign: 'center'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', marginBottom: '1rem' }}>💭</div>
+                      <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(0.9rem, 1.8vw, 1rem)' }}>
+                        Waiting for chat messages...
+                      </p>
+                      <p style={{ fontSize: 'clamp(0.8rem, 1.6vw, 0.9rem)', fontFamily: 'Poppins, sans-serif' }}>
+                        Make sure the channel is live and has active chat
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0.4rem, 1vw, 0.6rem)' }}>
+                    {messages.slice(-50).map((msg) => (
+                      <div
+                        key={msg.id}
+                        style={{
+                          padding: 'clamp(0.5rem, 1vw, 0.7rem)',
+                          background: msg.isQuestion 
+                            ? 'rgba(255, 159, 159, 0.2)' 
+                            : msg.sentiment === 'positive'
+                            ? 'rgba(184, 238, 138, 0.1)'
+                            : msg.sentiment === 'negative'
+                            ? 'rgba(255, 159, 159, 0.1)'
+                            : 'rgba(255, 255, 255, 0.05)',
+                          borderRadius: 'clamp(6px, 1.2vw, 8px)',
+                          border: msg.isQuestion 
+                            ? '1px solid rgba(255, 159, 159, 0.3)' 
+                            : msg.sentiment === 'positive'
+                            ? '1px solid rgba(184, 238, 138, 0.2)'
+                            : msg.sentiment === 'negative'
+                            ? '1px solid rgba(255, 159, 159, 0.2)'
+                            : '1px solid rgba(255, 255, 255, 0.1)',
+                          animation: msg.isQuestion ? 'pulse 2s infinite' : 'none'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          marginBottom: '0.3rem',
+                          flexWrap: 'wrap'
+                        }}>
+                          <span style={{ fontSize: 'clamp(0.75rem, 1.5vw, 0.85rem)' }}>
+                            {getLanguageFlag(msg.language || 'english')}
+                          </span>
+                          <span style={{
+                            fontWeight: '600',
+                            color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
+                            fontSize: 'clamp(0.8rem, 1.6vw, 0.9rem)'
+                          }}>
+                            {msg.username}
+                          </span>
+                          {msg.isQuestion && (
+                            <span style={{
+                              fontSize: 'clamp(0.6rem, 1.2vw, 0.7rem)',
+                              background: '#FF9F9F',
+                              padding: '0.1rem 0.3rem',
+                              borderRadius: '4px',
+                              color: '#151E3C',
+                              fontWeight: '600'
+                            }}>
+                              Q
+                            </span>
+                          )}
+                          <span style={{
+                            fontSize: 'clamp(0.6rem, 1.2vw, 0.7rem)',
+                            padding: '0.1rem 0.3rem',
+                            borderRadius: '4px',
+                            color: 'white',
+                            background: msg.sentiment === 'positive' 
+                              ? '#B8EE8A' 
+                              : msg.sentiment === 'negative' 
+                              ? '#FF9F9F' 
+                              : 'rgba(107, 114, 128, 0.8)'
+                          }}>
+                            {msg.sentiment?.charAt(0).toUpperCase()}
+                          </span>
+                          {msg.engagementLevel === 'high' && (
+                            <span style={{
+                              fontSize: 'clamp(0.6rem, 1.2vw, 0.7rem)',
+                              background: '#FFD700',
+                              padding: '0.1rem 0.3rem',
+                              borderRadius: '4px',
+                              color: '#000',
+                              fontWeight: '600'
+                            }}>
+                              🔥
+                            </span>
+                          )}
+                        </div>
+                        <p style={{
+                          margin: 0,
+                          color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
+                          lineHeight: '1.4',
+                          fontFamily: 'Poppins, sans-serif',
+                          fontSize: 'clamp(0.8rem, 1.6vw, 0.9rem)'
+                        }}>
+                          {msg.message}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )} solid rgba(255, 255, 255, 0.1)'
         }}>
           <h2 style={{ 
             margin: '0 0 1.5rem 0', 
