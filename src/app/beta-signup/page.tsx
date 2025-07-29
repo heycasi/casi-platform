@@ -9,387 +9,311 @@ const supabase = createClient(
 
 export default function BetaSignup() {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
-    twitch_channel: '',
-    beta_reason: ''
+    twitchUsername: '',
+    averageViewers: '',
+    streamingExperience: '',
+    primaryPlatform: 'twitch',
+    useCase: '',
+    hearAbout: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError('')
-
-    try {
-      // Clean twitch channel name (remove @ or twitch.tv/ if user includes them)
-      const cleanChannel = formData.twitch_channel
-        .replace('@', '')
-        .replace('twitch.tv/', '')
-        .replace('https://twitch.tv/', '')
-        .toLowerCase()
-
-      const { data, error } = await supabase
-        .from('beta_users')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email.toLowerCase(),
-            twitch_channel: cleanChannel,
-            tier: 'creator',
-            beta_reason: formData.beta_reason,
-            payment_status: 'beta_free'
-          }
-        ])
-
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          setError('This email is already registered. Please use a different email or contact support.')
-        } else {
-          setError('Something went wrong. Please try again or contact support.')
-        }
-      } else {
-        setSubmitted(true)
-      }
-    } catch (err) {
-      setError('Something went wrong. Please try again.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
   }
 
-  if (submitted) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        padding: 'clamp(1rem, 4vw, 2rem)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Poppins, sans-serif'
-      }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 'clamp(15px, 3vw, 20px)',
-          padding: 'clamp(2rem, 6vw, 3rem)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          textAlign: 'center',
-          maxWidth: '90vw',
-          width: '100%'
-        }}>
-          <div style={{ fontSize: 'clamp(3rem, 8vw, 4rem)', marginBottom: '1rem' }}>✅</div>
-          <h1 style={{
-            color: 'white',
-            fontSize: 'clamp(1.5rem, 5vw, 2rem)',
-            marginBottom: '1rem',
-            fontWeight: '700',
-            lineHeight: '1.2'
-          }}>
-            Application Submitted!
-          </h1>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: 'clamp(1rem, 3vw, 1.1rem)',
-            lineHeight: '1.6',
-            marginBottom: '1.5rem',
-            wordWrap: 'break-word'
-          }}>
-            Thanks {formData.name}! We've received your beta application for channel <strong>@{formData.twitch_channel}</strong>.
-          </p>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
-            lineHeight: '1.6',
-            marginBottom: '2rem'
-          }}>
-            Your free 2-week beta access starts as soon as we activate your account. We'll email you with login details and getting started instructions.
-          </p>
-          <button
-            onClick={() => window.location.href = '/'}
-            style={{
-              background: 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
-              color: 'white',
-              border: 'none',
-              padding: 'clamp(0.8rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem)',
-              borderRadius: '50px',
-              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontFamily: 'Poppins, sans-serif',
-              width: '100%',
-              maxWidth: '300px'
-            }}
-          >
-            Return to Home
-          </button>
-        </div>
-      </div>
-    )
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setMessage('')
+
+    // Basic validation
+    if (!formData.email || !formData.twitchUsername) {
+      setMessage('Please fill in email and Twitch username')
+      setIsSubmitting(false)
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      setMessage('Please enter a valid email address')
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('beta_signups')
+        .insert([
+          {
+            email: formData.email.toLowerCase().trim(),
+            twitch_username: formData.twitchUsername.toLowerCase().trim(),
+            average_viewers: parseInt(formData.averageViewers) || 0,
+            streaming_experience: formData.streamingExperience,
+            primary_platform: formData.primaryPlatform,
+            use_case: formData.useCase,
+            hear_about: formData.hearAbout,
+            source: 'beta_signup_page',
+            user_agent: navigator.userAgent,
+            created_at: new Date().toISOString()
+          }
+        ])
+
+      if (error) {
+        if (error.code === '23505') {
+          setMessage('You\'re already signed up for beta access! 🎉')
+        } else {
+          setMessage('Something went wrong. Please try again.')
+          console.error('Supabase error:', error)
+        }
+      } else {
+        setMessage('Beta application submitted! We\'ll be in touch soon 🚀')
+        setFormData({
+          email: '',
+          twitchUsername: '',
+          averageViewers: '',
+          streamingExperience: '',
+          primaryPlatform: 'twitch',
+          useCase: '',
+          hearAbout: ''
+        })
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      setMessage('Something went wrong. Please try again.')
+    }
+
+    setIsSubmitting(false)
   }
 
   return (
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      padding: 'clamp(1rem, 3vw, 2rem)',
-      fontFamily: 'Poppins, sans-serif'
+      fontFamily: 'Poppins, Arial, sans-serif',
+      color: 'white'
     }}>
-      {/* Header */}
-      <div style={{
-        padding: 'clamp(0.5rem, 2vw, 1rem) clamp(1rem, 4vw, 2rem)',
+      {/* Header with Navigation */}
+      <header style={{
+        padding: '1rem 2rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        marginBottom: 'clamp(1rem, 3vw, 2rem)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          flexWrap: 'wrap',
-          gap: '1rem'
+          gap: '0.5rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 2vw, 1rem)' }}>
-            <img 
-              src="/landing-logo.png" 
-              alt="Casi Logo" 
-              style={{ height: 'clamp(30px, 6vw, 40px)', width: 'auto' }}
-            />
-            <h1 style={{
-              color: 'white',
-              fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
-              fontWeight: '700',
-              margin: 0
-            }}>
-              Beta Access
-            </h1>
-          </div>
+          <img 
+            src="/landing-logo.png"
+            alt="Casi"
+            style={{ height: '32px', width: 'auto' }}
+            onError={(e) => {
+              const target = e.currentTarget
+              target.style.display = 'none'
+              const fallback = document.createElement('h1')
+              fallback.style.cssText = 'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+              fallback.textContent = 'Casi'
+              target.parentNode?.appendChild(fallback)
+            }}
+          />
+          
+          <img 
+            src="/landing-robot.png"
+            alt="Casi Robot"
+            style={{ width: '32px', height: '32px' }}
+            onError={(e) => {
+              const target = e.currentTarget
+              target.style.display = 'none'
+              const fallback = document.createElement('div')
+              fallback.style.cssText = 'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
+              fallback.textContent = '🤖'
+              target.parentNode?.appendChild(fallback)
+            }}
+          />
         </div>
-      </div>
 
-      {/* Main Form */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: 'clamp(1rem, 3vw, 3rem) 0'
-      }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 'clamp(15px, 3vw, 20px)',
-          padding: 'clamp(1.5rem, 4vw, 2rem)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          maxWidth: '95vw',
-          width: '100%',
-          boxSizing: 'border-box'
+        {/* Navigation Menu */}
+        <nav style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2rem'
         }}>
-          <div style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 5vw, 3rem)' }}>
-            <h2 style={{
-              color: 'white',
-              fontSize: 'clamp(1.8rem, 6vw, 2.5rem)',
-              marginBottom: '1.5rem',
-              fontWeight: '700',
-              lineHeight: '1.2'
-            }}>
-              Join Casi Beta
-            </h2>
-            <p style={{
+          <a 
+            href="/" 
+            style={{
               color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: 'clamp(1rem, 3vw, 1.1rem)',
-              lineHeight: '1.6',
-              maxWidth: '600px',
-              margin: '0 auto'
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontWeight: '500'
+            }}
+          >
+            Home
+          </a>
+          <a 
+            href="/beta-signup" 
+            style={{
+              color: 'white',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              opacity: 1
+            }}
+          >
+            Beta Program
+          </a>
+          <a 
+            href="/dashboard" 
+            style={{
+              padding: '0.5rem 1rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '20px',
+              fontSize: '0.8rem',
+              fontWeight: '600'
+            }}
+          >
+            Dashboard
+          </a>
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <main style={{ padding: '2rem' }}>
+        <div style={{
+          maxWidth: '800px',
+          margin: '0 auto'
+        }}>
+          {/* Header Section */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '3rem'
+          }}>
+            <h1 style={{
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: '800',
+              marginBottom: '1rem',
+              background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}>
-              Get early access to the smartest streaming analytics platform. Never miss important questions again.
+              Join the Casi Beta
+            </h1>
+            
+            <p style={{
+              fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              maxWidth: '600px',
+              margin: '0 auto',
+              lineHeight: '1.6'
+            }}>
+              Be among the first streamers to experience AI-powered chat analysis. 
+              Help us build the future of streaming analytics.
             </p>
           </div>
 
-          {/* Free Beta Box with Matching Gradient Background */}
+          {/* Beta Program Info */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(147, 47, 254, 0.15) 35%, rgba(255, 159, 159, 0.15) 70%, rgba(184, 238, 138, 0.15) 100%)',
-            borderRadius: 'clamp(12px, 3vw, 15px)',
-            padding: 'clamp(1.5rem, 4vw, 2rem)',
-            marginBottom: 'clamp(2rem, 5vw, 3rem)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            position: 'relative',
-            overflow: 'hidden'
+            background: 'rgba(94, 234, 212, 0.1)',
+            border: '1px solid rgba(94, 234, 212, 0.3)',
+            borderRadius: '16px',
+            padding: '2rem',
+            marginBottom: '3rem'
           }}>
-            {/* Robot Logo */}
-            <div style={{
-              position: 'absolute',
-              top: 'clamp(1rem, 3vw, 1.5rem)',
-              right: 'clamp(1rem, 3vw, 1.5rem)',
-              opacity: 0.7
+            <h2 style={{
+              color: '#5EEAD4',
+              fontSize: '1.5rem',
+              marginBottom: '1rem',
+              textAlign: 'center'
             }}>
-              <img 
-                src="/landing-robot.png" 
-                alt="Casi Robot" 
-                style={{ height: 'clamp(40px, 8vw, 70px)', width: 'auto' }}
-              />
-            </div>
+              🚀 What's Included in Beta
+            </h2>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)' }}>🎉</div>
-              <h3 style={{
-                color: '#5EEAD4',
-                fontSize: 'clamp(1.1rem, 4vw, 1.4rem)',
-                margin: 0,
-                fontWeight: '700',
-                lineHeight: '1.2'
-              }}>
-                FREE Beta Access - Limited to 10 Users!
-              </h3>
-            </div>
             <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: 'clamp(8px, 2vw, 10px)',
-              padding: 'clamp(1rem, 3vw, 1.5rem)',
-              marginBottom: '1.5rem'
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '1.5rem'
             }}>
-              <p style={{
-                color: '#FFD700',
-                fontSize: 'clamp(0.9rem, 3vw, 1rem)',
-                fontWeight: '600',
-                margin: '0 0 0.75rem 0'
-              }}>
-                🚀 2-Week Free Trial
-              </p>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: 'clamp(0.85rem, 2.5vw, 0.95rem)',
-                margin: 0,
-                lineHeight: '1.5'
-              }}>
-                Get complete access to all Creator Plan features absolutely free for 2 weeks. No payment required to start!
-              </p>
-            </div>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-              marginBottom: '1.5rem'
-            }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '0.75rem'
-              }}>
-                <ul style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  listStyle: 'none',
-                  padding: 0,
-                  margin: 0
-                }}>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Real-time chat analysis</li>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Question detection & highlighting</li>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Sentiment tracking</li>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Discord notifications</li>
-                </ul>
-                <ul style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  listStyle: 'none',
-                  padding: 0,
-                  margin: 0
-                }}>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Email support</li>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ Priority feedback channel</li>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)' }}>✅ End of stream report!</li>
-                  <li style={{ marginBottom: '0.75rem', fontSize: 'clamp(0.75rem, 2vw, 0.85rem)', fontStyle: 'italic', color: 'rgba(255, 255, 255, 0.6)' }}>(Normally only available in Pro tier and above)</li>
-                </ul>
+              <div>
+                <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  ✨ Real-time Chat Analysis
+                </h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem', margin: 0 }}>
+                  AI-powered sentiment tracking and question detection for live streams
+                </p>
               </div>
-            </div>
-            
-            {/* After Beta Pricing */}
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: 'clamp(6px, 2vw, 8px)',
-              padding: 'clamp(1rem, 3vw, 1.5rem)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
-                margin: '0 0 0.75rem 0',
-                fontWeight: '600'
-              }}>
-                After your 2-week trial:
-              </p>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: 'clamp(0.75rem, 2.2vw, 0.85rem)',
-                margin: 0,
-                lineHeight: '1.5'
-              }}>
-                If you love Casi and want to continue, plans start from just <strong style={{ color: '#5EEAD4' }}>£19/month</strong> with higher tiers available for larger streamers. 
-                No pressure - we'll contact you before your trial ends to see if you'd like to continue.
-              </p>
+              
+              <div>
+                <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  📊 Engagement Insights
+                </h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem', margin: 0 }}>
+                  Track viewer mood and engagement patterns throughout your streams
+                </p>
+              </div>
+              
+              <div>
+                <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  🎯 Priority Support
+                </h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem', margin: 0 }}>
+                  Direct feedback line to our development team
+                </p>
+              </div>
+              
+              <div>
+                <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  🆓 Free Access
+                </h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem', margin: 0 }}>
+                  Full platform access during beta period (3-6 months)
+                </p>
+              </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 'clamp(1rem, 3vw, 1.5rem)',
-              marginBottom: 'clamp(1.5rem, 4vw, 2rem)'
+          {/* Application Form */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '2rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <h2 style={{
+              color: 'white',
+              fontSize: '1.5rem',
+              marginBottom: '1.5rem',
+              textAlign: 'center'
             }}>
+              Beta Application Form
+            </h2>
+
+            <form onSubmit={handleSubmit}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: 'clamp(1rem, 3vw, 1.5rem)'
+                gridTemplateColumns: '1fr',
+                gap: '1.5rem'
               }}>
+                {/* Email */}
                 <div>
                   <label style={{
-                    color: 'white',
-                    fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                    fontWeight: '600',
                     display: 'block',
-                    marginBottom: '0.75rem'
-                  }}>
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: 'clamp(0.8rem, 3vw, 1rem)',
-                      borderRadius: 'clamp(8px, 2vw, 10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      color: 'white',
-                      fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                      fontFamily: 'Poppins, sans-serif',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="Enter your full name"
-                  />
-                </div>
-
-                <div>
-                  <label style={{
                     color: 'white',
-                    fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                    fontWeight: '600',
-                    display: 'block',
-                    marginBottom: '0.75rem'
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem'
                   }}>
                     Email Address *
                   </label>
@@ -397,238 +321,420 @@ export default function BetaSignup() {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
+                    onChange={handleInputChange}
+                    placeholder="your@email.com"
                     required
                     style={{
                       width: '100%',
-                      padding: 'clamp(0.8rem, 3vw, 1rem)',
-                      borderRadius: 'clamp(8px, 2vw, 10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: 'none',
                       background: 'rgba(255, 255, 255, 0.1)',
                       color: 'white',
-                      fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '1rem',
+                      fontFamily: 'Poppins, Arial, sans-serif',
                       boxSizing: 'border-box'
                     }}
-                    placeholder="your@email.com"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label style={{
-                  color: 'white',
-                  fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                  fontWeight: '600',
-                  display: 'block',
-                  marginBottom: '0.75rem'
+                {/* Twitch Username */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Twitch Username *
+                  </label>
+                  <input
+                    type="text"
+                    name="twitchUsername"
+                    value={formData.twitchUsername}
+                    onChange={handleInputChange}
+                    placeholder="your_twitch_username"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontFamily: 'Poppins, Arial, sans-serif',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* Two Column Layout for Desktop */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '1rem'
                 }}>
-                  Twitch Channel Username *
-                </label>
-                <input
-                  type="text"
-                  name="twitch_channel"
-                  value={formData.twitch_channel}
-                  onChange={handleChange}
-                  required
+                  {/* Average Viewers */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Average Viewers
+                    </label>
+                    <select
+                      name="averageViewers"
+                      value={formData.averageViewers}
+                      onChange={handleInputChange}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'Poppins, Arial, sans-serif',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <option value="">Select range</option>
+                      <option value="1-10">1-10 viewers</option>
+                      <option value="11-50">11-50 viewers</option>
+                      <option value="51-100">51-100 viewers</option>
+                      <option value="101-500">101-500 viewers</option>
+                      <option value="501-1000">501-1,000 viewers</option>
+                      <option value="1000+">1,000+ viewers</option>
+                    </select>
+                  </div>
+
+                  {/* Streaming Experience */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Streaming Experience
+                    </label>
+                    <select
+                      name="streamingExperience"
+                      value={formData.streamingExperience}
+                      onChange={handleInputChange}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'Poppins, Arial, sans-serif',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <option value="">Select experience</option>
+                      <option value="new">New (0-6 months)</option>
+                      <option value="intermediate">Intermediate (6 months - 2 years)</option>
+                      <option value="experienced">Experienced (2+ years)</option>
+                      <option value="professional">Professional/Partner</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Primary Platform */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Primary Streaming Platform
+                  </label>
+                  <select
+                    name="primaryPlatform"
+                    value={formData.primaryPlatform}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontFamily: 'Poppins, Arial, sans-serif',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="twitch">Twitch</option>
+                    <option value="youtube">YouTube Live</option>
+                    <option value="kick">Kick</option>
+                    <option value="facebook">Facebook Gaming</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                {/* Use Case */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem'
+                  }}>
+                    What would you primarily use Casi for?
+                  </label>
+                  <textarea
+                    name="useCase"
+                    value={formData.useCase}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Better engage with my community, track viewer sentiment, find important questions..."
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontFamily: 'Poppins, Arial, sans-serif',
+                      boxSizing: 'border-box',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                {/* How did you hear about us */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem'
+                  }}>
+                    How did you hear about Casi?
+                  </label>
+                  <select
+                    name="hearAbout"
+                    value={formData.hearAbout}
+                    onChange={handleInputChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontFamily: 'Poppins, Arial, sans-serif',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="">Select option</option>
+                    <option value="twitter">Twitter/X</option>
+                    <option value="twitch">Twitch</option>
+                    <option value="discord">Discord</option>
+                    <option value="reddit">Reddit</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="friend">Friend/Streamer</option>
+                    <option value="search">Google Search</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
                   style={{
                     width: '100%',
-                    padding: 'clamp(0.8rem, 3vw, 1rem)',
-                    borderRadius: 'clamp(8px, 2vw, 10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    background: 'rgba(255, 255, 255, 0.1)',
+                    padding: '1rem',
+                    background: isSubmitting 
+                      ? 'rgba(255, 255, 255, 0.2)' 
+                      : 'linear-gradient(135deg, #6932FF, #932FFE)',
                     color: 'white',
-                    fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                    fontFamily: 'Poppins, sans-serif',
-                    boxSizing: 'border-box'
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    fontSize: '1.1rem',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    fontFamily: 'Poppins, Arial, sans-serif',
+                    marginTop: '0.5rem'
                   }}
-                  placeholder="your_twitch_username"
-                />
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  fontSize: 'clamp(0.75rem, 2.2vw, 0.9rem)',
-                  marginTop: '0.75rem'
-                }}>
-                  Enter just your username (no @ or twitch.tv/)
+                >
+                  {isSubmitting ? 'Submitting Application...' : 'Apply for Beta Access'}
+                </button>
+              </div>
+            </form>
+
+            {message && (
+              <div style={{
+                marginTop: '1rem',
+                padding: '1rem',
+                borderRadius: '8px',
+                background: message.includes('wrong') || message.includes('valid') 
+                  ? 'rgba(255, 159, 159, 0.2)' 
+                  : 'rgba(184, 238, 138, 0.2)',
+                border: `1px solid ${message.includes('wrong') || message.includes('valid') 
+                  ? 'rgba(255, 159, 159, 0.3)' 
+                  : 'rgba(184, 238, 138, 0.3)'}`,
+                color: message.includes('wrong') || message.includes('valid') ? '#FF9F9F' : '#B8EE8A',
+                textAlign: 'center',
+                fontSize: '0.9rem'
+              }}>
+                {message}
+              </div>
+            )}
+          </div>
+
+          {/* Timeline */}
+          <div style={{
+            marginTop: '3rem',
+            textAlign: 'center'
+          }}>
+            <h3 style={{
+              color: 'white',
+              fontSize: '1.3rem',
+              marginBottom: '2rem'
+            }}>
+              Beta Timeline
+            </h3>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1.5rem'
+            }}>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📝</div>
+                <h4 style={{ color: 'white', fontSize: '1rem', marginBottom: '0.5rem' }}>
+                  Week 1-2
+                </h4>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', margin: 0 }}>
+                  Application review and beta invitations sent
+                </p>
+              </div>
+
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🚀</div>
+                <h4 style={{ color: 'white', fontSize: '1rem', marginBottom: '0.5rem' }}>
+                  Week 3-4
+                </h4>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', margin: 0 }}>
+                  Beta access granted and initial testing phase
+                </p>
+              </div>
+
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🔄</div>
+                <h4 style={{ color: 'white', fontSize: '1rem', marginBottom: '0.5rem' }}>
+                  Month 2-4
+                </h4>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', margin: 0 }}>
+                  Feature development based on your feedback
+                </p>
+              </div>
+
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🎯</div>
+                <h4 style={{ color: 'white', fontSize: '1rem', marginBottom: '0.5rem' }}>
+                  Month 5-6
+                </h4>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', margin: 0 }}>
+                  Public launch with special beta user benefits
                 </p>
               </div>
             </div>
+          </div>
 
-            {/* Beta Access Instructions with Gradient Background */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(147, 47, 254, 0.15) 35%, rgba(255, 159, 159, 0.15) 70%, rgba(184, 238, 138, 0.15) 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: 'clamp(8px, 2vw, 10px)',
-              padding: 'clamp(1.5rem, 4vw, 2rem)',
-              marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
-              position: 'relative'
+          {/* Contact Info */}
+          <div style={{
+            marginTop: '3rem',
+            padding: '2rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <h3 style={{
+              color: 'white',
+              fontSize: '1.2rem',
+              marginBottom: '1rem'
             }}>
-              {/* Small Robot Logo */}
-              <div style={{
-                position: 'absolute',
-                top: 'clamp(1rem, 3vw, 1.5rem)',
-                right: 'clamp(1rem, 3vw, 1.5rem)',
-                opacity: 0.6
-              }}>
-                <img 
-                  src="/landing-robot.png" 
-                  alt="Casi Robot" 
-                  style={{ height: 'clamp(30px, 6vw, 45px)', width: 'auto' }}
-                />
-              </div>
-              
-              <h4 style={{
-                color: '#5EEAD4',
-                fontSize: 'clamp(0.95rem, 3vw, 1.1rem)',
-                marginBottom: '1.5rem',
-                fontWeight: '600',
-                lineHeight: '1.2'
-              }}>
-                🎯 How to Get Your Free Beta Access
-              </h4>
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                padding: 'clamp(1rem, 3vw, 1.5rem)',
-                borderRadius: 'clamp(6px, 2vw, 8px)',
-                marginBottom: '1.5rem'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
-                    margin: 0,
-                    lineHeight: '1.6'
-                  }}>
-                    <strong>Step 1:</strong> Fill out the form with your details
-                  </p>
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
-                    margin: 0,
-                    lineHeight: '1.6'
-                  }}>
-                    <strong>Step 2:</strong> We'll review and activate within 24 hours
-                  </p>
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
-                    margin: 0,
-                    lineHeight: '1.6'
-                  }}>
-                    <strong>Step 3:</strong> Start using Casi - completely free for 2 weeks!
-                  </p>
-                </div>
-              </div>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: 'clamp(0.75rem, 2.2vw, 0.85rem)',
-                lineHeight: '1.5',
-                margin: 0,
-                textAlign: 'center'
-              }}>
-                <strong>Limited spots:</strong> Only 10 beta users will be selected for this exclusive free trial. 
-                Apply now to secure your spot!
-              </p>
-            </div>
-
-            <div style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}>
-              <label style={{
-                color: 'white',
-                fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                fontWeight: '600',
-                display: 'block',
-                marginBottom: '0.75rem'
-              }}>
-                Why do you want to join the Casi beta? *
-              </label>
-              <textarea
-                name="beta_reason"
-                value={formData.beta_reason}
-                onChange={handleChange}
-                required
-                rows={4}
-                style={{
-                  width: '100%',
-                  padding: 'clamp(0.8rem, 3vw, 1rem)',
-                  borderRadius: 'clamp(8px, 2vw, 10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'white',
-                  fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-                  fontFamily: 'Poppins, sans-serif',
-                  resize: 'vertical',
-                  minHeight: 'clamp(100px, 15vw, 120px)',
-                  boxSizing: 'border-box'
-                }}
-                placeholder="Tell us why you'd be a great beta tester and how you plan to use Casi..."
-              />
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: 'clamp(0.75rem, 2.2vw, 0.9rem)',
-                marginTop: '0.75rem'
-              }}>
-                Help us understand your streaming goals and how Casi can help you grow
-              </p>
-            </div>
-
-            {error && (
-              <div style={{
-                background: 'rgba(255, 0, 0, 0.1)',
-                border: '1px solid rgba(255, 0, 0, 0.3)',
-                borderRadius: 'clamp(8px, 2vw, 10px)',
-                padding: 'clamp(1rem, 3vw, 1.5rem)',
-                marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
-                color: '#ff6b6b',
-                fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
-                textAlign: 'center',
-                wordWrap: 'break-word'
-              }}>
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
+              Questions about the Beta?
+            </h3>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.9rem',
+              marginBottom: '1rem'
+            }}>
+              We're here to help! Reach out if you have any questions about the beta program.
+            </p>
+            <a
+              href="mailto:beta@heycasi.com"
               style={{
-                width: '100%',
-                background: isSubmitting 
-                  ? 'rgba(105, 50, 255, 0.5)' 
-                  : 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
-                color: 'white',
-                border: 'none',
-                padding: 'clamp(1rem, 4vw, 1.5rem) clamp(1.5rem, 4vw, 2rem)',
-                borderRadius: '50px',
-                fontSize: 'clamp(0.9rem, 3vw, 1.1rem)',
+                display: 'inline-block',
+                padding: '0.75rem 1.5rem',
+                background: 'rgba(94, 234, 212, 0.2)',
+                color: '#5EEAD4',
+                textDecoration: 'none',
+                borderRadius: '25px',
+                fontSize: '0.9rem',
                 fontWeight: '600',
-                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                fontFamily: 'Poppins, sans-serif',
-                transition: 'all 0.3s ease',
-                marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
-                boxSizing: 'border-box'
+                border: '1px solid rgba(94, 234, 212, 0.3)',
+                fontFamily: 'Poppins, Arial, sans-serif'
               }}
             >
-              {isSubmitting ? 'Submitting Application...' : 'Apply for Free Beta Access'}
-            </button>
-          </form>
-
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: 'clamp(0.75rem, 2.2vw, 0.85rem)',
-            textAlign: 'center',
-            lineHeight: '1.5',
-            maxWidth: '100%',
-            margin: '0 auto',
-            wordWrap: 'break-word'
-          }}>
-            By applying, you agree to provide feedback during the beta period. Only 10 spots available - we'll contact successful applicants within 24 hours.
-          </p>
+              📧 Contact Beta Team
+            </a>
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer style={{
+        padding: '2rem',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        textAlign: 'center',
+        color: 'rgba(255, 255, 255, 0.6)'
+      }}>
+        <p style={{ margin: 0, fontSize: '0.9rem' }}>
+          <strong style={{ color: '#5EEAD4' }}>Casi</strong> • Your stream's brainy co-pilot. Reads the room so you don't have to.
+        </p>
+      </footer>
     </div>
   )
 }
