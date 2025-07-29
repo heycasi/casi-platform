@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx - Clean Dashboard with Full Width Layout
+// src/app/dashboard/page.tsx - Dashboard with Navigation
 'use client'
 import { useState, useEffect } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
@@ -59,15 +59,6 @@ export default function Dashboard() {
     'streamdeckerbot', 'vivbot', 'soundalerts', 'own3dbot',
     'pretzelrocks', 'songrequestbot', 'musicbot'
   ]
-
-  const getLanguageFlag = (language: string): string => {
-    const flags: { [key: string]: string } = {
-      'english': '🇺🇸', 'spanish': '🇪🇸', 'french': '🇫🇷', 'german': '🇩🇪',
-      'portuguese': '🇵🇹', 'italian': '🇮🇹', 'dutch': '🇳🇱', 'japanese': '🇯🇵',
-      'korean': '🇰🇷', 'chinese': '🇨🇳', 'russian': '🇷🇺', 'arabic': '🇸🇦', 'hindi': '🇮🇳'
-    }
-    return flags[language] || '🌍'
-  }
 
   const handleBetaAccess = () => {
     if (validCodes.includes(betaCode.toUpperCase()) && email.trim()) {
@@ -358,7 +349,7 @@ export default function Dashboard() {
       fontFamily: 'Poppins, Arial, sans-serif',
       color: 'white'
     }}>
-      {/* Header */}
+      {/* Header with Navigation */}
       <div style={{
         padding: '0.75rem 1rem',
         background: 'rgba(255, 255, 255, 0.05)',
@@ -397,25 +388,49 @@ export default function Dashboard() {
           />
         </div>
         
-        <button
-          onClick={() => {
-            localStorage.removeItem('casi_beta_access')
-            localStorage.removeItem('casi_user_email')
-            setIsAuthenticated(false)
-          }}
-          style={{
-            padding: '0.5rem 1rem',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: 'none',
-            borderRadius: '15px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontFamily: 'Poppins, Arial, sans-serif'
-          }}
-        >
-          Logout
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <a 
+            href="/" 
+            style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              textDecoration: 'none',
+              fontSize: '0.8rem',
+              fontWeight: '500'
+            }}
+          >
+            Home
+          </a>
+          <a 
+            href="/beta-signup" 
+            style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              textDecoration: 'none',
+              fontSize: '0.8rem',
+              fontWeight: '500'
+            }}
+          >
+            Beta Program
+          </a>
+          <button
+            onClick={() => {
+              localStorage.removeItem('casi_beta_access')
+              localStorage.removeItem('casi_user_email')
+              setIsAuthenticated(false)
+            }}
+            style={{
+              padding: '0.4rem 0.8rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              borderRadius: '15px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontFamily: 'Poppins, Arial, sans-serif'
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       <div style={{ 
@@ -498,7 +513,7 @@ export default function Dashboard() {
         {/* Connected State */}
         {isConnected && (
           <>
-            {/* Combined Status & Welcome Banner - Full Width */}
+            {/* Combined Status & Welcome Banner - Left Aligned */}
             <div style={{
               background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.15))',
               borderRadius: '8px',
@@ -506,33 +521,30 @@ export default function Dashboard() {
               border: '1px solid rgba(184, 238, 138, 0.3)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.75rem'
+              gap: '0.75rem',
+              width: 'fit-content'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{
-                    width: '6px',
-                    height: '6px',
-                    background: '#B8EE8A',
-                    borderRadius: '50%'
-                  }} />
-                  <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
-                    Connected to @{channelName}
-                  </span>
-                </div>
-                
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{
-                  height: '12px',
-                  width: '1px',
-                  background: 'rgba(255, 255, 255, 0.2)'
+                  width: '6px',
+                  height: '6px',
+                  background: '#B8EE8A',
+                  borderRadius: '50%'
                 }} />
-                
-                <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
-                  Hey! Your friendly stream sidekick is analyzing chat 🎮✨
+                <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
+                  Connected to @{channelName}
                 </span>
               </div>
+              
+              <div style={{
+                height: '12px',
+                width: '1px',
+                background: 'rgba(255, 255, 255, 0.2)'
+              }} />
+              
+              <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
+                Hey! Your friendly stream sidekick is analyzing chat 🎮✨
+              </span>
               
               <button
                 onClick={() => {
@@ -555,6 +567,7 @@ export default function Dashboard() {
                 Disconnect
               </button>
             </div>
+
             {/* AI Motivational Message */}
             {motivationalMessage && (
               <div style={{
@@ -719,7 +732,7 @@ export default function Dashboard() {
                           flexWrap: 'wrap'
                         }}>
                           <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>
-                            {getLanguageFlag(q.language || 'english')} {q.username}
+                            {q.username}
                           </span>
                           <span style={{
                             fontSize: '0.7rem',
