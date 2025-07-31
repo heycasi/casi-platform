@@ -277,15 +277,24 @@ export default function Home() {
                   marginBottom: '1rem',
                   flexDirection: 'column'
                 }}>
+                  <label htmlFor="email" style={{
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    marginBottom: '0.25rem'
+                  }}>
+                    Email Address
+                  </label>
                   <input
+                    id="email"
                     type="email"
-                    placeholder="Enter your email address"
+                    placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     style={{
                       padding: '0.75rem',
                       borderRadius: '25px',
-                      border: 'none',
+                      border: '2px solid rgba(255, 255, 255, 0.2)',
                       background: 'rgba(255, 255, 255, 0.1)',
                       color: 'white',
                       fontSize: '1rem',
@@ -354,23 +363,25 @@ export default function Home() {
                 📝 Beta Program Details
               </a>
               
-              <a
-                href="/dashboard"
+              <button
+                onClick={() => {
+                  setMessage('🔒 Dashboard demo coming soon! Join the waitlist above for early access.')
+                }}
                 style={{
                   display: 'inline-block',
                   padding: '0.75rem 1.5rem',
                   background: 'rgba(255, 159, 159, 0.2)',
                   color: '#FF9F9F',
-                  textDecoration: 'none',
+                  border: '1px solid rgba(255, 159, 159, 0.3)',
                   borderRadius: '25px',
                   fontWeight: '600',
                   fontSize: '0.9rem',
-                  border: '1px solid rgba(255, 159, 159, 0.3)',
-                  fontFamily: 'Poppins, Arial, sans-serif'
+                  fontFamily: 'Poppins, Arial, sans-serif',
+                  cursor: 'pointer'
                 }}
               >
-                🚀 Try Dashboard
-              </a>
+                🔒 Preview Dashboard
+              </button>
             </div>
           </div>
 
@@ -389,7 +400,7 @@ export default function Home() {
             }}>
               <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💬</div>
               <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Real-time Chat Analysis</h3>
-              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
                 AI-powered sentiment analysis and question detection in live chat
               </p>
             </div>
@@ -402,7 +413,7 @@ export default function Home() {
             }}>
               <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📊</div>
               <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Engagement Insights</h3>
-              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
                 Track viewer mood and engagement levels throughout your stream
               </p>
             </div>
@@ -415,7 +426,7 @@ export default function Home() {
             }}>
               <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤖</div>
               <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>AI Response Suggestions</h3>
-              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
                 Get smart suggestions for engaging with your community
               </p>
             </div>
@@ -425,14 +436,161 @@ export default function Home() {
 
       {/* Footer */}
       <footer style={{
-        padding: '2rem',
+        padding: '3rem 2rem 2rem 2rem',
         borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        textAlign: 'center',
-        color: 'rgba(255, 255, 255, 0.6)'
+        background: 'rgba(0, 0, 0, 0.2)'
       }}>
-        <p style={{ margin: 0, fontSize: '0.9rem' }}>
-          <strong style={{ color: '#5EEAD4' }}>Casi</strong> • Your stream's brainy co-pilot. Reads the room so you don't have to.
-        </p>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '2rem',
+          marginBottom: '2rem'
+        }}>
+          {/* Brand */}
+          <div>
+            <h4 style={{ 
+              color: '#5EEAD4', 
+              marginBottom: '1rem',
+              fontSize: '1.1rem',
+              fontWeight: '600'
+            }}>
+              Casi
+            </h4>
+            <p style={{ 
+              color: 'rgba(255, 255, 255, 0.8)', 
+              fontSize: '0.9rem',
+              lineHeight: '1.5'
+            }}>
+              Your stream's brainy co-pilot. AI-powered chat analysis for better audience engagement.
+            </p>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h4 style={{ 
+              color: 'white', 
+              marginBottom: '1rem',
+              fontSize: '1rem',
+              fontWeight: '600'
+            }}>
+              Product
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <a href="/" style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Home
+              </a>
+              <a href="/beta-signup" style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Beta Program
+              </a>
+              <button 
+                onClick={() => setMessage('🔒 Dashboard demo coming soon!')}
+                style={{ 
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.8)', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  padding: 0,
+                  fontFamily: 'Poppins, Arial, sans-serif'
+                }}
+              >
+                Dashboard
+              </button>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 style={{ 
+              color: 'white', 
+              marginBottom: '1rem',
+              fontSize: '1rem',
+              fontWeight: '600'
+            }}>
+              Contact
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <a href="mailto:casi@heycasi.com" style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                casi@heycasi.com
+              </a>
+              <a href="#" onClick={(e) => {
+                e.preventDefault()
+                setMessage('📞 Support available for beta users!')
+              }} style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Support
+              </a>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 style={{ 
+              color: 'white', 
+              marginBottom: '1rem',
+              fontSize: '1rem',
+              fontWeight: '600'
+            }}>
+              Legal
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <a href="#" onClick={(e) => {
+                e.preventDefault()
+                setMessage('📄 Privacy policy coming soon!')
+              }} style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Privacy Policy
+              </a>
+              <a href="#" onClick={(e) => {
+                e.preventDefault()
+                setMessage('📋 Terms of service coming soon!')
+              }} style={{ 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Terms of Service
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={{
+          paddingTop: '2rem',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          textAlign: 'center'
+        }}>
+          <p style={{ 
+            margin: 0, 
+            fontSize: '0.8rem',
+            color: 'rgba(255, 255, 255, 0.6)'
+          }}>
+            © 2024 Casi. All rights reserved.
+          </p>
+        </div>
       </footer>
 
       {/* CSS for animations */}

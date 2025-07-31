@@ -1,0 +1,6 @@
+node_modules/
+.next/
+*.docx
+previous claude chats/
+package-lock.json
+tsconfig.json
