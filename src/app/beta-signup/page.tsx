@@ -91,7 +91,9 @@ export default function BetaSignup() {
         alignItems: 'center',
         background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        flexWrap: 'wrap',
+        gap: '1rem'
       }}>
         <div style={{
           display: 'flex',
@@ -131,7 +133,8 @@ export default function BetaSignup() {
         <nav style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '2rem'
+          gap: '1.5rem',
+          flexWrap: 'wrap'
         }}>
           <a 
             href="/" 
@@ -139,7 +142,8 @@ export default function BetaSignup() {
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
               fontSize: '0.9rem',
-              fontWeight: '500'
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
             }}
           >
             Home
@@ -151,7 +155,8 @@ export default function BetaSignup() {
               textDecoration: 'none',
               fontSize: '0.9rem',
               fontWeight: '500',
-              opacity: 1
+              opacity: 1,
+              whiteSpace: 'nowrap'
             }}
           >
             Beta Program
@@ -165,7 +170,8 @@ export default function BetaSignup() {
               textDecoration: 'none',
               borderRadius: '20px',
               fontSize: '0.8rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              whiteSpace: 'nowrap'
             }}
           >
             Dashboard

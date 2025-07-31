@@ -94,14 +94,16 @@ export default function Home() {
       color: 'white'
     }}>
       {/* Header with Navigation */}
-      <header style={{
+      <header className="header-nav" style={{
         padding: '1rem 2rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        flexWrap: 'wrap',
+        gap: '1rem'
       }}>
         <div style={{
           display: 'flex',
@@ -141,7 +143,8 @@ export default function Home() {
         <nav style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '2rem'
+          gap: '1.5rem',
+          flexWrap: 'wrap'
         }}>
           <a 
             href="/" 
@@ -150,7 +153,8 @@ export default function Home() {
               textDecoration: 'none',
               fontSize: '0.9rem',
               fontWeight: '500',
-              opacity: 1
+              opacity: 1,
+              whiteSpace: 'nowrap'
             }}
           >
             Home
@@ -161,7 +165,8 @@ export default function Home() {
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
               fontSize: '0.9rem',
-              fontWeight: '500'
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
             }}
           >
             Beta Program
@@ -175,7 +180,8 @@ export default function Home() {
               textDecoration: 'none',
               borderRadius: '20px',
               fontSize: '0.8rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              whiteSpace: 'nowrap'
             }}
           >
             Dashboard
@@ -211,7 +217,7 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <main style={{ padding: '4rem 2rem' }}>
+      <main className="main-content" style={{ padding: '4rem 2rem' }}>
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
@@ -252,7 +258,7 @@ export default function Home() {
             </p>
 
             {/* Waitlist Form */}
-            <div style={{
+            <div className="form-container" style={{
               background: 'rgba(255, 255, 255, 0.05)',
               backdropFilter: 'blur(10px)',
               borderRadius: '20px',
@@ -339,7 +345,7 @@ export default function Home() {
             </div>
 
             {/* Quick Access Buttons */}
-            <div style={{
+            <div className="quick-access-buttons" style={{
               display: 'flex',
               gap: '1rem',
               justifyContent: 'center',
@@ -386,7 +392,7 @@ export default function Home() {
           </div>
 
           {/* Features Preview */}
-          <div style={{
+          <div className="features-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '2rem',
@@ -440,7 +446,7 @@ export default function Home() {
         borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         background: 'rgba(0, 0, 0, 0.2)'
       }}>
-        <div style={{
+        <div className="footer-grid" style={{
           maxWidth: '1200px',
           margin: '0 auto',
           display: 'grid',
@@ -598,6 +604,65 @@ export default function Home() {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 768px) {
+          .header-nav {
+            padding: 1rem !important;
+            flex-direction: column !important;
+            gap: 1rem !important;
+            text-align: center !important;
+          }
+          
+          .header-nav nav {
+            gap: 1rem !important;
+            justify-content: center !important;
+          }
+          
+          .features-grid {
+            grid-template-columns: 1fr !important;
+          }
+          
+          .quick-access-buttons {
+            flex-direction: column !important;
+            align-items: center !important;
+          }
+          
+          .quick-access-buttons a,
+          .quick-access-buttons button {
+            width: 100% !important;
+            max-width: 300px !important;
+            text-align: center !important;
+          }
+          
+          .footer-grid {
+            grid-template-columns: 1fr !important;
+            text-align: center !important;
+          }
+          
+          .form-container {
+            margin: 0 1rem 3rem 1rem !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .header-nav {
+            padding: 0.75rem !important;
+          }
+          
+          .header-nav nav {
+            gap: 0.75rem !important;
+            flex-direction: column !important;
+          }
+          
+          .header-nav nav a {
+            font-size: 0.85rem !important;
+            padding: 0.5rem 1rem !important;
+          }
+          
+          .main-content {
+            padding: 2rem 1rem !important;
+          }
         }
       `}</style>
     </div>
