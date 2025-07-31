@@ -2,6 +2,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
+import { AnalyticsService } from '../../lib/analytics'
 
 interface ChatMessage {
   id: string
@@ -39,6 +40,8 @@ export default function Dashboard() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [questions, setQuestions] = useState<ChatMessage[]>([])
   const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -77,8 +80,63 @@ export default function Dashboard() {
     }
   }, [])
 
+  // Create session when connecting
+  const startSession = async () => {
+    if (email && channelName) {
+      try {
+        const sessionId = await AnalyticsService.createSession(email, channelName)
+        setCurrentSessionId(sessionId)
+        console.log('Started session:', sessionId)
+      } catch (error) {
+        console.error('Failed to start session:', error)
+      }
+    }
+  }
+
+  // End session and generate report
+  const endSession = async () => {
+    if (currentSessionId) {
+      try {
+        await AnalyticsService.endSession(currentSessionId)
+        console.log('Ended session:', currentSessionId)
+        
+        // Generate report after a short delay to ensure all data is processed
+        setTimeout(() => {
+          generateReport(currentSessionId)
+        }, 2000)
+      } catch (error) {
+        console.error('Failed to end session:', error)
+      }
+    }
+  }
+
+  // Generate and send report
+  const generateReport = async (sessionId: string) => {
+    setIsGeneratingReport(true)
+    try {
+      const response = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, email })
+      })
+      
+      if (response.ok) {
+        console.log('Report generated and sent successfully')
+      } else {
+        throw new Error('Failed to generate report')
+      }
+    } catch (error) {
+      console.error('Failed to generate report:', error)
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }
+
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
+
+    // Start session when connecting
+    startSession()
 
     let ws: WebSocket | null = null
 
@@ -110,11 +168,12 @@ export default function Dashboard() {
             
             const analysis = analyzeMessage(messageText)
             
+            const timestamp = new Date()
             const chatMessage: ChatMessage = {
               id: Date.now().toString() + Math.random(),
               username,
               message: messageText,
-              timestamp: Date.now(),
+              timestamp: timestamp.getTime(),
               sentiment: analysis.sentiment,
               sentimentReason: analysis.sentimentReason,
               sentimentScore: analysis.sentimentScore,
@@ -131,6 +190,26 @@ export default function Dashboard() {
             if (analysis.isQuestion) {
               setQuestions(prev => [...prev.slice(-9), chatMessage])
             }
+
+            // Store message in database if we have an active session
+            if (currentSessionId) {
+              AnalyticsService.storeChatMessage(currentSessionId, {
+                username,
+                message: messageText,
+                timestamp,
+                language: analysis.language,
+                language_confidence: analysis.confidence,
+                sentiment: analysis.sentiment,
+                sentiment_score: analysis.sentimentScore,
+                sentiment_reason: analysis.sentimentReason,
+                is_question: analysis.isQuestion,
+                question_type: analysis.questionType,
+                engagement_level: analysis.engagementLevel,
+                topics: analysis.topics
+              }).catch(error => {
+                console.error('Failed to store message:', error)
+              })
+            }
           }
         }
 
@@ -141,6 +220,9 @@ export default function Dashboard() {
         ws.onclose = () => {
           if (isConnected) {
             setTimeout(connectToTwitch, 3000)
+          } else {
+            // Stream ended, end session
+            endSession()
           }
         }
 
@@ -205,6 +287,17 @@ export default function Dashboard() {
       activeUsers: uniqueUsers,
       currentMood
     })
+
+    // Update session stats in database
+    if (currentSessionId && messages.length > 0) {
+      AnalyticsService.updateSessionStats(currentSessionId, {
+        peak_viewer_count: Math.max(stats.viewerCount, viewerCount),
+        total_messages: messages.length,
+        unique_chatters: uniqueUsers
+      }).catch(error => {
+        console.error('Failed to update session stats:', error)
+      })
+    }
   }, [messages, questions])
 
   if (!isAuthenticated) {
@@ -552,6 +645,8 @@ export default function Dashboard() {
                   setMessages([])
                   setQuestions([])
                   setMotivationalMessage(null)
+                  setCurrentSessionId(null)
+                  // endSession will be called by WebSocket onclose
                 }}
                 style={{
                   padding: '0.3rem 0.6rem',
@@ -614,6 +709,33 @@ export default function Dashboard() {
                 >
                   ×
                 </button>
+              </div>
+            )}
+
+            {/* Report Generation Status */}
+            {isGeneratingReport && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(147, 47, 254, 0.2), rgba(147, 47, 254, 0.1))',
+                borderRadius: '12px',
+                padding: '1rem',
+                border: '1px solid rgba(147, 47, 254, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
+              }}>
+                <div style={{
+                  background: '#932FFE',
+                  color: 'white',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '12px',
+                  fontSize: '0.7rem',
+                  fontWeight: '600'
+                }}>
+                  📊 GENERATING REPORT
+                </div>
+                <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.9rem' }}>
+                  Processing your stream analytics and preparing your summary report...
+                </p>
               </div>
             )}
 
@@ -712,9 +834,10 @@ export default function Dashboard() {
                     overflowY: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    maxHeight: '400px'
                   }}>
-                    {questions.slice(-10).map((q) => (
+                    {questions.slice(-10).reverse().map((q) => (
                       <div
                         key={q.id}
                         style={{
@@ -778,7 +901,8 @@ export default function Dashboard() {
                   overflowY: 'auto',
                   background: 'rgba(0, 0, 0, 0.3)',
                   borderRadius: '8px',
-                  padding: '0.75rem'
+                  padding: '0.75rem',
+                  maxHeight: '400px'
                 }}>
                   {messages.length === 0 ? (
                     <div style={{
@@ -801,7 +925,7 @@ export default function Dashboard() {
                       flexDirection: 'column', 
                       gap: '0.5rem'
                     }}>
-                      {messages.slice(-50).map((msg) => (
+                      {messages.slice(-50).reverse().map((msg) => (
                         <div
                           key={msg.id}
                           style={{
