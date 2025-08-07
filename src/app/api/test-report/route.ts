@@ -55,7 +55,7 @@ function generateMockReport(): StreamReport {
       streamer_email: 'test@heycasi.com',
       total_messages: 3456,
       unique_chatters: 234,
-      report_generated: new Date().toISOString(),
+      report_generated: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     },
