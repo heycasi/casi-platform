@@ -276,6 +276,15 @@
             margin-right: auto;
         }
         
+        .stat-number-realtime {
+            font-size: 42px !important;
+            font-weight: 800;
+            color: #FFFFFF;
+            display: block;
+            margin-bottom: 10px;
+            white-space: nowrap;
+        }
+        
         .stat-card {
             text-align: center;
         }
@@ -307,6 +316,17 @@
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
+        }
+        
+        .use-case-grid-bottom {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            justify-items: center;
         }
         
         .use-case-card {
@@ -684,7 +704,12 @@
 
         <!-- Solution Section -->
         <section class="solution-section gradient-section">
-            <h2 class="solution-title">Meet Casi: The Game Changer</h2>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 30px; flex-wrap: wrap;">
+                <img src="landing-robot.png" alt="Casi Robot" style="width: 120px; height: 120px;">
+                <div>
+                    <h2 class="solution-title" style="margin-bottom: 10px;">Meet Casi: The Game Changer</h2>
+                </div>
+            </div>
             <p style="font-size: 18px; color: #666; max-width: 800px; margin: 0 auto;">Imagine having a brilliant AI assistant that watches your chat, understands your viewers, and gives you actionable insights in real-time.</p>
             
             <div class="features-grid">
@@ -748,13 +773,13 @@
                     <h2>Why Streamers Choose Casi</h2>
                     <p>Join the revolution of data-driven streaming. Our AI doesn't just watch your chat—it understands it, analyzes it, and turns it into actionable insights that help you grow your community and improve your content.</p>
                     <div style="margin-top: 30px;">
-                        <div class="stats-grid" style="max-width: none; margin: 0;">
-                            <div class="stat-card" style="text-align: left;">
+                        <div style="display: flex; gap: 60px; align-items: flex-start;">
+                            <div class="stat-card" style="text-align: left; flex: 1;">
                                 <span class="stat-number" style="color: #B785FF; font-size: 32px;">13+</span>
                                 <span class="stat-label" style="color: #666;">Languages</span>
                             </div>
-                            <div class="stat-card" style="text-align: left;">
-                                <span class="stat-number" style="color: #B785FF; font-size: 32px;">Real-Time</span>
+                            <div class="stat-card" style="text-align: left; flex: 1;">
+                                <span class="stat-number" style="color: #B785FF; font-size: 26px; white-space: nowrap;">Real-Time</span>
                                 <span class="stat-label" style="color: #666;">Processing</span>
                             </div>
                         </div>
@@ -794,7 +819,7 @@
                     <span class="stat-label">Languages Analyzed</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-number">Real-Time</span>
+                    <span class="stat-number-realtime">Real-Time</span>
                     <span class="stat-label">Chat Processing</span>
                 </div>
                 <div class="stat-card">
@@ -832,6 +857,9 @@
                     <h3 class="use-case-title">Growing Streamers</h3>
                     <p>Data-driven insights to accelerate growth. Understand what content works and optimize your streaming strategy.</p>
                 </div>
+            </div>
+            
+            <div class="use-case-grid-bottom">
                 <div class="use-case-card">
                     <div class="use-case-avatar">🌍</div>
                     <h3 class="use-case-title">International Streamers</h3>
