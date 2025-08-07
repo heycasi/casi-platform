@@ -5,7 +5,7 @@ import { StreamReport } from '../types/analytics'
 import fs from 'fs'
 import path from 'path'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 // Helper function to convert image to base64 data URL for email
 function getImageAsBase64(imagePath: string): string {
@@ -25,6 +25,12 @@ export class EmailService {
   static async sendStreamReport(email: string, report: StreamReport): Promise<boolean> {
     try {
       console.log('📧 Generating comprehensive HTML stream report...')
+      
+      // Check if Resend is available
+      if (!resend) {
+        console.log('⚠️ RESEND_API_KEY not configured, skipping email send')
+        return false
+      }
       
       // Generate comprehensive HTML email
       const emailHTML = generateReportHTML(report)
