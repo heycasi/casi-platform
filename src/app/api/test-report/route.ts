@@ -57,7 +57,7 @@ function generateMockReport(): StreamReport {
       unique_chatters: 234,
       report_generated: true,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      // updated_at: new Date().toISOString() // Not in StreamSession type
     },
     analytics: {
       total_messages: 3456,
