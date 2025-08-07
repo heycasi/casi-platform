@@ -57,6 +57,7 @@ function generateMockReport(): StreamReport {
       unique_chatters: 234,
       report_generated: true,
       created_at: new Date().toISOString(),
+      report_sent: true
       // updated_at: new Date().toISOString() // Not in StreamSession type
     },
     analytics: {
