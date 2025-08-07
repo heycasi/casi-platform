@@ -48,3 +48,10 @@ Casi Platform is a Next.js application for real-time streaming analytics with AI
 - Production URL hardcoded as 'https://heycasi.com' for Twitch OAuth redirect
 - SSL certificates present in `/certificates/` for local HTTPS development
 - Static assets in `/public/` including landing page images
+
+## Supabase Setup Guidance
+
+- When setting up the project, you will need to create the necessary tables and authentication providers in Supabase
+- For this project's functionality, ensure you have configured:
+  - Twitch OAuth provider in Supabase Authentication settings
+  - A `waitlist` table with appropriate columns for email tracking

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casi - Your Stream's Brainy Co-Pilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0;
+            background: white;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #B785FF 0%, #5EEAD4 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo {
+            height: 60px;
+            filter: brightness(0) invert(1);
+        }
+        
+        .robot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            padding: 5px;
+        }
+        
+        .logo-text {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, #5EEAD4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tagline {
+            font-size: 24px;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFFFFF, #5EEAD4);
+            color: #1a1a1a;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Problem Section */
+        .problem-section {
+            background: linear-gradient(135deg, #B785FF 0%, #5EEAD4 100%);
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #FFFFFF;
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .problem-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .problem-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .problem-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #FFFFFF;
+        }
+        
+        /* Solution Section */
+        .solution-section {
+            padding: 80px 40px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(183, 133, 255, 0.05), rgba(94, 234, 212, 0.05));
+        }
+        
+        .solution-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #B785FF;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, rgba(183, 133, 255, 0.05), rgba(94, 234, 212, 0.05));
+            border: 2px solid #B785FF;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #B785FF;
+        }
+        
+        .feature-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+        }
+        
+        .feature-highlight {
+            background: linear-gradient(135deg, #B785FF, #5EEAD4);
+            color: #1a1a1a;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(135deg, #B785FF 0%, #5EEAD4 100%);
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-top: 50px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .stat-card {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            color: #FFFFFF;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        /* Use Cases */
+        .use-cases-section {
+            padding: 80px 40px;
+            background: linear-gradient(135deg, rgba(183, 133, 255, 0.03), rgba(94, 234, 212, 0.03));
+        }
+        
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .use-case-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .use-case-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #B785FF, #5EEAD4);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+        }
+        
+        .use-case-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #B785FF;
+        }
+        
+        /* Pricing Section */
+        .pricing-section {
+            padding: 80px 40px;
+            background: linear-gradient(135deg, rgba(183, 133, 255, 0.05), rgba(94, 234, 212, 0.05));
+            text-align: center;
+        }
+        
+        .pricing-card {
+            max-width: 400px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, rgba(183, 133, 255, 0.05), rgba(94, 234, 212, 0.05));
+            border: 3px solid #B785FF;
+            border-radius: 25px;
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pricing-badge {
+            position: absolute;
+            top: -10px;
+            right: 30px;
+            background: linear-gradient(135deg, #B785FF, #5EEAD4);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .pricing-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #B785FF;
+        }
+        
+        .pricing-description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        /* Footer CTA */
+        .footer-cta {
+            background: linear-gradient(135deg, #B785FF 0%, #5EEAD4 100%);
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+        }
+        
+        .footer-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #B785FF, #5EEAD4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .footer-subtitle {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+        
+        .email-form {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .email-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        
+        .submit-button {
+            background: linear-gradient(135deg, #B785FF, #5EEAD4);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Two-column layout for larger sections */
+        .content-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+        
+        .content-left h2 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #B785FF;
+        }
+        
+        .content-left p {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #666;
+        }
+        
+        .content-right {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .mini-feature {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(183, 133, 255, 0.1);
+            border: 2px solid rgba(183, 133, 255, 0.1);
+        }
+        
+        .mini-feature-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .mini-feature h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #B785FF;
+            margin-bottom: 10px;
+        }
+        
+        .mini-feature p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-section {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .content-right {
+                justify-self: center;
+                max-width: 600px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .logo-text {
+                font-size: 36px;
+            }
+            
+            .tagline {
+                font-size: 20px;
+            }
+            
+            .section-title, .solution-title, .footer-title {
+                font-size: 28px;
+            }
+            
+            .features-grid, .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-right {
+                grid-template-columns: 1fr;
+            }
+            
+            .email-form {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <img src="landing-logo.png" alt="Casi Logo" class="logo" style="height: 60px; filter: none;">
+                <img src="landing-robot.png" alt="Casi Robot" style="width: 60px; height: 60px;">
+            </div>
+            <h1 class="tagline">Your Stream's Brainy Sidekick</h1>
+            <p class="subtitle">AI-powered chat analysis & stream intelligence that reads the room so you don't have to</p>
+            <a href="#waitlist" class="cta-button">🚀 Join the Revolution</a>
+        </header>
+
+        <!-- Problem Section -->
+        <section class="problem-section">
+            <h2 class="section-title">The Streaming Struggle is Real</h2>
+            <p style="font-size: 18px; opacity: 0.8; max-width: 800px; margin: 0 auto;">Every streamer faces the same impossible challenge: How do you engage with thousands of viewers while staying focused on your content?</p>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">😵‍💫</div>
+                    <h3 class="problem-title">Chat Overload</h3>
+                    <p>Messages flying by at lightning speed. Important questions buried in spam. Viewer sentiment lost in the chaos.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🌍</div>
+                    <h3 class="problem-title">Language Barriers</h3>
+                    <p>Global audiences speaking different languages. You're missing connections with international viewers who could be your biggest fans.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">📊</div>
+                    <h3 class="problem-title">No Analytics</h3>
+                    <p>Streams end and you're left wondering: What worked? What didn't? How do you improve? Pure guesswork.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution Section -->
+        <section class="solution-section">
+            <h2 class="solution-title">Meet Casi: The Game Changer</h2>
+            <p style="font-size: 18px; color: #666; max-width: 800px; margin: 0 auto;">Imagine having a brilliant AI assistant that watches your chat, understands your viewers, and gives you actionable insights in real-time.</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">Real-Time AI Analysis</h3>
+                    <p class="feature-description">
+                        Our advanced AI processes every message instantly, identifying <span class="feature-highlight">questions</span>, 
+                        <span class="feature-highlight">sentiment</span>, and <span class="feature-highlight">engagement patterns</span>. 
+                        Never miss important viewer interactions again.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">13+ Language Support</h3>
+                    <p class="feature-description">
+                        Connect with viewers worldwide! Casi automatically detects and analyzes chat in 
+                        <span class="feature-highlight">English, Spanish, French, German, Portuguese, Italian, Russian, Japanese, Korean, Chinese, Arabic, Hindi, and Dutch</span>.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">❓</div>
+                    <h3 class="feature-title">Smart Question Detection</h3>
+                    <p class="feature-description">
+                        Important viewer questions automatically highlighted and prioritized. 
+                        <span class="feature-highlight">Never ignore a fan again</span>. Build stronger community connections.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Comprehensive Reports</h3>
+                    <p class="feature-description">
+                        After every stream, receive detailed analytics: <span class="feature-highlight">engagement peaks</span>, 
+                        <span class="feature-highlight">viewer sentiment</span>, <span class="feature-highlight">top questions</span>, 
+                        and <span class="feature-highlight">growth recommendations</span>.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">One-Click Integration</h3>
+                    <p class="feature-description">
+                        <span class="feature-highlight">Twitch OAuth integration</span> means setup in seconds. 
+                        No complex installations, no technical knowledge required. Just pure streaming intelligence.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Actionable Insights</h3>
+                    <p class="feature-description">
+                        Get personalized recommendations for content, timing, and engagement strategies. 
+                        <span class="feature-highlight">Data-driven growth</span> instead of guesswork.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Streamers Choose Casi Section -->
+        <section style="background: white; padding: 0;">
+            <div class="content-section">
+                <div class="content-left">
+                    <h2>Why Streamers Choose Casi</h2>
+                    <p>Join the revolution of data-driven streaming. Our AI doesn't just watch your chat—it understands it, analyzes it, and turns it into actionable insights that help you grow your community and improve your content.</p>
+                    <div style="margin-top: 30px;">
+                        <div class="stats-grid" style="max-width: none; margin: 0;">
+                            <div class="stat-card" style="text-align: left;">
+                                <span class="stat-number" style="color: #B785FF; font-size: 32px;">13+</span>
+                                <span class="stat-label" style="color: #666;">Languages</span>
+                            </div>
+                            <div class="stat-card" style="text-align: left;">
+                                <span class="stat-number" style="color: #B785FF; font-size: 32px;">Real-Time</span>
+                                <span class="stat-label" style="color: #666;">Processing</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-right">
+                    <div class="mini-feature">
+                        <div class="mini-feature-icon">🚀</div>
+                        <h4>Instant Setup</h4>
+                        <p>Connect your Twitch in seconds with OAuth integration</p>
+                    </div>
+                    <div class="mini-feature">
+                        <div class="mini-feature-icon">📊</div>
+                        <h4>Smart Analytics</h4>
+                        <p>Get insights that actually help you grow</p>
+                    </div>
+                    <div class="mini-feature">
+                        <div class="mini-feature-icon">🌍</div>
+                        <h4>Global Reach</h4>
+                        <p>Understand viewers in any language</p>
+                    </div>
+                    <div class="mini-feature">
+                        <div class="mini-feature-icon">⚡</div>
+                        <h4>Zero Distraction</h4>
+                        <p>Focus on content while we handle chat analysis</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <h2 style="font-size: 36px; font-weight: 700; margin-bottom: 20px;">The Power of Understanding Your Audience</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">13+</span>
+                    <span class="stat-label">Languages Analyzed</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Real-Time</span>
+                    <span class="stat-label">Chat Processing</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Automated</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">∞</span>
+                    <span class="stat-label">Growth Potential</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section class="use-cases-section">
+            <h2 style="text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 30px; color: #B785FF;">Perfect For Every Type of Streamer</h2>
+            <div class="use-case-grid">
+                <div class="use-case-card">
+                    <div class="use-case-avatar">🎮</div>
+                    <h3 class="use-case-title">Gaming Streamers</h3>
+                    <p>Focus on gameplay while Casi handles chat analysis. Catch strategic questions and viewer reactions to epic moments.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-avatar">🎨</div>
+                    <h3 class="use-case-title">Creative Streamers</h3>
+                    <p>Understand which art styles resonate with viewers. Get real-time feedback on your creative process.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-avatar">💬</div>
+                    <h3 class="use-case-title">Just Chatting</h3>
+                    <p>Perfect for talk shows and discussion streams. Never miss interesting conversation topics or viewer questions.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-avatar">🌟</div>
+                    <h3 class="use-case-title">Growing Streamers</h3>
+                    <p>Data-driven insights to accelerate growth. Understand what content works and optimize your streaming strategy.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-avatar">🌍</div>
+                    <h3 class="use-case-title">International Streamers</h3>
+                    <p>Connect with viewers worldwide. Our multilingual AI breaks down language barriers effortlessly.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-avatar">📚</div>
+                    <h3 class="use-case-title">Educational Content</h3>
+                    <p>Identify student questions instantly. Track comprehension and engagement with your teaching material.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="pricing-section">
+            <h2 style="font-size: 36px; font-weight: 700; margin-bottom: 30px; color: #B785FF;">Early Access Pricing</h2>
+            <div class="pricing-card">
+                <div class="pricing-badge">Limited Beta</div>
+                <h3 class="pricing-title">Free During Beta</h3>
+                <p class="pricing-description">
+                    Be among the first to experience the future of streaming analytics. 
+                    Full access to all features while we perfect the platform together.
+                </p>
+                <ul style="text-align: left; margin: 30px 0; line-height: 2;">
+                    <li>✅ Real-time chat analysis</li>
+                    <li>✅ 13+ language support</li>
+                    <li>✅ Comprehensive stream reports</li>
+                    <li>✅ Question detection & prioritization</li>
+                    <li>✅ Sentiment analysis</li>
+                    <li>✅ Growth recommendations</li>
+                    <li>✅ Email report delivery</li>
+                    <li>✅ Priority support</li>
+                </ul>
+                <p style="font-size: 14px; color: #666; font-style: italic;">
+                    *Free 2-week beta trial, then move to paid subscription
+                </p>
+            </div>
+        </section>
+
+        <!-- Footer CTA -->
+        <section class="footer-cta" id="waitlist">
+            <h2 class="footer-title">Ready to Transform Your Streams?</h2>
+            <p class="footer-subtitle">Join the waitlist and be the first to experience streaming with AI superpowers</p>
+            
+            <div class="email-form">
+                <input type="email" class="email-input" placeholder="Enter your email address" required>
+                <button type="submit" class="submit-button">Join Waitlist</button>
+            </div>
+            
+            <p style="font-size: 14px; opacity: 0.7; margin-top: 20px;">
+                🚀 <strong>Limited Beta Access</strong> • 🔒 <strong>Your Email is Safe</strong> • 💡 <strong>Early Adopter Benefits</strong>
+            </p>
+            
+            <div style="margin-top: 50px; padding-top: 30px; border-top: 1px solid #444;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                    <img src="landing-logo.png" alt="Casi" style="height: 30px; filter: brightness(0) invert(1);">
+                    <img src="landing-robot.png" alt="Casi Robot" style="width: 30px; height: 30px;">
+                </div>
+                <p style="opacity: 0.8;">Questions? Email us at <a href="mailto:casi@heycasi.com" style="color: #5EEAD4;">casi@heycasi.com</a></p>
+                <p style="opacity: 0.6; font-size: 14px; margin-top: 10px;">© 2025 Casi. Built for streamers, by streamers.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Add some interactive elements
+        document.querySelector('.submit-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            const email = document.querySelector('.email-input').value;
+            if (email) {
+                alert('🎉 Thanks for joining the waitlist! We\'ll be in touch soon with beta access.');
+                document.querySelector('.email-input').value = '';
+            } else {
+                alert('Please enter your email address first!');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
