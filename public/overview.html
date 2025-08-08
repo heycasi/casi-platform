@@ -641,9 +641,14 @@
             
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
+                gap: 24px 16px;
             }
-            .stats-grid .stat-card { padding: 0 16px; }
+            .stats-grid .stat-card {
+                padding: 0 20px;
+                border-left: none;
+            }
+            .stat-label { font-size: 16px; line-height: 1.5; }
+            .stat-number, .stat-number-realtime { margin-bottom: 12px; }
             
             .content-right {
                 grid-template-columns: 1fr;
