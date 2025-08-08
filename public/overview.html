@@ -341,10 +341,7 @@
             font-size: 18px;
             opacity: 0.95;
         }
-
-        .stats-grid .stat-card + .stat-card {
-            border-left: 1px solid rgba(255,255,255,0.25);
-        }
+        
         
         /* Use Cases */
         .use-cases-section {
@@ -597,7 +594,7 @@
         
         @media (max-width: 768px) {
             .header {
-                padding: 40px 20px;
+                padding: 36px 16px;
             }
             
             .logo-section {
@@ -626,8 +623,8 @@
             }
             
             .section-title, .solution-title, .footer-title {
-                font-size: 28px;
-                line-height: 1.2;
+                font-size: 26px;
+                line-height: 1.25;
             }
             
             .features-grid, .use-case-grid {
@@ -640,13 +637,15 @@
             }
             
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 24px 16px;
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
             .stats-grid .stat-card {
-                padding: 0 20px;
+                padding: 8px 0;
                 border-left: none;
+                border-top: 1px solid rgba(255,255,255,0.25);
             }
+            .stats-grid .stat-card:first-child { border-top: none; }
             .stat-label { font-size: 16px; line-height: 1.5; }
             .stat-number, .stat-number-realtime { margin-bottom: 12px; }
             
@@ -691,11 +690,11 @@
         
         @media (max-width: 480px) {
             .header {
-                padding: 30px 15px;
+                padding: 28px 14px;
             }
             
             .tagline {
-                font-size: 20px;
+                font-size: 19px;
             }
             
             .section-title, .solution-title, .footer-title {
