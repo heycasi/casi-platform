@@ -643,11 +643,12 @@ export default function Dashboard() {
               
               <button
                 onClick={() => {
+                  // Explicitly end the session on user disconnect to avoid race conditions
+                  endSession()
                   setIsConnected(false)
                   setMessages([])
                   setQuestions([])
                   setMotivationalMessage(null)
-                  // endSession will be called by WebSocket onclose
                 }}
                 style={{
                   padding: '0.3rem 0.6rem',
