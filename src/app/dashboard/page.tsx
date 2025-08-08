@@ -42,6 +42,7 @@ export default function Dashboard() {
   const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const [lastEndedSessionId, setLastEndedSessionId] = useState<string | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -99,6 +100,7 @@ export default function Dashboard() {
       try {
         await AnalyticsService.endSession(currentSessionId)
         console.log('Ended session:', currentSessionId)
+        setLastEndedSessionId(currentSessionId)
         
         // Generate report after a short delay to ensure all data is processed
         setTimeout(() => {
@@ -645,7 +647,6 @@ export default function Dashboard() {
                   setMessages([])
                   setQuestions([])
                   setMotivationalMessage(null)
-                  setCurrentSessionId(null)
                   // endSession will be called by WebSocket onclose
                 }}
                 style={{
@@ -1015,6 +1016,42 @@ export default function Dashboard() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Manual report generation option after disconnect */}
+        {!isConnected && lastEndedSessionId && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(147, 47, 254, 0.15), rgba(94, 234, 212, 0.12))',
+            border: '1px solid rgba(147, 47, 254, 0.3)',
+            borderRadius: '12px',
+            padding: '1rem',
+            maxWidth: '520px',
+            margin: '0.5rem auto'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ color: '#F7F7F7' }}>
+                <strong>Generate your stream report</strong>
+                <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>If it didn’t send automatically, you can trigger it here.</div>
+              </div>
+              <button
+                onClick={() => generateReport(lastEndedSessionId)}
+                disabled={isGeneratingReport}
+                style={{
+                  padding: '0.6rem 1rem',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  border: 'none',
+                  borderRadius: '20px',
+                  color: 'white',
+                  cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
+                  opacity: isGeneratingReport ? 0.7 : 1,
+                  fontFamily: 'Poppins, Arial, sans-serif',
+                  fontWeight: 600
+                }}
+              >
+                {isGeneratingReport ? 'Generating…' : 'Generate Report'}
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Footer - Always visible */}
