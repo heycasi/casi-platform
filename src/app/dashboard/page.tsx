@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [betaCode, setBetaCode] = useState('')
   const [email, setEmail] = useState('')
+  const [reportEmail, setReportEmail] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [channelName, setChannelName] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -78,6 +79,7 @@ export default function Dashboard() {
     if (hasAccess && savedEmail) {
       setIsAuthenticated(true)
       setEmail(savedEmail)
+      setReportEmail(savedEmail)
     }
   }, [])
 
@@ -116,10 +118,15 @@ export default function Dashboard() {
   const generateReport = async (sessionId: string) => {
     setIsGeneratingReport(true)
     try {
+      const effectiveEmail = (reportEmail || email).trim()
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(effectiveEmail)) {
+        throw new Error('Please enter a valid email address for the report recipient.')
+      }
       const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, email })
+        body: JSON.stringify({ sessionId, email: effectiveEmail })
       })
       
       if (response.ok) {
@@ -1032,8 +1039,23 @@ export default function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
               <div style={{ color: '#F7F7F7' }}>
                 <strong>Generate your stream report</strong>
-                <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>If it didn’t send automatically, you can trigger it here.</div>
+                <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>Choose where to send it, then generate.</div>
               </div>
+              <input
+                type="email"
+                placeholder="you@domain.com"
+                value={reportEmail}
+                onChange={(e) => setReportEmail(e.target.value)}
+                style={{
+                  padding: '0.55rem 0.8rem',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.08)',
+                  color: 'white',
+                  minWidth: '220px',
+                  fontFamily: 'Poppins, Arial, sans-serif'
+                }}
+              />
               <button
                 onClick={() => generateReport(lastEndedSessionId)}
                 disabled={isGeneratingReport}
