@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
 import { AnalyticsService } from '../../lib/analytics'
 
+function formatDurationMs(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const h = Math.floor(totalSeconds / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
+  const s = totalSeconds % 60
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${pad(h)}:${pad(m)}:${pad(s)}`
+}
+
 interface ChatMessage {
   id: string
   username: string
@@ -45,6 +54,7 @@ export default function Dashboard() {
   const [streamStartTime, setStreamStartTime] = useState<number | null>(null)
   const [elapsedDuration, setElapsedDuration] = useState<string>('00:00:00')
   const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number }>>([])
+  const [twitchUser, setTwitchUser] = useState<any>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -81,6 +91,7 @@ export default function Dashboard() {
     if (twitchUserRaw) {
       try {
         const tu = JSON.parse(twitchUserRaw)
+        setTwitchUser(tu)
         if (tu?.login) {
           setIsAuthenticated(true)
           setChannelName(tu.login)
@@ -93,6 +104,28 @@ export default function Dashboard() {
     }
   }, [])
 
+  // Auto-connect when Twitch user is present and live
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('twitch_access_token') : null
+    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
+    if (!twitchUser || !token || !clientId || isConnected) return
+    const checkLiveAndConnect = async () => {
+      try {
+        const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${twitchUser.id}`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Client-Id': clientId }
+        })
+        const data = await res.json()
+        const isLive = Array.isArray(data?.data) && data.data.length > 0
+        if (isLive) {
+          setIsConnected(true)
+        }
+      } catch {}
+    }
+    checkLiveAndConnect()
+    const id = window.setInterval(checkLiveAndConnect, 30000)
+    return () => clearInterval(id)
+  }, [twitchUser, isConnected])
+
   // Create session when connecting
   const startSession = async () => {
     if (email && channelName) {
@@ -100,15 +133,6 @@ export default function Dashboard() {
         const sessionId = await AnalyticsService.createSession(email, channelName)
         setCurrentSessionId(sessionId)
         console.log('Started session:', sessionId)
-        const now = Date.now()
-        setStreamStartTime(now)
-        setElapsedDuration('00:00:00')
-        // duration ticker
-        const intervalId = window.setInterval(() => {
-          setElapsedDuration(formatDurationMs(Date.now() - now))
-        }, 1000)
-        // store to window for cleanup
-        ;(window as any).__casi_duration_interval = intervalId
       } catch (error) {
         console.error('Failed to start session:', error)
       }
@@ -130,13 +154,20 @@ export default function Dashboard() {
         console.error('Failed to end session:', error)
       }
     }
-    // cleanup timers
-    if ((window as any).__casi_duration_interval) {
-      clearInterval((window as any).__casi_duration_interval)
-      ;(window as any).__casi_duration_interval = null
-    }
     setStreamStartTime(null)
   }
+
+  // Duration ticker lifecycle
+  useEffect(() => {
+    if (!isConnected) return
+    const start = Date.now()
+    setStreamStartTime(start)
+    setElapsedDuration('00:00:00')
+    const intervalId = window.setInterval(() => {
+      setElapsedDuration(formatDurationMs(Date.now() - start))
+    }, 1000)
+    return () => clearInterval(intervalId)
+  }, [isConnected])
 
   // Generate and send report
   const generateReport = async (sessionId: string) => {
@@ -606,7 +637,7 @@ export default function Dashboard() {
       }}>
         
         {/* Connection Panel */}
-        {!isConnected && (
+         {!isConnected && !twitchUser && (
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '16px',
@@ -617,59 +648,31 @@ export default function Dashboard() {
             textAlign: 'center'
           }}>
             <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
-              🎮 Connect to Twitch Channel
+              🎮 Connect your Twitch
             </h2>
+            <p style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0 1rem 0' }}>Sign in with Twitch to auto-connect to your channel and sync viewers.</p>
+            <a
+              href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '')}&redirect_uri=${encodeURIComponent('https://heycasi.com/auth/callback')}&response_type=code&scope=user%3Aread%3Aemail`}
+              style={{
+                display: 'inline-block',
+                padding: '0.75rem 1.5rem',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                borderRadius: '25px', color: 'white', textDecoration: 'none', fontWeight: 600,
+                fontFamily: 'Poppins, Arial, sans-serif', marginBottom: '1rem'
+              }}
+            >
+              Connect with Twitch
+            </a>
             
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              gap: '1rem', 
-              alignItems: 'center' 
-            }}>
-              <input
-                type="text"
-                placeholder="Enter channel name (e.g., shroud)"
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>Temporary fallback: enter any channel name to test without logging in.</div>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.75rem' }}>
+              <input type="text" placeholder="channel name"
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
-                style={{
-                  width: '100%',
-                  maxWidth: '280px',
-                  padding: '0.75rem',
-                  borderRadius: '25px',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontFamily: 'Poppins, Arial, sans-serif',
-                  textAlign: 'center'
-                }}
-              />
-              
-               <button
-                 onClick={() => {
-                   if (channelName.trim()) {
-                     setIsConnected(true)
-                     setMessages([])
-                     setQuestions([])
-                     setMotivationalMessage(null)
-                   }
-                 }}
+                style={{ padding: '0.6rem 0.9rem', borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.1)', color: 'white' }} />
+              <button onClick={() => { if (channelName.trim()) { setIsConnected(true); setMessages([]); setQuestions([]); setMotivationalMessage(null) } }}
                 disabled={!channelName.trim()}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                  border: 'none',
-                  borderRadius: '25px',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: channelName.trim() ? 'pointer' : 'not-allowed',
-                  opacity: channelName.trim() ? 1 : 0.5,
-                  fontFamily: 'Poppins, Arial, sans-serif'
-                }}
-              >
-                Connect
-              </button>
+                style={{ padding: '0.6rem 0.9rem', borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.2)', color: 'white', cursor: channelName.trim() ? 'pointer' : 'not-allowed' }}>Test Connect</button>
             </div>
           </div>
         )}
