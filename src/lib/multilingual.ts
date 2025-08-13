@@ -1,8 +1,9 @@
 // src/lib/multilingual.ts - Enhanced Multilingual Support with Detailed Sentiment Analysis
 
 export interface LanguageDetection {
-  language: string
-  confidence: number
+  // language removed from UI surface; kept internal-only if needed
+  language?: string
+  confidence?: number
   isQuestion: boolean
   sentiment: 'positive' | 'negative' | 'neutral'
   sentimentReason?: string
@@ -184,6 +185,11 @@ export function analyzeSentiment(text: string, language: string): {
   let score = 0
   let reasons: string[] = []
   
+  // Profanity/insult list with strong negative weighting
+  const profanity = [
+    'fuck','fucking','shit','bullshit','bitch','bastard','asshole','dick','prick','cunt','twat','wanker','motherfucker','mf','wtf','stfu','retard','retarded','idiot','dumb','stupid','trash','garbage','kill yourself','kys'
+  ]
+  
   // Get language-specific sentiment words
   const positive = positiveWords[language] || positiveWords.english
   const negative = negativeWords[language] || negativeWords.english
@@ -201,6 +207,14 @@ export function analyzeSentiment(text: string, language: string): {
     if (lowerText.includes(word)) {
       score -= 1
       reasons.push(`negative word: "${word}"`)
+    }
+  })
+
+  // Profanity weighting
+  profanity.forEach(word => {
+    if (lowerText.includes(word)) {
+      score -= 2
+      reasons.push(`profanity: "${word}"`)
     }
   })
   
@@ -281,7 +295,7 @@ export function getEngagementLevel(text: string): 'high' | 'medium' | 'low' {
 
 // Main analysis function
 export function analyzeMessage(text: string): LanguageDetection {
-  // Detect language
+  // Detect language (internal only; not shown in UI)
   const { language, confidence } = detectLanguage(text)
   
   // Check if it's a question
@@ -309,6 +323,7 @@ export function analyzeMessage(text: string): LanguageDetection {
   }
   
   return {
+    // keep internally if needed elsewhere
     language,
     confidence,
     isQuestion,

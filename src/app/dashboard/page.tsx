@@ -645,15 +645,15 @@ export default function Dashboard() {
                 }}
               />
               
-              <button
-                onClick={() => {
-                  if (channelName.trim()) {
-                    setIsConnected(true)
-                    setMessages([])
-                    setQuestions([])
-                    setMotivationalMessage(null)
-                  }
-                }}
+               <button
+                 onClick={() => {
+                   if (channelName.trim()) {
+                     setIsConnected(true)
+                     setMessages([])
+                     setQuestions([])
+                     setMotivationalMessage(null)
+                   }
+                 }}
                 disabled={!channelName.trim()}
                 style={{
                   padding: '0.75rem 1.5rem',
@@ -967,18 +967,18 @@ export default function Dashboard() {
                                 Q
                               </span>
                             )}
-                            <span style={{
-                              fontSize: '0.6rem',
-                              padding: '0.1rem 0.25rem',
-                              borderRadius: '3px',
-                              background: msg.sentiment === 'positive' 
-                                ? '#B8EE8A' 
-                                : msg.sentiment === 'negative' 
-                                ? '#FF9F9F' 
-                                : 'rgba(107, 114, 128, 0.8)'
-                            }}>
-                              {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😢' : '😐'}
-                            </span>
+                 <span style={{
+                   fontSize: '0.6rem',
+                   padding: '0.1rem 0.25rem',
+                   borderRadius: '3px',
+                   background: msg.sentiment === 'positive' 
+                     ? '#B8EE8A' 
+                     : msg.sentiment === 'negative' 
+                     ? '#FF9F9F' 
+                     : 'rgba(107, 114, 128, 0.8)'
+                 }}>
+                   {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😢' : '😐'}
+                 </span>
                             {msg.engagementLevel === 'high' && (
                               <span style={{
                                 fontSize: '0.6rem',
