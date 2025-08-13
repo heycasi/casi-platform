@@ -35,7 +35,6 @@ export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [betaCode, setBetaCode] = useState('')
   const [email, setEmail] = useState('')
-  const [reportEmail, setReportEmail] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [channelName, setChannelName] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -43,7 +42,9 @@ export default function Dashboard() {
   const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
-  const [lastEndedSessionId, setLastEndedSessionId] = useState<string | null>(null)
+  const [streamStartTime, setStreamStartTime] = useState<number | null>(null)
+  const [elapsedDuration, setElapsedDuration] = useState<string>('00:00:00')
+  const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number }>>([])
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -76,10 +77,19 @@ export default function Dashboard() {
   useEffect(() => {
     const hasAccess = localStorage.getItem('casi_beta_access')
     const savedEmail = localStorage.getItem('casi_user_email')
+    const twitchUserRaw = localStorage.getItem('twitch_user')
+    if (twitchUserRaw) {
+      try {
+        const tu = JSON.parse(twitchUserRaw)
+        if (tu?.login) {
+          setIsAuthenticated(true)
+          setChannelName(tu.login)
+        }
+      } catch {}
+    }
     if (hasAccess && savedEmail) {
       setIsAuthenticated(true)
       setEmail(savedEmail)
-      setReportEmail(savedEmail)
     }
   }, [])
 
@@ -90,6 +100,15 @@ export default function Dashboard() {
         const sessionId = await AnalyticsService.createSession(email, channelName)
         setCurrentSessionId(sessionId)
         console.log('Started session:', sessionId)
+        const now = Date.now()
+        setStreamStartTime(now)
+        setElapsedDuration('00:00:00')
+        // duration ticker
+        const intervalId = window.setInterval(() => {
+          setElapsedDuration(formatDurationMs(Date.now() - now))
+        }, 1000)
+        // store to window for cleanup
+        ;(window as any).__casi_duration_interval = intervalId
       } catch (error) {
         console.error('Failed to start session:', error)
       }
@@ -102,7 +121,6 @@ export default function Dashboard() {
       try {
         await AnalyticsService.endSession(currentSessionId)
         console.log('Ended session:', currentSessionId)
-        setLastEndedSessionId(currentSessionId)
         
         // Generate report after a short delay to ensure all data is processed
         setTimeout(() => {
@@ -112,21 +130,22 @@ export default function Dashboard() {
         console.error('Failed to end session:', error)
       }
     }
+    // cleanup timers
+    if ((window as any).__casi_duration_interval) {
+      clearInterval((window as any).__casi_duration_interval)
+      ;(window as any).__casi_duration_interval = null
+    }
+    setStreamStartTime(null)
   }
 
   // Generate and send report
   const generateReport = async (sessionId: string) => {
     setIsGeneratingReport(true)
     try {
-      const effectiveEmail = (reportEmail || email).trim()
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(effectiveEmail)) {
-        throw new Error('Please enter a valid email address for the report recipient.')
-      }
       const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, email: effectiveEmail })
+        body: JSON.stringify({ sessionId, email })
       })
       
       if (response.ok) {
@@ -148,6 +167,7 @@ export default function Dashboard() {
     startSession()
 
     let ws: WebSocket | null = null
+    let viewerInterval: number | null = null
 
     const connectToTwitch = () => {
       try {
@@ -242,9 +262,42 @@ export default function Dashboard() {
 
     connectToTwitch()
 
+    // Real viewer count from Twitch if authenticated
+    const token = typeof window !== 'undefined' ? localStorage.getItem('twitch_access_token') : null
+    const twitchUserRaw = typeof window !== 'undefined' ? localStorage.getItem('twitch_user') : null
+    if (token && twitchUserRaw) {
+      try {
+        const tu = JSON.parse(twitchUserRaw)
+        const userId = tu?.id
+        const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
+        if (userId && clientId) {
+          const fetchViewers = async () => {
+            try {
+              const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${userId}`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Client-Id': clientId
+                }
+              })
+              const data = await res.json()
+              const vc = data?.data?.[0]?.viewer_count
+              if (typeof vc === 'number') {
+                setStats(prev => ({ ...prev, viewerCount: vc }))
+              }
+            } catch {}
+          }
+          fetchViewers()
+          viewerInterval = window.setInterval(fetchViewers, 30000)
+        }
+      } catch {}
+    }
+
     return () => {
       if (ws) {
         ws.close()
+      }
+      if (viewerInterval) {
+        clearInterval(viewerInterval)
       }
     }
   }, [isConnected, channelName])
@@ -292,10 +345,19 @@ export default function Dashboard() {
       avgSentiment,
       positiveMessages,
       negativeMessages,
-      viewerCount,
+      viewerCount: stats.viewerCount || viewerCount,
       activeUsers: uniqueUsers,
       currentMood
     })
+
+    // Compute top chatters in-session
+    const counts: Record<string, number> = {}
+    messages.forEach(m => { counts[m.username] = (counts[m.username] || 0) + 1 })
+    const top = Object.entries(counts)
+      .sort((a,b) => b[1]-a[1])
+      .slice(0,5)
+      .map(([username,count]) => ({ username, count }))
+    setTopChatters(top)
 
     // Update session stats in database
     if (currentSessionId && messages.length > 0) {
@@ -647,15 +709,22 @@ export default function Dashboard() {
               <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
                 Hey! Your friendly stream sidekick is analyzing chat 🎮✨
               </span>
+
+              {/* Live duration */}
+              {streamStartTime && (
+                <span style={{ color: '#B8EE8A', fontSize: '0.8rem' }}>
+                  ⏱️ {elapsedDuration}
+                </span>
+              )}
               
               <button
                 onClick={() => {
-                  // Explicitly end the session on user disconnect to avoid race conditions
-                  endSession()
                   setIsConnected(false)
                   setMessages([])
                   setQuestions([])
                   setMotivationalMessage(null)
+                  setCurrentSessionId(null)
+                  // endSession will be called by WebSocket onclose
                 }}
                 style={{
                   padding: '0.3rem 0.6rem',
@@ -799,107 +868,23 @@ export default function Dashboard() {
             {/* Main Content Area */}
             <div style={{
               display: 'flex',
-              flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+              flexDirection: window.innerWidth < 900 ? 'column' : 'row',
               gap: '1rem',
               flex: 1,
-              minHeight: '400px'
+              minHeight: '400px',
+              minWidth: 0
             }}>
-              
-              {/* Questions Panel */}
-              {questions.length > 0 && (
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
-                  borderRadius: '16px',
-                  padding: '1rem',
-                  border: '1px solid rgba(255, 159, 159, 0.3)',
-                  flex: '1',
-                  minHeight: '300px',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '1rem'
-                  }}>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
-                      🚨 Questions ({questions.length})
-                    </h3>
-                    <div style={{
-                      background: '#FF9F9F',
-                      color: '#151E3C',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '8px',
-                      fontSize: '0.7rem',
-                      fontWeight: '600'
-                    }}>
-                      PRIORITY
-                    </div>
-                  </div>
-                  
-                  <div style={{ 
-                    flex: 1,
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem',
-                    maxHeight: '400px'
-                  }}>
-                    {questions.slice(-10).reverse().map((q) => (
-                      <div
-                        key={q.id}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          borderRadius: '8px',
-                          padding: '0.75rem',
-                          border: '1px solid rgba(255, 159, 159, 0.3)'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          marginBottom: '0.5rem',
-                          flexWrap: 'wrap'
-                        }}>
-                          <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>
-                            {q.username}
-                          </span>
-                          <span style={{
-                            fontSize: '0.7rem',
-                            background: 'rgba(94, 234, 212, 0.3)',
-                            padding: '0.1rem 0.3rem',
-                            borderRadius: '4px',
-                            color: '#5EEAD4'
-                          }}>
-                            {q.language || 'english'}
-                          </span>
-                        </div>
-                        <p style={{
-                          margin: 0,
-                          color: '#F7F7F7',
-                          fontSize: '0.8rem',
-                          lineHeight: '1.3'
-                        }}>
-                          {q.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Chat Feed */}
+              {/* Chat Feed (60%) */}
               <div style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 borderRadius: '16px',
                 padding: '1rem',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                flex: questions.length > 0 ? '1' : '1',
+                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 60%',
                 minHeight: '300px',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                minWidth: 0
               }}>
                 <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
                   💬 Live Chat Feed
@@ -911,7 +896,7 @@ export default function Dashboard() {
                   background: 'rgba(0, 0, 0, 0.3)',
                   borderRadius: '8px',
                   padding: '0.75rem',
-                  maxHeight: '400px'
+                  minHeight: 0
                 }}>
                   {messages.length === 0 ? (
                     <div style={{
@@ -1022,59 +1007,80 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
+
+              {/* Right Column (40%) - Top Chatters + Questions always visible */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%', minWidth: 0, minHeight: 0 }}>
+                {/* Top Chatters / Stats */}
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '16px',
+                  padding: '1rem',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters</h3>
+                  {topChatters.length === 0 ? (
+                    <p style={{ margin: '0.75rem 0 0 0', opacity: 0.7 }}>No chatters yet</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0 0' }}>
+                      {topChatters.map((c) => (
+                        <li key={c.username} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}>
+                          <span style={{ color: '#F7F7F7' }}>@{c.username}</span>
+                          <span style={{ color: '#5EEAD4', fontWeight: 700 }}>{c.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Questions - always visible */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
+                  borderRadius: '16px',
+                  padding: '1rem',
+                  border: '1px solid rgba(255, 159, 159, 0.3)',
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '1rem'
+                  }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
+                      🚨 Questions ({questions.length})
+                    </h3>
+                    <div style={{
+                      background: '#FF9F9F',
+                      color: '#151E3C',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.7rem',
+                      fontWeight: '600'
+                    }}>
+                      PRIORITY
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
+                    {questions.length === 0 ? (
+                      <p style={{ margin: 0, opacity: 0.7 }}>No questions yet</p>
+                    ) : (
+                      questions.slice(-10).reverse().map((q) => (
+                        <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>@{q.username}</span>
+                          </div>
+                          <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.8rem', lineHeight: '1.3' }}>{q.message}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </>
-        )}
-
-        {/* Manual report generation option after disconnect */}
-        {!isConnected && lastEndedSessionId && (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(147, 47, 254, 0.15), rgba(94, 234, 212, 0.12))',
-            border: '1px solid rgba(147, 47, 254, 0.3)',
-            borderRadius: '12px',
-            padding: '1rem',
-            maxWidth: '520px',
-            margin: '0.5rem auto'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ color: '#F7F7F7' }}>
-                <strong>Generate your stream report</strong>
-                <div style={{ fontSize: '0.85rem', opacity: 0.85 }}>Choose where to send it, then generate.</div>
-              </div>
-              <input
-                type="email"
-                placeholder="you@domain.com"
-                value={reportEmail}
-                onChange={(e) => setReportEmail(e.target.value)}
-                style={{
-                  padding: '0.55rem 0.8rem',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'white',
-                  minWidth: '220px',
-                  fontFamily: 'Poppins, Arial, sans-serif'
-                }}
-              />
-              <button
-                onClick={() => generateReport(lastEndedSessionId)}
-                disabled={isGeneratingReport}
-                style={{
-                  padding: '0.6rem 1rem',
-                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                  border: 'none',
-                  borderRadius: '20px',
-                  color: 'white',
-                  cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
-                  opacity: isGeneratingReport ? 0.7 : 1,
-                  fontFamily: 'Poppins, Arial, sans-serif',
-                  fontWeight: 600
-                }}
-              >
-                {isGeneratingReport ? 'Generating…' : 'Generate Report'}
-              </button>
-            </div>
-          </div>
         )}
 
         {/* Footer - Always visible */}
