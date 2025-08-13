@@ -106,19 +106,12 @@ export default function Dashboard() {
 
   // Auto-connect when Twitch user is present and live
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('twitch_access_token') : null
-    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
-    if (!twitchUser || !token || !clientId || isConnected) return
+    if (!twitchUser || isConnected) return
     const checkLiveAndConnect = async () => {
       try {
-        const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${twitchUser.id}`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Client-Id': clientId }
-        })
-        const data = await res.json()
-        const isLive = Array.isArray(data?.data) && data.data.length > 0
-        if (isLive) {
-          setIsConnected(true)
-        }
+        const res = await fetch(`/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`)
+        const info = await res.json()
+        if (info?.live) setIsConnected(true)
       } catch {}
     }
     checkLiveAndConnect()
@@ -160,14 +153,15 @@ export default function Dashboard() {
   // Duration ticker lifecycle
   useEffect(() => {
     if (!isConnected) return
-    const start = Date.now()
-    setStreamStartTime(start)
+    // If we already have a streamStartTime from Twitch, tick from that; otherwise use now
+    const start = streamStartTime ?? Date.now()
+    if (!streamStartTime) setStreamStartTime(start)
     setElapsedDuration('00:00:00')
     const intervalId = window.setInterval(() => {
       setElapsedDuration(formatDurationMs(Date.now() - start))
     }, 1000)
     return () => clearInterval(intervalId)
-  }, [isConnected])
+  }, [isConnected, streamStartTime])
 
   // Generate and send report
   const generateReport = async (sessionId: string) => {
@@ -294,33 +288,21 @@ export default function Dashboard() {
     connectToTwitch()
 
     // Real viewer count from Twitch if authenticated
-    const token = typeof window !== 'undefined' ? localStorage.getItem('twitch_access_token') : null
-    const twitchUserRaw = typeof window !== 'undefined' ? localStorage.getItem('twitch_user') : null
-    if (token && twitchUserRaw) {
-      try {
-        const tu = JSON.parse(twitchUserRaw)
-        const userId = tu?.id
-        const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
-        if (userId && clientId) {
-          const fetchViewers = async () => {
-            try {
-              const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${userId}`, {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Client-Id': clientId
-                }
-              })
-              const data = await res.json()
-              const vc = data?.data?.[0]?.viewer_count
-              if (typeof vc === 'number') {
-                setStats(prev => ({ ...prev, viewerCount: vc }))
-              }
-            } catch {}
+    if (twitchUser) {
+      const fetchViewers = async () => {
+        try {
+          const res = await fetch(`/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`)
+          const info = await res.json()
+          if (info?.viewer_count != null) setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
+          if (info?.started_at) {
+            const start = new Date(info.started_at).getTime()
+            setStreamStartTime(start)
+            setElapsedDuration(formatDurationMs(Date.now() - start))
           }
-          fetchViewers()
-          viewerInterval = window.setInterval(fetchViewers, 30000)
-        }
-      } catch {}
+        } catch {}
+      }
+      fetchViewers()
+      viewerInterval = window.setInterval(fetchViewers, 15000)
     }
 
     return () => {
