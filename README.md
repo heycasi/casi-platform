@@ -34,20 +34,4 @@ You can also trigger manually via “Run workflow”.
 - Node 18 is used in CI to match Next.js 14 requirements.
 - ESLint/TypeScript errors are ignored during build per `next.config.js`.
 
-## Twitch Discovery API (experimental)
-
-Endpoint: `POST /api/twitch/discover`
-
-Body:
-```json
-{ "game": "Call of Duty", "first": 20 }
-```
-
-- Fetches live streams (optionally filtered by `game`), enriches with user bios, extracts a business email (best-effort) from the description, resolves game names, and stores/upserts into `twitch_streamers`.
-- Requires env: `NEXT_PUBLIC_TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
-- DB schema: `database/twitch-scraper.sql` (run in Supabase).
-
-Response:
-```json
-{ "count": 20, "records": [ { "login": "...", "email": "...", "game_name": "...", "current_viewer_count": 123 } ] }
-```
+ 
