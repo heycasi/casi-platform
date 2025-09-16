@@ -999,19 +999,19 @@ export default function Dashboard() {
                 {/* Compact Stream Player */}
                 <div style={{
                   background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '16px',
-                  padding: '1rem',
+                  borderRadius: '12px',
+                  padding: '0.75rem',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem' }}>
-                    📺 Stream Preview
+                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
+                    📺 Preview
                   </h3>
                   
                   <div style={{
                     position: 'relative',
-                    paddingBottom: '56.25%', // 16:9 aspect ratio but smaller container
+                    paddingBottom: '42%', // Smaller aspect ratio
                     height: 0,
-                    borderRadius: '8px',
+                    borderRadius: '6px',
                     overflow: 'hidden',
                     background: '#000',
                     maxWidth: '100%'
@@ -1032,36 +1032,14 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Top Chatters / Stats */}
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '16px',
-                  padding: '1rem',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters</h3>
-                  {topChatters.length === 0 ? (
-                    <p style={{ margin: '0.75rem 0 0 0', opacity: 0.7 }}>No chatters yet</p>
-                  ) : (
-                    <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0 0' }}>
-                      {topChatters.map((c) => (
-                        <li key={c.username} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}>
-                          <span style={{ color: '#F7F7F7' }}>@{c.username}</span>
-                          <span style={{ color: '#5EEAD4', fontWeight: 700 }}>{c.count}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                {/* Questions - always visible */}
+                {/* Questions - Expanded Priority Panel */}
                 <div style={{
                   background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
                   borderRadius: '16px',
                   padding: '1rem',
                   border: '1px solid rgba(255, 159, 159, 0.3)',
-                  flex: 1,
-                  minHeight: 0,
+                  flex: 2, // Take up more space
+                  minHeight: '350px', // Ensure good height
                   display: 'flex',
                   flexDirection: 'column'
                 }}>
@@ -1089,7 +1067,7 @@ export default function Dashboard() {
                     {questions.length === 0 ? (
                       <p style={{ margin: 0, opacity: 0.7 }}>No questions yet</p>
                     ) : (
-                      questions.slice(-10).reverse().map((q) => (
+                      questions.slice(-15).reverse().map((q) => (
                         <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                             <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>@{q.username}</span>
@@ -1099,6 +1077,29 @@ export default function Dashboard() {
                       ))
                     )}
                   </div>
+                </div>
+
+                {/* Top Chatters / Stats - Moved to bottom */}
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '12px',
+                  padding: '0.75rem',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <h3 style={{ margin: 0, fontSize: '0.9rem' }}>🏆 Top Chatters</h3>
+                  {topChatters.length === 0 ? (
+                    <p style={{ margin: '0.5rem 0 0 0', opacity: 0.7, fontSize: '0.8rem' }}>No chatters yet</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: '0.5rem 0 0 0' }}>
+                      {topChatters.slice(0, 3).map((c) => (
+                        <li key={c.username} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0', borderBottom: '1px dashed rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>
+                          <span style={{ color: '#F7F7F7' }}>@{c.username}</span>
+                          <span style={{ color: '#5EEAD4', fontWeight: 700 }}>{c.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
                 </div>
               </div>
             </div>
