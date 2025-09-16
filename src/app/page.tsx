@@ -509,7 +509,10 @@ export default function Home() {
                   cursor: 'pointer',
                   textAlign: 'left',
                   padding: 0,
-                  fontFamily: 'Poppins, Arial, sans-serif'
+                  margin: 0,
+                  fontFamily: 'Poppins, Arial, sans-serif',
+                  display: 'block',
+                  width: 'auto'
                 }}
               >
                 Dashboard
