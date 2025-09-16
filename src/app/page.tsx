@@ -512,7 +512,11 @@ export default function Home() {
                   margin: 0,
                   fontFamily: 'Poppins, Arial, sans-serif',
                   display: 'block',
-                  width: 'auto'
+                  width: 'auto',
+                  WebkitAppearance: 'none',
+                  appearance: 'none',
+                  outline: 'none',
+                  boxSizing: 'border-box'
                 }}
               >
                 Dashboard
