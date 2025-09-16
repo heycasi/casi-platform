@@ -871,7 +871,7 @@ export default function Dashboard() {
                 background: '#000'
               }}>
                 <iframe
-                  src={`https://player.twitch.tv/?channel=${channelName}&parent=heycasi.com&parent=localhost&muted=false`}
+                  src={`https://player.twitch.tv/?channel=${channelName}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'heycasi.com'}&muted=false`}
                   style={{
                     position: 'absolute',
                     top: 0,
