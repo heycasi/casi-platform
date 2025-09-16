@@ -850,6 +850,42 @@ export default function Dashboard() {
               ))}
             </div>
 
+            {/* Stream Player */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              padding: '1rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              marginBottom: '1rem'
+            }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
+                📺 Live Stream
+              </h3>
+              
+              <div style={{
+                position: 'relative',
+                paddingBottom: '56.25%', // 16:9 aspect ratio
+                height: 0,
+                borderRadius: '12px',
+                overflow: 'hidden',
+                background: '#000'
+              }}>
+                <iframe
+                  src={`https://player.twitch.tv/?channel=${channelName}&parent=heycasi.com&parent=localhost&muted=false`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                  }}
+                  allowFullScreen
+                  title={`${channelName} Twitch Stream`}
+                />
+              </div>
+            </div>
+
             {/* Main Content Area */}
             <div style={{
               display: 'flex',
