@@ -498,29 +498,20 @@ export default function Home() {
               }}>
                 Beta Program
               </a>
-              <button 
-                onClick={() => setMessage('🔒 Dashboard demo coming soon!')}
+              <a 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault()
+                  setMessage('🔒 Dashboard demo coming soon!')
+                }}
                 style={{ 
-                  background: 'none',
-                  border: 'none',
                   color: 'rgba(255, 255, 255, 0.8)', 
                   textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  padding: 0,
-                  margin: 0,
-                  fontFamily: 'Poppins, Arial, sans-serif',
-                  display: 'block',
-                  width: 'auto',
-                  WebkitAppearance: 'none',
-                  appearance: 'none',
-                  outline: 'none',
-                  boxSizing: 'border-box'
+                  fontSize: '0.9rem'
                 }}
               >
                 Dashboard
-              </button>
+              </a>
             </div>
           </div>
 
