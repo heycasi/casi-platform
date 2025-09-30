@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx - Dashboard with Navigation
+// src/app/dashboard/page.tsx - Secure Dashboard with OAuth
 'use client'
 import { useState, useEffect } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
@@ -40,12 +40,28 @@ interface DashboardStats {
   currentMood: string
 }
 
+// Admin user IDs (Twitch user IDs)
+const ADMIN_USER_IDS = [
+  // Will be auto-populated when you log in via /admin-setup
+]
+
+// Admin usernames (Twitch login names)
+const ADMIN_USERNAMES = [
+  'conzooo_' // Your Twitch username (case-insensitive)
+]
+
+// Admin email addresses as fallback
+const ADMIN_EMAILS = [
+  // Add your email if needed
+]
+
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [betaCode, setBetaCode] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [email, setEmail] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [channelName, setChannelName] = useState('')
+  const [adminChannelInput, setAdminChannelInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [questions, setQuestions] = useState<ChatMessage[]>([])
   const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null)
@@ -66,58 +82,85 @@ export default function Dashboard() {
     currentMood: 'Neutral'
   })
 
-  const validCodes = ['CASI2025', 'BETASTREAM', 'EARLYACCESS']
-
   const botUsernames = [
-    'nightbot', 'streamelements', 'moobot', 'fossabot', 'wizebot', 
+    'nightbot', 'streamelements', 'moobot', 'fossabot', 'wizebot',
     'streamlabs', 'botisimo', 'deepbot', 'ankhbot', 'revlobot',
     'phantombot', 'coebot', 'ohbot', 'tipeeebot', 'chatty',
     'streamdeckerbot', 'vivbot', 'soundalerts', 'own3dbot',
     'pretzelrocks', 'songrequestbot', 'musicbot'
   ]
 
-  const handleBetaAccess = () => {
-    if (validCodes.includes(betaCode.toUpperCase()) && email.trim()) {
-      setIsAuthenticated(true)
-      localStorage.setItem('casi_beta_access', 'true')
-      localStorage.setItem('casi_user_email', email)
+  // Check if user is admin
+  const checkAdminStatus = (user: any) => {
+    if (!user) return false
+
+    // Check by Twitch user ID
+    if (user.id && ADMIN_USER_IDS.includes(user.id)) {
+      return true
     }
+
+    // Check by Twitch username (case-insensitive)
+    if (user.login && ADMIN_USERNAMES.map(u => u.toLowerCase()).includes(user.login.toLowerCase())) {
+      return true
+    }
+
+    // Check by display_name as fallback
+    if (user.display_name && ADMIN_USERNAMES.map(u => u.toLowerCase()).includes(user.display_name.toLowerCase())) {
+      return true
+    }
+
+    // Check by email
+    if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      return true
+    }
+
+    return false
   }
 
   useEffect(() => {
-    const hasAccess = localStorage.getItem('casi_beta_access')
-    const savedEmail = localStorage.getItem('casi_user_email')
     const twitchUserRaw = localStorage.getItem('twitch_user')
+    const savedEmail = localStorage.getItem('casi_user_email')
+
     if (twitchUserRaw) {
       try {
         const tu = JSON.parse(twitchUserRaw)
         setTwitchUser(tu)
+
+        // Check admin status
+        const adminStatus = checkAdminStatus(tu)
+        setIsAdmin(adminStatus)
+
         if (tu?.login) {
           setIsAuthenticated(true)
           setChannelName(tu.login)
+          setEmail(tu.email || savedEmail || '')
         }
       } catch {}
     }
-    if (hasAccess && savedEmail) {
-      setIsAuthenticated(true)
+
+    if (savedEmail) {
       setEmail(savedEmail)
     }
   }, [])
 
   // Auto-connect when Twitch user is present and live
   useEffect(() => {
-    if (!twitchUser || isConnected) return
+    if (!twitchUser || isConnected || isAdmin) return // Don't auto-connect for admins
+
     const checkLiveAndConnect = async () => {
       try {
         const res = await fetch(`/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`)
         const info = await res.json()
-        if (info?.live) setIsConnected(true)
+        if (info?.live) {
+          setIsConnected(true)
+        }
       } catch {}
     }
+
     checkLiveAndConnect()
     const id = window.setInterval(checkLiveAndConnect, 30000)
     return () => clearInterval(id)
-  }, [twitchUser, isConnected])
+  }, [twitchUser, isConnected, isAdmin])
 
   // Create session when connecting
   const startSession = async () => {
@@ -138,8 +181,7 @@ export default function Dashboard() {
       try {
         await AnalyticsService.endSession(currentSessionId)
         console.log('Ended session:', currentSessionId)
-        
-        // Generate report after a short delay to ensure all data is processed
+
         setTimeout(() => {
           generateReport(currentSessionId)
         }, 2000)
@@ -153,7 +195,6 @@ export default function Dashboard() {
   // Duration ticker lifecycle
   useEffect(() => {
     if (!isConnected) return
-    // If we already have a streamStartTime from Twitch, tick from that; otherwise use now
     const start = streamStartTime ?? Date.now()
     if (!streamStartTime) setStreamStartTime(start)
     setElapsedDuration('00:00:00')
@@ -172,7 +213,7 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, email })
       })
-      
+
       if (response.ok) {
         console.log('Report generated and sent successfully')
       } else {
@@ -188,7 +229,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
-    // Start session when connecting
     startSession()
 
     let ws: WebSocket | null = null
@@ -197,7 +237,7 @@ export default function Dashboard() {
     const connectToTwitch = () => {
       try {
         ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
-        
+
         ws.onopen = () => {
           ws?.send('PASS SCHMOOPIIE')
           ws?.send('NICK justinfan12345')
@@ -206,7 +246,7 @@ export default function Dashboard() {
 
         ws.onmessage = (event) => {
           const message = event.data.trim()
-          
+
           if (message.startsWith('PING')) {
             ws?.send('PONG :tmi.twitch.tv')
             return
@@ -215,13 +255,13 @@ export default function Dashboard() {
           const chatMatch = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
           if (chatMatch) {
             const [, username, messageText] = chatMatch
-            
+
             if (botUsernames.includes(username.toLowerCase())) {
               return
             }
-            
+
             const analysis = analyzeMessage(messageText)
-            
+
             const timestamp = new Date()
             const chatMessage: ChatMessage = {
               id: Date.now().toString() + Math.random(),
@@ -240,12 +280,11 @@ export default function Dashboard() {
             }
 
             setMessages(prev => [...prev.slice(-49), chatMessage])
-            
+
             if (analysis.isQuestion) {
               setQuestions(prev => [...prev.slice(-9), chatMessage])
             }
 
-            // Store message in database if we have an active session
             if (currentSessionId) {
               AnalyticsService.storeChatMessage(currentSessionId, {
                 username,
@@ -275,7 +314,6 @@ export default function Dashboard() {
           if (isConnected) {
             setTimeout(connectToTwitch, 3000)
           } else {
-            // Stream ended, end session
             endSession()
           }
         }
@@ -287,7 +325,7 @@ export default function Dashboard() {
 
     connectToTwitch()
 
-    // Real viewer count from Twitch if authenticated
+    // Real viewer count from Twitch API
     if (twitchUser) {
       const fetchViewers = async () => {
         try {
@@ -334,16 +372,16 @@ export default function Dashboard() {
     const uniqueUsers = new Set(messages.map(m => m.username)).size
     const positiveMessages = messages.filter(m => m.sentiment === 'positive').length
     const negativeMessages = messages.filter(m => m.sentiment === 'negative').length
-    
+
     const sentimentValues = messages.map(m => m.sentimentScore || 0)
-    const avgSentiment = sentimentValues.length > 0 
+    const avgSentiment = sentimentValues.length > 0
       ? Math.round((sentimentValues.reduce((a, b) => a + b, 0) / sentimentValues.length) * 100) / 100
       : 0
 
     const recentMessages = messages.slice(-10)
     const recentPositive = recentMessages.filter(m => m.sentiment === 'positive').length
     const recentNegative = recentMessages.filter(m => m.sentiment === 'negative').length
-    
+
     let currentMood = 'Neutral'
     if (recentPositive > recentNegative * 2) currentMood = 'Very Positive'
     else if (recentPositive > recentNegative) currentMood = 'Positive'
@@ -363,7 +401,6 @@ export default function Dashboard() {
       currentMood
     })
 
-    // Compute top chatters in-session
     const counts: Record<string, number> = {}
     messages.forEach(m => { counts[m.username] = (counts[m.username] || 0) + 1 })
     const top = Object.entries(counts)
@@ -372,7 +409,6 @@ export default function Dashboard() {
       .map(([username,count]) => ({ username, count }))
     setTopChatters(top)
 
-    // Update session stats in database
     if (currentSessionId && messages.length > 0) {
       AnalyticsService.updateSessionStats(currentSessionId, {
         peak_viewer_count: Math.max(stats.viewerCount, viewerCount),
@@ -384,6 +420,7 @@ export default function Dashboard() {
     }
   }, [messages, questions])
 
+  // Not authenticated - require Twitch login
   if (!isAuthenticated) {
     return (
       <div style={{
@@ -410,24 +447,20 @@ export default function Dashboard() {
             justifyContent: 'center',
             marginBottom: '1.5rem'
           }}>
-            <img 
-              src="/landing-robot.png"
-              alt="Casi Robot"
+            <img
+              src="/landing-logo.png"
+              alt="Casi"
               style={{
-                width: '60px',
-                height: '60px'
+                width: '200px',
+                height: 'auto'
               }}
               onError={(e) => {
                 const target = e.currentTarget
                 target.style.display = 'none'
-                const fallback = document.createElement('div')
-                fallback.style.cssText = 'width: 60px; height: 60px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;'
-                fallback.textContent = '🤖'
-                target.parentNode?.appendChild(fallback)
               }}
             />
           </div>
-          
+
           <h1 style={{
             color: 'white',
             fontSize: '2rem',
@@ -437,82 +470,41 @@ export default function Dashboard() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Casi Beta
+            Connect your Twitch
           </h1>
-          
+
           <p style={{
             color: 'rgba(255, 255, 255, 0.8)',
             margin: '0 0 1.5rem 0',
             fontSize: '1rem'
           }}>
-            Access the future of streaming analytics
+            Sign in with Twitch to auto-connect to your channel and sync viewers.
           </p>
 
-          <input
-            type="email"
-            placeholder="Your email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+          <a
+            href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18')}&redirect_uri=${encodeURIComponent('https://heycasi.com/auth/callback')}&response_type=code&scope=user%3Aread%3Aemail`}
             style={{
+              display: 'inline-block',
               width: '100%',
-              padding: '0.75rem',
-              margin: '0 0 1rem 0',
-              borderRadius: '25px',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              fontSize: '0.9rem',
-              fontFamily: 'Poppins, Arial, sans-serif',
-              boxSizing: 'border-box'
-            }}
-          />
-
-          <input
-            type="text"
-            placeholder="Beta access code"
-            value={betaCode}
-            onChange={(e) => setBetaCode(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              margin: '0 0 1.5rem 0',
-              borderRadius: '25px',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              fontSize: '0.9rem',
-              fontFamily: 'Poppins, Arial, sans-serif',
-              boxSizing: 'border-box'
-            }}
-          />
-
-          <button
-            onClick={handleBetaAccess}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
+              padding: '0.75rem 1.5rem',
               background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-              border: 'none',
               borderRadius: '25px',
               color: 'white',
-              fontSize: '1rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontFamily: 'Poppins, Arial, sans-serif'
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontFamily: 'Poppins, Arial, sans-serif',
+              boxSizing: 'border-box'
             }}
           >
-            Access Beta Dashboard
-          </button>
+            Connect with Twitch
+          </a>
 
           <p style={{
             color: 'rgba(255, 255, 255, 0.6)',
             fontSize: '0.8rem',
-            margin: '1rem 0 0 0'
+            margin: '1.5rem 0 0 0'
           }}>
-            Need a beta code? Join our waitlist at{' '}
-            <a href="/" style={{ color: '#5EEAD4', textDecoration: 'none' }}>
-              heycasi.com
-            </a>
+            Secure OAuth • Read-only access • Privacy protected
           </p>
         </div>
       </div>
@@ -536,7 +528,7 @@ export default function Dashboard() {
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <img 
+          <img
             src="/landing-logo.png"
             alt="Casi"
             style={{ height: '32px', width: 'auto' }}
@@ -549,8 +541,8 @@ export default function Dashboard() {
               target.parentNode?.appendChild(fallback)
             }}
           />
-          
-          <img 
+
+          <img
             src="/landing-robot.png"
             alt="Casi Robot"
             style={{ width: '32px', height: '32px' }}
@@ -563,11 +555,25 @@ export default function Dashboard() {
               target.parentNode?.appendChild(fallback)
             }}
           />
+
+          {isAdmin && (
+            <span style={{
+              background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+              color: '#000',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '12px',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              marginLeft: '0.5rem'
+            }}>
+              👑 ADMIN
+            </span>
+          )}
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <a 
-            href="/" 
+          <a
+            href="/"
             style={{
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
@@ -577,8 +583,8 @@ export default function Dashboard() {
           >
             Home
           </a>
-          <a 
-            href="/beta-signup" 
+          <a
+            href="/beta-signup"
             style={{
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
@@ -590,9 +596,10 @@ export default function Dashboard() {
           </a>
           <button
             onClick={() => {
-              localStorage.removeItem('casi_beta_access')
+              localStorage.removeItem('twitch_access_token')
+              localStorage.removeItem('twitch_user')
               localStorage.removeItem('casi_user_email')
-              setIsAuthenticated(false)
+              window.location.href = '/login'
             }}
             style={{
               padding: '0.4rem 0.8rem',
@@ -610,16 +617,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ 
-        padding: '1rem', 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <div style={{
+        padding: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
         gap: '1rem',
         minHeight: 'calc(100vh - 80px)'
       }}>
-        
-        {/* Connection Panel */}
-         {!isConnected && !twitchUser && (
+
+        {/* Connection Panel - Admin can view any channel */}
+        {!isConnected && (
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '16px',
@@ -629,33 +636,78 @@ export default function Dashboard() {
             margin: '0 auto',
             textAlign: 'center'
           }}>
-            <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
-              🎮 Connect your Twitch
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0 1rem 0' }}>Sign in with Twitch to auto-connect to your channel and sync viewers.</p>
-            <a
-              href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '')}&redirect_uri=${encodeURIComponent('https://heycasi.com/auth/callback')}&response_type=code&scope=user%3Aread%3Aemail`}
-              style={{
-                display: 'inline-block',
-                padding: '0.75rem 1.5rem',
-                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                borderRadius: '25px', color: 'white', textDecoration: 'none', fontWeight: 600,
-                fontFamily: 'Poppins, Arial, sans-serif', marginBottom: '1rem'
-              }}
-            >
-              Connect with Twitch
-            </a>
-            
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>Temporary fallback: enter any channel name to test without logging in.</div>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '0.75rem' }}>
-              <input type="text" placeholder="channel name"
-                value={channelName}
-                onChange={(e) => setChannelName(e.target.value)}
-                style={{ padding: '0.6rem 0.9rem', borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.1)', color: 'white' }} />
-              <button onClick={() => { if (channelName.trim()) { setIsConnected(true); setMessages([]); setQuestions([]); setMotivationalMessage(null) } }}
-                disabled={!channelName.trim()}
-                style={{ padding: '0.6rem 0.9rem', borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.2)', color: 'white', cursor: channelName.trim() ? 'pointer' : 'not-allowed' }}>Test Connect</button>
-            </div>
+            {isAdmin ? (
+              <>
+                <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
+                  👑 Admin Panel
+                </h2>
+                <p style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0 1rem 0' }}>
+                  Enter any Twitch channel to monitor
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="channel name"
+                    value={adminChannelInput}
+                    onChange={(e) => setAdminChannelInput(e.target.value)}
+                    style={{
+                      padding: '0.6rem 0.9rem',
+                      borderRadius: '20px',
+                      border: 'none',
+                      background: 'rgba(255,255,255,0.1)',
+                      color: 'white',
+                      flex: 1
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (adminChannelInput.trim()) {
+                        setChannelName(adminChannelInput.trim())
+                        setIsConnected(true)
+                        setMessages([])
+                        setQuestions([])
+                        setMotivationalMessage(null)
+                      }
+                    }}
+                    disabled={!adminChannelInput.trim()}
+                    style={{
+                      padding: '0.6rem 1.5rem',
+                      borderRadius: '20px',
+                      border: 'none',
+                      background: adminChannelInput.trim() ? 'linear-gradient(135deg, #FFD700, #FFA500)' : 'rgba(255,255,255,0.1)',
+                      color: adminChannelInput.trim() ? '#000' : 'white',
+                      fontWeight: '600',
+                      cursor: adminChannelInput.trim() ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    Connect
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
+                  🎮 Waiting for your stream...
+                </h2>
+                <p style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0 1rem 0' }}>
+                  Go live on Twitch and your dashboard will auto-connect!
+                </p>
+                <div style={{
+                  background: 'rgba(184, 238, 138, 0.1)',
+                  border: '1px solid rgba(184, 238, 138, 0.3)',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  marginTop: '1rem'
+                }}>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#B8EE8A' }}>
+                    ✨ Connected as <strong>@{twitchUser?.login || 'Unknown'}</strong>
+                  </p>
+                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
+                    Your dashboard will automatically activate when you start streaming
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -671,37 +723,45 @@ export default function Dashboard() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.75rem',
-              width: 'fit-content'
+              width: 'fit-content',
+              flexWrap: 'wrap'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{
                   width: '6px',
                   height: '6px',
                   background: '#B8EE8A',
-                  borderRadius: '50%'
+                  borderRadius: '50%',
+                  animation: 'pulse 2s infinite'
                 }} />
                 <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
                   Connected to @{channelName}
                 </span>
               </div>
-              
+
               <div style={{
                 height: '12px',
                 width: '1px',
                 background: 'rgba(255, 255, 255, 0.2)'
               }} />
-              
+
               <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
                 Hey! Your friendly stream sidekick is analyzing chat 🎮✨
               </span>
 
-              {/* Live duration */}
               {streamStartTime && (
-                <span style={{ color: '#B8EE8A', fontSize: '0.8rem' }}>
-                  ⏱️ {elapsedDuration}
-                </span>
+                <>
+                  <div style={{
+                    height: '12px',
+                    width: '1px',
+                    background: 'rgba(255, 255, 255, 0.2)'
+                  }} />
+                  <span style={{ color: '#B8EE8A', fontSize: '0.8rem', fontWeight: '600' }}>
+                    ⏱️ {elapsedDuration}
+                  </span>
+                </>
               )}
-              
+
               <button
                 onClick={() => {
                   setIsConnected(false)
@@ -709,7 +769,7 @@ export default function Dashboard() {
                   setQuestions([])
                   setMotivationalMessage(null)
                   setCurrentSessionId(null)
-                  // endSession will be called by WebSocket onclose
+                  setAdminChannelInput('')
                 }}
                 style={{
                   padding: '0.3rem 0.6rem',
@@ -749,11 +809,11 @@ export default function Dashboard() {
                 }}>
                   🤖 AI INSIGHT
                 </div>
-                
+
                 <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.9rem', flex: 1 }}>
                   {motivationalMessage}
                 </p>
-                
+
                 <button
                   onClick={() => setMotivationalMessage(null)}
                   style={{
@@ -813,15 +873,15 @@ export default function Dashboard() {
                 { icon: '👥', value: stats.viewerCount, label: 'Viewers', color: '#5EEAD4' },
                 { icon: '💬', value: stats.totalMessages, label: 'Messages', color: '#5EEAD4' },
                 { icon: '❓', value: stats.questions, label: 'Questions', color: '#FF9F9F' },
-                { 
-                  icon: stats.currentMood === 'Very Positive' ? '😊' : 
-                        stats.currentMood === 'Positive' ? '🙂' : 
-                        stats.currentMood === 'Negative' ? '😢' : 
-                        stats.currentMood === 'Slightly Negative' ? '😕' : '😐', 
-                  value: stats.currentMood, 
-                  label: 'Mood', 
-                  color: stats.currentMood.includes('Positive') ? '#B8EE8A' : 
-                         stats.currentMood.includes('Negative') ? '#FF9F9F' : '#F7F7F7' 
+                {
+                  icon: stats.currentMood === 'Very Positive' ? '😊' :
+                        stats.currentMood === 'Positive' ? '🙂' :
+                        stats.currentMood === 'Negative' ? '😢' :
+                        stats.currentMood === 'Slightly Negative' ? '😕' : '😐',
+                  value: stats.currentMood,
+                  label: 'Mood',
+                  color: stats.currentMood.includes('Positive') ? '#B8EE8A' :
+                         stats.currentMood.includes('Negative') ? '#FF9F9F' : '#F7F7F7'
                 },
                 { icon: '✨', value: stats.positiveMessages, label: 'Positive', color: '#B8EE8A' },
                 { icon: '💔', value: stats.negativeMessages, label: 'Negative', color: '#FF9F9F' }
@@ -836,10 +896,10 @@ export default function Dashboard() {
                   flex: '1 1 auto'
                 }}>
                   <div style={{ fontSize: '1rem', margin: '0 0 0.25rem 0' }}>{stat.icon}</div>
-                  <p style={{ 
-                    margin: 0, 
-                    fontSize: '1rem', 
-                    fontWeight: 'bold', 
+                  <p style={{
+                    margin: 0,
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
                     color: stat.color,
                     wordBreak: 'break-word'
                   }}>
@@ -874,7 +934,7 @@ export default function Dashboard() {
                 <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
                   💬 Live Chat Feed
                 </h3>
-                
+
                 <div style={{
                   flex: 1,
                   overflowY: 'auto',
@@ -899,9 +959,9 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
                       gap: '0.5rem'
                     }}>
                       {messages.slice(-50).reverse().map((msg) => (
@@ -909,16 +969,16 @@ export default function Dashboard() {
                           key={msg.id}
                           style={{
                             padding: '0.5rem',
-                            background: msg.isQuestion 
-                              ? 'rgba(255, 159, 159, 0.2)' 
+                            background: msg.isQuestion
+                              ? 'rgba(255, 159, 159, 0.2)'
                               : msg.sentiment === 'positive'
                               ? 'rgba(184, 238, 138, 0.1)'
                               : msg.sentiment === 'negative'
                               ? 'rgba(255, 159, 159, 0.1)'
                               : 'rgba(255, 255, 255, 0.05)',
                             borderRadius: '6px',
-                            border: msg.isQuestion 
-                              ? '1px solid rgba(255, 159, 159, 0.3)' 
+                            border: msg.isQuestion
+                              ? '1px solid rgba(255, 159, 159, 0.3)'
                               : msg.sentiment === 'positive'
                               ? '1px solid rgba(184, 238, 138, 0.2)'
                               : msg.sentiment === 'negative'
@@ -952,18 +1012,18 @@ export default function Dashboard() {
                                 Q
                               </span>
                             )}
-                 <span style={{
-                   fontSize: '0.6rem',
-                   padding: '0.1rem 0.25rem',
-                   borderRadius: '3px',
-                   background: msg.sentiment === 'positive' 
-                     ? '#B8EE8A' 
-                     : msg.sentiment === 'negative' 
-                     ? '#FF9F9F' 
-                     : 'rgba(107, 114, 128, 0.8)'
-                 }}>
-                   {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😢' : '😐'}
-                 </span>
+                            <span style={{
+                              fontSize: '0.6rem',
+                              padding: '0.1rem 0.25rem',
+                              borderRadius: '3px',
+                              background: msg.sentiment === 'positive'
+                                ? '#B8EE8A'
+                                : msg.sentiment === 'negative'
+                                ? '#FF9F9F'
+                                : 'rgba(107, 114, 128, 0.8)'
+                            }}>
+                              {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😢' : '😐'}
+                            </span>
                             {msg.engagementLevel === 'high' && (
                               <span style={{
                                 fontSize: '0.6rem',
@@ -993,53 +1053,38 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Right Column (40%) - Stream + Top Chatters + Questions */}
+              {/* Right Column (40%) - Top Chatters + Questions always visible */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%', minWidth: 0, minHeight: 0 }}>
-                
-                {/* Compact Stream Player */}
+                {/* Top Chatters / Stats */}
                 <div style={{
                   background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '12px',
-                  padding: '0.75rem',
+                  borderRadius: '16px',
+                  padding: '1rem',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
-                    📺 Preview
-                  </h3>
-                  
-                  <div style={{
-                    position: 'relative',
-                    paddingBottom: '42%', // Smaller aspect ratio
-                    height: 0,
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    background: '#000',
-                    maxWidth: '100%'
-                  }}>
-                    <iframe
-                      src={`https://player.twitch.tv/?channel=${channelName}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'heycasi.com'}&muted=true`}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        border: 'none'
-                      }}
-                      allowFullScreen
-                      title={`${channelName} Stream Preview`}
-                    />
-                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters</h3>
+                  {topChatters.length === 0 ? (
+                    <p style={{ margin: '0.75rem 0 0 0', opacity: 0.7 }}>No chatters yet</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0 0' }}>
+                      {topChatters.map((c) => (
+                        <li key={c.username} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}>
+                          <span style={{ color: '#F7F7F7' }}>@{c.username}</span>
+                          <span style={{ color: '#5EEAD4', fontWeight: 700 }}>{c.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
-                {/* Questions - Expanded Priority Panel */}
+                {/* Questions - always visible */}
                 <div style={{
                   background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
                   borderRadius: '16px',
                   padding: '1rem',
                   border: '1px solid rgba(255, 159, 159, 0.3)',
-                  flex: 2, // Take up more space
-                  minHeight: '350px', // Ensure good height
+                  flex: 1,
+                  minHeight: 0,
                   display: 'flex',
                   flexDirection: 'column'
                 }}>
@@ -1067,7 +1112,7 @@ export default function Dashboard() {
                     {questions.length === 0 ? (
                       <p style={{ margin: 0, opacity: 0.7 }}>No questions yet</p>
                     ) : (
-                      questions.slice(-15).reverse().map((q) => (
+                      questions.slice(-10).reverse().map((q) => (
                         <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                             <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>@{q.username}</span>
@@ -1077,28 +1122,6 @@ export default function Dashboard() {
                       ))
                     )}
                   </div>
-                </div>
-
-                {/* Top Chatters / Stats - Moved to bottom */}
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '12px',
-                  padding: '0.75rem',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
-                  <h3 style={{ margin: 0, fontSize: '0.9rem' }}>🏆 Top Chatters</h3>
-                  {topChatters.length === 0 ? (
-                    <p style={{ margin: '0.5rem 0 0 0', opacity: 0.7, fontSize: '0.8rem' }}>No chatters yet</p>
-                  ) : (
-                    <ul style={{ listStyle: 'none', padding: 0, margin: '0.5rem 0 0 0' }}>
-                      {topChatters.slice(0, 3).map((c) => (
-                        <li key={c.username} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0', borderBottom: '1px dashed rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>
-                          <span style={{ color: '#F7F7F7' }}>@{c.username}</span>
-                          <span style={{ color: '#5EEAD4', fontWeight: 700 }}>{c.count}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </div>
               </div>
             </div>
@@ -1117,8 +1140,8 @@ export default function Dashboard() {
             <strong style={{ color: '#5EEAD4' }}>Casi</strong> • Your stream's brainy co-pilot. Reads the room so you don't have to.
           </p>
           {!isConnected && (
-            <a 
-              href="/" 
+            <a
+              href="/"
               style={{
                 display: 'inline-block',
                 marginTop: '0.5rem',
@@ -1132,6 +1155,14 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* CSS Animation for pulse effect */}
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
     </div>
   )
 }
