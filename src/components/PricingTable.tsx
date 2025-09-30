@@ -60,24 +60,29 @@ export default function PricingTable() {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
       {/* Billing Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
         <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
-          padding: '4px',
-          borderRadius: '0.5rem',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          background: 'rgba(255, 255, 255, 0.05)',
+          padding: '0.5rem',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          display: 'inline-flex',
+          gap: '0.5rem'
         }}>
           <button
             onClick={() => setIsYearly(false)}
             style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              fontWeight: '500',
+              padding: '0.75rem 2rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '1rem',
+              fontFamily: 'Poppins, sans-serif',
               transition: 'all 0.3s ease',
-              background: !isYearly ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              background: !isYearly ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
               color: 'white',
               border: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: !isYearly ? '0 4px 15px rgba(105, 50, 255, 0.4)' : 'none'
             }}
           >
             Monthly
@@ -85,17 +90,20 @@ export default function PricingTable() {
           <button
             onClick={() => setIsYearly(true)}
             style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              fontWeight: '500',
+              padding: '0.75rem 2rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '1rem',
+              fontFamily: 'Poppins, sans-serif',
               transition: 'all 0.3s ease',
-              background: isYearly ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              background: isYearly ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              boxShadow: isYearly ? '0 4px 15px rgba(105, 50, 255, 0.4)' : 'none'
             }}
           >
             Yearly
@@ -103,8 +111,9 @@ export default function PricingTable() {
               fontSize: '0.75rem',
               background: '#10b981',
               color: 'white',
-              padding: '0.125rem 0.375rem',
-              borderRadius: '0.25rem'
+              padding: '0.25rem 0.5rem',
+              borderRadius: '6px',
+              fontWeight: '700'
             }}>
               Save 16%
             </span>
