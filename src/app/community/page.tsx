@@ -16,7 +16,7 @@ export default function CommunityPage() {
       name: 'TikTok',
       description: 'Follow us for quick tips, feature highlights, and behind-the-scenes content',
       icon: '🎵',
-      url: 'https://tiktok.com/@heycasi',
+      url: 'https://tiktok.com/@HeyCasi_',
       bgColor: 'bg-pink-50',
       textColor: 'text-pink-600',
       buttonColor: 'bg-pink-600 hover:bg-pink-700'
@@ -25,7 +25,7 @@ export default function CommunityPage() {
       name: 'Twitter/X',
       description: 'Get the latest updates, announcements, and engage in conversations about streaming',
       icon: '🐦',
-      url: 'https://twitter.com/heycasi',
+      url: 'https://twitter.com/HeyCasi_',
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
       buttonColor: 'bg-blue-600 hover:bg-blue-700'

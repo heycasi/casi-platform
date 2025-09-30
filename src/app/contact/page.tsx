@@ -348,7 +348,7 @@ export default function ContactPage() {
                 }}>Follow our updates</h3>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <a
-                    href="https://twitter.com/heycasi"
+                    href="https://twitter.com/HeyCasi_"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
