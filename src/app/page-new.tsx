@@ -88,30 +88,34 @@ export default function Home() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Background Robot Mascot */}
+      {/* Background Casi C Pattern */}
       <div style={{
         position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        top: 0,
+        left: 0,
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
         zIndex: 0,
-        opacity: 0.04,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        opacity: 0.03
       }}>
-        <img
-          src="/landing-robot.png"
-          alt=""
-          style={{
-            width: '800px',
-            height: 'auto',
-            objectFit: 'contain'
-          }}
-        />
+        {[...Array(6)].map((_, i) => (
+          <img
+            key={i}
+            src="/logo_casiC.jpeg"
+            alt=""
+            style={{
+              position: 'absolute',
+              width: i === 2 ? '1200px' : '400px',
+              height: i === 2 ? '1200px' : '400px',
+              objectFit: 'contain',
+              top: i === 0 ? '5%' : i === 1 ? '5%' : i === 2 ? '50%' : i === 3 ? '70%' : i === 4 ? '70%' : '30%',
+              left: i === 0 ? '5%' : i === 1 ? 'auto' : i === 2 ? '50%' : i === 3 ? '10%' : i === 4 ? 'auto' : '70%',
+              right: i === 1 ? '5%' : i === 4 ? '10%' : 'auto',
+              transform: i === 2 ? 'translate(-50%, -50%)' : 'none'
+            }}
+          />
+        ))}
       </div>
 
       {/* Header */}
@@ -122,49 +126,35 @@ export default function Home() {
         background: 'rgba(26, 26, 26, 0.95)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '1rem 1.5rem'
+        padding: '1.25rem 2rem'
       }}>
-        <style dangerouslySetInnerHTML={{__html: `
-          @media (min-width: 768px) {
-            header { padding: 2rem 3rem !important; }
-          }
-          @media (max-width: 767px) {
-            .desktop-nav { display: none !important; }
-            .mobile-logo { height: 80px !important; }
-          }
-          @media (min-width: 768px) {
-            .desktop-nav { display: flex !important; }
-            .mobile-logo { height: 140px !important; }
-          }
-        `}} />
         <div style={{
-          maxWidth: '1800px',
+          maxWidth: '1400px',
           margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative'
+          justifyContent: 'space-between',
+          gap: '2rem'
         }}>
-          {/* Centered Logo */}
           <Link href="/" style={{
-            textDecoration: 'none',
-            zIndex: 10
-          }}>
-            <img src="/landing-logo.png" alt="Casi" className="mobile-logo" style={{ height: '140px', width: 'auto' }} />
-          </Link>
-
-          {/* Right-aligned Navigation - Desktop Only */}
-          <nav className="desktop-nav" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '2rem',
-            position: 'absolute',
-            right: 0
+            gap: '1rem',
+            textDecoration: 'none'
           }}>
-            <Link href="/features" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Features</Link>
-            <Link href="/pricing" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Pricing</Link>
-            <Link href="/beta" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Beta</Link>
-            <Link href="/dashboard" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Dashboard</Link>
+            <img src="/landing-logo.png" alt="Casi" style={{ height: '60px', width: 'auto' }} />
+            <img src="/landing-robot.png" alt="Casi Robot" style={{ height: '55px', width: 'auto' }} />
+          </Link>
+
+          <nav style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '3rem'
+          }}>
+            <Link href="/features" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}>Features</Link>
+            <Link href="/pricing" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}>Pricing</Link>
+            <Link href="/beta" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}>Beta</Link>
+            <Link href="/dashboard" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s' }}>Dashboard</Link>
             <Link
               href="/dashboard"
               style={{
@@ -176,8 +166,7 @@ export default function Home() {
                 fontSize: '0.9rem',
                 fontWeight: '600',
                 boxShadow: '0 4px 15px rgba(105, 50, 255, 0.4)',
-                transition: 'all 0.3s ease',
-                whiteSpace: 'nowrap'
+                transition: 'all 0.3s ease'
               }}
             >
               Get Started
@@ -191,16 +180,11 @@ export default function Home() {
 
         {/* Hero Section */}
         <section style={{
-          padding: '3rem 1.5rem',
+          padding: '6rem 2rem',
           maxWidth: '1400px',
           margin: '0 auto',
           textAlign: 'center'
         }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            @media (min-width: 768px) {
-              section { padding: 6rem 2rem !important; }
-            }
-          `}} />
           <div style={{ marginBottom: '3rem' }}>
             <h1 style={{
               fontSize: 'clamp(2.5rem, 6vw, 5rem)',
@@ -287,7 +271,7 @@ export default function Home() {
             }}>
               <span>✓ No credit card required</span>
               <span>✓ 2 weeks free</span>
-              <span>✓ 20+ streamers waiting</span>
+              <span>✓ {waitlistCount}+ streamers waiting</span>
             </div>
           </div>
 
@@ -298,7 +282,7 @@ export default function Home() {
             position: 'relative'
           }}>
             <img
-              src="/wholedashboard.png"
+              src="/whole-dashboard.png"
               alt="Casi Dashboard"
               style={{
                 width: '100%',
@@ -309,7 +293,7 @@ export default function Home() {
                 cursor: 'pointer',
                 transition: 'transform 0.3s ease'
               }}
-              onClick={() => window.open('/wholedashboard.png', '_blank')}
+              onClick={() => window.open('/whole-dashboard.png', '_blank')}
             />
             <div style={{
               position: 'absolute',
@@ -330,56 +314,38 @@ export default function Home() {
 
         {/* Stats Bar */}
         <section style={{
-          padding: '2rem 1.5rem',
+          padding: '4rem 2rem',
           background: 'rgba(255, 255, 255, 0.02)',
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            @media (min-width: 768px) {
-              .stats-section { padding: 4rem 2rem !important; }
-              .stats-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 3rem !important; }
-            }
-            @media (max-width: 767px) {
-              .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 2rem !important; }
-            }
-          `}} />
-          <div className="stats-grid" style={{
+          <div style={{
             maxWidth: '1400px',
             margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '2rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '3rem',
             textAlign: 'center'
           }}>
             {[
-              { number: 'Pre-Launch', label: 'Beta Testing Phase', color: '#5EEAD4' },
-              { number: '20+', label: 'Streamers on Waitlist', color: '#FF9F9F' },
-              { number: '99.9%', label: 'Target Uptime', color: '#B8EE8A' },
-              { number: '2025', label: 'Full Launch Coming', color: '#932FFE' }
+              { number: '1M+', label: 'Messages Analyzed', color: '#5EEAD4' },
+              { number: '10K+', label: 'Questions Detected', color: '#FF9F9F' },
+              { number: '99.9%', label: 'Uptime Guarantee', color: '#B8EE8A' },
+              { number: '500+', label: 'Happy Streamers', color: '#932FFE' }
             ].map((stat, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                minHeight: '140px'
-              }}>
+              <div key={i}>
                 <div style={{
-                  fontSize: '2.5rem',
+                  fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
                   fontWeight: '700',
                   color: stat.color,
-                  marginBottom: '0.75rem',
-                  lineHeight: '1.2',
-                  textAlign: 'center'
+                  marginBottom: '0.5rem'
                 }}>
                   {stat.number}
                 </div>
                 <div style={{
                   fontSize: '1rem',
                   color: 'rgba(255, 255, 255, 0.7)',
-                  fontWeight: '500',
-                  textAlign: 'center'
+                  fontWeight: '500'
                 }}>
                   {stat.label}
                 </div>
@@ -485,46 +451,36 @@ export default function Home() {
         <section id="features" style={{
           background: 'rgba(255, 255, 255, 0.02)',
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '3rem 1.5rem'
+          padding: '6rem 2rem'
         }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            @media (min-width: 768px) {
-              #features { padding: 6rem 2rem !important; }
-              .feature-item { grid-template-columns: repeat(2, 1fr) !important; gap: 4rem !important; }
-            }
-            @media (max-width: 767px) {
-              .feature-item { grid-template-columns: 1fr !important; gap: 2rem !important; }
-              .feature-item > div { order: 1 !important; }
-            }
-          `}} />
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
             {[
               {
-                title: 'Live Chat Feed Analysis',
-                desc: 'See every message analyzed for sentiment, questions, and engagement level in real-time.',
-                image: '/livechatfeed.png',
+                title: 'Real-Time Sentiment Tracking',
+                desc: 'Watch your chat\'s mood shift in real-time. See what\'s landing well and adjust on the fly.',
+                image: '/sentiment-analysis.png',
                 reverse: false,
-                color: '#5EEAD4'
+                color: '#B8EE8A'
               },
               {
-                title: 'Never Miss a Question & Track Top Chatters',
-                desc: 'AI highlights every question in chat and tracks your top chatters. Get alerts so you can respond fast, keep viewers engaged, and recognize your most active community members.',
+                title: 'Never Miss a Question',
+                desc: 'AI highlights every question in chat. Get alerts so you can respond fast and keep viewers engaged.',
                 image: '/missedquestions-topchatters.png',
                 reverse: true,
                 color: '#FF9F9F'
               },
               {
-                title: 'Stream Preview',
-                desc: 'Watch your stream directly in the dashboard while monitoring chat analytics in real-time.',
-                image: '/stream-preview.png',
+                title: 'Live Chat Feed Analysis',
+                desc: 'See every message analyzed for sentiment, questions, and engagement level in real-time.',
+                image: '/live chat feed.png',
                 reverse: false,
-                color: '#B8EE8A'
+                color: '#5EEAD4'
               }
             ].map((feature, i) => (
-              <div key={i} className="feature-item" style={{
+              <div key={i} style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr',
-                gap: '2rem',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                gap: '4rem',
                 alignItems: 'center',
                 marginBottom: i < 2 ? '8rem' : '0',
                 flexDirection: feature.reverse ? 'row-reverse' : 'row'
@@ -579,7 +535,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Community Section */}
+        {/* Testimonials */}
         <section style={{
           padding: '6rem 2rem',
           maxWidth: '1400px',
@@ -591,13 +547,13 @@ export default function Home() {
               fontWeight: '700',
               marginBottom: '1rem'
             }}>
-              Join the Beta Community
+              Loved by Streamers
             </h2>
             <p style={{
               fontSize: '1.2rem',
               color: 'rgba(255, 255, 255, 0.7)'
             }}>
-              Be among the first streamers to experience next-gen chat analytics
+              Join hundreds of creators using Casi
             </p>
           </div>
 
@@ -608,50 +564,60 @@ export default function Home() {
           }}>
             {[
               {
-                icon: '🚀',
-                title: 'Early Access',
-                desc: 'Get exclusive access to all features during our beta testing phase'
+                quote: "Casi helped me catch questions I was missing. My viewers feel more heard now.",
+                author: "Alex Rivers",
+                role: "12K Twitch Followers",
+                avatar: "AR"
               },
               {
-                icon: '💬',
-                title: 'Shape the Product',
-                desc: 'Your feedback will directly influence the features we build'
+                quote: "The sentiment tracking is a game-changer. I can see when chat loves something!",
+                author: "Jamie Chen",
+                role: "25K Twitch Followers",
+                avatar: "JC"
               },
               {
-                icon: '🎁',
-                title: 'Special Pricing',
-                desc: 'Lock in discounted rates as an early supporter when we launch'
+                quote: "Setup took 2 minutes. Now I never miss important moments in chat.",
+                author: "Morgan Lee",
+                role: "8K Twitch Followers",
+                avatar: "ML"
               }
-            ].map((item, i) => (
+            ].map((testimonial, i) => (
               <div key={i} style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 backdropFilter: 'blur(10px)',
                 borderRadius: '20px',
-                padding: '2.5rem 2rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                textAlign: 'center'
+                padding: '2rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
-                <div style={{
-                  fontSize: '3rem',
-                  marginBottom: '1.5rem'
-                }}>
-                  {item.icon}
-                </div>
-                <h3 style={{
-                  fontSize: '1.4rem',
-                  fontWeight: '600',
-                  marginBottom: '1rem',
-                  color: '#F7F7F7'
-                }}>
-                  {item.title}
-                </h3>
                 <p style={{
-                  fontSize: '1rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  lineHeight: '1.6'
+                  fontSize: '1.1rem',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  marginBottom: '1.5rem',
+                  lineHeight: '1.6',
+                  fontStyle: 'italic'
                 }}>
-                  {item.desc}
+                  "{testimonial.quote}"
                 </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #5EEAD4, #932FFE)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    fontWeight: '700',
+                    color: '#151E3C'
+                  }}>
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: '600', color: '#F7F7F7' }}>{testimonial.author}</div>
+                    <div style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.6)' }}>{testimonial.role}</div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -680,46 +646,36 @@ export default function Home() {
               </p>
             </div>
 
-            <style dangerouslySetInnerHTML={{__html: `
-              @media (min-width: 768px) {
-                .pricing-grid { grid-template-columns: repeat(3, 1fr) !important; }
-              }
-              @media (max-width: 767px) {
-                .pricing-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
-              }
-            `}} />
-            <div className="pricing-grid" style={{
+            <div style={{
               display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '1.5rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '2rem',
               maxWidth: '1200px',
-              margin: '0 auto',
-              alignItems: 'start',
-              padding: '0 1rem'
+              margin: '0 auto'
             }}>
               {[
                 {
-                  name: 'Creator',
-                  price: '£19',
-                  period: 'per month',
-                  features: ['Real-time sentiment analysis', 'Question detection', 'Live chat feed', 'Top chatters tracking', 'Email support'],
-                  cta: 'Get Creator',
+                  name: 'Free Beta',
+                  price: '$0',
+                  period: '2 weeks',
+                  features: ['Real-time sentiment', 'Question detection', 'Basic analytics', 'Email support'],
+                  cta: 'Start Free',
                   highlight: false
                 },
                 {
                   name: 'Pro',
-                  price: '£37',
+                  price: '$29',
                   period: 'per month',
-                  features: ['Everything in Creator', 'Advanced analytics', 'Missed questions alerts', 'Historical data', 'Priority support', 'Discord integration'],
+                  features: ['Everything in Free', 'Advanced analytics', 'Priority alerts', 'Discord integration', 'Priority support'],
                   cta: 'Get Pro',
                   highlight: true
                 },
                 {
-                  name: 'Streamer+',
-                  price: '£75',
+                  name: 'Premium',
+                  price: '$79',
                   period: 'per month',
-                  features: ['Everything in Pro', 'OBS overlay widget', 'Custom alerts & notifications', 'API access', 'Multi-stream support', 'Dedicated support'],
-                  cta: 'Get Streamer+',
+                  features: ['Everything in Pro', 'OBS overlay', 'Custom alerts', 'API access', 'Dedicated support'],
+                  cta: 'Get Premium',
                   highlight: false
                 }
               ].map((plan, i) => (
@@ -730,10 +686,8 @@ export default function Home() {
                   padding: '2.5rem 2rem',
                   border: plan.highlight ? '2px solid #932FFE' : '1px solid rgba(255, 255, 255, 0.1)',
                   position: 'relative',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%'
+                  transform: plan.highlight ? 'scale(1.05)' : 'scale(1)',
+                  transition: 'all 0.3s ease'
                 }}>
                   {plan.highlight && (
                     <div style={{
@@ -752,11 +706,10 @@ export default function Home() {
                     </div>
                   )}
                   <h3 style={{
-                    fontSize: '2rem',
+                    fontSize: '1.5rem',
                     fontWeight: '700',
                     marginBottom: '1rem',
-                    color: '#F7F7F7',
-                    textAlign: 'center'
+                    color: '#F7F7F7'
                   }}>
                     {plan.name}
                   </h3>
@@ -779,8 +732,7 @@ export default function Home() {
                   <ul style={{
                     listStyle: 'none',
                     padding: 0,
-                    marginBottom: '2rem',
-                    flex: 1
+                    marginBottom: '2rem'
                   }}>
                     {plan.features.map((feature, j) => (
                       <li key={j} style={{
@@ -809,8 +761,7 @@ export default function Home() {
                       textDecoration: 'none',
                       fontSize: '1rem',
                       fontWeight: '600',
-                      transition: 'all 0.3s ease',
-                      marginTop: 'auto'
+                      transition: 'all 0.3s ease'
                     }}
                   >
                     {plan.cta}
@@ -920,33 +871,25 @@ export default function Home() {
         <footer style={{
           background: 'rgba(255, 255, 255, 0.02)',
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '3rem 1.5rem 2rem'
+          padding: '4rem 2rem 2rem'
         }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            @media (min-width: 768px) {
-              footer { padding: 4rem 2rem 2rem !important; }
-              .footer-grid { grid-template-columns: repeat(4, 1fr) !important; }
-            }
-            @media (max-width: 767px) {
-              .footer-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-            }
-          `}} />
           <div style={{
             maxWidth: '1400px',
             margin: '0 auto'
           }}>
-            <div className="footer-grid" style={{
+            <div style={{
               display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '3rem',
               marginBottom: '3rem'
             }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                   <img src="/landing-logo.png" alt="Casi" style={{ height: '40px' }} />
+                  <img src="/landing-robot.png" alt="Robot" style={{ height: '35px' }} />
                 </div>
-                <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', lineHeight: '1.7', maxWidth: '300px' }}>
-                  Our mission: Transform how streamers connect with their communities through data-driven insights and AI-powered engagement optimisation.
+                <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  Real-time streaming analytics powered by AI.
                 </p>
               </div>
 

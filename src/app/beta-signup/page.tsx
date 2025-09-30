@@ -100,32 +100,16 @@ export default function BetaSignup() {
           alignItems: 'center',
           gap: '0.5rem'
         }}>
-          <img 
+          <img
             src="/landing-logo.png"
             alt="Casi"
             style={{ height: '32px', width: 'auto' }}
-            onError={(e) => {
-              const target = e.currentTarget
-              target.style.display = 'none'
-              const fallback = document.createElement('h1')
-              fallback.style.cssText = 'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
-              fallback.textContent = 'Casi'
-              target.parentNode?.appendChild(fallback)
-            }}
           />
           
-          <img 
+          <img
             src="/landing-robot.png"
             alt="Casi Robot"
             style={{ width: '32px', height: '32px' }}
-            onError={(e) => {
-              const target = e.currentTarget
-              target.style.display = 'none'
-              const fallback = document.createElement('div')
-              fallback.style.cssText = 'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
-              fallback.textContent = '🤖'
-              target.parentNode?.appendChild(fallback)
-            }}
           />
         </div>
 

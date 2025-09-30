@@ -1,0 +1,248 @@
+'use client'
+import { useState } from 'react'
+
+export default function PricingTable() {
+  const [isYearly, setIsYearly] = useState(false)
+
+  const tiers = [
+    {
+      name: 'Creator',
+      monthlyPrice: 19,
+      yearlyPrice: 190,
+      description: 'Perfect for growing streamers',
+      features: [
+        'Real-time sentiment tracking',
+        'Question detection & alerts',
+        'Basic analytics dashboard',
+        'Email support',
+        'Up to 1,000 messages/hour'
+      ],
+      cta: 'Start Creator Plan',
+      popular: false
+    },
+    {
+      name: 'Pro',
+      monthlyPrice: 37,
+      yearlyPrice: 370,
+      description: 'For serious content creators',
+      features: [
+        'Everything in Creator',
+        'Advanced sentiment analysis',
+        'Priority question alerts',
+        'Export analytics reports',
+        'Priority support',
+        'Up to 5,000 messages/hour',
+        'Multi-platform dashboard'
+      ],
+      cta: 'Start Pro Plan',
+      popular: true
+    },
+    {
+      name: 'Streamer+',
+      monthlyPrice: 75,
+      yearlyPrice: 750,
+      description: 'For top-tier streamers',
+      features: [
+        'Everything in Pro',
+        'AI response suggestions',
+        'OBS overlay integration',
+        'Custom alerts & webhooks',
+        'Dedicated account manager',
+        'Unlimited messages',
+        'White-label options',
+        'API access'
+      ],
+      cta: 'Start Streamer+ Plan',
+      popular: false
+    }
+  ]
+
+  return (
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
+      {/* Billing Toggle */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          padding: '4px',
+          borderRadius: '0.5rem',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
+        }}>
+          <button
+            onClick={() => setIsYearly(false)}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              background: !isYearly ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setIsYearly(true)}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              background: isYearly ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            Yearly
+            <span style={{
+              fontSize: '0.75rem',
+              background: '#10b981',
+              color: 'white',
+              padding: '0.125rem 0.375rem',
+              borderRadius: '0.25rem'
+            }}>
+              Save 16%
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Pricing Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '2rem'
+      }}>
+        {tiers.map((tier) => (
+          <div
+            key={tier.name}
+            style={{
+              position: 'relative',
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '1rem',
+              border: tier.popular ? '2px solid #8b5cf6' : '1px solid rgba(255, 255, 255, 0.1)',
+              padding: '2rem',
+              transform: tier.popular ? 'scale(1.05)' : 'scale(1)',
+              transition: 'transform 0.3s ease'
+            }}
+          >
+            {tier.popular && (
+              <div style={{
+                position: 'absolute',
+                top: '-1rem',
+                left: '50%',
+                transform: 'translateX(-50%)'
+              }}>
+                <span style={{
+                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                  color: 'white',
+                  padding: '0.25rem 1rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }}>
+                  Most Popular
+                </span>
+              </div>
+            )}
+
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: 'white',
+                marginBottom: '0.5rem'
+              }}>{tier.name}</h3>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                marginBottom: '1.5rem'
+              }}>{tier.description}</p>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <span style={{
+                  fontSize: '2.5rem',
+                  fontWeight: '800',
+                  color: 'white'
+                }}>
+                  £{isYearly ? tier.yearlyPrice : tier.monthlyPrice}
+                </span>
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}>
+                  /{isYearly ? 'year' : 'month'}
+                </span>
+                {isYearly && (
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: '#10b981',
+                    marginTop: '0.25rem'
+                  }}>
+                    Save £{(tier.monthlyPrice * 12) - tier.yearlyPrice} per year
+                  </div>
+                )}
+              </div>
+
+              <button
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.5rem',
+                  fontWeight: '600',
+                  transition: 'opacity 0.3s ease',
+                  marginBottom: '1.5rem',
+                  background: tier.popular
+                    ? 'linear-gradient(45deg, #8b5cf6, #ec4899)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  border: tier.popular ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
+                  cursor: 'pointer'
+                }}
+                data-event={`cta-pricing-${tier.name.toLowerCase()}`}
+              >
+                {tier.cta}
+              </button>
+            </div>
+
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {tier.features.map((feature, index) => (
+                <li key={index} style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  marginBottom: '0.75rem'
+                }}>
+                  <span style={{
+                    color: '#10b981',
+                    marginRight: '0.75rem',
+                    fontSize: '1.2rem',
+                    marginTop: '0.125rem'
+                  }}>✓</span>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    lineHeight: '1.5'
+                  }}>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Beta Note */}
+      <div className="mt-12 text-center">
+        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+          <h4 className="font-semibold text-blue-900 mb-2">Beta Pricing</h4>
+          <p className="text-blue-800">
+            🎉 Beta is free for your first 2 weeks — email signup only. No card required.
+            <br />
+            Lock in these launch prices during the beta period!
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

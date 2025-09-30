@@ -1,619 +1,264 @@
 'use client'
-import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
-export default function About() {
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  useEffect(() => {
-    setIsLoaded(true)
-  }, [])
-
+export default function AboutPage() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      color: 'white'
-    }}>
-      {/* Header with Navigation */}
-      <header style={{
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: 'rgba(0, 0, 0, 0.2)',
-        backdropFilter: 'blur(10px)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img 
-            src="/landing-logo.png" 
-            alt="Casi" 
-            style={{ height: '2rem', width: 'auto' }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              const fallback = document.createElement('h1')
-              fallback.style.cssText = 'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
-              fallback.textContent = 'Casi'
-              target.parentNode?.appendChild(fallback)
-              target.style.display = 'none'
-            }}
-          />
-          <img 
-            src="/landing-robot.png" 
-            alt="Casi Robot" 
-            style={{ height: '2rem', width: '2rem', borderRadius: '50%' }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              const fallback = document.createElement('div')
-              fallback.style.cssText = 'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
-              fallback.textContent = '🤖'
-              target.parentNode?.appendChild(fallback)
-              target.style.display = 'none'
-            }}
-          />
-        </div>
-        <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a 
-            href="/" 
-            style={{ 
-              color: '#5EEAD4', 
-              textDecoration: 'none', 
-              fontWeight: '500',
-              transition: 'color 0.3s ease'
-            }}
-          >
-            Home
-          </a>
-          <a 
-            href="/dashboard" 
-            style={{ 
-              color: 'white', 
-              textDecoration: 'none', 
-              fontWeight: '500',
-              transition: 'color 0.3s ease'
-            }}
-          >
-            Dashboard
-          </a>
-        </nav>
-      </header>
-
+    <>
       {/* Hero Section */}
-      <section style={{
-        padding: '4rem 2rem',
-        textAlign: 'center',
-        background: 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'radial-gradient(circle at 30% 50%, rgba(94, 234, 212, 0.1) 0%, transparent 50%)',
-        }} />
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{
-            margin: '0 0 1.5rem 0',
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: '800',
-            background: 'linear-gradient(135deg, #FFFFFF, #B8EE8A)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            About Casi
+      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-pink-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 text-gray-900">
+            About <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Casi</span>
           </h1>
-          <p style={{
-            fontSize: '1.25rem',
-            opacity: '0.9',
-            lineHeight: '1.6',
-            margin: '0 0 2rem 0'
-          }}>
-            Born from passion, built for streamers
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+            We're building the future of streaming analytics to help creators connect better with their communities.
           </p>
         </div>
       </section>
 
       {/* Mission Section */}
-      <section style={{
-        padding: '4rem 2rem',
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        <div style={{
-          background: 'rgba(105, 50, 255, 0.1)',
-          border: '2px solid #6932FF',
-          borderRadius: '20px',
-          padding: '3rem',
-          textAlign: 'center',
-          marginBottom: '4rem'
-        }}>
-          <h2 style={{
-            fontSize: '2rem',
-            fontWeight: '700',
-            color: '#5EEAD4',
-            marginBottom: '1.5rem'
-          }}>
-            Our Mission
-          </h2>
-          <p style={{
-            fontSize: '1.25rem',
-            lineHeight: '1.8',
-            color: '#FFFFFF',
-            fontWeight: '500'
-          }}>
-            Transform how streamers connect with their communities through 
-            <span style={{ color: '#B8EE8A', fontWeight: '700' }}> data-driven insights</span> and 
-            <span style={{ color: '#FF9F9F', fontWeight: '700' }}> AI-powered engagement optimisation</span>.
-          </p>
-        </div>
-
-        {/* Our Story */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2.5rem',
-            fontWeight: '700',
-            textAlign: 'center',
-            marginBottom: '2rem',
-            background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Our Story
-          </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '2rem',
-            marginBottom: '3rem'
-          }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '15px',
-              padding: '2rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎮</div>
-              <h3 style={{ color: '#5EEAD4', fontSize: '1.5rem', marginBottom: '1rem' }}>Gaming Connection</h3>
-              <p style={{ lineHeight: '1.6', opacity: '0.9' }}>
-                It all started in the gaming community. Two passionate gamers who understood the struggles 
-                of building and engaging with streaming audiences in an increasingly crowded space.
-              </p>
-            </div>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '15px',
-              padding: '2rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💡</div>
-              <h3 style={{ color: '#FF9F9F', fontSize: '1.5rem', marginBottom: '1rem' }}>The Problem</h3>
-              <p style={{ lineHeight: '1.6', opacity: '0.9' }}>
-                We watched talented streamers struggle with chat overload, miss important viewer questions, 
-                and have no way to understand what content truly resonated with their communities.
-              </p>
-            </div>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '15px',
-              padding: '2rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚀</div>
-              <h3 style={{ color: '#B8EE8A', fontSize: '1.5rem', marginBottom: '1rem' }}>The Solution</h3>
-              <p style={{ lineHeight: '1.6', opacity: '0.9' }}>
-                Combining data science expertise with deep streaming knowledge, we built Casi - 
-                the AI co-pilot every streamer deserves to have by their side.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Founders Section */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2.5rem',
-            fontWeight: '700',
-            textAlign: 'center',
-            marginBottom: '3rem',
-            background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Meet the Founders
-          </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-            gap: '3rem',
-            maxWidth: '1000px',
-            margin: '0 auto'
-          }}>
-            {/* Connor Dahl */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(105, 50, 255, 0.1), rgba(94, 234, 212, 0.1))',
-              border: '2px solid #6932FF',
-              borderRadius: '20px',
-              padding: '2.5rem',
-              textAlign: 'center',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '-50%',
-                right: '-50%',
-                width: '100%',
-                height: '100%',
-                background: 'radial-gradient(circle, rgba(94, 234, 212, 0.1) 0%, transparent 70%)',
-                opacity: '0.5'
-              }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{
-                  width: '120px',
-                  height: '120px',
-                  margin: '0 auto 1.5rem',
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  border: '3px solid #5EEAD4',
-                  background: 'linear-gradient(135deg, #6932FF, #5EEAD4)'
-                }}>
-                  <img 
-                    src="/Connor.png" 
-                    alt="Connor Dahl" 
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      objectFit: 'cover' 
-                    }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      const fallback = document.createElement('div')
-                      fallback.style.cssText = 'width: 100%; height: 100%; background: linear-gradient(135deg, #6932FF, #5EEAD4); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; font-weight: 700;'
-                      fallback.textContent = 'CD'
-                      target.parentNode?.appendChild(fallback)
-                      target.style.display = 'none'
-                    }}
-                  />
-                </div>
-                <h3 style={{
-                  fontSize: '1.75rem',
-                  fontWeight: '700',
-                  color: '#5EEAD4',
-                  marginBottom: '0.5rem'
-                }}>
-                  Connor Dahl
-                </h3>
-                <p style={{
-                  color: '#B8EE8A',
-                  fontWeight: '600',
-                  marginBottom: '1.5rem',
-                  fontSize: '1.1rem'
-                }}>
-                  Co-Founder & Data Architect
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+                Our Mission
+              </h2>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-2xl border-l-4 border-purple-500">
+                <p className="text-xl text-gray-700 leading-relaxed italic">
+                  "Transform how streamers connect with their communities through data-driven insights and AI-powered engagement optimisation."
                 </p>
-                <p style={{
-                  lineHeight: '1.6',
-                  opacity: '0.9',
-                  marginBottom: '1.5rem'
-                }}>
-                  With a deep background in <strong style={{ color: '#5EEAD4' }}>Data & Analytics</strong> and 
-                  an unwavering passion for gaming, Connor brings the technical expertise that powers 
-                  Casi's intelligent insights. He understands both the science behind the data and 
-                  the heart of gaming communities.
-                </p>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
-                }}>
-                  <span style={{
-                    background: '#5EEAD4',
-                    color: '#1a1a1a',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    Data Science
-                  </span>
-                  <span style={{
-                    background: '#B8EE8A',
-                    color: '#1a1a1a',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    Gaming Enthusiast
-                  </span>
+              </div>
+              <p className="text-lg text-gray-600 mt-6 leading-relaxed">
+                We believe every streamer deserves to understand their audience better. By providing real-time insights into chat sentiment and highlighting important questions, we help creators build stronger, more engaged communities.
+              </p>
+            </div>
+            <div>
+              <div className="bg-gray-50 rounded-2xl p-8">
+                <h3 className="text-2xl font-bold mb-6 text-gray-900">Why We Built Casi</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4 mt-1 flex-shrink-0">
+                      💬
+                    </div>
+                    <p className="text-gray-600">
+                      <strong>Chat moves too fast</strong> - Important questions and feedback get lost in busy streams
+                    </p>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4 mt-1 flex-shrink-0">
+                      📊
+                    </div>
+                    <p className="text-gray-600">
+                      <strong>No real-time feedback</strong> - Streamers can't tell how their audience is reacting moment by moment
+                    </p>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4 mt-1 flex-shrink-0">
+                      🎯
+                    </div>
+                    <p className="text-gray-600">
+                      <strong>Limited insights</strong> - Current tools don't provide actionable data about audience engagement
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Ellie-Jade Farrington */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(147, 47, 254, 0.1), rgba(255, 159, 159, 0.1))',
-              border: '2px solid #932FFE',
-              borderRadius: '20px',
-              padding: '2.5rem',
-              textAlign: 'center',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '-50%',
-                left: '-50%',
-                width: '100%',
-                height: '100%',
-                background: 'radial-gradient(circle, rgba(255, 159, 159, 0.1) 0%, transparent 70%)',
-                opacity: '0.5'
-              }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{
-                  width: '120px',
-                  height: '120px',
-                  margin: '0 auto 1.5rem',
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  border: '3px solid #FF9F9F',
-                  background: 'linear-gradient(135deg, #932FFE, #FF9F9F)'
-                }}>
-                  <img 
-                    src="/Elliepng.png" 
-                    alt="Ellie-Jade Farrington" 
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      objectFit: 'cover' 
-                    }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      const fallback = document.createElement('div')
-                      fallback.style.cssText = 'width: 100%; height: 100%; background: linear-gradient(135deg, #932FFE, #FF9F9F); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; font-weight: 700;'
-                      fallback.textContent = 'EJ'
-                      target.parentNode?.appendChild(fallback)
-                      target.style.display = 'none'
-                    }}
-                  />
-                </div>
-                <h3 style={{
-                  fontSize: '1.75rem',
-                  fontWeight: '700',
-                  color: '#FF9F9F',
-                  marginBottom: '0.5rem'
-                }}>
-                  Ellie-Jade Farrington
-                </h3>
-                <p style={{
-                  color: '#932FFE',
-                  fontWeight: '600',
-                  marginBottom: '1.5rem',
-                  fontSize: '1.1rem'
-                }}>
-                  Co-Founder & Community Strategist
-                </p>
-                <p style={{
-                  lineHeight: '1.6',
-                  opacity: '0.9',
-                  marginBottom: '1.5rem'
-                }}>
-                  A <strong style={{ color: '#FF9F9F' }}>marketing expert</strong> and 
-                  <strong style={{ color: '#932FFE' }}> former streamer</strong> with an infectious 
-                  passion for gaming, Ellie brings real-world streaming experience and deep 
-                  understanding of what creators truly need to build thriving communities.
-                </p>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
-                }}>
-                  <span style={{
-                    background: '#FF9F9F',
-                    color: '#1a1a1a',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    Marketing
-                  </span>
-                  <span style={{
-                    background: '#932FFE',
-                    color: 'white',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    Ex-Streamer
-                  </span>
-                  <span style={{
-                    background: '#B8EE8A',
-                    color: '#1a1a1a',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    Gaming Passionate
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Values Section */}
-        <div style={{ marginBottom: '4rem' }}>
-          <h2 style={{
-            fontSize: '2.5rem',
-            fontWeight: '700',
-            textAlign: 'center',
-            marginBottom: '3rem',
-            background: 'linear-gradient(135deg, #FF9F9F, #B8EE8A)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            What We Believe
-          </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '2rem'
-          }}>
-            <div style={{
-              background: 'rgba(94, 234, 212, 0.1)',
-              border: '1px solid #5EEAD4',
-              borderRadius: '15px',
-              padding: '2rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🎯</div>
-              <h3 style={{ color: '#5EEAD4', fontSize: '1.3rem', marginBottom: '1rem' }}>Data-Driven Growth</h3>
-              <p style={{ opacity: '0.9', lineHeight: '1.6' }}>
-                Every streamer deserves insights that help them grow smarter, not just harder.
-              </p>
-            </div>
-            <div style={{
-              background: 'rgba(255, 159, 159, 0.1)',
-              border: '1px solid #FF9F9F',
-              borderRadius: '15px',
-              padding: '2rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🤝</div>
-              <h3 style={{ color: '#FF9F9F', fontSize: '1.3rem', marginBottom: '1rem' }}>Community First</h3>
-              <p style={{ opacity: '0.9', lineHeight: '1.6' }}>
-                Technology should strengthen the bond between streamers and their communities.
-              </p>
-            </div>
-            <div style={{
-              background: 'rgba(184, 238, 138, 0.1)',
-              border: '1px solid #B8EE8A',
-              borderRadius: '15px',
-              padding: '2rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚡</div>
-              <h3 style={{ color: '#B8EE8A', fontSize: '1.3rem', marginBottom: '1rem' }}>Simplicity Wins</h3>
-              <p style={{ opacity: '0.9', lineHeight: '1.6' }}>
-                Powerful features should be simple to use. Complexity is the enemy of adoption.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div style={{
-          background: 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
-          borderRadius: '25px',
-          padding: '3rem',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'radial-gradient(circle at 70% 30%, rgba(184, 238, 138, 0.2) 0%, transparent 60%)'
-          }} />
-          <div style={{ position: 'relative', zIndex: 2 }}>
-            <h2 style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              marginBottom: '1rem',
-              color: 'white'
-            }}>
-              Ready to Transform Your Streams?
-            </h2>
-            <p style={{
-              fontSize: '1.1rem',
-              opacity: '0.9',
-              marginBottom: '2rem',
-              maxWidth: '600px',
-              margin: '0 auto 2rem'
-            }}>
-              Join the growing community of streamers who use data to build better connections 
-              with their audiences.
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <a
-                href="/"
-                style={{
-                  display: 'inline-block',
-                  background: 'linear-gradient(135deg, #5EEAD4, #B8EE8A)',
-                  color: '#1a1a1a',
-                  padding: '1rem 2rem',
-                  borderRadius: '50px',
-                  textDecoration: 'none',
-                  fontWeight: '700',
-                  fontSize: '1.1rem',
-                  transition: 'transform 0.3s ease'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'translateY(-2px)'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'translateY(0)'}
-              >
-                🚀 Join Waitlist
-              </a>
-              <a
-                href="/dashboard"
-                style={{
-                  display: 'inline-block',
-                  border: '2px solid white',
-                  color: 'white',
-                  padding: '1rem 2rem',
-                  borderRadius: '50px',
-                  textDecoration: 'none',
-                  fontWeight: '700',
-                  fontSize: '1.1rem',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.background = 'white';
-                  (e.target as HTMLElement).style.color = '#6932FF'
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.background = 'transparent';
-                  (e.target as HTMLElement).style.color = 'white'
-                }}
-              >
-                Try Dashboard
-              </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{
-        background: 'rgba(0, 0, 0, 0.3)',
-        padding: '2rem',
-        textAlign: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-          <span style={{ color: '#5EEAD4', fontSize: '1.25rem', fontWeight: '800' }}>Casi</span>
-          <div style={{ width: '24px', height: '24px', background: '#B8EE8A', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>🤖</div>
+      {/* Roadmap Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Product Roadmap
+            </h2>
+            <p className="text-xl text-gray-600">Our journey from analytics to automation</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Now */}
+            <div className="relative">
+              <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-green-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mr-4">
+                    ✓
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Now</h3>
+                    <p className="text-green-600 text-sm font-medium">Available in Beta</p>
+                  </div>
+                </div>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Real-time sentiment tracking
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Question detection & alerts
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Basic analytics dashboard
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Next */}
+            <div className="relative">
+              <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mr-4">
+                    🚀
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Next</h3>
+                    <p className="text-blue-600 text-sm font-medium">Coming Soon</p>
+                  </div>
+                </div>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Multi-platform dashboard
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Advanced trend analysis
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Export & reporting tools
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Later */}
+            <div className="relative">
+              <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-purple-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mr-4">
+                    🔮
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Later</h3>
+                    <p className="text-purple-600 text-sm font-medium">Future Vision</p>
+                  </div>
+                </div>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    OBS overlay integration
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    AI response suggestions
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    Automated engagement tools
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <p style={{ opacity: '0.8', marginBottom: '1rem' }}>
-          <strong style={{ color: '#6932FF' }}>Your stream's brainy co-pilot</strong>
-        </p>
-        <p style={{ opacity: '0.6', fontSize: '0.9rem' }}>
-          Questions? Email us at <a href="mailto:casi@heycasi.com" style={{ color: '#5EEAD4', textDecoration: 'none' }}>casi@heycasi.com</a>
-        </p>
-        <p style={{ opacity: '0.5', fontSize: '0.8rem', margin: '1rem 0 0 0' }}>
-          © 2025 Casi. Built with ❤️ for the streaming community.
-        </p>
-      </footer>
-    </div>
+      </section>
+
+      {/* Team Values */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Our Values
+            </h2>
+            <p className="text-xl text-gray-600">What drives us every day</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                🎯
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Creator-First</h3>
+              <p className="text-gray-600">
+                Every feature we build starts with understanding what streamers actually need, not what sounds cool.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                🔒
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Privacy-Focused</h3>
+              <p className="text-gray-600">
+                We analyze data to provide insights, but never store personal conversations or compromise user privacy.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                ⚡
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Real-Time Performance</h3>
+              <p className="text-gray-600">
+                Streaming is live, so our analytics are too. No delays, no lag, just instant insights when you need them.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-pink-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+            Join us on this journey
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Help us build the future of streaming analytics by joining our beta program.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/features"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-12 py-4 rounded-full font-bold text-xl hover:opacity-90 transition-opacity inline-block"
+              data-event="cta-about-see-features"
+            >
+              See Features
+            </Link>
+            <Link
+              href="/pricing"
+              className="bg-white text-gray-900 px-12 py-4 rounded-full font-medium border-2 border-gray-200 hover:border-gray-300 transition-colors inline-block"
+              data-event="cta-about-view-pricing"
+            >
+              View Pricing
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
