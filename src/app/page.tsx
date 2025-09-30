@@ -437,10 +437,77 @@ export default function Home() {
             <p style={{
               fontSize: '0.9rem',
               color: 'rgba(255, 255, 255, 0.6)',
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              marginBottom: '1.5rem'
             }}>
               Your stream's brainy co-pilot. AI-powered chat analysis for better audience engagement.
             </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <a
+                href="https://twitter.com/HeyCasi_"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  background: '#1DA1F2',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  textDecoration: 'none',
+                  transition: 'opacity 0.3s ease',
+                  fontSize: '1.2rem'
+                }}
+                aria-label="Follow us on Twitter"
+              >
+                𝕏
+              </a>
+              <a
+                href="https://tiktok.com/@HeyCasi_"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  background: '#000000',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  textDecoration: 'none',
+                  transition: 'opacity 0.3s ease',
+                  fontSize: '1.2rem'
+                }}
+                aria-label="Follow us on TikTok"
+              >
+                🎵
+              </a>
+              <a
+                href="https://linkedin.com/company/heycasi"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  background: '#0A66C2',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  textDecoration: 'none',
+                  transition: 'opacity 0.3s ease',
+                  fontSize: '1rem',
+                  fontWeight: '700'
+                }}
+                aria-label="Follow us on LinkedIn"
+              >
+                in
+              </a>
+            </div>
           </div>
           <div>
             <h4 style={{
