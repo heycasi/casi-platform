@@ -233,10 +233,25 @@ export default function PricingTable() {
       </div>
 
       {/* Beta Note */}
-      <div className="mt-12 text-center">
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-          <h4 className="font-semibold text-blue-900 mb-2">Beta Pricing</h4>
-          <p className="text-blue-800">
+      <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+        <div style={{
+          background: 'rgba(94, 234, 212, 0.1)',
+          borderRadius: '0.75rem',
+          padding: '2rem',
+          border: '1px solid rgba(94, 234, 212, 0.3)'
+        }}>
+          <h4 style={{
+            fontWeight: '700',
+            color: '#5EEAD4',
+            marginBottom: '0.5rem',
+            fontSize: '1.2rem'
+          }}>
+            Beta Pricing
+          </h4>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            lineHeight: '1.6'
+          }}>
             🎉 Beta is free for your first 2 weeks — email signup only. No card required.
             <br />
             Lock in these launch prices during the beta period!

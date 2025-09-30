@@ -1,17 +1,10 @@
 'use client'
 import Link from 'next/link'
-import DashboardMock from '../../components/DashboardMock'
-import QuestionQueueMock from '../../components/QuestionQueueMock'
+import PageLayout from '../../components/PageLayout'
 
 export default function FeaturesPage() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      color: 'white'
-    }}>
-
+    <PageLayout>
       {/* Hero Section */}
       <section style={{
         paddingTop: '3rem',
@@ -20,18 +13,17 @@ export default function FeaturesPage() {
         paddingRight: '2rem',
         textAlign: 'center'
       }}>
-        <div style={{ maxWidth: '4xl', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h1 style={{
             fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 'bold',
+            fontWeight: '700',
             lineHeight: '1.2',
             marginBottom: '2rem'
           }}>
             What <span style={{
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              WebkitTextFillColor: 'transparent'
             }}>Casi</span> Does For You
           </h1>
           <p style={{
@@ -47,233 +39,243 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* MVP Features */}
+      {/* Feature 1: Sentiment Tracking */}
       <section style={{
-        paddingTop: '5rem',
-        paddingBottom: '5rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem'
+        padding: '4rem 2rem',
+        maxWidth: '1200px',
+        margin: '0 auto'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-
-          {/* Real-time Sentiment Tracking */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '3rem',
-            alignItems: 'center',
-            marginBottom: '5rem'
-          }}>
-            <div>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '4rem',
-                height: '4rem',
-                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                borderRadius: '0.75rem',
-                color: 'white',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                marginBottom: '1.5rem'
-              }}>
-                📈
-              </div>
-              <h2 style={{
-                fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-                fontWeight: 'bold',
-                marginBottom: '1.5rem',
-                color: 'white'
-              }}>
-                Real-time Sentiment Tracking
-              </h2>
-              <p style={{
-                fontSize: '1.1rem',
-                color: 'rgba(255, 255, 255, 0.8)',
-                marginBottom: '1.5rem',
-                lineHeight: '1.6'
-              }}>
-                Watch your audience's mood change in real-time as you stream. Our AI analyzes every chat message to provide instant sentiment feedback.
-              </p>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem'
-                  }}>✓</span>
-                  Live sentiment analysis
-                </li>
-                <li style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem'
-                  }}>✓</span>
-                  Positive/neutral/negative breakdown
-                </li>
-                <li style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem'
-                  }}>✓</span>
-                  Historical trends & patterns
-                </li>
-              </ul>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center'
+        }}>
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '4rem',
+              height: '4rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              borderRadius: '0.75rem',
+              color: 'white',
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '1.5rem'
+            }}>
+              📈
             </div>
-            <div>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  inset: '0',
-                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                  borderRadius: '0.5rem',
-                  transform: 'rotate(1deg)',
-                  opacity: '0.3'
-                }}></div>
-                <div style={{
-                  position: 'relative',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '0.5rem',
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              marginBottom: '1.5rem',
+              color: 'white'
+            }}>
+              Real-time Sentiment Tracking
+            </h2>
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '1.5rem',
+              lineHeight: '1.6'
+            }}>
+              Watch your audience's mood change in real-time as you stream. Our AI analyzes every chat message to provide instant sentiment feedback.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {['Live sentiment analysis', 'Positive/neutral/negative breakdown', 'Historical trends & patterns'].map((item, i) => (
+                <li key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.9)'
                 }}>
-                  <DashboardMock />
-                </div>
-              </div>
-            </div>
+                  <span style={{
+                    color: '#10b981',
+                    marginRight: '0.75rem',
+                    fontSize: '1.2rem'
+                  }}>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-
-          {/* Question Detection & Alerts */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '3rem',
-            alignItems: 'center'
-          }}>
-            <div style={{ order: '2' }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '4rem',
-                height: '4rem',
-                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                borderRadius: '0.75rem',
-                color: 'white',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                marginBottom: '1.5rem'
-              }}>
-                ❓
-              </div>
-              <h2 style={{
-                fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-                fontWeight: 'bold',
-                marginBottom: '1.5rem',
-                color: 'white'
-              }}>
-                Question Detection & Alerts
-              </h2>
-              <p style={{
-                fontSize: '1.1rem',
-                color: 'rgba(255, 255, 255, 0.8)',
-                marginBottom: '1.5rem',
-                lineHeight: '1.6'
-              }}>
-                Never miss important questions from your viewers. Smart AI identifies and prioritizes questions that need your attention.
-              </p>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem'
-                  }}>✓</span>
-                  Automatic question detection
-                </li>
-                <li style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem'
-                  }}>✓</span>
-                  Priority-based alerts
-                </li>
-                <li style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem'
-                  }}>✓</span>
-                  Queue management system
-                </li>
-              </ul>
-            </div>
-            <div style={{ order: '1' }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  inset: '0',
-                  background: 'linear-gradient(45deg, #ec4899, #8b5cf6)',
-                  borderRadius: '0.5rem',
-                  transform: 'rotate(-1deg)',
-                  opacity: '0.3'
-                }}></div>
-                <div style={{
-                  position: 'relative',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '0.5rem',
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
-                  <QuestionQueueMock variant="questions" />
-                </div>
-              </div>
-            </div>
+          <div>
+            <img
+              src="/sentimentanalysis.png"
+              alt="Sentiment Analysis"
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+              }}
+            />
           </div>
+        </div>
+      </section>
 
+      {/* Feature 2: Question Detection */}
+      <section style={{
+        padding: '4rem 2rem',
+        maxWidth: '1200px',
+        margin: '0 auto'
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center'
+        }}>
+          <div style={{ order: 2 }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '4rem',
+              height: '4rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              borderRadius: '0.75rem',
+              color: 'white',
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '1.5rem'
+            }}>
+              ❓
+            </div>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              marginBottom: '1.5rem',
+              color: 'white'
+            }}>
+              Question Detection & Alerts
+            </h2>
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '1.5rem',
+              lineHeight: '1.6'
+            }}>
+              Never miss important questions from your viewers. Smart AI identifies and prioritizes questions that need your attention.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {['Automatic question detection', 'Priority-based alerts', 'Queue management system'].map((item, i) => (
+                <li key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.9)'
+                }}>
+                  <span style={{
+                    color: '#10b981',
+                    marginRight: '0.75rem',
+                    fontSize: '1.2rem'
+                  }}>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ order: 1 }}>
+            <img
+              src="/missedquestions-topchatters.png"
+              alt="Question Detection"
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+              }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Feature 3: Live Chat Feed */}
+      <section style={{
+        padding: '4rem 2rem',
+        maxWidth: '1200px',
+        margin: '0 auto'
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center'
+        }}>
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '4rem',
+              height: '4rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              borderRadius: '0.75rem',
+              color: 'white',
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '1.5rem'
+            }}>
+              💬
+            </div>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              marginBottom: '1.5rem',
+              color: 'white'
+            }}>
+              Live Chat Feed
+            </h2>
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '1.5rem',
+              lineHeight: '1.6'
+            }}>
+              See your entire chat stream with sentiment indicators in real-time. Filter, search, and track top chatters all in one place.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {['Real-time chat monitoring', 'Sentiment indicators per message', 'Top chatters tracking'].map((item, i) => (
+                <li key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.9)'
+                }}>
+                  <span style={{
+                    color: '#10b981',
+                    marginRight: '0.75rem',
+                    fontSize: '1.2rem'
+                  }}>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <img
+              src="/livechatfeed.png"
+              alt="Live Chat Feed"
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+              }}
+            />
+          </div>
         </div>
       </section>
 
       {/* Coming Soon Section */}
       <section style={{
-        paddingTop: '5rem',
-        paddingBottom: '5rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem',
+        padding: '5rem 2rem',
         background: 'rgba(255, 255, 255, 0.02)',
         borderTop: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
@@ -281,7 +283,7 @@ export default function FeaturesPage() {
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 style={{
               fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-              fontWeight: 'bold',
+              fontWeight: '700',
               color: 'white',
               marginBottom: '1rem'
             }}>
@@ -298,172 +300,73 @@ export default function FeaturesPage() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '2rem'
           }}>
-            {/* OBS Overlay */}
-            <div style={{
-              textAlign: 'center',
-              padding: '1.5rem',
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.75rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              opacity: '0.8'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                margin: '0 auto 1rem'
+            {[
+              { emoji: '🎥', title: 'OBS Overlay', desc: 'Real-time sentiment and question alerts directly in your stream overlay' },
+              { emoji: '🤖', title: 'AI Suggested Responses', desc: 'Smart response suggestions to help you engage better with your community' },
+              { emoji: '🌐', title: 'Multi-platform Dashboard', desc: 'Unified analytics across Twitch, YouTube, and Kick in one dashboard' }
+            ].map((feature, i) => (
+              <div key={i} style={{
+                textAlign: 'center',
+                padding: '1.5rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '0.75rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                opacity: '0.8'
               }}>
-                🎥
+                <div style={{
+                  width: '3rem',
+                  height: '3rem',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  margin: '0 auto 1rem'
+                }}>
+                  {feature.emoji}
+                </div>
+                <h3 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  marginBottom: '0.75rem',
+                  color: 'white'
+                }}>{feature.title}</h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.9rem',
+                  lineHeight: '1.4',
+                  marginBottom: '1rem'
+                }}>
+                  {feature.desc}
+                </p>
+                <span style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.75rem',
+                  fontWeight: '600'
+                }}>
+                  Coming Later
+                </span>
               </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '0.75rem',
-                color: 'white'
-              }}>OBS Overlay</h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: '0.9rem',
-                lineHeight: '1.4',
-                marginBottom: '1rem'
-              }}>
-                Real-time sentiment and question alerts directly in your stream overlay
-              </p>
-              <span style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.8)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '9999px',
-                fontSize: '0.75rem',
-                fontWeight: '500'
-              }}>
-                Coming Later
-              </span>
-            </div>
-
-            {/* AI Suggested Responses */}
-            <div style={{
-              textAlign: 'center',
-              padding: '1.5rem',
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.75rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              opacity: '0.8'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                margin: '0 auto 1rem'
-              }}>
-                🤖
-              </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '0.75rem',
-                color: 'white'
-              }}>AI Suggested Responses</h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: '0.9rem',
-                lineHeight: '1.4',
-                marginBottom: '1rem'
-              }}>
-                Smart response suggestions to help you engage better with your community
-              </p>
-              <span style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.8)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '9999px',
-                fontSize: '0.75rem',
-                fontWeight: '500'
-              }}>
-                Coming Later
-              </span>
-            </div>
-
-            {/* Multi-platform Dashboard */}
-            <div style={{
-              textAlign: 'center',
-              padding: '1.5rem',
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.75rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              opacity: '0.8'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                margin: '0 auto 1rem'
-              }}>
-                🌐
-              </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '0.75rem',
-                color: 'white'
-              }}>Multi-platform Dashboard</h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: '0.9rem',
-                lineHeight: '1.4',
-                marginBottom: '1rem'
-              }}>
-                Unified analytics across Twitch, YouTube, and Kick in one dashboard
-              </p>
-              <span style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.8)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '9999px',
-                fontSize: '0.75rem',
-                fontWeight: '500'
-              }}>
-                Coming Later
-              </span>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section style={{
-        paddingTop: '5rem',
-        paddingBottom: '5rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem',
-        textAlign: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        padding: '5rem 2rem',
+        textAlign: 'center'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h2 style={{
             fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-            fontWeight: 'bold',
+            fontWeight: '700',
             marginBottom: '1.5rem',
             color: 'white'
           }}>
@@ -482,21 +385,21 @@ export default function FeaturesPage() {
             href="/beta"
             style={{
               display: 'inline-block',
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               color: 'white',
               padding: '1rem 3rem',
               borderRadius: '9999px',
-              fontWeight: 'bold',
+              fontWeight: '700',
               fontSize: '1.1rem',
               textDecoration: 'none',
-              transition: 'opacity 0.3s ease'
+              boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
+              transition: 'all 0.3s ease'
             }}
-            data-event="cta-features-join-beta"
           >
             Join Beta Program
           </Link>
         </div>
       </section>
-    </div>
+    </PageLayout>
   )
 }

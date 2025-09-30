@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import PageLayout from '../../components/PageLayout'
 import EmailCapture from '../../components/EmailCapture'
 
 export default function BetaPage() {
@@ -30,12 +31,7 @@ export default function BetaPage() {
   ]
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      color: 'white'
-    }}>
+    <PageLayout>
       {/* Hero Section */}
       <section style={{
         paddingTop: '3rem',
@@ -47,15 +43,14 @@ export default function BetaPage() {
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h1 style={{
             fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 'bold',
+            fontWeight: '700',
             lineHeight: '1.2',
             marginBottom: '2rem'
           }}>
             Join the <span style={{
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              WebkitTextFillColor: 'transparent'
             }}>Beta</span>
           </h1>
           <p style={{
@@ -73,43 +68,58 @@ export default function BetaPage() {
 
       {/* Beta Benefits & Email Capture */}
       <section style={{
-        paddingTop: '3rem',
-        paddingBottom: '3rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem'
+        padding: '3rem 2rem',
+        maxWidth: '1200px',
+        margin: '0 auto'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-            gap: '3rem',
-            alignItems: 'center'
-          }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center'
+        }}>
+          {/* Benefits */}
+          <div>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              marginBottom: '2rem',
+              color: 'white'
+            }}>
+              Why Join the Beta?
+            </h2>
 
-            {/* Benefits */}
-            <div>
-              <h2 style={{
-                fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-                fontWeight: 'bold',
-                marginBottom: '2rem',
-                color: 'white'
-              }}>
-                Why Join the Beta?
-              </h2>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {[
+                {
+                  title: 'Early Access to MVP Features',
+                  desc: 'Be among the first to use real-time sentiment tracking and question detection for your streams.'
+                },
+                {
+                  title: 'Help Shape the Roadmap',
+                  desc: 'Your feedback directly influences which features we build next and how we prioritize development.'
+                },
+                {
+                  title: 'Lock in Launch Pricing',
+                  desc: 'Beta users get access to special launch pricing when we exit beta. Plus, your first 2 weeks are completely free.'
+                },
+                {
+                  title: 'Exclusive Community Access',
+                  desc: 'Join our community of beta users to share feedback, get support, and connect with other streamers.'
+                }
+              ].map((benefit, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start' }}>
                   <div style={{
                     width: '2rem',
                     height: '2rem',
-                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                    background: 'linear-gradient(135deg, #6932FF, #932FFE)',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'white',
                     fontSize: '0.875rem',
-                    fontWeight: 'bold',
+                    fontWeight: '700',
                     marginRight: '1rem',
                     marginTop: '0.25rem',
                     flexShrink: 0
@@ -122,132 +132,32 @@ export default function BetaPage() {
                       fontWeight: '600',
                       color: 'white',
                       marginBottom: '0.5rem'
-                    }}>Early Access to MVP Features</h3>
+                    }}>{benefit.title}</h3>
                     <p style={{
                       color: 'rgba(255, 255, 255, 0.8)',
                       lineHeight: '1.6'
-                    }}>Be among the first to use real-time sentiment tracking and question detection for your streams.</p>
+                    }}>{benefit.desc}</p>
                   </div>
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: '2rem',
-                    height: '2rem',
-                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    fontWeight: 'bold',
-                    marginRight: '1rem',
-                    marginTop: '0.25rem',
-                    flexShrink: 0
-                  }}>
-                    ✓
-                  </div>
-                  <div>
-                    <h3 style={{
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      color: 'white',
-                      marginBottom: '0.5rem'
-                    }}>Help Shape the Roadmap</h3>
-                    <p style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      lineHeight: '1.6'
-                    }}>Your feedback directly influences which features we build next and how we prioritize development.</p>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: '2rem',
-                    height: '2rem',
-                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    fontWeight: 'bold',
-                    marginRight: '1rem',
-                    marginTop: '0.25rem',
-                    flexShrink: 0
-                  }}>
-                    ✓
-                  </div>
-                  <div>
-                    <h3 style={{
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      color: 'white',
-                      marginBottom: '0.5rem'
-                    }}>Lock in Launch Pricing</h3>
-                    <p style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      lineHeight: '1.6'
-                    }}>Beta users get access to special launch pricing when we exit beta. Plus, your first 2 weeks are completely free.</p>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: '2rem',
-                    height: '2rem',
-                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    fontWeight: 'bold',
-                    marginRight: '1rem',
-                    marginTop: '0.25rem',
-                    flexShrink: 0
-                  }}>
-                    ✓
-                  </div>
-                  <div>
-                    <h3 style={{
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      color: 'white',
-                      marginBottom: '0.5rem'
-                    }}>Exclusive Discord Community</h3>
-                    <p style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      lineHeight: '1.6'
-                    }}>Join our private Discord for beta users to share feedback, get support, and connect with other streamers.</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* Email Capture */}
-            <div style={{ paddingLeft: '2rem' }}>
-              <EmailCapture
-                source="beta-page"
-                title="Start Your Free Beta"
-                description="Join the exclusive beta program and start improving your stream today"
-                buttonText="Join Beta Program"
-              />
-            </div>
-
+          {/* Email Capture */}
+          <div>
+            <EmailCapture
+              source="beta-page"
+              title="Start Your Free Beta"
+              description="Join the exclusive beta program and start improving your stream today"
+              buttonText="Join Beta Program"
+            />
           </div>
         </div>
       </section>
 
       {/* What You Get */}
       <section style={{
-        paddingTop: '3rem',
-        paddingBottom: '3rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem',
+        padding: '5rem 2rem',
         background: 'rgba(255, 255, 255, 0.02)',
         borderTop: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
@@ -255,7 +165,7 @@ export default function BetaPage() {
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 style={{
               fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-              fontWeight: 'bold',
+              fontWeight: '700',
               color: 'white',
               marginBottom: '1rem'
             }}>
@@ -272,113 +182,79 @@ export default function BetaPage() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
             gap: '2rem'
           }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.75rem',
-              padding: '2rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '1rem'
+            {[
+              {
+                emoji: '📈',
+                title: 'Real-time Sentiment Tracking',
+                desc: 'Watch your chat\'s mood change live with AI-powered sentiment analysis. See positive, neutral, and negative trends as they happen.',
+                features: ['Live sentiment charts', 'Historical data & trends', 'Emoji-based mood indicators']
+              },
+              {
+                emoji: '❓',
+                title: 'Question Detection & Alerts',
+                desc: 'Never miss important questions from your viewers. Smart AI identifies and prioritizes questions that need your attention.',
+                features: ['Automatic question detection', 'Priority-based alerts', 'Queue management system']
+              }
+            ].map((feature, i) => (
+              <div key={i} style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '0.75rem',
+                padding: '2rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
-                📈
+                <div style={{
+                  width: '3rem',
+                  height: '3rem',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  borderRadius: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  marginBottom: '1rem'
+                }}>
+                  {feature.emoji}
+                </div>
+                <h3 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  marginBottom: '0.75rem',
+                  color: 'white'
+                }}>{feature.title}</h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  marginBottom: '1rem',
+                  lineHeight: '1.6'
+                }}>
+                  {feature.desc}
+                </p>
+                <ul style={{
+                  fontSize: '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  listStyle: 'none',
+                  padding: 0
+                }}>
+                  {feature.features.map((item, j) => (
+                    <li key={j} style={{ marginBottom: '0.25rem' }}>• {item}</li>
+                  ))}
+                </ul>
               </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '0.75rem',
-                color: 'white'
-              }}>Real-time Sentiment Tracking</h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                marginBottom: '1rem',
-                lineHeight: '1.6'
-              }}>
-                Watch your chat's mood change live with AI-powered sentiment analysis. See positive, neutral, and negative trends as they happen.
-              </p>
-              <ul style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                listStyle: 'none',
-                padding: 0
-              }}>
-                <li style={{ marginBottom: '0.25rem' }}>• Live sentiment charts</li>
-                <li style={{ marginBottom: '0.25rem' }}>• Historical data & trends</li>
-                <li>• Emoji-based mood indicators</li>
-              </ul>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.75rem',
-              padding: '2rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '1rem'
-              }}>
-                ❓
-              </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                marginBottom: '0.75rem',
-                color: 'white'
-              }}>Question Detection & Alerts</h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                marginBottom: '1rem',
-                lineHeight: '1.6'
-              }}>
-                Never miss important questions from your viewers. Smart AI identifies and prioritizes questions that need your attention.
-              </p>
-              <ul style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                listStyle: 'none',
-                padding: 0
-              }}>
-                <li style={{ marginBottom: '0.25rem' }}>• Automatic question detection</li>
-                <li style={{ marginBottom: '0.25rem' }}>• Priority-based alerts</li>
-                <li>• Queue management system</li>
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
       <section style={{
-        paddingTop: '3rem',
-        paddingBottom: '3rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem'
+        padding: '5rem 2rem'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 style={{
               fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-              fontWeight: 'bold',
+              fontWeight: '700',
               color: 'white',
               marginBottom: '1rem'
             }}>
@@ -412,6 +288,7 @@ export default function BetaPage() {
                     color: 'white',
                     fontSize: '1.1rem',
                     fontWeight: '600',
+                    fontFamily: 'Poppins, sans-serif',
                     cursor: 'pointer',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -443,17 +320,14 @@ export default function BetaPage() {
 
       {/* CTA Section */}
       <section style={{
-        paddingTop: '3rem',
-        paddingBottom: '3rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem',
+        padding: '5rem 2rem',
         textAlign: 'center',
         borderTop: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h2 style={{
             fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-            fontWeight: 'bold',
+            fontWeight: '700',
             marginBottom: '1.5rem',
             color: 'white'
           }}>
@@ -475,23 +349,23 @@ export default function BetaPage() {
             justifyContent: 'center',
             alignItems: 'center'
           }}>
-            <Link
+            <a
               href="#email-capture"
               style={{
                 display: 'inline-block',
-                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
                 color: 'white',
                 padding: '1rem 3rem',
                 borderRadius: '9999px',
-                fontWeight: 'bold',
+                fontWeight: '700',
                 fontSize: '1.1rem',
                 textDecoration: 'none',
-                transition: 'opacity 0.3s ease'
+                boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
+                transition: 'all 0.3s ease'
               }}
-              data-event="cta-beta-join"
             >
               Start Free Beta
-            </Link>
+            </a>
             <Link
               href="/features"
               style={{
@@ -500,18 +374,17 @@ export default function BetaPage() {
                 color: 'white',
                 padding: '1rem 3rem',
                 borderRadius: '9999px',
-                fontWeight: '500',
+                fontWeight: '600',
                 border: '2px solid rgba(255, 255, 255, 0.2)',
                 textDecoration: 'none',
                 transition: 'border-color 0.3s ease'
               }}
-              data-event="cta-beta-view-features"
             >
               View Features
             </Link>
           </div>
         </div>
       </section>
-    </div>
+    </PageLayout>
   )
 }

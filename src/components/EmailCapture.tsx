@@ -13,7 +13,6 @@ interface EmailCaptureProps {
   description?: string
   placeholder?: string
   buttonText?: string
-  className?: string
 }
 
 export default function EmailCapture({
@@ -21,8 +20,7 @@ export default function EmailCapture({
   title = "Join the Beta",
   description = "Get early access to Casi Platform",
   placeholder = "your@email.com",
-  buttonText = "Join Beta",
-  className = ""
+  buttonText = "Join Beta"
 }: EmailCaptureProps) {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -40,7 +38,6 @@ export default function EmailCapture({
       return
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       setMessage('Please enter a valid email address')
@@ -61,7 +58,7 @@ export default function EmailCapture({
         ])
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') {
           setMessage('You\'re already signed up! Check your email for updates.')
           setIsSuccess(true)
         } else {
@@ -83,24 +80,58 @@ export default function EmailCapture({
 
   if (isSuccess && message.includes('Welcome')) {
     return (
-      <div className={`bg-white rounded-2xl shadow-lg border border-gray-200 p-6 text-center ${className}`}>
-        <div className="text-4xl mb-4">🎉</div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">You're In!</h3>
-        <p className="text-gray-600 mb-4">{message}</p>
-        <div className="space-y-3">
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '1rem',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        padding: '2rem',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: '700',
+          color: 'white',
+          marginBottom: '0.5rem'
+        }}>
+          You're In!
+        </h3>
+        <p style={{
+          color: 'rgba(255, 255, 255, 0.8)',
+          marginBottom: '1.5rem'
+        }}>
+          {message}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <a
-            href="https://discord.gg/casi" // Replace with actual Discord invite
-            className="block bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/dashboard"
+            style={{
+              display: 'block',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              color: 'white',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.5rem',
+              fontWeight: '600',
+              textDecoration: 'none',
+              transition: 'opacity 0.3s ease'
+            }}
           >
-            Join Discord Community
+            Go to Dashboard
           </a>
           <a
-            href="/dashboard-preview"
-            className="block bg-gray-100 text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            href="/features"
+            style={{
+              display: 'block',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: 'white',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.5rem',
+              fontWeight: '600',
+              textDecoration: 'none',
+              transition: 'background 0.3s ease'
+            }}
           >
-            Preview Dashboard
+            View Features
           </a>
         </div>
       </div>
@@ -108,25 +139,61 @@ export default function EmailCapture({
   }
 
   return (
-    <div className={`bg-white rounded-2xl shadow-lg border border-gray-200 p-6 ${className}`}>
-      <div className="text-center mb-4">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '1rem',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      padding: '2rem'
+    }}>
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: '700',
+          color: 'white',
+          marginBottom: '0.5rem'
+        }}>
+          {title}
+        </h3>
+        <p style={{ color: 'rgba(255, 255, 255, 0.8)' }}>{description}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <input
           type="email"
           placeholder={placeholder}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+          style={{
+            width: '100%',
+            padding: '0.75rem 1rem',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '0.5rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            color: 'white',
+            fontSize: '1rem',
+            fontFamily: 'Poppins, sans-serif',
+            outline: 'none',
+            transition: 'border-color 0.3s ease'
+          }}
           required
         />
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            width: '100%',
+            background: isSubmitting ? 'rgba(105, 50, 255, 0.5)' : 'linear-gradient(135deg, #6932FF, #932FFE)',
+            color: 'white',
+            padding: '0.75rem 2rem',
+            borderRadius: '0.5rem',
+            fontWeight: '700',
+            fontSize: '1rem',
+            fontFamily: 'Poppins, sans-serif',
+            border: 'none',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            boxShadow: '0 4px 15px rgba(105, 50, 255, 0.4)',
+            transition: 'all 0.3s ease'
+          }}
           data-event={`cta-email-capture-${source}`}
         >
           {isSubmitting ? 'Joining...' : buttonText}
@@ -134,11 +201,21 @@ export default function EmailCapture({
       </form>
 
       {message && (
-        <div className={`mt-4 text-center p-3 rounded-lg ${
-          message.includes('wrong') || message.includes('valid')
-            ? 'bg-red-50 text-red-700 border border-red-200'
-            : 'bg-green-50 text-green-700 border border-green-200'
-        }`}>
+        <div style={{
+          marginTop: '1rem',
+          textAlign: 'center',
+          padding: '0.75rem',
+          borderRadius: '0.5rem',
+          background: message.includes('wrong') || message.includes('valid')
+            ? 'rgba(239, 68, 68, 0.1)'
+            : 'rgba(16, 185, 129, 0.1)',
+          color: message.includes('wrong') || message.includes('valid')
+            ? '#EF4444'
+            : '#10B981',
+          border: message.includes('wrong') || message.includes('valid')
+            ? '1px solid rgba(239, 68, 68, 0.3)'
+            : '1px solid rgba(16, 185, 129, 0.3)'
+        }}>
           {message}
         </div>
       )}

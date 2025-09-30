@@ -1,16 +1,11 @@
 'use client'
 import Link from 'next/link'
+import PageLayout from '../../components/PageLayout'
 import PricingTable from '../../components/PricingTable'
 
 export default function PricingPage() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      color: 'white'
-    }}>
-
+    <PageLayout>
       {/* Hero Section */}
       <section style={{
         paddingTop: '3rem',
@@ -19,18 +14,17 @@ export default function PricingPage() {
         paddingRight: '2rem',
         textAlign: 'center'
       }}>
-        <div style={{ maxWidth: '4xl', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h1 style={{
             fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 'bold',
+            fontWeight: '700',
             lineHeight: '1.2',
             marginBottom: '2rem'
           }}>
             Simple, <span style={{
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              WebkitTextFillColor: 'transparent'
             }}>Transparent</span> Pricing
           </h1>
           <p style={{
@@ -48,7 +42,7 @@ export default function PricingPage() {
 
       {/* Pricing Table */}
       <section style={{
-        paddingTop: '5rem',
+        paddingTop: '3rem',
         paddingBottom: '5rem',
         paddingLeft: '2rem',
         paddingRight: '2rem'
@@ -69,7 +63,7 @@ export default function PricingPage() {
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 style={{
               fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-              fontWeight: 'bold',
+              fontWeight: '700',
               color: 'white',
               marginBottom: '1rem'
             }}>
@@ -82,121 +76,50 @@ export default function PricingPage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.5rem',
-              padding: '1.5rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                color: 'white',
-                marginBottom: '0.75rem'
+            {[
+              {
+                q: 'How does the beta pricing work?',
+                a: 'The beta is completely free for your first 2 weeks. No credit card required, just email signup. You can test all MVP features and help shape the product roadmap. After beta, you can choose any paid plan to continue.'
+              },
+              {
+                q: 'Can I change plans anytime?',
+                a: 'Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we\'ll prorate the billing accordingly.'
+              },
+              {
+                q: 'What happens if I exceed my message limits?',
+                a: 'We\'ll notify you when you\'re approaching your limit. If you exceed it, we\'ll continue processing but may suggest upgrading to a higher tier for consistent performance.'
+              },
+              {
+                q: 'Do you offer refunds?',
+                a: 'Yes, we offer a 30-day money-back guarantee for all paid plans. If you\'re not satisfied, contact us for a full refund.'
+              },
+              {
+                q: 'Which platforms are supported?',
+                a: 'Currently, we support Twitch with YouTube and Kick coming during the beta period. All plans include access to new platforms as they\'re added.'
+              }
+            ].map((faq, i) => (
+              <div key={i} style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '0.5rem',
+                padding: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
-                How does the beta pricing work?
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.6'
-              }}>
-                The beta is completely free for your first 2 weeks. No credit card required, just email signup.
-                You can test all MVP features and help shape the product roadmap. After beta, you can choose
-                any paid plan to continue.
-              </p>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.5rem',
-              padding: '1.5rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                color: 'white',
-                marginBottom: '0.75rem'
-              }}>
-                Can I change plans anytime?
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.6'
-              }}>
-                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately,
-                and we'll prorate the billing accordingly.
-              </p>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.5rem',
-              padding: '1.5rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                color: 'white',
-                marginBottom: '0.75rem'
-              }}>
-                What happens if I exceed my message limits?
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.6'
-              }}>
-                We'll notify you when you're approaching your limit. If you exceed it, we'll continue
-                processing but may suggest upgrading to a higher tier for consistent performance.
-              </p>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.5rem',
-              padding: '1.5rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                color: 'white',
-                marginBottom: '0.75rem'
-              }}>
-                Do you offer refunds?
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.6'
-              }}>
-                Yes, we offer a 30-day money-back guarantee for all paid plans. If you're not satisfied,
-                contact us for a full refund.
-              </p>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.5rem',
-              padding: '1.5rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                color: 'white',
-                marginBottom: '0.75rem'
-              }}>
-                Which platforms are supported?
-              </h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.6'
-              }}>
-                Currently, we support Twitch with YouTube and Kick coming during the beta period.
-                All plans include access to new platforms as they're added.
-              </p>
-            </div>
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: 'white',
+                  marginBottom: '0.75rem'
+                }}>
+                  {faq.q}
+                </h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  lineHeight: '1.6'
+                }}>
+                  {faq.a}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -207,13 +130,12 @@ export default function PricingPage() {
         paddingBottom: '5rem',
         paddingLeft: '2rem',
         paddingRight: '2rem',
-        textAlign: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        textAlign: 'center'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h2 style={{
             fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-            fontWeight: 'bold',
+            fontWeight: '700',
             marginBottom: '1.5rem',
             color: 'white'
           }}>
@@ -225,7 +147,7 @@ export default function PricingPage() {
             marginBottom: '2rem',
             lineHeight: '1.6'
           }}>
-            Join thousands of streamers who are already improving their audience engagement.
+            Join streamers who are already improving their audience engagement.
           </p>
 
           <div style={{
@@ -239,16 +161,16 @@ export default function PricingPage() {
               href="/beta"
               style={{
                 display: 'inline-block',
-                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
                 color: 'white',
                 padding: '1rem 3rem',
                 borderRadius: '9999px',
-                fontWeight: 'bold',
+                fontWeight: '700',
                 fontSize: '1.1rem',
                 textDecoration: 'none',
-                transition: 'opacity 0.3s ease'
+                boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
+                transition: 'all 0.3s ease'
               }}
-              data-event="cta-pricing-join-beta"
             >
               Start Free Beta
             </Link>
@@ -260,18 +182,17 @@ export default function PricingPage() {
                 color: 'white',
                 padding: '1rem 3rem',
                 borderRadius: '9999px',
-                fontWeight: '500',
+                fontWeight: '600',
                 border: '2px solid rgba(255, 255, 255, 0.2)',
                 textDecoration: 'none',
                 transition: 'border-color 0.3s ease'
               }}
-              data-event="cta-pricing-view-features"
             >
               View Features
             </Link>
           </div>
         </div>
       </section>
-    </div>
+    </PageLayout>
   )
 }
