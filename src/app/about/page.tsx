@@ -1,67 +1,128 @@
 'use client'
 import Link from 'next/link'
+import PageLayout from '../../components/PageLayout'
 
 export default function AboutPage() {
   return (
-    <>
+    <PageLayout>
       {/* Hero Section */}
-      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-pink-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 text-gray-900">
-            About <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Casi</span>
+      <section style={{
+        paddingTop: '3rem',
+        paddingBottom: '2rem',
+        paddingLeft: '2rem',
+        paddingRight: '2rem',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+            fontWeight: '700',
+            lineHeight: '1.2',
+            marginBottom: '2rem'
+          }}>
+            About <span style={{
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>Casi</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+          <p style={{
+            fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
+            color: 'rgba(255, 255, 255, 0.8)',
+            lineHeight: '1.6',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
             We're building the future of streaming analytics to help creators connect better with their communities.
           </p>
         </div>
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
-                Our Mission
-              </h2>
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-2xl border-l-4 border-purple-500">
-                <p className="text-xl text-gray-700 leading-relaxed italic">
-                  "Transform how streamers connect with their communities through data-driven insights and AI-powered engagement optimisation."
-                </p>
-              </div>
-              <p className="text-lg text-gray-600 mt-6 leading-relaxed">
-                We believe every streamer deserves to understand their audience better. By providing real-time insights into chat sentiment and highlighting important questions, we help creators build stronger, more engaged communities.
+      <section style={{
+        padding: '5rem 2rem',
+        maxWidth: '1200px',
+        margin: '0 auto'
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              marginBottom: '2rem',
+              color: 'white'
+            }}>
+              Our Mission
+            </h2>
+            <div style={{
+              background: 'rgba(105, 50, 255, 0.1)',
+              padding: '2rem',
+              borderRadius: '12px',
+              borderLeft: '4px solid #6932FF',
+              marginBottom: '1.5rem'
+            }}>
+              <p style={{
+                fontSize: '1.2rem',
+                color: 'rgba(255, 255, 255, 0.9)',
+                lineHeight: '1.6',
+                fontStyle: 'italic'
+              }}>
+                "Transform how streamers connect with their communities through data-driven insights and AI-powered engagement optimization."
               </p>
             </div>
-            <div>
-              <div className="bg-gray-50 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold mb-6 text-gray-900">Why We Built Casi</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4 mt-1 flex-shrink-0">
-                      💬
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'rgba(255, 255, 255, 0.8)',
+              lineHeight: '1.6'
+            }}>
+              We believe every streamer deserves to understand their audience better. By providing real-time insights into chat sentiment and highlighting important questions, we help creators build stronger, more engaged communities.
+            </p>
+          </div>
+          <div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                marginBottom: '1.5rem',
+                color: 'white'
+              }}>Why We Built Casi</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {[
+                  { emoji: '💬', title: 'Chat moves too fast', desc: 'Important questions and feedback get lost in busy streams' },
+                  { emoji: '📊', title: 'No real-time feedback', desc: 'Streamers can\'t tell how their audience is reacting moment by moment' },
+                  { emoji: '🎯', title: 'Limited insights', desc: 'Current tools don\'t provide actionable data about audience engagement' }
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <div style={{
+                      width: '2.5rem',
+                      height: '2.5rem',
+                      background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.2rem',
+                      marginRight: '1rem',
+                      flexShrink: 0
+                    }}>
+                      {item.emoji}
                     </div>
-                    <p className="text-gray-600">
-                      <strong>Chat moves too fast</strong> - Important questions and feedback get lost in busy streams
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4 mt-1 flex-shrink-0">
-                      📊
+                    <div>
+                      <strong style={{ color: 'white', display: 'block', marginBottom: '0.25rem' }}>{item.title}</strong>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{item.desc}</span>
                     </div>
-                    <p className="text-gray-600">
-                      <strong>No real-time feedback</strong> - Streamers can't tell how their audience is reacting moment by moment
-                    </p>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4 mt-1 flex-shrink-0">
-                      🎯
-                    </div>
-                    <p className="text-gray-600">
-                      <strong>Limited insights</strong> - Current tools don't provide actionable data about audience engagement
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -69,196 +130,244 @@ export default function AboutPage() {
       </section>
 
       {/* Roadmap Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      <section style={{
+        padding: '5rem 2rem',
+        background: 'rgba(255, 255, 255, 0.02)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              color: 'white',
+              marginBottom: '1rem'
+            }}>
               Product Roadmap
             </h2>
-            <p className="text-xl text-gray-600">Our journey from analytics to automation</p>
+            <p style={{
+              fontSize: '1.2rem',
+              color: 'rgba(255, 255, 255, 0.7)'
+            }}>Our journey from analytics to automation</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Now */}
-            <div className="relative">
-              <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-green-200">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mr-4">
-                    ✓
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem'
+          }}>
+            {[
+              {
+                emoji: '✓',
+                title: 'Now',
+                subtitle: 'Available in Beta',
+                color: '#10b981',
+                features: ['Real-time sentiment tracking', 'Question detection & alerts', 'Basic analytics dashboard']
+              },
+              {
+                emoji: '🚀',
+                title: 'Next',
+                subtitle: 'Coming Soon',
+                color: '#3b82f6',
+                features: ['Multi-platform dashboard', 'Advanced trend analysis', 'Export & reporting tools']
+              },
+              {
+                emoji: '🔮',
+                title: 'Later',
+                subtitle: 'Future Vision',
+                color: '#932FFE',
+                features: ['OBS overlay integration', 'AI response suggestions', 'Automated engagement tools']
+              }
+            ].map((phase, i) => (
+              <div key={i} style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '12px',
+                padding: '2rem',
+                border: `2px solid ${phase.color}40`
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{
+                    width: '3rem',
+                    height: '3rem',
+                    background: phase.color,
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    marginRight: '1rem'
+                  }}>
+                    {phase.emoji}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Now</h3>
-                    <p className="text-green-600 text-sm font-medium">Available in Beta</p>
+                    <h3 style={{
+                      fontSize: '1.3rem',
+                      fontWeight: '700',
+                      color: 'white',
+                      marginBottom: '0.25rem'
+                    }}>{phase.title}</h3>
+                    <p style={{
+                      fontSize: '0.9rem',
+                      color: phase.color
+                    }}>{phase.subtitle}</p>
                   </div>
                 </div>
-                <ul className="space-y-3 text-gray-700">
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Real-time sentiment tracking
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Question detection & alerts
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Basic analytics dashboard
-                  </li>
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  {phase.features.map((feature, j) => (
+                    <li key={j} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '0.75rem',
+                      color: 'rgba(255, 255, 255, 0.8)'
+                    }}>
+                      <span style={{
+                        color: phase.color,
+                        marginRight: '0.75rem',
+                        fontSize: '1.2rem'
+                      }}>✓</span>
+                      {feature}
+                    </li>
+                  ))}
                 </ul>
               </div>
-            </div>
-
-            {/* Next */}
-            <div className="relative">
-              <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-200">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mr-4">
-                    🚀
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">Next</h3>
-                    <p className="text-blue-600 text-sm font-medium">Coming Soon</p>
-                  </div>
-                </div>
-                <ul className="space-y-3 text-gray-700">
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Multi-platform dashboard
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Advanced trend analysis
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Export & reporting tools
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Later */}
-            <div className="relative">
-              <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-purple-200">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white text-xl font-bold mr-4">
-                    🔮
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">Later</h3>
-                    <p className="text-purple-600 text-sm font-medium">Future Vision</p>
-                  </div>
-                </div>
-                <ul className="space-y-3 text-gray-700">
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                    </svg>
-                    OBS overlay integration
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                    </svg>
-                    AI response suggestions
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                    </svg>
-                    Automated engagement tools
-                  </li>
-                </ul>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Team Values */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      {/* Values Section */}
+      <section style={{
+        padding: '5rem 2rem'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+              fontWeight: '700',
+              color: 'white',
+              marginBottom: '1rem'
+            }}>
               Our Values
             </h2>
-            <p className="text-xl text-gray-600">What drives us every day</p>
+            <p style={{
+              fontSize: '1.2rem',
+              color: 'rgba(255, 255, 255, 0.7)'
+            }}>What drives us every day</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                🎯
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem'
+          }}>
+            {[
+              { emoji: '🎯', title: 'Creator-First', desc: 'Every feature we build starts with understanding what streamers actually need, not what sounds cool.' },
+              { emoji: '🔒', title: 'Privacy-Focused', desc: 'We analyze data to provide insights, but never store personal conversations or compromise user privacy.' },
+              { emoji: '⚡', title: 'Real-Time Performance', desc: 'Streaming is live, so our analytics are too. No delays, no lag, just instant insights when you need them.' }
+            ].map((value, i) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: '4rem',
+                  height: '4rem',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '2rem',
+                  fontWeight: '700',
+                  margin: '0 auto 1rem'
+                }}>
+                  {value.emoji}
+                </div>
+                <h3 style={{
+                  fontSize: '1.3rem',
+                  fontWeight: '700',
+                  marginBottom: '0.75rem',
+                  color: 'white'
+                }}>{value.title}</h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  lineHeight: '1.6'
+                }}>
+                  {value.desc}
+                </p>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Creator-First</h3>
-              <p className="text-gray-600">
-                Every feature we build starts with understanding what streamers actually need, not what sounds cool.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                🔒
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Privacy-Focused</h3>
-              <p className="text-gray-600">
-                We analyze data to provide insights, but never store personal conversations or compromise user privacy.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                ⚡
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Real-Time Performance</h3>
-              <p className="text-gray-600">
-                Streaming is live, so our analytics are too. No delays, no lag, just instant insights when you need them.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-pink-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+      <section style={{
+        padding: '5rem 2rem',
+        textAlign: 'center',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h2 style={{
+            fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+            fontWeight: '700',
+            marginBottom: '1.5rem',
+            color: 'white'
+          }}>
             Join us on this journey
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p style={{
+            fontSize: '1.2rem',
+            color: 'rgba(255, 255, 255, 0.8)',
+            marginBottom: '2rem',
+            lineHeight: '1.6'
+          }}>
             Help us build the future of streaming analytics by joining our beta program.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
             <Link
-              href="/features"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-12 py-4 rounded-full font-bold text-xl hover:opacity-90 transition-opacity inline-block"
-              data-event="cta-about-see-features"
+              href="/beta"
+              style={{
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                color: 'white',
+                padding: '1rem 3rem',
+                borderRadius: '9999px',
+                fontWeight: '700',
+                fontSize: '1.1rem',
+                textDecoration: 'none',
+                boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
+                transition: 'all 0.3s ease'
+              }}
             >
-              See Features
+              Join Beta Program
             </Link>
             <Link
-              href="/pricing"
-              className="bg-white text-gray-900 px-12 py-4 rounded-full font-medium border-2 border-gray-200 hover:border-gray-300 transition-colors inline-block"
-              data-event="cta-about-view-pricing"
+              href="/features"
+              style={{
+                display: 'inline-block',
+                background: 'transparent',
+                color: 'white',
+                padding: '1rem 3rem',
+                borderRadius: '9999px',
+                fontWeight: '600',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                textDecoration: 'none',
+                transition: 'border-color 0.3s ease'
+              }}
             >
-              View Pricing
+              See Features
             </Link>
           </div>
         </div>
       </section>
-    </>
+    </PageLayout>
   )
 }
