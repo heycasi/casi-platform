@@ -109,17 +109,17 @@ export default function Home() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.75rem'
+          gap: '1rem'
         }}>
           <img
             src="/landing-logo.png"
             alt="Casi"
-            style={{ height: '50px', width: 'auto' }}
+            style={{ height: '80px', width: 'auto' }}
             onError={(e) => {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('h1')
-              fallback.style.cssText = 'margin: 0; font-size: 1.8rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+              fallback.style.cssText = 'margin: 0; font-size: 2.5rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
               fallback.textContent = 'Casi'
               target.parentNode?.appendChild(fallback)
             }}
@@ -128,12 +128,12 @@ export default function Home() {
           <img
             src="/landing-robot.png"
             alt="Casi Robot"
-            style={{ width: '45px', height: '45px' }}
+            style={{ width: '70px', height: '70px' }}
             onError={(e) => {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('div')
-              fallback.style.cssText = 'width: 45px; height: 45px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;'
+              fallback.style.cssText = 'width: 70px; height: 70px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;'
               fallback.textContent = '🤖'
               target.parentNode?.appendChild(fallback)
             }}
@@ -234,25 +234,86 @@ export default function Home() {
         padding: '4rem 2rem',
         position: 'relative'
       }}>
-        {/* Background Casi C Logo */}
+        {/* Background Casi C Logos - Multiple for full coverage */}
         <div style={{
           position: 'absolute',
-          top: '10%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '800px',
-          height: '800px',
-          opacity: 0.05,
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
           pointerEvents: 'none',
           zIndex: 0
         }}>
+          {/* Top Left */}
           <img
             src="/logo_casiC.jpeg"
-            alt="Casi Background"
+            alt=""
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
+              position: 'absolute',
+              top: '5%',
+              left: '5%',
+              width: '400px',
+              height: '400px',
+              objectFit: 'contain',
+              opacity: 0.03
+            }}
+          />
+          {/* Top Right */}
+          <img
+            src="/logo_casiC.jpeg"
+            alt=""
+            style={{
+              position: 'absolute',
+              top: '5%',
+              right: '5%',
+              width: '400px',
+              height: '400px',
+              objectFit: 'contain',
+              opacity: 0.03
+            }}
+          />
+          {/* Center - Largest */}
+          <img
+            src="/logo_casiC.jpeg"
+            alt=""
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '1000px',
+              height: '1000px',
+              objectFit: 'contain',
+              opacity: 0.04
+            }}
+          />
+          {/* Bottom Left */}
+          <img
+            src="/logo_casiC.jpeg"
+            alt=""
+            style={{
+              position: 'absolute',
+              bottom: '10%',
+              left: '10%',
+              width: '350px',
+              height: '350px',
+              objectFit: 'contain',
+              opacity: 0.03
+            }}
+          />
+          {/* Bottom Right */}
+          <img
+            src="/logo_casiC.jpeg"
+            alt=""
+            style={{
+              position: 'absolute',
+              bottom: '10%',
+              right: '10%',
+              width: '350px',
+              height: '350px',
+              objectFit: 'contain',
+              opacity: 0.03
             }}
           />
         </div>
@@ -299,33 +360,32 @@ export default function Home() {
 
             {/* Dashboard Preview */}
             <div style={{
-              maxWidth: '1200px',
+              maxWidth: '1400px',
               margin: '0 auto 3rem auto',
               position: 'relative'
             }}>
               <img
-                src="/sentiment-analysis.png"
-                alt="Dashboard preview showing real-time sentiment analysis with anonymized data"
+                src="/whole-dashboard.png"
+                alt="Dashboard preview showing real-time sentiment analysis and chat monitoring"
                 style={{
                   width: '100%',
                   height: 'auto',
-                  borderRadius: '16px',
-                  border: '2px solid rgba(94, 234, 212, 0.3)',
-                  boxShadow: '0 30px 60px rgba(94, 234, 212, 0.2), 0 20px 40px rgba(0, 0, 0, 0.4)',
+                  borderRadius: '20px',
+                  border: '3px solid rgba(94, 234, 212, 0.4)',
+                  boxShadow: '0 40px 80px rgba(94, 234, 212, 0.25), 0 20px 40px rgba(0, 0, 0, 0.5)',
                   cursor: 'pointer',
-                  transition: 'transform 0.3s ease'
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                 }}
-                onClick={(e) => {
-                  const target = e.currentTarget
-                  if (target.style.transform === 'scale(1.5)') {
-                    target.style.transform = 'scale(1)'
-                    target.style.zIndex = '1'
-                    target.style.position = 'relative'
-                  } else {
-                    target.style.transform = 'scale(1.5)'
-                    target.style.zIndex = '1000'
-                    target.style.position = 'relative'
-                  }
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)'
+                  e.currentTarget.style.boxShadow = '0 50px 100px rgba(94, 234, 212, 0.3), 0 30px 60px rgba(0, 0, 0, 0.6)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 40px 80px rgba(94, 234, 212, 0.25), 0 20px 40px rgba(0, 0, 0, 0.5)'
+                }}
+                onClick={() => {
+                  window.open('/whole-dashboard.png', '_blank')
                 }}
                 onError={(e) => {
                   const target = e.currentTarget
