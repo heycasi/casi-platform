@@ -10,6 +10,7 @@ const supabase = createClient(
 
 export default function Home() {
   const [waitlistCount, setWaitlistCount] = useState(0)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     fetchWaitlistCount()
@@ -82,10 +83,12 @@ export default function Home() {
           @media (max-width: 767px) {
             .desktop-nav { display: none !important; }
             .mobile-logo { height: 80px !important; }
+            .mobile-menu-btn { display: flex !important; }
           }
           @media (min-width: 768px) {
             .desktop-nav { display: flex !important; }
             .mobile-logo { height: 140px !important; }
+            .mobile-menu-btn { display: none !important; }
           }
         `}} />
         <div style={{
@@ -134,6 +137,131 @@ export default function Home() {
               Get Started
             </Link>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="mobile-menu-btn"
+            style={{
+              display: 'none',
+              position: 'absolute',
+              right: 0,
+              width: '2.5rem',
+              height: '2.5rem',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              zIndex: 1001
+            }}
+            aria-label="Toggle mobile menu"
+          >
+            <div style={{
+              width: '1.5rem',
+              height: '2px',
+              background: 'white',
+              transition: 'all 0.3s ease',
+              transform: isMobileMenuOpen ? 'rotate(45deg) translateY(6px)' : 'rotate(0)',
+              marginBottom: '4px'
+            }} />
+            <div style={{
+              width: '1.5rem',
+              height: '2px',
+              background: 'white',
+              transition: 'all 0.3s ease',
+              opacity: isMobileMenuOpen ? 0 : 1,
+              marginBottom: '4px'
+            }} />
+            <div style={{
+              width: '1.5rem',
+              height: '2px',
+              background: 'white',
+              transition: 'all 0.3s ease',
+              transform: isMobileMenuOpen ? 'rotate(-45deg) translateY(-6px)' : 'rotate(0)'
+            }} />
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <div style={{
+          display: isMobileMenuOpen ? 'flex' : 'none',
+          flexDirection: 'column',
+          gap: '1rem',
+          padding: '1.5rem',
+          background: 'rgba(26, 26, 26, 0.98)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <Link
+            href="/features"
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              color: 'rgba(255,255,255,0.9)',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              padding: '0.75rem'
+            }}
+          >
+            Features
+          </Link>
+          <Link
+            href="/pricing"
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              color: 'rgba(255,255,255,0.9)',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              padding: '0.75rem'
+            }}
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/beta"
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              color: 'rgba(255,255,255,0.9)',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              padding: '0.75rem'
+            }}
+          >
+            Beta
+          </Link>
+          <Link
+            href="/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              color: 'rgba(255,255,255,0.9)',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              padding: '0.75rem'
+            }}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/beta"
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              borderRadius: '50px',
+              color: 'white',
+              textDecoration: 'none',
+              fontSize: '1rem',
+              fontWeight: '600',
+              boxShadow: '0 4px 15px rgba(105, 50, 255, 0.4)',
+              textAlign: 'center'
+            }}
+          >
+            Get Started
+          </Link>
         </div>
       </header>
 
