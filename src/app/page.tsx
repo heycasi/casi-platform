@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -59,7 +60,7 @@ export default function Home() {
         .insert([
           {
             email: email.toLowerCase().trim(),
-            source: 'landing_page',
+            source: 'homepage',
             user_agent: navigator.userAgent,
             created_at: new Date().toISOString()
           }
@@ -82,7 +83,7 @@ export default function Home() {
       console.error('Error:', error)
       setMessage('Something went wrong. Please try again.')
     }
-    
+
     setIsSubmitting(false)
   }
 
@@ -108,31 +109,31 @@ export default function Home() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.75rem'
         }}>
-          <img 
+          <img
             src="/landing-logo.png"
             alt="Casi"
-            style={{ height: '32px', width: 'auto' }}
+            style={{ height: '50px', width: 'auto' }}
             onError={(e) => {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('h1')
-              fallback.style.cssText = 'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+              fallback.style.cssText = 'margin: 0; font-size: 1.8rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
               fallback.textContent = 'Casi'
               target.parentNode?.appendChild(fallback)
             }}
           />
-          
-          <img 
+
+          <img
             src="/landing-robot.png"
             alt="Casi Robot"
-            style={{ width: '32px', height: '32px' }}
+            style={{ width: '45px', height: '45px' }}
             onError={(e) => {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('div')
-              fallback.style.cssText = 'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
+              fallback.style.cssText = 'width: 45px; height: 45px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;'
               fallback.textContent = '🤖'
               target.parentNode?.appendChild(fallback)
             }}
@@ -146,8 +147,8 @@ export default function Home() {
           gap: '1.5rem',
           flexWrap: 'wrap'
         }}>
-          <a 
-            href="/" 
+          <a
+            href="/"
             style={{
               color: 'white',
               textDecoration: 'none',
@@ -159,8 +160,8 @@ export default function Home() {
           >
             Home
           </a>
-          <a 
-            href="/beta-signup" 
+          <a
+            href="/features"
             style={{
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
@@ -169,10 +170,22 @@ export default function Home() {
               whiteSpace: 'nowrap'
             }}
           >
-            Beta Program
+            Features
           </a>
-          <a 
-            href="/dashboard" 
+          <a
+            href="/pricing"
+            style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Pricing
+          </a>
+          <a
+            href="/beta"
             style={{
               padding: '0.5rem 1rem',
               background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -184,7 +197,7 @@ export default function Home() {
               whiteSpace: 'nowrap'
             }}
           >
-            Dashboard
+            Join Beta
           </a>
         </nav>
       </header>
@@ -217,11 +230,39 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <main className="main-content" style={{ padding: '4rem 2rem' }}>
+      <main className="main-content" style={{
+        padding: '4rem 2rem',
+        position: 'relative'
+      }}>
+        {/* Background Casi C Logo */}
+        <div style={{
+          position: 'absolute',
+          top: '10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '800px',
+          height: '800px',
+          opacity: 0.05,
+          pointerEvents: 'none',
+          zIndex: 0
+        }}>
+          <img
+            src="/logo_casiC.jpeg"
+            alt="Casi Background"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+          />
+        </div>
+
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          textAlign: 'center'
+          textAlign: 'center',
+          position: 'relative',
+          zIndex: 1
         }}>
           {/* Hero Section */}
           <div style={{ marginBottom: '4rem' }}>
@@ -233,7 +274,7 @@ export default function Home() {
               lineHeight: '1.1',
               letterSpacing: '-0.02em'
             }}>
-              Real-time Streaming
+              Turn Your Chat Into
               <br />
               <span style={{
                 background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
@@ -241,10 +282,10 @@ export default function Home() {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
               }}>
-                Analytics
+                Content Gold
               </span>
             </h1>
-            
+
             <p style={{
               fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
               color: 'rgba(255, 255, 255, 0.9)',
@@ -253,9 +294,102 @@ export default function Home() {
               margin: '0 auto 3rem auto',
               lineHeight: '1.6'
             }}>
-              AI-powered chat analysis that helps streamers engage better with their audience.
-              Get instant insights on viewer sentiment and never miss important questions.
+              Real-time analytics for Twitch — see sentiment, spot questions, and act fast. YouTube & Kick coming soon.
             </p>
+
+            {/* Dashboard Preview */}
+            <div style={{
+              maxWidth: '1200px',
+              margin: '0 auto 3rem auto',
+              position: 'relative'
+            }}>
+              <img
+                src="/sentiment-analysis.png"
+                alt="Dashboard preview showing real-time sentiment analysis with anonymized data"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: '16px',
+                  border: '2px solid rgba(94, 234, 212, 0.3)',
+                  boxShadow: '0 30px 60px rgba(94, 234, 212, 0.2), 0 20px 40px rgba(0, 0, 0, 0.4)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.3s ease'
+                }}
+                onClick={(e) => {
+                  const target = e.currentTarget
+                  if (target.style.transform === 'scale(1.5)') {
+                    target.style.transform = 'scale(1)'
+                    target.style.zIndex = '1'
+                    target.style.position = 'relative'
+                  } else {
+                    target.style.transform = 'scale(1.5)'
+                    target.style.zIndex = '1000'
+                    target.style.position = 'relative'
+                  }
+                }}
+                onError={(e) => {
+                  const target = e.currentTarget
+                  target.style.display = 'none'
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'rgba(59, 130, 246, 0.9)',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '20px',
+                fontSize: '0.8rem',
+                fontWeight: '600'
+              }}>
+                Preview
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="quick-access-buttons" style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              marginBottom: '3rem'
+            }}>
+              <a
+                href="/beta"
+                style={{
+                  display: 'inline-block',
+                  padding: '0.75rem 2rem',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '25px',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  fontFamily: 'Poppins, Arial, sans-serif'
+                }}
+              >
+                Join Beta
+              </a>
+
+              <a
+                href="/features"
+                style={{
+                  display: 'inline-block',
+                  padding: '0.75rem 2rem',
+                  background: 'rgba(94, 234, 212, 0.2)',
+                  color: '#5EEAD4',
+                  textDecoration: 'none',
+                  borderRadius: '25px',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  border: '1px solid rgba(94, 234, 212, 0.3)',
+                  fontFamily: 'Poppins, Arial, sans-serif'
+                }}
+              >
+                See Features
+              </a>
+            </div>
 
             {/* Waitlist Form */}
             <div className="form-container" style={{
@@ -275,7 +409,7 @@ export default function Home() {
               }}>
                 Get Early Access
               </h3>
-              
+
               <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
                 <div style={{
                   display: 'flex',
@@ -309,14 +443,14 @@ export default function Home() {
                       boxSizing: 'border-box'
                     }}
                   />
-                  
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     style={{
                       padding: '0.75rem 1.5rem',
-                      background: isSubmitting 
-                        ? 'rgba(255, 255, 255, 0.2)' 
+                      background: isSubmitting
+                        ? 'rgba(255, 255, 255, 0.2)'
                         : 'linear-gradient(135deg, #6932FF, #932FFE)',
                       color: 'white',
                       border: 'none',
@@ -343,58 +477,109 @@ export default function Home() {
                 </p>
               )}
             </div>
+          </div>
 
-            {/* Quick Access Buttons */}
-            <div className="quick-access-buttons" style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center',
-              flexWrap: 'wrap'
+          {/* 3-Step Process */}
+          <div style={{
+            marginBottom: '4rem',
+            background: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: '20px',
+            padding: '3rem 2rem',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h2 style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color: 'white',
+              marginBottom: '1rem'
             }}>
-              <a
-                href="/beta-signup"
-                style={{
-                  display: 'inline-block',
-                  padding: '0.75rem 1.5rem',
-                  background: 'rgba(94, 234, 212, 0.2)',
-                  color: '#5EEAD4',
-                  textDecoration: 'none',
-                  borderRadius: '25px',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  border: '1px solid rgba(94, 234, 212, 0.3)',
-                  fontFamily: 'Poppins, Arial, sans-serif'
-                }}
-              >
-                📝 Beta Program Details
-              </a>
-              
-              <button
-                onClick={() => {
-                  setMessage('🔒 Dashboard demo coming soon! Join the waitlist above for early access.')
-                }}
-                style={{
-                  display: 'inline-block',
-                  padding: '0.75rem 1.5rem',
-                  background: 'rgba(255, 159, 159, 0.2)',
-                  color: '#FF9F9F',
-                  border: '1px solid rgba(255, 159, 159, 0.3)',
-                  borderRadius: '25px',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  fontFamily: 'Poppins, Arial, sans-serif',
-                  cursor: 'pointer'
-                }}
-              >
-                🔒 Preview Dashboard
-              </button>
+              How It Works
+            </h2>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '3rem',
+              fontSize: '1.1rem'
+            }}>
+              Simple setup, instant insights
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '2rem'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem auto',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}>
+                  1
+                </div>
+                <h3 style={{ color: 'white', marginBottom: '0.5rem', fontSize: '1.1rem' }}>Connect Your Stream</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem' }}>
+                  Link your Twitch account in seconds (YouTube & Kick coming soon)
+                </p>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem auto',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}>
+                  2
+                </div>
+                <h3 style={{ color: 'white', marginBottom: '0.5rem', fontSize: '1.1rem' }}>We Analyse Chat in Real Time</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem' }}>
+                  AI processes every message for sentiment and questions
+                </p>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem auto',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}>
+                  3
+                </div>
+                <h3 style={{ color: 'white', marginBottom: '0.5rem', fontSize: '1.1rem' }}>You Get Insights & Alerts</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem' }}>
+                  Live dashboard shows mood and highlights key questions
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Features Preview */}
+          {/* MVP Features Preview */}
           <div className="features-grid" style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: '2rem',
             marginBottom: '4rem'
           }}>
@@ -404,10 +589,10 @@ export default function Home() {
               padding: '2rem',
               border: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💬</div>
-              <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Real-time Chat Analysis</h3>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📈</div>
+              <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Real-time Sentiment Tracking</h3>
               <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
-                AI-powered sentiment analysis and question detection in live chat
+                Watch your chat's mood change live with AI-powered sentiment analysis
               </p>
             </div>
 
@@ -417,23 +602,10 @@ export default function Home() {
               padding: '2rem',
               border: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📊</div>
-              <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Engagement Insights</h3>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>❓</div>
+              <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Question Detection & Alerts</h3>
               <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
-                Track viewer mood and engagement levels throughout your stream
-              </p>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '16px',
-              padding: '2rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤖</div>
-              <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>AI Response Suggestions</h3>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.9rem' }}>
-                Get smart suggestions for engaging with your community
+                Never miss important questions with smart AI detection and priority alerts
               </p>
             </div>
           </div>
@@ -456,16 +628,16 @@ export default function Home() {
         }}>
           {/* Brand */}
           <div>
-            <h4 style={{ 
-              color: '#5EEAD4', 
+            <h4 style={{
+              color: '#5EEAD4',
               marginBottom: '1rem',
               fontSize: '1.1rem',
               fontWeight: '600'
             }}>
               Casi
             </h4>
-            <p style={{ 
-              color: 'rgba(255, 255, 255, 0.8)', 
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.8)',
               fontSize: '0.9rem',
               lineHeight: '1.5'
             }}>
@@ -473,10 +645,10 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Links */}
+          {/* Product Links */}
           <div>
-            <h4 style={{ 
-              color: 'white', 
+            <h4 style={{
+              color: 'white',
               marginBottom: '1rem',
               fontSize: '1rem',
               fontWeight: '600'
@@ -484,72 +656,90 @@ export default function Home() {
               Product
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <a href="/" style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
+              <a href="/" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
                 textDecoration: 'none',
                 fontSize: '0.9rem'
               }}>
                 Home
               </a>
-              <a href="/beta-signup" style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
+              <a href="/features" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
                 textDecoration: 'none',
                 fontSize: '0.9rem'
               }}>
-                Beta Program
+                Features
               </a>
-              <a 
-                href="#" 
-                onClick={(e) => {
-                  e.preventDefault()
-                  setMessage('🔒 Dashboard demo coming soon!')
-                }}
-                style={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  textDecoration: 'none',
-                  fontSize: '0.9rem'
-                }}
-              >
-                Dashboard
+              <a href="/pricing" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Pricing
+              </a>
+              <a href="/beta" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Beta
+              </a>
+              <a href="/dashboard-preview" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Dashboard Preview
               </a>
             </div>
           </div>
 
-          {/* Contact */}
+          {/* Company Links */}
           <div>
-            <h4 style={{ 
-              color: 'white', 
+            <h4 style={{
+              color: 'white',
               marginBottom: '1rem',
               fontSize: '1rem',
               fontWeight: '600'
             }}>
-              Contact
+              Company
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <a href="mailto:casi@heycasi.com" style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
+              <a href="/about" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                About
+              </a>
+              <a href="/community" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Community
+              </a>
+              <a href="/contact" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}>
+                Contact
+              </a>
+              <a href="mailto:casi@heycasi.com" style={{
+                color: 'rgba(255, 255, 255, 0.8)',
                 textDecoration: 'none',
                 fontSize: '0.9rem'
               }}>
                 casi@heycasi.com
-              </a>
-              <a href="#" onClick={(e) => {
-                e.preventDefault()
-                setMessage('📞 Support available for beta users!')
-              }} style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
-                textDecoration: 'none',
-                fontSize: '0.9rem'
-              }}>
-                Support
               </a>
             </div>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 style={{ 
-              color: 'white', 
+            <h4 style={{
+              color: 'white',
               marginBottom: '1rem',
               fontSize: '1rem',
               fontWeight: '600'
@@ -560,8 +750,8 @@ export default function Home() {
               <a href="#" onClick={(e) => {
                 e.preventDefault()
                 setMessage('📄 Privacy policy coming soon!')
-              }} style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
+              }} style={{
+                color: 'rgba(255, 255, 255, 0.8)',
                 textDecoration: 'none',
                 fontSize: '0.9rem'
               }}>
@@ -570,8 +760,8 @@ export default function Home() {
               <a href="#" onClick={(e) => {
                 e.preventDefault()
                 setMessage('📋 Terms of service coming soon!')
-              }} style={{ 
-                color: 'rgba(255, 255, 255, 0.8)', 
+              }} style={{
+                color: 'rgba(255, 255, 255, 0.8)',
                 textDecoration: 'none',
                 fontSize: '0.9rem'
               }}>
@@ -587,8 +777,8 @@ export default function Home() {
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
           textAlign: 'center'
         }}>
-          <p style={{ 
-            margin: 0, 
+          <p style={{
+            margin: 0,
             fontSize: '0.8rem',
             color: 'rgba(255, 255, 255, 0.6)'
           }}>
@@ -603,7 +793,7 @@ export default function Home() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
         }
-        
+
         @media (max-width: 768px) {
           .header-nav {
             padding: 1rem !important;
@@ -611,53 +801,52 @@ export default function Home() {
             gap: 1rem !important;
             text-align: center !important;
           }
-          
+
           .header-nav nav {
             gap: 1rem !important;
             justify-content: center !important;
           }
-          
+
           .features-grid {
             grid-template-columns: 1fr !important;
           }
-          
+
           .quick-access-buttons {
             flex-direction: column !important;
             align-items: center !important;
           }
-          
-          .quick-access-buttons a,
-          .quick-access-buttons button {
+
+          .quick-access-buttons a {
             width: 100% !important;
             max-width: 300px !important;
             text-align: center !important;
           }
-          
+
           .footer-grid {
             grid-template-columns: 1fr !important;
             text-align: center !important;
           }
-          
+
           .form-container {
             margin: 0 1rem 3rem 1rem !important;
           }
         }
-        
+
         @media (max-width: 480px) {
           .header-nav {
             padding: 0.75rem !important;
           }
-          
+
           .header-nav nav {
             gap: 0.75rem !important;
             flex-direction: column !important;
           }
-          
+
           .header-nav nav a {
             font-size: 0.85rem !important;
             padding: 0.5rem 1rem !important;
           }
-          
+
           .main-content {
             padding: 2rem 1rem !important;
           }
