@@ -298,7 +298,7 @@ export default function Home() {
             position: 'relative'
           }}>
             <img
-              src="/whole-dashboard.png"
+              src="/wholedashboard.png"
               alt="Casi Dashboard"
               style={{
                 width: '100%',
@@ -309,7 +309,7 @@ export default function Home() {
                 cursor: 'pointer',
                 transition: 'transform 0.3s ease'
               }}
-              onClick={() => window.open('/whole-dashboard.png', '_blank')}
+              onClick={() => window.open('/wholedashboard.png', '_blank')}
             />
             <div style={{
               position: 'absolute',
@@ -500,25 +500,25 @@ export default function Home() {
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
             {[
               {
-                title: 'Real-Time Sentiment Tracking',
-                desc: 'Watch your chat\'s mood shift in real-time. See what\'s landing well and adjust on the fly.',
-                image: '/sentiment-analysis.png',
+                title: 'Live Chat Feed Analysis',
+                desc: 'See every message analyzed for sentiment, questions, and engagement level in real-time.',
+                image: '/livechatfeed.png',
                 reverse: false,
-                color: '#B8EE8A'
+                color: '#5EEAD4'
               },
               {
-                title: 'Never Miss a Question',
+                title: 'Never Miss a Question & Track Top Chatters',
                 desc: 'AI highlights every question in chat and tracks your top chatters. Get alerts so you can respond fast, keep viewers engaged, and recognize your most active community members.',
                 image: '/missedquestions-topchatters.png',
                 reverse: true,
                 color: '#FF9F9F'
               },
               {
-                title: 'Live Chat Feed Analysis',
-                desc: 'See every message analyzed for sentiment, questions, and engagement level in real-time.',
-                image: '/live chat feed.png',
+                title: 'Stream Preview',
+                desc: 'Watch your stream directly in the dashboard while monitoring chat analytics in real-time.',
+                image: '/stream-preview (2).png',
                 reverse: false,
-                color: '#5EEAD4'
+                color: '#B8EE8A'
               }
             ].map((feature, i) => (
               <div key={i} className="feature-item" style={{
