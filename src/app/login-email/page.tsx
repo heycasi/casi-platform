@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import AnimatedBackground from '@/components/AnimatedBackground'
 
 export default function EmailLoginPage() {
   const [email, setEmail] = useState('')
@@ -60,13 +61,14 @@ export default function EmailLoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0B0D14 0%, #1a1d2e 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: 'Poppins, sans-serif',
-      padding: '1rem'
+      padding: '1rem',
+      position: 'relative'
     }}>
+      <AnimatedBackground />
       <div style={{
         background: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',

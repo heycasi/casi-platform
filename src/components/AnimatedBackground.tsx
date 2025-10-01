@@ -1,5 +1,8 @@
 'use client'
 
+import MeteorBackground from './MeteorBackground'
+import DotGridBackground from './DotGridBackground'
+
 export default function AnimatedBackground() {
   return (
     <>
@@ -10,11 +13,17 @@ export default function AnimatedBackground() {
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: -1,
+        zIndex: -2,
         background: 'linear-gradient(135deg, #0B0D14 0%, #1a1d2e 50%, #0B0D14 100%)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 15s ease infinite'
       }} />
+
+      {/* Dot Grid Background */}
+      <DotGridBackground dotColor="rgba(105, 50, 255, 0.15)" spacing={40} />
+
+      {/* Meteor Shower */}
+      <MeteorBackground />
 
       {/* Floating Orbs */}
       <div style={{

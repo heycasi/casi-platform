@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { ReactNode, useState } from 'react'
+import AnimatedBackground from './AnimatedBackground'
 
 interface PageLayoutProps {
   children: ReactNode
@@ -12,12 +13,14 @@ export default function PageLayout({ children }: PageLayoutProps) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       fontFamily: 'Poppins, sans-serif',
       color: '#F7F7F7',
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* Animated Background */}
+      <AnimatedBackground />
+
       {/* Background Robot Mascot */}
       <div style={{
         position: 'fixed',
@@ -39,10 +42,24 @@ export default function PageLayout({ children }: PageLayoutProps) {
           style={{
             width: '800px',
             height: 'auto',
-            objectFit: 'contain'
+            objectFit: 'contain',
+            animation: 'pulse 8s ease-in-out infinite'
           }}
         />
       </div>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.04;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.06;
+            transform: scale(1.02);
+          }
+        }
+      `}</style>
 
       {/* Header */}
       <header style={{
@@ -95,10 +112,9 @@ export default function PageLayout({ children }: PageLayoutProps) {
           }}>
             <Link href="/features" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Features</Link>
             <Link href="/pricing" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Pricing</Link>
-            <Link href="/beta" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Beta</Link>
-            <Link href="/dashboard" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Dashboard</Link>
+            <Link href="/login-email" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Login</Link>
             <Link
-              href="/beta"
+              href="/signup"
               style={{
                 padding: '0.65rem 1.5rem',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -112,7 +128,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
                 whiteSpace: 'nowrap'
               }}
             >
-              Get Started
+              Sign Up
             </Link>
           </nav>
 
@@ -198,7 +214,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
             Pricing
           </Link>
           <Link
-            href="/beta"
+            href="/login-email"
             onClick={() => setIsMobileMenuOpen(false)}
             style={{
               color: 'rgba(255,255,255,0.9)',
@@ -208,23 +224,10 @@ export default function PageLayout({ children }: PageLayoutProps) {
               padding: '0.75rem'
             }}
           >
-            Beta
+            Login
           </Link>
           <Link
-            href="/dashboard"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{
-              color: 'rgba(255,255,255,0.9)',
-              textDecoration: 'none',
-              fontSize: '1.1rem',
-              fontWeight: '500',
-              padding: '0.75rem'
-            }}
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/beta"
+            href="/signup"
             onClick={() => setIsMobileMenuOpen(false)}
             style={{
               padding: '0.75rem 1.5rem',
@@ -238,7 +241,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
               textAlign: 'center'
             }}
           >
-            Get Started
+            Sign Up
           </Link>
         </div>
       </header>
