@@ -3,55 +3,53 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function EmailLoginPage() {
+export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const supabase = createClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessage('')
 
-    try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (signInError) throw signInError
-
-      // Redirect to dashboard
-      window.location.href = '/dashboard'
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
-    } finally {
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
       setLoading(false)
-    }
-  }
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError('Please enter your email address first')
       return
     }
 
-    setLoading(true)
-    setError('')
+    // Validate password length
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setLoading(false)
+      return
+    }
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
       })
 
-      if (resetError) throw resetError
+      if (signUpError) throw signUpError
 
-      setMessage('Password reset email sent! Check your inbox.')
+      setMessage('Account created! Please check your email to verify your account.')
+      setEmail('')
+      setPassword('')
+      setConfirmPassword('')
+
     } catch (err: any) {
-      setError(err.message || 'Failed to send reset email')
+      setError(err.message || 'Failed to create account')
     } finally {
       setLoading(false)
     }
@@ -92,7 +90,7 @@ export default function EmailLoginPage() {
           marginBottom: '0.5rem',
           textAlign: 'center'
         }}>
-          Welcome Back
+          Create Account
         </h1>
 
         <p style={{
@@ -101,10 +99,10 @@ export default function EmailLoginPage() {
           textAlign: 'center',
           marginBottom: '2rem'
         }}>
-          Log in to your Casi account
+          Start your free Casi account today
         </p>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignUp}>
           {/* Email */}
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{
@@ -136,7 +134,7 @@ export default function EmailLoginPage() {
           </div>
 
           {/* Password */}
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
             <label style={{
               display: 'block',
               color: 'rgba(255, 255, 255, 0.8)',
@@ -161,27 +159,38 @@ export default function EmailLoginPage() {
                 fontSize: '0.875rem',
                 outline: 'none'
               }}
-              placeholder="••••••••"
+              placeholder="At least 6 characters"
             />
           </div>
 
-          {/* Forgot Password */}
-          <div style={{ textAlign: 'right', marginBottom: '1.5rem' }}>
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              disabled={loading}
+          {/* Confirm Password */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{
+              display: 'block',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.875rem',
+              marginBottom: '0.5rem',
+              fontWeight: '500'
+            }}>
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
               style={{
-                background: 'none',
-                border: 'none',
-                color: '#6932FF',
+                width: '100%',
+                padding: '0.875rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '10px',
+                color: 'white',
                 fontSize: '0.875rem',
-                cursor: 'pointer',
-                textDecoration: 'underline'
+                outline: 'none'
               }}
-            >
-              Forgot password?
-            </button>
+              placeholder="Re-enter password"
+            />
           </div>
 
           {/* Error/Message */}
@@ -231,10 +240,9 @@ export default function EmailLoginPage() {
               marginBottom: '1rem'
             }}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
-
 
         {/* Footer */}
         <div style={{
@@ -243,9 +251,9 @@ export default function EmailLoginPage() {
           color: 'rgba(255, 255, 255, 0.5)',
           fontSize: '0.875rem'
         }}>
-          Don't have an account?{' '}
-          <a href="/signup" style={{ color: '#6932FF', textDecoration: 'none', fontWeight: '600' }}>
-            Sign up free
+          Already have an account?{' '}
+          <a href="/login-email" style={{ color: '#6932FF', textDecoration: 'none', fontWeight: '600' }}>
+            Sign in
           </a>
         </div>
       </div>

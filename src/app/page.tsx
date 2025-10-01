@@ -117,10 +117,9 @@ export default function Home() {
           }}>
             <Link href="/features" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Features</Link>
             <Link href="/pricing" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Pricing</Link>
-            <Link href="/beta" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Beta</Link>
             <Link href="/login-email" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Login</Link>
             <Link
-              href="/beta"
+              href="/signup"
               style={{
                 padding: '0.65rem 1.5rem',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -134,7 +133,7 @@ export default function Home() {
                 whiteSpace: 'nowrap'
               }}
             >
-              Get Started
+              Sign Up
             </Link>
           </nav>
 
@@ -220,19 +219,6 @@ export default function Home() {
             Pricing
           </Link>
           <Link
-            href="/beta"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{
-              color: 'rgba(255,255,255,0.9)',
-              textDecoration: 'none',
-              fontSize: '1.1rem',
-              fontWeight: '500',
-              padding: '0.75rem'
-            }}
-          >
-            Beta
-          </Link>
-          <Link
             href="/login-email"
             onClick={() => setIsMobileMenuOpen(false)}
             style={{
@@ -246,7 +232,7 @@ export default function Home() {
             Login
           </Link>
           <Link
-            href="/beta"
+            href="/signup"
             onClick={() => setIsMobileMenuOpen(false)}
             style={{
               padding: '0.75rem 1.5rem',
@@ -260,7 +246,7 @@ export default function Home() {
               textAlign: 'center'
             }}
           >
-            Get Started
+            Sign Up
           </Link>
         </div>
       </header>
