@@ -1,7 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
+import AnimatedBackground from '@/components/AnimatedBackground'
+import { FadeInText, ShinyText, SplitText } from '@/components/AnimatedText'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,9 +13,12 @@ const supabase = createClient(
 export default function Home() {
   const [waitlistCount, setWaitlistCount] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+  const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchWaitlistCount()
+    setIsVisible(true)
   }, [])
 
   const fetchWaitlistCount = async () => {
@@ -34,12 +39,14 @@ export default function Home() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       fontFamily: 'Poppins, sans-serif',
       color: '#F7F7F7',
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* Animated Background */}
+      <AnimatedBackground />
+
       {/* Background Robot Mascot */}
       <div style={{
         position: 'fixed',
@@ -61,10 +68,24 @@ export default function Home() {
           style={{
             width: '800px',
             height: 'auto',
-            objectFit: 'contain'
+            objectFit: 'contain',
+            animation: 'pulse 8s ease-in-out infinite'
           }}
         />
       </div>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.04;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.06;
+            transform: scale(1.02);
+          }
+        }
+      `}</style>
 
       {/* Header */}
       <header style={{
@@ -274,26 +295,28 @@ export default function Home() {
               marginBottom: '1.5rem',
               letterSpacing: '-0.02em'
             }}>
-              Turn Your Chat Into
-              <br />
-              <span style={{
-                background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>
-                Content Gold
-              </span>
+              <FadeInText
+                text="Turn Your Chat Into"
+                delay={100}
+                style={{
+                  display: 'block',
+                  marginBottom: '0.5rem'
+                }}
+              />
+              <ShinyText text="Content Gold" />
             </h1>
 
-            <p style={{
-              fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
-              color: 'rgba(255, 255, 255, 0.8)',
-              maxWidth: '700px',
-              margin: '0 auto 3rem',
-              lineHeight: '1.6'
-            }}>
-              Real-time analytics for Twitch streamers. See sentiment, spot questions, and act fast—so you never miss what matters.
-            </p>
+            <FadeInText
+              text="Real-time analytics for Twitch streamers. See sentiment, spot questions, and act fast—so you never miss what matters."
+              delay={400}
+              style={{
+                fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
+                color: 'rgba(255, 255, 255, 0.8)',
+                maxWidth: '700px',
+                margin: '0 auto 3rem',
+                lineHeight: '1.6'
+              }}
+            />
 
             {/* Dual CTAs */}
             <div style={{
@@ -305,6 +328,7 @@ export default function Home() {
             }}>
               <Link
                 href="/beta"
+                className="cta-button-primary"
                 style={{
                   padding: '1rem 2.5rem',
                   background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -315,7 +339,17 @@ export default function Home() {
                   fontWeight: '600',
                   boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
                   transition: 'all 0.3s ease',
-                  display: 'inline-block'
+                  display: 'inline-block',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
+                  e.currentTarget.style.boxShadow = '0 12px 40px rgba(105, 50, 255, 0.7)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(105, 50, 255, 0.5)'
                 }}
               >
                 Start Free Trial
@@ -334,6 +368,16 @@ export default function Home() {
                   fontWeight: '600',
                   transition: 'all 0.3s ease',
                   display: 'inline-block'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(94, 234, 212, 0.2)'
+                  e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.8)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                  e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.5)'
+                  e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
                 See Features
