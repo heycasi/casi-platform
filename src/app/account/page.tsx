@@ -39,7 +39,7 @@ export default function AccountPage() {
   if (!user) {
     // Redirect to login if not authenticated
     if (typeof window !== 'undefined') {
-      window.location.href = '/login'
+      window.location.href = '/login-email'
     }
     return (
       <div style={{
@@ -53,7 +53,7 @@ export default function AccountPage() {
         gap: '1rem'
       }}>
         <div>Redirecting to login...</div>
-        <a href="/login" style={{ color: '#6932FF', textDecoration: 'underline' }}>
+        <a href="/login-email" style={{ color: '#6932FF', textDecoration: 'underline' }}>
           Click here if not redirected
         </a>
       </div>

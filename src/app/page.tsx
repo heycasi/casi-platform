@@ -118,7 +118,7 @@ export default function Home() {
             <Link href="/features" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Features</Link>
             <Link href="/pricing" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Pricing</Link>
             <Link href="/beta" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Beta</Link>
-            <Link href="/dashboard" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Dashboard</Link>
+            <Link href="/login-email" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.2s', whiteSpace: 'nowrap' }}>Login</Link>
             <Link
               href="/beta"
               style={{
@@ -233,7 +233,7 @@ export default function Home() {
             Beta
           </Link>
           <Link
-            href="/dashboard"
+            href="/login-email"
             onClick={() => setIsMobileMenuOpen(false)}
             style={{
               color: 'rgba(255,255,255,0.9)',
@@ -243,7 +243,7 @@ export default function Home() {
               padding: '0.75rem'
             }}
           >
-            Dashboard
+            Login
           </Link>
           <Link
             href="/beta"

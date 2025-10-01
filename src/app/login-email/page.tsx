@@ -235,45 +235,6 @@ export default function EmailLoginPage() {
           </button>
         </form>
 
-        {/* Divider */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          margin: '1.5rem 0'
-        }}>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
-          <span style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.875rem' }}>or</span>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
-        </div>
-
-        {/* Connect Twitch Button */}
-        <a
-          href="/api/auth/twitch"
-          style={{
-            display: 'block',
-            width: '100%',
-            padding: '1rem',
-            background: 'rgba(145, 70, 255, 0.2)',
-            border: '1px solid rgba(145, 70, 255, 0.3)',
-            borderRadius: '10px',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            textAlign: 'center',
-            textDecoration: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(145, 70, 255, 0.3)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(145, 70, 255, 0.2)'
-          }}
-        >
-          📺 Connect with Twitch
-        </a>
 
         {/* Footer */}
         <div style={{
