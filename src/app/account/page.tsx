@@ -37,6 +37,10 @@ export default function AccountPage() {
   }
 
   if (!user) {
+    // Redirect to login if not authenticated
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
     return (
       <div style={{
         minHeight: '100vh',
@@ -44,9 +48,14 @@ export default function AccountPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'white'
+        color: 'white',
+        flexDirection: 'column',
+        gap: '1rem'
       }}>
-        <div>Please log in to view your account</div>
+        <div>Redirecting to login...</div>
+        <a href="/login" style={{ color: '#6932FF', textDecoration: 'underline' }}>
+          Click here if not redirected
+        </a>
       </div>
     )
   }
