@@ -44,20 +44,56 @@ export default function AuthCallback() {
           return
         }
 
-        setStatus('💾 Storing user session...')
-        
-        // Store tokens securely (you can enhance this later)
+        setStatus('💾 Creating Supabase account...')
+
+        // Create/sign in Supabase user with Twitch data
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+
+        // Use Twitch user ID as the email domain to create a unique account
+        const twitchEmail = `${tokenData.user.id}@twitch.casi.app`
+
+        // Try to sign in first, if fails, sign up
+        let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: twitchEmail,
+          password: tokenData.user.id // Using Twitch ID as password (secure since it's unique)
+        })
+
+        if (signInError) {
+          // User doesn't exist, create new account
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: twitchEmail,
+            password: tokenData.user.id,
+            options: {
+              data: {
+                twitch_id: tokenData.user.id,
+                display_name: tokenData.user.display_name,
+                preferred_username: tokenData.user.login,
+                avatar_url: tokenData.user.profile_image_url,
+                provider: 'twitch'
+              }
+            }
+          })
+
+          if (signUpError) {
+            console.error('Supabase signup error:', signUpError)
+            setStatus('⚠️ Account creation failed, but you can still use the dashboard')
+          }
+        }
+
+        // Store tokens in localStorage as well for backward compatibility
         if (typeof window !== 'undefined') {
           localStorage.setItem('twitch_access_token', tokenData.access_token)
           localStorage.setItem('twitch_user', JSON.stringify(tokenData.user))
+          localStorage.setItem('casi_user_email', twitchEmail)
         }
 
         setStatus('✅ Authentication successful! Redirecting...')
-        
-        // Redirect to dashboard after 2 seconds
+
+        // Redirect to dashboard after 1 second
         setTimeout(() => {
           router.push('/dashboard')
-        }, 2000)
+        }, 1000)
 
       } catch (err) {
         console.error('Auth error:', err)
