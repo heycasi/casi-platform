@@ -89,6 +89,87 @@ export class EmailService {
       return false
     }
   }
+
+  static async sendSubscriptionConfirmation(
+    email: string,
+    planName: string,
+    billingInterval: string,
+    amount: number
+  ): Promise<boolean> {
+    try {
+      if (!resend) {
+        console.log('⚠️ RESEND_API_KEY not configured, skipping subscription email')
+        return false
+      }
+
+      const { data, error } = await resend.emails.send({
+        from: 'Casi <casi@heycasi.com>',
+        to: [email],
+        subject: `🎉 Welcome to Casi ${planName}!`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+          </head>
+          <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f7fa;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #6932FF 0%, #932FFE 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 32px;">🎉 Welcome to Casi!</h1>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px;">
+                <p style="font-size: 18px; color: #333; margin-bottom: 20px;">Thanks for subscribing to <strong style="color: #6932FF;">Casi ${planName}</strong>!</p>
+
+                <div style="background: #f8f9fb; border-left: 4px solid #6932FF; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                  <p style="margin: 0; color: #666;"><strong>Plan:</strong> ${planName}</p>
+                  <p style="margin: 10px 0 0 0; color: #666;"><strong>Billing:</strong> £${amount}/${billingInterval}</p>
+                </div>
+
+                <h2 style="color: #6932FF; font-size: 20px; margin-top: 30px;">🚀 Next Steps:</h2>
+                <ol style="color: #666; line-height: 1.8;">
+                  <li>Connect your Twitch account</li>
+                  <li>Set up your dashboard preferences</li>
+                  <li>Start tracking your stream chat</li>
+                </ol>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="https://www.heycasi.com/dashboard" style="display: inline-block; background: linear-gradient(135deg, #6932FF, #932FFE); color: white; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: 600;">
+                    Go to Dashboard
+                  </a>
+                </div>
+
+                <p style="color: #666; font-size: 14px; margin-top: 30px;">If you have any questions, just reply to this email. We're here to help!</p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #f8f9fb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0; color: #6932FF; font-weight: 700;">Casi</p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Your stream's brainy co-pilot</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      })
+
+      if (error) {
+        console.error('Subscription email error:', error)
+        return false
+      }
+
+      console.log('✅ Subscription confirmation email sent:', data?.id)
+      return true
+    } catch (error) {
+      console.error('Subscription email service error:', error)
+      return false
+    }
+  }
 }
 
 function generateReportHTML(report: StreamReport): string {

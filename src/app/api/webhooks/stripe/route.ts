@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { EmailService } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia'
@@ -90,6 +91,29 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   )
 
   await upsertSubscription(subscription, session.customer_details?.email)
+
+  // Send confirmation email
+  if (session.customer_details?.email) {
+    const priceId = subscription.items.data[0].price.id
+    const price = await stripe.prices.retrieve(priceId)
+
+    let planName = 'Creator'
+    if (priceId.includes('pro') || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY) {
+      planName = 'Pro'
+    } else if (priceId.includes('streamer') || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY) {
+      planName = 'Streamer+'
+    }
+
+    const amount = (price.unit_amount || 0) / 100
+    const billingInterval = price.recurring?.interval || 'month'
+
+    await EmailService.sendSubscriptionConfirmation(
+      session.customer_details.email,
+      planName,
+      billingInterval,
+      amount
+    )
+  }
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
