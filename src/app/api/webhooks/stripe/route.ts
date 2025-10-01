@@ -92,6 +92,54 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     session.subscription as string
   )
 
+  // Create Supabase account if customer email is provided
+  if (session.customer_details?.email) {
+    try {
+      // Check if user already exists
+      const { data: existingUsers } = await supabase
+        .from('auth.users')
+        .select('email')
+        .eq('email', session.customer_details.email)
+        .single()
+
+      if (!existingUsers) {
+        // Create new Supabase account with temporary password
+        // User will need to reset password via email
+        const tempPassword = Math.random().toString(36).slice(-16)
+
+        const { error: signUpError } = await supabase.auth.admin.createUser({
+          email: session.customer_details.email,
+          password: tempPassword,
+          email_confirm: true, // Auto-confirm email since they paid
+          user_metadata: {
+            stripe_customer_id: session.customer,
+            created_via: 'stripe_checkout'
+          }
+        })
+
+        if (signUpError) {
+          console.error('Failed to create Supabase user:', signUpError)
+        } else {
+          console.log('✅ Created Supabase account for:', session.customer_details.email)
+
+          // Send password reset email so user can set their password
+          const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+            session.customer_details.email,
+            {
+              redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`
+            }
+          )
+
+          if (resetError) {
+            console.error('Failed to send password reset:', resetError)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking/creating user:', error)
+    }
+  }
+
   await upsertSubscription(subscription, session.customer_details?.email)
 
   // Send confirmation email
