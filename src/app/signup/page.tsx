@@ -43,7 +43,35 @@ export default function SignUpPage() {
 
       if (signUpError) throw signUpError
 
-      setMessage('Account created! Please check your email to verify your account.')
+      // Check if this email has an existing subscription and link it
+      if (data.user) {
+        try {
+          const linkResponse = await fetch('/api/link-subscription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: email,
+              userId: data.user.id
+            })
+          })
+
+          const linkData = await linkResponse.json()
+
+          if (linkData.linked) {
+            setMessage(`Account created and your ${linkData.subscription.plan_name} subscription has been linked! Please check your email to verify your account.`)
+          } else {
+            setMessage('Account created! Please check your email to verify your account.')
+          }
+        } catch (linkError) {
+          console.error('Error linking subscription:', linkError)
+          setMessage('Account created! Please check your email to verify your account.')
+        }
+      } else {
+        setMessage('Account created! Please check your email to verify your account.')
+      }
+
       setEmail('')
       setPassword('')
       setConfirmPassword('')

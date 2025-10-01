@@ -309,11 +309,26 @@ async function upsertSubscription(
     email = (customer as Stripe.Customer).email || undefined
   }
 
+  // Try to find the user_id for this email
+  let userId: string | null = null
+  if (email) {
+    try {
+      const { data: userData } = await supabase.auth.admin.listUsers()
+      const user = userData?.users.find(u => u.email === email)
+      if (user) {
+        userId = user.id
+      }
+    } catch (err) {
+      console.error('Error finding user:', err)
+    }
+  }
+
   const { error } = await supabase
     .from('subscriptions')
     .upsert({
       ...subscriptionData,
-      email: email || 'unknown@email.com'
+      email: email || 'unknown@email.com',
+      user_id: userId
     }, {
       onConflict: 'stripe_subscription_id'
     })
