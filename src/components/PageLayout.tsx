@@ -31,7 +31,6 @@ export default function PageLayout({ children }: PageLayoutProps) {
         height: '100%',
         pointerEvents: 'none',
         zIndex: 0,
-        opacity: 0.04,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -43,6 +42,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
             width: '800px',
             height: 'auto',
             objectFit: 'contain',
+            opacity: 0.08,
             animation: 'pulse 8s ease-in-out infinite'
           }}
         />
@@ -51,11 +51,11 @@ export default function PageLayout({ children }: PageLayoutProps) {
       <style jsx>{`
         @keyframes pulse {
           0%, 100% {
-            opacity: 0.04;
+            opacity: 0.08;
             transform: scale(1);
           }
           50% {
-            opacity: 0.06;
+            opacity: 0.12;
             transform: scale(1.02);
           }
         }
@@ -66,7 +66,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        background: 'rgba(26, 26, 26, 0.95)',
+        background: 'rgba(11, 13, 20, 0.7)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         padding: '1rem 1.5rem'
@@ -257,7 +257,8 @@ export default function PageLayout({ children }: PageLayoutProps) {
         zIndex: 1,
         padding: '3rem 1.5rem',
         borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        background: 'rgba(0, 0, 0, 0.3)'
+        background: 'rgba(11, 13, 20, 0.5)',
+        backdropFilter: 'blur(10px)'
       }}>
         <div style={{
           maxWidth: '1400px',
