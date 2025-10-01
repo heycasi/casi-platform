@@ -7,3 +7,5 @@ tsconfig.json
 
 .vercel
 .env.production
+.env.local
+.env*.local
