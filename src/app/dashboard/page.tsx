@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [elapsedDuration, setElapsedDuration] = useState<string>('00:00:00')
   const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number }>>([])
   const [twitchUser, setTwitchUser] = useState<any>(null)
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -594,26 +595,132 @@ export default function Dashboard() {
           >
             Beta Program
           </a>
-          <button
-            onClick={() => {
-              localStorage.removeItem('twitch_access_token')
-              localStorage.removeItem('twitch_user')
-              localStorage.removeItem('casi_user_email')
-              window.location.href = '/login'
-            }}
-            style={{
-              padding: '0.4rem 0.8rem',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
-              borderRadius: '15px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              fontFamily: 'Poppins, Arial, sans-serif'
-            }}
-          >
-            Logout
-          </button>
+
+          {/* Account Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: twitchUser?.profile_image_url
+                  ? `url(${twitchUser.profile_image_url}) center/cover`
+                  : 'linear-gradient(135deg, #6932FF, #932FFE)',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '1rem'
+              }}
+            >
+              {!twitchUser?.profile_image_url && '👤'}
+            </button>
+
+            {showAccountDropdown && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '45px',
+                  background: '#1a1d2e',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+                  minWidth: '200px',
+                  zIndex: 1000,
+                  overflow: 'hidden'
+                }}
+                onMouseLeave={() => setShowAccountDropdown(false)}
+              >
+                {/* User Info */}
+                <div style={{
+                  padding: '1rem',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(105, 50, 255, 0.1)'
+                }}>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: 'white',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {twitchUser?.display_name || 'User'}
+                  </div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.6)'
+                  }}>
+                    {email}
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div style={{ padding: '0.5rem' }}>
+                  <a
+                    href="/account"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      color: 'white',
+                      textDecoration: 'none',
+                      fontSize: '0.875rem',
+                      borderRadius: '8px',
+                      transition: 'background 0.2s',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent'
+                    }}
+                  >
+                    <span>⚙️</span>
+                    <span>My Account</span>
+                  </a>
+
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('twitch_access_token')
+                      localStorage.removeItem('twitch_user')
+                      localStorage.removeItem('casi_user_email')
+                      window.location.href = '/login'
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#ef4444',
+                      fontSize: '0.875rem',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'background 0.2s',
+                      fontFamily: 'Poppins, Arial, sans-serif'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent'
+                    }}
+                  >
+                    <span>🚪</span>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
