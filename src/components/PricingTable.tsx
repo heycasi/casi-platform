@@ -3,12 +3,15 @@ import { useState } from 'react'
 
 export default function PricingTable() {
   const [isYearly, setIsYearly] = useState(false)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   const tiers = [
     {
       name: 'Creator',
       monthlyPrice: 19,
       yearlyPrice: 190,
+      monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY || 'price_1Rlx2DEEgFiyIrnTAomiE2J3',
+      yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY || 'price_1Rlx2DEEgFiyIrnTGQZSVs8q',
       description: 'Perfect for growing streamers',
       features: [
         'Real-time sentiment tracking',
@@ -24,6 +27,8 @@ export default function PricingTable() {
       name: 'Pro',
       monthlyPrice: 37,
       yearlyPrice: 370,
+      monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || 'price_1RlxA7EEgFiyIrnTVR20se38',
+      yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY || 'price_1RlxA7EEgFiyIrnTSuiyywVq',
       description: 'For serious content creators',
       features: [
         'Everything in Creator',
@@ -41,6 +46,8 @@ export default function PricingTable() {
       name: 'Streamer+',
       monthlyPrice: 75,
       yearlyPrice: 750,
+      monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || 'price_1RlzDHEEgFiyIrnThpPdz7gV',
+      yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY || 'price_1RlzDHEEgFiyIrnT45NkAklL',
       description: 'For top-tier streamers',
       features: [
         'Everything in Pro',
@@ -56,6 +63,33 @@ export default function PricingTable() {
       popular: false
     }
   ]
+
+  const handleCheckout = async (tier: typeof tiers[0]) => {
+    try {
+      setLoadingPlan(tier.name)
+      const priceId = isYearly ? tier.yearlyPriceId : tier.monthlyPriceId
+
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ priceId }),
+      })
+
+      const data = await response.json()
+
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No checkout URL returned')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Failed to start checkout. Please try again.')
+      setLoadingPlan(null)
+    }
+  }
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
@@ -197,6 +231,8 @@ export default function PricingTable() {
               </div>
 
               <button
+                onClick={() => handleCheckout(tier)}
+                disabled={loadingPlan !== null}
                 style={{
                   width: '100%',
                   padding: '0.75rem 1.5rem',
@@ -209,11 +245,12 @@ export default function PricingTable() {
                     : 'rgba(255, 255, 255, 0.1)',
                   color: 'white',
                   border: tier.popular ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
-                  cursor: 'pointer'
+                  cursor: loadingPlan !== null ? 'not-allowed' : 'pointer',
+                  opacity: loadingPlan !== null && loadingPlan !== tier.name ? 0.5 : 1
                 }}
                 data-event={`cta-pricing-${tier.name.toLowerCase()}`}
               >
-                {tier.cta}
+                {loadingPlan === tier.name ? 'Loading...' : tier.cta}
               </button>
             </div>
 
