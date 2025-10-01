@@ -79,14 +79,18 @@ export default function PricingTable() {
 
       const data = await response.json()
 
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
+
       if (data.url) {
         window.location.href = data.url
       } else {
         throw new Error('No checkout URL returned')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error)
-      alert('Failed to start checkout. Please try again.')
+      alert(`Failed to start checkout: ${error.message}`)
       setLoadingPlan(null)
     }
   }
