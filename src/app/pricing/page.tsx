@@ -2,6 +2,9 @@
 import Link from 'next/link'
 import PageLayout from '../../components/PageLayout'
 import PricingTable from '../../components/PricingTable'
+import BlurText from '../../components/BlurText'
+import GradientText from '../../components/GradientText'
+import { FadeInText } from '../../components/AnimatedText'
 
 export default function PricingPage() {
   return (
@@ -21,22 +24,22 @@ export default function PricingPage() {
             lineHeight: '1.2',
             marginBottom: '2rem'
           }}>
-            Simple, <span style={{
-              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>Transparent</span> Pricing
+            <BlurText text="Simple, " delay={0} style={{ display: 'inline' }} />
+            <GradientText animate={true}>Transparent</GradientText>
+            <BlurText text=" Pricing" delay={100} style={{ display: 'inline' }} />
           </h1>
-          <p style={{
-            fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
-            color: 'rgba(255, 255, 255, 0.8)',
-            marginBottom: '2rem',
-            lineHeight: '1.6',
-            maxWidth: '600px',
-            margin: '0 auto 2rem'
-          }}>
-            Choose the plan that fits your streaming goals. Start with our free beta.
-          </p>
+          <BlurText
+            text="Choose the plan that fits your streaming goals. Start with our free beta."
+            delay={300}
+            style={{
+              fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '2rem',
+              lineHeight: '1.6',
+              maxWidth: '600px',
+              margin: '0 auto 2rem'
+            }}
+          />
         </div>
       </section>
 
@@ -139,16 +142,18 @@ export default function PricingPage() {
             marginBottom: '1.5rem',
             color: 'white'
           }}>
-            Ready to start your free beta?
+            <GradientText animate={true}>Ready to start your free beta?</GradientText>
           </h2>
-          <p style={{
-            fontSize: '1.2rem',
-            color: 'rgba(255, 255, 255, 0.8)',
-            marginBottom: '2rem',
-            lineHeight: '1.6'
-          }}>
-            Join streamers who are already improving their audience engagement.
-          </p>
+          <BlurText
+            text="Join streamers who are already improving their audience engagement."
+            delay={200}
+            style={{
+              fontSize: '1.2rem',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '2rem',
+              lineHeight: '1.6'
+            }}
+          />
 
           <div style={{
             display: 'flex',

@@ -4,6 +4,11 @@ import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import AnimatedBackground from '@/components/AnimatedBackground'
 import { FadeInText, ShinyText, SplitText } from '@/components/AnimatedText'
+import BlurText from '@/components/BlurText'
+import CountUp from '@/components/CountUp'
+import GradientText from '@/components/GradientText'
+import TypewriterText from '@/components/TypewriterText'
+import MagneticButton from '@/components/MagneticButton'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -295,7 +300,7 @@ export default function Home() {
               marginBottom: '1.5rem',
               letterSpacing: '-0.02em'
             }}>
-              <FadeInText
+              <BlurText
                 text="Turn Your Chat Into"
                 delay={100}
                 style={{
@@ -303,10 +308,10 @@ export default function Home() {
                   marginBottom: '0.5rem'
                 }}
               />
-              <ShinyText text="Content Gold" />
+              <GradientText animate={true}>Content Gold</GradientText>
             </h1>
 
-            <FadeInText
+            <BlurText
               text="Real-time analytics for Twitch streamers. See sentiment, spot questions, and act fast—so you never miss what matters."
               delay={400}
               style={{
@@ -474,19 +479,24 @@ export default function Home() {
               <div style={{
                 fontSize: 'clamp(2rem, 4vw, 3rem)',
                 fontWeight: '700',
-                background: 'linear-gradient(135deg, #FF9F9F, #932FFE)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
                 marginBottom: '0.5rem'
               }}>
-                {waitlistCount > 0 ? `${waitlistCount}+` : '20+'}
+                <GradientText animate={false}>
+                  <CountUp
+                    end={waitlistCount > 0 ? waitlistCount : 20}
+                    suffix="+"
+                    duration={2500}
+                  />
+                </GradientText>
               </div>
-              <div style={{
-                fontSize: '1rem',
-                color: 'rgba(255, 255, 255, 0.6)'
-              }}>
-                Streamers on Waitlist
-              </div>
+              <BlurText
+                text="Streamers on Waitlist"
+                delay={200}
+                style={{
+                  fontSize: '1rem',
+                  color: 'rgba(255, 255, 255, 0.6)'
+                }}
+              />
             </div>
             <div>
               <div style={{
@@ -537,17 +547,19 @@ export default function Home() {
             fontWeight: '700',
             marginBottom: '1rem'
           }}>
-            Ready to Get Started?
+            <GradientText animate={true}>Ready to Get Started?</GradientText>
           </h2>
-          <p style={{
-            fontSize: '1.2rem',
-            color: 'rgba(255, 255, 255, 0.7)',
-            marginBottom: '2rem',
-            maxWidth: '600px',
-            margin: '0 auto 2rem'
-          }}>
-            Join the beta program today and transform how you engage with your audience.
-          </p>
+          <BlurText
+            text="Join the beta program today and transform how you engage with your audience."
+            delay={200}
+            style={{
+              fontSize: '1.2rem',
+              color: 'rgba(255, 255, 255, 0.7)',
+              marginBottom: '2rem',
+              maxWidth: '600px',
+              margin: '0 auto 2rem'
+            }}
+          />
           <Link
             href="/beta"
             style={{

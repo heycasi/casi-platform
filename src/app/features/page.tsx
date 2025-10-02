@@ -1,6 +1,8 @@
 'use client'
 import Link from 'next/link'
 import PageLayout from '../../components/PageLayout'
+import BlurText from '../../components/BlurText'
+import GradientText from '../../components/GradientText'
 
 export default function FeaturesPage() {
   return (
@@ -20,22 +22,22 @@ export default function FeaturesPage() {
             lineHeight: '1.2',
             marginBottom: '2rem'
           }}>
-            What <span style={{
-              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>Casi</span> Does For You
+            <BlurText text="What " delay={0} style={{ display: 'inline' }} />
+            <GradientText animate={true}>Casi</GradientText>
+            <BlurText text=" Does For You" delay={100} style={{ display: 'inline' }} />
           </h1>
-          <p style={{
-            fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
-            color: 'rgba(255, 255, 255, 0.8)',
-            marginBottom: '2rem',
-            lineHeight: '1.6',
-            maxWidth: '600px',
-            margin: '0 auto 2rem'
-          }}>
-            Turn your stream chat into actionable insights with AI-powered analytics
-          </p>
+          <BlurText
+            text="Turn your stream chat into actionable insights with AI-powered analytics"
+            delay={300}
+            style={{
+              fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '2rem',
+              lineHeight: '1.6',
+              maxWidth: '600px',
+              margin: '0 auto 2rem'
+            }}
+          />
         </div>
       </section>
 
@@ -73,7 +75,7 @@ export default function FeaturesPage() {
               marginBottom: '1.5rem',
               color: 'white'
             }}>
-              Real-time Sentiment Tracking
+              <GradientText animate={false}>Real-time Sentiment Tracking</GradientText>
             </h2>
             <p style={{
               fontSize: '1.1rem',
