@@ -73,16 +73,16 @@ export default function PageLayout({ children }: PageLayoutProps) {
       }}>
         <style dangerouslySetInnerHTML={{__html: `
           @media (min-width: 768px) {
-            header { padding: 2rem 3rem !important; }
+            header { padding: 1rem 3rem !important; }
           }
           @media (max-width: 767px) {
             .desktop-nav { display: none !important; }
-            .mobile-logo { height: 80px !important; }
+            .mobile-logo { height: 60px !important; }
             .mobile-menu-btn { display: flex !important; }
           }
           @media (min-width: 768px) {
             .desktop-nav { display: flex !important; }
-            .mobile-logo { height: 140px !important; }
+            .mobile-logo { height: 100px !important; }
             .mobile-menu-btn { display: none !important; }
           }
         `}} />
@@ -99,7 +99,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
             textDecoration: 'none',
             zIndex: 10
           }}>
-            <img src="/landing-logo.png" alt="Casi" className="mobile-logo" style={{ height: '140px', width: 'auto' }} />
+            <img src="/landing-logo.png" alt="Casi" className="mobile-logo" style={{ height: '100px', width: 'auto' }} />
           </Link>
 
           {/* Right-aligned Navigation - Desktop Only */}
