@@ -2,9 +2,28 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { EmailService } from '../../../lib/email'
+import { validateEmail, ValidationError } from '@/lib/validation'
+import { rateLimiters, getClientIdentifier } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientId = getClientIdentifier(request)
+    const rateLimitResult = await rateLimiters.api.check(clientId)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.reset.toString()
+          }
+        }
+      )
+    }
+
     const { email } = await request.json()
 
     if (!email) {
@@ -14,17 +33,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      )
-    }
+    // Validate email using our validation library
+    const validatedEmail = validateEmail(email)
 
-    console.log('Sending test email to:', email)
-    const emailSent = await EmailService.sendTestEmail(email)
+    console.log('Sending test email to:', validatedEmail)
+    const emailSent = await EmailService.sendTestEmail(validatedEmail)
 
     if (emailSent) {
       return NextResponse.json({ 
@@ -40,6 +53,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Test email error:', error)
+
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -5,6 +5,8 @@ import { AnalyticsService } from '../../../lib/analytics'
 import { EmailService } from '../../../lib/email'
 import { StreamReport } from '../../../types/analytics'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimiters, getClientIdentifier } from '@/lib/rate-limit'
+import { validateEmail, validateUUID, ValidationError } from '@/lib/validation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +15,23 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - 3 reports per hour to prevent abuse
+    const clientId = getClientIdentifier(request)
+    const rateLimitResult = await rateLimiters.report.check(clientId)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many report requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.reset.toString()
+          }
+        }
+      )
+    }
+
     const { sessionId, email } = await request.json()
 
     if (!sessionId || !email) {
@@ -22,12 +41,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate inputs
+    const validatedSessionId = validateUUID(sessionId)
+    const validatedEmail = validateEmail(email)
+
     // Generate analytics for the session
-    console.log('Generating analytics for session:', sessionId)
-    const analytics = await AnalyticsService.generateSessionAnalytics(sessionId)
-    
+    console.log('Generating analytics for session:', validatedSessionId)
+    const analytics = await AnalyticsService.generateSessionAnalytics(validatedSessionId)
+
     // Get session data
-    const session = await AnalyticsService.getSessionForReport(sessionId)
+    const session = await AnalyticsService.getSessionForReport(validatedSessionId)
     if (!session) {
       return NextResponse.json(
         { error: 'Session not found' },
@@ -36,46 +59,46 @@ export async function POST(request: NextRequest) {
     }
 
     // Get top questions
-    const topQuestions = await AnalyticsService.getTopQuestions(sessionId, 5)
+    const topQuestions = await AnalyticsService.getTopQuestions(validatedSessionId, 5)
 
     // Generate comprehensive report
     const report = await generateComprehensiveReport(session, analytics, topQuestions)
 
     // Send report via email
-    const emailSent = await EmailService.sendStreamReport(email, report)
+    const emailSent = await EmailService.sendStreamReport(validatedEmail, report)
 
     if (emailSent) {
       // Mark session as report generated and sent
       await supabase
         .from('stream_report_sessions')
-        .update({ 
-          report_generated: true, 
-          report_sent: true 
+        .update({
+          report_generated: true,
+          report_sent: true
         })
-        .eq('id', sessionId)
+        .eq('id', validatedSessionId)
 
       // Log successful delivery
       await supabase
         .from('stream_report_deliveries')
         .insert({
-          session_id: sessionId,
-          email: email,
+          session_id: validatedSessionId,
+          email: validatedEmail,
           delivery_status: 'sent',
           delivery_timestamp: new Date().toISOString(),
           report_data: report
         })
 
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Report generated and sent successfully' 
+      return NextResponse.json({
+        success: true,
+        message: 'Report generated and sent successfully'
       })
     } else {
       // Log failed delivery
       await supabase
         .from('stream_report_deliveries')
         .insert({
-          session_id: sessionId,
-          email: email,
+          session_id: validatedSessionId,
+          email: validatedEmail,
           delivery_status: 'failed',
           error_message: 'Email delivery failed',
           report_data: report
@@ -89,6 +112,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Report generation error:', error)
+
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

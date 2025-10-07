@@ -11,7 +11,10 @@
     "migrate:db": "node scripts/migrate-database.js",
     "migrate:verify": "node scripts/migrate-database.js verify",
     "test:reports": "node scripts/test-setup.js",
-    "reports:install": "npm install resend dotenv && npm run setup:reports"
+    "reports:install": "npm install resend dotenv && npm run setup:reports",
+    "verify:env": "node scripts/verify-env.js",
+    "verify:supabase": "node scripts/verify-supabase.js",
+    "verify:all": "npm run verify:env && npm run verify:supabase"
   },
   "dependencies": {
     "@stripe/stripe-js": "^7.9.0",

@@ -25,34 +25,66 @@ export class EmailService {
   static async sendStreamReport(email: string, report: StreamReport): Promise<boolean> {
     try {
       console.log('📧 Generating comprehensive HTML stream report...')
-      
+
       // Check if Resend is available
       if (!resend) {
-        console.log('⚠️ RESEND_API_KEY not configured, skipping email send')
+        console.error('❌ RESEND_API_KEY not configured, cannot send email')
         return false
       }
-      
+
+      // Validate inputs
+      if (!report || !report.session || !report.analytics) {
+        console.error('❌ Invalid report structure - missing required data')
+        console.error('Report structure:', {
+          hasReport: !!report,
+          hasSession: !!report?.session,
+          hasAnalytics: !!report?.analytics
+        })
+        return false
+      }
+
+      if (!email || !email.includes('@')) {
+        console.error('❌ Invalid email address:', email)
+        return false
+      }
+
+      console.log('✅ Validation passed, generating HTML...')
+
       // Generate comprehensive HTML email
       const emailHTML = generateReportHTML(report)
-      
+
+      console.log(`📤 Sending report to ${email} for channel @${report.session.channel_name}`)
+
       const { data, error } = await resend.emails.send({
         from: 'Casi <casi@heycasi.com>',
         to: [email],
         subject: `🎮 Your Stream Report - ${report.session.channel_name}`,
         html: emailHTML,
       })
-      
-      console.log('Email send result:', { data, error })
+
+      console.log('Email send result:', {
+        success: !!data,
+        emailId: data?.id,
+        hasError: !!error
+      })
 
       if (error) {
-        console.error('Resend error:', error)
+        console.error('❌ Resend API error:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
+        console.error('Error type:', error.name)
+        console.error('Error message:', error.message)
         return false
       }
 
-      console.log('✅ Comprehensive stream report email sent successfully:', data?.id)
+      console.log('✅ Stream report email sent successfully!')
+      console.log('   Email ID:', data?.id)
+      console.log('   Recipient:', email)
+      console.log('   Channel:', report.session.channel_name)
       return true
     } catch (error) {
-      console.error('Email service error:', error)
+      console.error('❌ Email service exception:', error)
+      console.error('Exception details:', error instanceof Error ? error.message : 'Unknown error')
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A')
       return false
     }
   }
@@ -182,9 +214,11 @@ function generateReportHTML(report: StreamReport): string {
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
   }
 
-  // Convert logos to base64 for email embedding (email clients block external images)
-  const casiLogoBase64 = getImageAsBase64('landing-logo.png');
-  const robotImageBase64 = getImageAsBase64('landing-robot.png');
+  // Use hosted URLs instead of base64 for better reliability
+  // Email clients handle URLs better than large base64 strings
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com';
+  const casiLogoUrl = `${siteUrl}/landing-logo.png`;
+  const robotImageUrl = `${siteUrl}/landing-robot.png`;
 
   return `
     <!DOCTYPE html>
@@ -201,14 +235,8 @@ function generateReportHTML(report: StreamReport): string {
         <!-- Header with Casi Branding -->
         <div style="background: linear-gradient(135deg, #6932FF 0%, #932FFE 100%); background-color: #6932FF; padding: 40px 30px; text-align: center; color: #FFFFFF;">
           <div style="text-align: center; margin-bottom: 20px;">
-            ${casiLogoBase64 ? 
-              `<img src="${casiLogoBase64}" alt="Casi" style="height: 32px; filter: brightness(0) invert(1); vertical-align: middle;" />` : 
-              `<span style="color: white !important; font-size: 24px; font-weight: 800; font-family: 'Poppins', Arial, sans-serif;">Casi</span>`
-            }
-            ${robotImageBase64 ? 
-              `<img src="${robotImageBase64}" alt="Casi Robot" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); padding: 2px; margin-left: 12px; vertical-align: middle;" />` : 
-              `<span style="display: inline-block; width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; text-align: center; line-height: 32px; font-size: 16px; margin-left: 12px; vertical-align: middle;">🤖</span>`
-            }
+            <img src="${casiLogoUrl}" alt="Casi" style="height: 32px; filter: brightness(0) invert(1); vertical-align: middle;" onerror="this.style.display='none'" />
+            <img src="${robotImageUrl}" alt="Casi Robot" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); padding: 2px; margin-left: 12px; vertical-align: middle;" onerror="this.style.display='none'" />
           </div>
           <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 700; font-family: 'Poppins', Arial, sans-serif; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;">🎮 Your Stream Report</h1>
           <p style="margin: 0; font-size: 18px; font-weight: 600; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;"><strong style="color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF;">@${session.channel_name}</strong></p>
@@ -373,14 +401,8 @@ function generateReportHTML(report: StreamReport): string {
         <!-- Footer -->
         <div style="background: #f8f9fb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
           <div style="text-align: center; margin-bottom: 15px;">
-            ${casiLogoBase64 ? 
-              `<img src="${casiLogoBase64}" alt="Casi" style="height: 20px; vertical-align: middle;" />` : 
-              `<span style="color: #6932FF !important; font-size: 18px; font-weight: 800; font-family: 'Poppins', Arial, sans-serif;">Casi</span>`
-            }
-            ${robotImageBase64 ? 
-              `<img src="${robotImageBase64}" alt="Casi Robot" style="width: 20px; height: 20px; border-radius: 50%; margin-left: 8px; vertical-align: middle;" />` : 
-              `<span style="display: inline-block; width: 20px; height: 20px; background: #B8EE8A; border-radius: 50%; text-align: center; line-height: 20px; font-size: 10px; margin-left: 8px; vertical-align: middle;">🤖</span>`
-            }
+            <img src="${casiLogoUrl}" alt="Casi" style="height: 20px; vertical-align: middle;" onerror="this.style.display='none'" />
+            <img src="${robotImageUrl}" alt="Casi Robot" style="width: 20px; height: 20px; border-radius: 50%; margin-left: 8px; vertical-align: middle;" onerror="this.style.display='none'" />
           </div>
           <p style="margin: 8px 0; color: #6b7280 !important; font-size: 14px; font-family: 'Poppins', Arial, sans-serif;"><strong style="color: #6932FF !important;">Your stream's brainy co-pilot</strong></p>
           <p style="margin: 8px 0; color: #6b7280 !important; font-size: 13px;">Questions? Just reply to this email - we're here to help!</p>
