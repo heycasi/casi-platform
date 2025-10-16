@@ -8,3 +8,6 @@ package-lock.json
 .env.production
 .env.local
 .env*.local
+
+# Contains sensitive API keys
+SUPABASE_EMAIL_SETUP.txt
