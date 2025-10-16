@@ -516,9 +516,32 @@ function SubscriptionTab({ user }: { user: User }) {
     fetchSubscription()
   }, [user.email])
 
+  const [portalLoading, setPortalLoading] = useState(false)
+
   const handleManageSubscription = async () => {
-    // TODO: Create Stripe portal session
-    alert('Stripe Customer Portal will be implemented')
+    setPortalLoading(true)
+    try {
+      const response = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: user.email }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.url) {
+        // Redirect to Stripe Customer Portal
+        window.location.href = data.url
+      } else {
+        alert(`Error: ${data.error || 'Failed to open customer portal'}`)
+        setPortalLoading(false)
+      }
+    } catch (error: any) {
+      alert(`Error: ${error.message}`)
+      setPortalLoading(false)
+    }
   }
 
   if (loading) {
@@ -566,6 +589,7 @@ function SubscriptionTab({ user }: { user: User }) {
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
             <button
               onClick={handleManageSubscription}
+              disabled={portalLoading}
               style={{
                 padding: '0.75rem 1.5rem',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -574,10 +598,11 @@ function SubscriptionTab({ user }: { user: User }) {
                 color: 'white',
                 fontSize: '0.875rem',
                 fontWeight: '600',
-                cursor: 'pointer'
+                cursor: portalLoading ? 'not-allowed' : 'pointer',
+                opacity: portalLoading ? 0.6 : 1
               }}
             >
-              Manage Subscription
+              {portalLoading ? 'Opening Portal...' : 'Manage Subscription'}
             </button>
             <button
               onClick={() => alert('Invoice download coming soon')}
