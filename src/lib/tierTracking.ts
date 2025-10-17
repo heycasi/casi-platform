@@ -134,8 +134,9 @@ export async function checkAndUpdateTierStatus(
  */
 export async function getAllTierStatuses() {
   const { data, error } = await supabase
-    .from('subscription_tier_compliance')
-    .select('*')
+    .from('subscriptions')
+    .select('id, email, stripe_subscription_id, tier_name, plan_name, status, avg_viewer_limit, avg_viewers_30d, days_over_limit, tier_status, last_nudge_sent_at')
+    .eq('status', 'active')
     .order('days_over_limit', { ascending: false })
 
   if (error) {
