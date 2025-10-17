@@ -133,6 +133,7 @@ export async function checkAndUpdateTierStatus(
  * Get tier status for all active subscriptions
  */
 export async function getAllTierStatuses() {
+  console.log('🔍 Fetching all active subscriptions...')
   const { data, error } = await supabase
     .from('subscriptions')
     .select('id, email, stripe_subscription_id, tier_name, plan_name, status, avg_viewer_limit, avg_viewers_30d, days_over_limit, tier_status, last_nudge_sent_at')
@@ -140,10 +141,11 @@ export async function getAllTierStatuses() {
     .order('days_over_limit', { ascending: false })
 
   if (error) {
-    console.error('Error fetching tier compliance:', error)
+    console.error('❌ Error fetching tier compliance:', error)
     return []
   }
 
+  console.log(`✅ Found ${data?.length || 0} active subscriptions:`, data)
   return data || []
 }
 
