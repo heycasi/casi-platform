@@ -36,10 +36,10 @@ export async function calculate30DayAvgViewers(userEmail: string): Promise<numbe
 
   const { data, error } = await supabase
     .from('stream_report_sessions')
-    .select('peak_viewer_count, stream_started_at')
+    .select('peak_viewer_count, session_start')
     .eq('streamer_email', userEmail)
-    .gte('stream_started_at', thirtyDaysAgo.toISOString())
-    .order('stream_started_at', { ascending: false })
+    .gte('session_start', thirtyDaysAgo.toISOString())
+    .order('session_start', { ascending: false })
 
   if (error) {
     console.error('Error fetching stream sessions:', error)
