@@ -287,11 +287,24 @@ async function upsertSubscription(
     planName = 'Streamer+'
   }
 
+  // Determine viewer limit based on tier
+  let avgViewerLimit = 50 // Creator default
+  if (planName === 'Pro') {
+    avgViewerLimit = 250
+  } else if (planName === 'Streamer+') {
+    avgViewerLimit = 999999 // Unlimited
+  }
+
   const subscriptionData = {
     stripe_customer_id: subscription.customer as string,
     stripe_subscription_id: subscription.id,
     stripe_price_id: priceId,
     plan_name: planName,
+    tier_name: planName, // Set tier_name same as plan_name
+    avg_viewer_limit: avgViewerLimit, // Set tier limit
+    avg_viewers_30d: 0, // Start at 0
+    days_over_limit: 0, // Start at 0
+    tier_status: 'within_limit', // Default status
     billing_interval: price.recurring?.interval || 'month',
     status: subscription.status,
     current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
