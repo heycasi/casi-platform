@@ -4,7 +4,16 @@ import { useState, useEffect } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
 import { AnalyticsService } from '../../lib/analytics'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
-import { getUserTierStatus, type TierStatus } from '@/lib/tierTracking'
+
+interface TierStatus {
+  avgViewers: number
+  limit: number
+  isOverLimit: boolean
+  daysOverLimit: number
+  shouldNudge: boolean
+  suggestedTier?: string
+  percentOver: number
+}
 
 function formatDurationMs(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -153,8 +162,11 @@ export default function Dashboard() {
 
     const fetchTierStatus = async () => {
       try {
-        const status = await getUserTierStatus(email)
-        setTierStatus(status)
+        const response = await fetch(`/api/tier-status?email=${encodeURIComponent(email)}`)
+        if (response.ok) {
+          const status = await response.json()
+          setTierStatus(status)
+        }
       } catch (error) {
         console.error('Failed to fetch tier status:', error)
       }
