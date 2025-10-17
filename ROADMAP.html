@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casi Platform - Product Roadmap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0A0A0F;
+            color: white;
+            padding: 3rem 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            height: 80px;
+            width: auto;
+        }
+
+        .robot-logo {
+            height: 100px;
+            width: auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .current-marker {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        /* Phase Section */
+        .phase {
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .phase-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .phase-badge {
+            display: inline-block;
+            background: rgba(105, 50, 255, 0.2);
+            border: 2px solid #6932FF;
+            color: #A78BFA;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        /* Feature Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Feature Card */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(105, 50, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(105, 50, 255, 0.3);
+        }
+
+        .feature-card.highlight {
+            border: 2px solid #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .feature-card.highlight::before {
+            content: '⭐ NEW';
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-number {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6932FF, #932FFE);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .feature-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feature-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-details li {
+            padding: 0.25rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .feature-details li::before {
+            content: '→';
+            color: #6932FF;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .priority-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .priority-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .priority-high {
+            background: rgba(245, 158, 11, 0.2);
+            color: #FCD34D;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .priority-medium {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .priority-low {
+            background: rgba(107, 114, 128, 0.2);
+            color: #D1D5DB;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 5rem;
+            padding-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .watermark {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .phase-title {
+                font-size: 1.5rem;
+            }
+
+            .logo-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .logo, .robot-logo {
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <img src="public/landing-logo.png" alt="Casi Logo" class="logo">
+                <img src="public/landing-robot.png" alt="Casi Robot" class="robot-logo">
+            </div>
+            <h1>Product Roadmap 2025</h1>
+            <p>Real-time Streaming Analytics & AI-Powered Chat Intelligence</p>
+            <div class="current-marker">📍 You Are Here: Phase 1</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline">
+
+            <!-- PHASE 1 -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-badge">PHASE 1</div>
+                    <h2 class="phase-title">Core Functionality</h2>
+                    <p class="phase-subtitle">Now - 1 Month | Must Complete Before Launch</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-number">1</div>
+                        <div class="feature-icon">🎮</div>
+                        <h3 class="feature-title">Multi-Platform Support</h3>
+                        <p class="feature-description">Expand beyond Twitch to YouTube and Kick streaming platforms</p>
+                        <div class="priority-tag priority-critical">CRITICAL</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>YouTube Live integration</li>
+                                <li>Kick platform support</li>
+                                <li>Unified analytics dashboard</li>
+                                <li>Cross-platform sentiment tracking</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">2</div>
+                        <div class="feature-icon">📊</div>
+                        <h3 class="feature-title">Real-time Analytics Dashboard</h3>
+                        <p class="feature-description">Complete core analytics features for stream insights</p>
+                        <div class="priority-tag priority-critical">CRITICAL</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Stream sentiment tracking</li>
+                                <li>Question detection system</li>
+                                <li>Message volume metrics</li>
+                                <li>Engagement scoring</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">3</div>
+                        <div class="feature-icon">📧</div>
+                        <h3 class="feature-title">Email Report Enhancement</h3>
+                        <p class="feature-description">Enhanced post-stream summary and export capabilities</p>
+                        <div class="priority-tag priority-critical">CRITICAL</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Post-stream summary emails</li>
+                                <li>Export functionality (Pro tier)</li>
+                                <li>Custom report scheduling</li>
+                                <li>PDF export support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 2 -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-badge">PHASE 2</div>
+                    <h2 class="phase-title">User Retention & Engagement</h2>
+                    <p class="phase-subtitle">1-2 Months | Drives Value & Retention</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card highlight">
+                        <div class="feature-number">4</div>
+                        <div class="feature-icon">🎬</div>
+                        <h3 class="feature-title">Viral Clip Detection & Auto-Clipping</h3>
+                        <p class="feature-description">AI-powered automatic clip creation when chat engagement spikes</p>
+                        <div class="priority-tag priority-high">HIGH</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Chat trigger: "!clip" or "clip it"</li>
+                                <li>Auto-clip last 2 minutes</li>
+                                <li>Sentiment spike detection</li>
+                                <li>Duplicate prevention (90s cooldown)</li>
+                                <li>Clip queue management</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">5</div>
+                        <div class="feature-icon">🔔</div>
+                        <h3 class="feature-title">Priority Question Alert System</h3>
+                        <p class="feature-description">Never miss important viewer questions</p>
+                        <div class="priority-tag priority-high">HIGH</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Real-time question notifications</li>
+                                <li>OBS overlay integration</li>
+                                <li>Mobile push notifications</li>
+                                <li>Question priority scoring</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">6</div>
+                        <div class="feature-icon">😊</div>
+                        <h3 class="feature-title">Advanced Sentiment Analysis</h3>
+                        <p class="feature-description">Deep emotional insights from chat messages</p>
+                        <div class="priority-tag priority-high">HIGH</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Emotion breakdown (joy, excitement, etc.)</li>
+                                <li>Trending topics detection</li>
+                                <li>Viewer engagement scoring</li>
+                                <li>Sentiment timeline visualization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 3 -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-badge">PHASE 3</div>
+                    <h2 class="phase-title">Power User Features</h2>
+                    <p class="phase-subtitle">2-4 Months | Premium Tier Differentiators</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-number">7</div>
+                        <div class="feature-icon">🤖</div>
+                        <h3 class="feature-title">AI Response Suggestions</h3>
+                        <p class="feature-description">Streamer+ exclusive AI-powered chat assistance</p>
+                        <div class="priority-tag priority-medium">MEDIUM</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Contextual response recommendations</li>
+                                <li>Question answering assistance</li>
+                                <li>Community management suggestions</li>
+                                <li>Personalized AI training</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">8</div>
+                        <div class="feature-icon">🎥</div>
+                        <h3 class="feature-title">OBS Overlay Integration</h3>
+                        <p class="feature-description">Professional stream overlays for analytics</p>
+                        <div class="priority-tag priority-medium">MEDIUM</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Real-time sentiment display</li>
+                                <li>Question queue overlay</li>
+                                <li>Viewer stats widget</li>
+                                <li>Customizable themes</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">9</div>
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-title">Custom Alerts & Webhooks</h3>
+                        <p class="feature-description">Connect Casi to your entire workflow</p>
+                        <div class="priority-tag priority-medium">MEDIUM</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Discord/Slack notifications</li>
+                                <li>Custom alert conditions</li>
+                                <li>Third-party integrations</li>
+                                <li>Zapier/Make.com support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 4 -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-badge">PHASE 4</div>
+                    <h2 class="phase-title">Scale & Monetization</h2>
+                    <p class="phase-subtitle">4-6 Months | Growth & Enterprise Features</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-number">10</div>
+                        <div class="feature-icon">🔌</div>
+                        <h3 class="feature-title">API Access</h3>
+                        <p class="feature-description">Developer-friendly API for custom integrations</p>
+                        <div class="priority-tag priority-low">GROWTH</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Comprehensive API documentation</li>
+                                <li>Rate-limited endpoints</li>
+                                <li>Webhook support</li>
+                                <li>SDK libraries (JS, Python)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">11</div>
+                        <div class="feature-icon">🏷️</div>
+                        <h3 class="feature-title">White-Label Options</h3>
+                        <p class="feature-description">Enterprise branding and customization</p>
+                        <div class="priority-tag priority-low">GROWTH</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Custom branding options</li>
+                                <li>Embeddable analytics widgets</li>
+                                <li>Branded email reports</li>
+                                <li>Custom domain support</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-number">12</div>
+                        <div class="feature-icon">🌍</div>
+                        <h3 class="feature-title">Multi-Language Expansion</h3>
+                        <p class="feature-description">Global language support and auto-translation</p>
+                        <div class="priority-tag priority-low">GROWTH</div>
+                        <div class="feature-details">
+                            <ul>
+                                <li>Expand beyond 13 languages</li>
+                                <li>Real-time auto-translation</li>
+                                <li>Multi-lingual sentiment analysis</li>
+                                <li>Regional chat insights</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This roadmap is subject to change based on user feedback and market conditions</p>
+            <p class="watermark">🤖 Generated with Casi Platform · Updated October 2025</p>
+        </div>
+    </div>
+</body>
+</html>

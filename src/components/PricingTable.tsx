@@ -13,7 +13,9 @@ export default function PricingTable() {
       monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY || 'price_1Rlx2DEEgFiyIrnTAomiE2J3',
       yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY || 'price_1Rlx2DEEgFiyIrnTGQZSVs8q',
       description: 'Perfect for growing streamers',
+      viewerLimit: '50 avg viewers',
       features: [
+        'Up to 50 average viewers',
         'Real-time sentiment tracking',
         'Question detection & alerts',
         'Basic analytics dashboard',
@@ -30,7 +32,9 @@ export default function PricingTable() {
       monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || 'price_1RlxA7EEgFiyIrnTVR20se38',
       yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY || 'price_1RlxA7EEgFiyIrnTSuiyywVq',
       description: 'For serious content creators',
+      viewerLimit: '250 avg viewers',
       features: [
+        'Up to 250 average viewers',
         'Everything in Creator',
         'Advanced sentiment analysis',
         'Priority question alerts',
@@ -49,7 +53,9 @@ export default function PricingTable() {
       monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || 'price_1RlzDHEEgFiyIrnThpPdz7gV',
       yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY || 'price_1RlzDHEEgFiyIrnT45NkAklL',
       description: 'For top-tier streamers',
+      viewerLimit: 'Unlimited',
       features: [
+        'Unlimited average viewers',
         'Everything in Pro',
         'AI response suggestions',
         'OBS overlay integration',
@@ -207,8 +213,28 @@ export default function PricingTable() {
               }}>{tier.name}</h3>
               <p style={{
                 color: 'rgba(255, 255, 255, 0.7)',
-                marginBottom: '1.5rem'
+                marginBottom: '0.5rem'
               }}>{tier.description}</p>
+              <div style={{
+                background: tier.viewerLimit === 'Unlimited'
+                  ? 'linear-gradient(135deg, #FFD700, #FFA500)'
+                  : 'rgba(94, 234, 212, 0.2)',
+                border: tier.viewerLimit === 'Unlimited'
+                  ? '1px solid rgba(255, 215, 0, 0.4)'
+                  : '1px solid rgba(94, 234, 212, 0.4)',
+                borderRadius: '8px',
+                padding: '0.5rem 1rem',
+                marginBottom: '1rem',
+                display: 'inline-block'
+              }}>
+                <span style={{
+                  fontSize: '0.85rem',
+                  fontWeight: '600',
+                  color: tier.viewerLimit === 'Unlimited' ? '#000' : '#5EEAD4'
+                }}>
+                  {tier.viewerLimit === 'Unlimited' ? '♾️ ' : '👥 '}{tier.viewerLimit}
+                </span>
+              </div>
 
               <div style={{ marginBottom: '1.5rem' }}>
                 <span style={{

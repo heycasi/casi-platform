@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
 import { AnalyticsService } from '../../lib/analytics'
+import TierUpgradeNudge from '@/components/TierUpgradeNudge'
+import { getUserTierStatus, type TierStatus } from '@/lib/tierTracking'
 
 function formatDurationMs(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -72,6 +74,7 @@ export default function Dashboard() {
   const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number }>>([])
   const [twitchUser, setTwitchUser] = useState<any>(null)
   const [showAccountDropdown, setShowAccountDropdown] = useState(false)
+  const [tierStatus, setTierStatus] = useState<TierStatus | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -143,6 +146,25 @@ export default function Dashboard() {
       setEmail(savedEmail)
     }
   }, [])
+
+  // Fetch tier status for the user
+  useEffect(() => {
+    if (!email) return
+
+    const fetchTierStatus = async () => {
+      try {
+        const status = await getUserTierStatus(email)
+        setTierStatus(status)
+      } catch (error) {
+        console.error('Failed to fetch tier status:', error)
+      }
+    }
+
+    fetchTierStatus()
+    // Refresh tier status every 5 minutes
+    const interval = setInterval(fetchTierStatus, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [email])
 
   // Auto-connect when Twitch user is present and live
   useEffect(() => {
@@ -892,6 +914,17 @@ export default function Dashboard() {
                 Disconnect
               </button>
             </div>
+
+            {/* Tier Upgrade Nudge */}
+            {tierStatus && tierStatus.isOverLimit && (
+              <TierUpgradeNudge
+                currentTier={tierStatus.suggestedTier === 'Pro' ? 'Creator' : 'Pro'}
+                avgViewers={tierStatus.avgViewers}
+                viewerLimit={tierStatus.limit}
+                daysOverLimit={tierStatus.daysOverLimit}
+                percentOver={tierStatus.percentOver}
+              />
+            )}
 
             {/* AI Motivational Message */}
             {motivationalMessage && (
