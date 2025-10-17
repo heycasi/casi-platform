@@ -87,32 +87,83 @@ fetch(`/api/export/analytics?email=${email}&sessionId=${id}&format=csv`)
 
 ## 📋 Phase 2: Essential Features (IN PROGRESS)
 
-### 5. Account Deletion API 🔄
-**Status:** In Progress
+### 5. Account Deletion API ✅
+**Status:** COMPLETED
 **Priority:** HIGH (GDPR compliance)
-**Files to Create:**
-- `src/app/api/account/delete/route.ts`
+**Files Created:**
+- `src/app/api/account/delete/route.ts` - GDPR-compliant account deletion
 
-**Requirements:**
-- Delete user from Supabase auth
-- Delete all subscriptions
-- Delete all session data
-- Delete all chat messages
-- Cancel Stripe subscription
-- Send confirmation email
+**Features:**
+- Deletes user from Supabase auth
+- Cancels active Stripe subscriptions immediately
+- Deletes all subscriptions and subscription events (CASCADE)
+- Deletes all stream sessions, chat messages, analytics (CASCADE)
+- Sends beautiful confirmation email
+- Full error handling and logging
+- Email confirmation required (double-check safety)
+
+**Usage:**
+```bash
+# Delete account
+curl -X DELETE https://www.heycasi.com/api/account/delete \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","confirmEmail":"user@example.com"}'
+```
+
+**Testing:**
+```bash
+# Test with your email (WARNING: This will actually delete the account!)
+curl -X DELETE https://www.heycasi.com/api/account/delete \
+  -H "Content-Type: application/json" \
+  -d '{"email":"connordahl@hotmail.com","confirmEmail":"connordahl@hotmail.com"}'
+```
 
 ---
 
-### 6. Invoice Download Functionality ⏳
-**Status:** Pending
+### 6. Invoice Download Functionality ✅
+**Status:** COMPLETED
 **Priority:** MEDIUM
-**Files to Create:**
-- `src/app/api/invoices/route.ts`
+**Files Created:**
+- `src/app/api/invoices/route.ts` - Stripe invoice retrieval API
 
-**Requirements:**
-- Fetch invoices from Stripe
-- Generate PDF if needed
-- Secure download link
+**Features:**
+- Lists all invoices for a customer (last 100)
+- Retrieves specific invoice details
+- Returns Stripe-hosted PDF URLs
+- Secure verification (invoices must belong to user)
+- Formatted currency and dates
+- No PDF generation needed (Stripe provides PDFs)
+
+**Usage:**
+```bash
+# List all invoices for a user
+curl "https://www.heycasi.com/api/invoices?email=connordahl@hotmail.com"
+
+# Get specific invoice details
+curl "https://www.heycasi.com/api/invoices?email=connordahl@hotmail.com&invoiceId=in_xxxxx"
+```
+
+**Response Example:**
+```json
+{
+  "subscription": {
+    "plan_name": "Creator",
+    "status": "active"
+  },
+  "invoices": [
+    {
+      "id": "in_xxxxx",
+      "number": "12345678",
+      "amount_paid": 19.00,
+      "currency": "gbp",
+      "status": "paid",
+      "pdf_url": "https://pay.stripe.com/invoice/xxxxx/pdf",
+      "hosted_invoice_url": "https://invoice.stripe.com/i/xxxxx",
+      "description": "Creator subscription"
+    }
+  ],
+  "total": 1
+}
 
 ---
 
