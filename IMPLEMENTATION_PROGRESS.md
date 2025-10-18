@@ -85,7 +85,7 @@ fetch(`/api/export/analytics?email=${email}&sessionId=${id}&format=csv`)
 
 ---
 
-## 📋 Phase 2: Essential Features (IN PROGRESS)
+## 📋 Phase 2: Essential Features (COMPLETED)
 
 ### 5. Account Deletion API ✅
 **Status:** COMPLETED
@@ -195,6 +195,58 @@ curl "https://www.heycasi.com/api/invoices?email=connordahl@hotmail.com&invoiceI
 - Event triggers (question detected, sentiment threshold, etc.)
 - Retry logic
 - Webhook logs
+
+---
+
+### 9. Beta Code System & Access Control ✅
+**Status:** COMPLETED
+**Priority:** CRITICAL (Revenue protection)
+**Files Created:**
+- `database/beta-codes-migration.sql` - Beta codes table and trial system
+- `src/app/api/beta-code/validate/route.ts` - Beta code validation and redemption
+- `src/app/api/user-access/route.ts` - User access checking API
+
+**Files Modified:**
+- `src/app/signup/page.tsx` - Added beta code input field
+- `src/app/dashboard/page.tsx` - Added subscription/trial access gates
+
+**Features:**
+- Beta codes table with usage tracking
+- Trial subscriptions with expiration dates
+- Dashboard access requires active subscription OR valid trial
+- CASIBETA25 code pre-configured (unlimited uses, 14-day trial)
+- Beautiful access-denied screens with upgrade prompts
+- Trial status banner showing days remaining
+- Database views and functions for access checking
+
+**Usage:**
+```bash
+# Check beta code validity
+curl "https://www.heycasi.com/api/beta-code/validate?code=CASIBETA25"
+
+# Redeem beta code (called automatically during signup)
+curl -X POST https://www.heycasi.com/api/beta-code/validate \
+  -H "Content-Type: application/json" \
+  -d '{"code":"CASIBETA25","email":"user@example.com","userId":"user-id"}'
+
+# Check user access
+curl "https://www.heycasi.com/api/user-access?email=user@example.com"
+```
+
+**Access Flow:**
+1. User signs up without subscription → No dashboard access
+2. User signs up with CASIBETA25 → 14-day trial created
+3. User with active paid subscription → Full access
+4. User with expired trial → Redirected to pricing page
+5. Admin users → Always have access
+
+**Database Migration:**
+Run `database/beta-codes-migration.sql` in Supabase to set up:
+- `beta_codes` table
+- Trial-related columns in `subscriptions`
+- `active_user_access` view
+- `user_has_access()` function
+- `get_user_access_details()` function
 
 ---
 

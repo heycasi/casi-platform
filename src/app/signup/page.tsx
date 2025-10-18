@@ -8,6 +8,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [betaCode, setBetaCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -63,7 +64,35 @@ export default function SignUpPage() {
           if (linkData.linked) {
             setMessage(`Account created and your ${linkData.subscription.plan_name} subscription has been linked! Please check your email to verify your account.`)
           } else {
-            setMessage('Account created! Please check your email to verify your account.')
+            // If beta code was provided, redeem it
+            if (betaCode.trim()) {
+              try {
+                const betaResponse = await fetch('/api/beta-code/validate', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    code: betaCode.trim(),
+                    email: email,
+                    userId: data.user.id
+                  })
+                })
+
+                const betaData = await betaResponse.json()
+
+                if (betaResponse.ok && betaData.success) {
+                  setMessage(`Account created! ${betaData.message} Please check your email to verify your account.`)
+                } else {
+                  setMessage(`Account created! Note: ${betaData.error}. Please check your email to verify your account.`)
+                }
+              } catch (betaError) {
+                console.error('Error redeeming beta code:', betaError)
+                setMessage('Account created! Please check your email to verify your account.')
+              }
+            } else {
+              setMessage('Account created! Please check your email to verify your account. You will need a subscription to access the dashboard.')
+            }
           }
         } catch (linkError) {
           console.error('Error linking subscription:', linkError)
@@ -76,6 +105,7 @@ export default function SignUpPage() {
       setEmail('')
       setPassword('')
       setConfirmPassword('')
+      setBetaCode('')
 
     } catch (err: any) {
       setError(err.message || 'Failed to create account')
@@ -194,7 +224,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Confirm Password */}
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
             <label style={{
               display: 'block',
               color: 'rgba(255, 255, 255, 0.8)',
@@ -221,6 +251,43 @@ export default function SignUpPage() {
               }}
               placeholder="Re-enter password"
             />
+          </div>
+
+          {/* Beta Code (Optional) */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{
+              display: 'block',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.875rem',
+              marginBottom: '0.5rem',
+              fontWeight: '500'
+            }}>
+              Beta Code <span style={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: '400' }}>(Optional)</span>
+            </label>
+            <input
+              type="text"
+              value={betaCode}
+              onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+              style={{
+                width: '100%',
+                padding: '0.875rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(184, 238, 138, 0.3)',
+                borderRadius: '10px',
+                color: 'white',
+                fontSize: '0.875rem',
+                outline: 'none',
+                textTransform: 'uppercase'
+              }}
+              placeholder="CASIBETA25"
+            />
+            <p style={{
+              fontSize: '0.75rem',
+              color: 'rgba(184, 238, 138, 0.7)',
+              margin: '0.5rem 0 0 0'
+            }}>
+              Have a beta code? Get 14 days free access!
+            </p>
           </div>
 
           {/* Error/Message */}

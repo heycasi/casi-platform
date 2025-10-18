@@ -69,6 +69,9 @@ const ADMIN_EMAILS = [
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [hasAccess, setHasAccess] = useState(false)
+  const [accessLoading, setAccessLoading] = useState(true)
+  const [accessDetails, setAccessDetails] = useState<any>(null)
   const [email, setEmail] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [channelName, setChannelName] = useState('')
@@ -155,6 +158,37 @@ export default function Dashboard() {
       setEmail(savedEmail)
     }
   }, [])
+
+  // Check user access (subscription or trial)
+  useEffect(() => {
+    if (!email) {
+      setAccessLoading(false)
+      return
+    }
+
+    const checkAccess = async () => {
+      setAccessLoading(true)
+      try {
+        const response = await fetch(`/api/user-access?email=${encodeURIComponent(email)}`)
+        const data = await response.json()
+
+        setAccessDetails(data)
+        setHasAccess(data.has_access || false)
+
+        // If admin, always grant access
+        if (isAdmin) {
+          setHasAccess(true)
+        }
+      } catch (error) {
+        console.error('Failed to check user access:', error)
+        setHasAccess(false)
+      } finally {
+        setAccessLoading(false)
+      }
+    }
+
+    checkAccess()
+  }, [email, isAdmin])
 
   // Fetch tier status for the user
   useEffect(() => {
@@ -546,6 +580,143 @@ export default function Dashboard() {
     )
   }
 
+  // Checking access...
+  if (accessLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, Arial, sans-serif',
+        color: 'white'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+          <p>Checking your access...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // No access - require subscription or beta code
+  if (!hasAccess && !isAdmin) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, Arial, sans-serif',
+        padding: '1rem'
+      }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          padding: '2.5rem 2rem',
+          maxWidth: '500px',
+          width: '100%',
+          textAlign: 'center',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <div style={{
+            fontSize: '4rem',
+            marginBottom: '1rem'
+          }}>
+            🔒
+          </div>
+
+          <h1 style={{
+            color: 'white',
+            fontSize: '1.875rem',
+            fontWeight: 'bold',
+            margin: '0 0 1rem 0'
+          }}>
+            {accessDetails?.status === 'trial_expired' ? 'Trial Expired' : 'Subscription Required'}
+          </h1>
+
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            margin: '0 0 1.5rem 0',
+            fontSize: '1rem',
+            lineHeight: '1.6'
+          }}>
+            {accessDetails?.message || 'You need an active subscription or beta code to access the dashboard.'}
+          </p>
+
+          {accessDetails?.status === 'trial_expired' && accessDetails?.trial_ends_at && (
+            <div style={{
+              background: 'rgba(255, 159, 159, 0.1)',
+              border: '1px solid rgba(255, 159, 159, 0.3)',
+              borderRadius: '12px',
+              padding: '1rem',
+              marginBottom: '1.5rem'
+            }}>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: '#FF9F9F' }}>
+                Your trial ended on {new Date(accessDetails.trial_ends_at).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <a
+              href="/pricing"
+              style={{
+                display: 'inline-block',
+                width: '100%',
+                padding: '1rem 1.5rem',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                borderRadius: '12px',
+                color: 'white',
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '1rem'
+              }}
+            >
+              View Plans & Subscribe
+            </a>
+
+            {!accessDetails?.beta_code && (
+              <a
+                href="/signup"
+                style={{
+                  display: 'inline-block',
+                  width: '100%',
+                  padding: '1rem 1.5rem',
+                  background: 'rgba(184, 238, 138, 0.1)',
+                  border: '1px solid rgba(184, 238, 138, 0.3)',
+                  borderRadius: '12px',
+                  color: '#B8EE8A',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  fontSize: '1rem'
+                }}
+              >
+                Have a Beta Code? Sign Up
+              </a>
+            )}
+
+            <a
+              href="/"
+              style={{
+                display: 'inline-block',
+                color: 'rgba(255, 255, 255, 0.6)',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                marginTop: '0.5rem'
+              }}
+            >
+              ← Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -926,6 +1097,58 @@ export default function Dashboard() {
                 Disconnect
               </button>
             </div>
+
+            {/* Trial Status Banner */}
+            {accessDetails?.is_trial && accessDetails?.trial_days_remaining && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(184, 238, 138, 0.1))',
+                borderRadius: '12px',
+                padding: '1rem',
+                border: '1px solid rgba(184, 238, 138, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                  <div style={{
+                    background: '#B8EE8A',
+                    color: '#151E3C',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    BETA TRIAL
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: '600', color: '#F7F7F7' }}>
+                      {accessDetails.trial_days_remaining} days remaining
+                    </p>
+                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                      Trial ends {new Date(accessDetails.trial_ends_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="/pricing"
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    textDecoration: 'none',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Upgrade Now
+                </a>
+              </div>
+            )}
 
             {/* Tier Upgrade Nudge */}
             {tierStatus && tierStatus.isOverLimit && (
