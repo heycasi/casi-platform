@@ -499,6 +499,9 @@ function IntegrationsTab({ user }: { user: User }) {
 function SubscriptionTab({ user }: { user: User }) {
   const [subscription, setSubscription] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [invoices, setInvoices] = useState<any[]>([])
+  const [showInvoices, setShowInvoices] = useState(false)
+  const [invoicesLoading, setInvoicesLoading] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -541,6 +544,27 @@ function SubscriptionTab({ user }: { user: User }) {
     } catch (error: any) {
       alert(`Error: ${error.message}`)
       setPortalLoading(false)
+    }
+  }
+
+  const handleDownloadInvoices = async () => {
+    setInvoicesLoading(true)
+    setShowInvoices(true)
+    try {
+      const response = await fetch(`/api/invoices?email=${encodeURIComponent(user.email!)}`)
+      const data = await response.json()
+
+      if (response.ok && data.invoices) {
+        setInvoices(data.invoices)
+      } else {
+        alert(`Error: ${data.error || 'Failed to fetch invoices'}`)
+        setShowInvoices(false)
+      }
+    } catch (error: any) {
+      alert(`Error: ${error.message}`)
+      setShowInvoices(false)
+    } finally {
+      setInvoicesLoading(false)
     }
   }
 
@@ -605,7 +629,8 @@ function SubscriptionTab({ user }: { user: User }) {
               {portalLoading ? 'Opening Portal...' : 'Manage Subscription'}
             </button>
             <button
-              onClick={() => alert('Invoice download coming soon')}
+              onClick={handleDownloadInvoices}
+              disabled={invoicesLoading}
               style={{
                 padding: '0.75rem 1.5rem',
                 background: 'transparent',
@@ -614,10 +639,11 @@ function SubscriptionTab({ user }: { user: User }) {
                 color: 'white',
                 fontSize: '0.875rem',
                 fontWeight: '500',
-                cursor: 'pointer'
+                cursor: invoicesLoading ? 'not-allowed' : 'pointer',
+                opacity: invoicesLoading ? 0.6 : 1
               }}
             >
-              Download Invoices
+              {invoicesLoading ? 'Loading...' : 'Download Invoices'}
             </button>
           </div>
         </>
@@ -672,6 +698,127 @@ function SubscriptionTab({ user }: { user: User }) {
           <li>Priority support</li>
         </ul>
       </div>
+
+      {/* Invoice Modal */}
+      {showInvoices && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem'
+        }} onClick={() => setShowInvoices(false)}>
+          <div style={{
+            background: '#1a1d2e',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '800px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>Your Invoices</h3>
+              <button
+                onClick={() => setShowInvoices(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {invoicesLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                Loading invoices...
+              </div>
+            ) : invoices.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                No invoices found
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {invoices.map((invoice) => (
+                  <div key={invoice.id} style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '8px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '1rem'
+                  }}>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <div style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                        {invoice.description || 'Subscription Invoice'}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        {invoice.number ? `#${invoice.number}` : invoice.id}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.5)', marginTop: '0.25rem' }}>
+                        {new Date(invoice.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.125rem', fontWeight: '600' }}>
+                          {invoice.currency === 'gbp' ? '£' : invoice.currency === 'usd' ? '$' : '€'}
+                          {invoice.amount_paid.toFixed(2)}
+                        </div>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          color: invoice.status === 'paid' ? '#10b981' : '#f59e0b',
+                          fontWeight: '600',
+                          textTransform: 'uppercase'
+                        }}>
+                          {invoice.status}
+                        </div>
+                      </div>
+                      {invoice.pdf_url && (
+                        <a
+                          href={invoice.pdf_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: '0.625rem 1.25rem',
+                            background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                            border: 'none',
+                            borderRadius: '6px',
+                            color: 'white',
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            textDecoration: 'none',
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Download PDF
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
