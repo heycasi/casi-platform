@@ -279,7 +279,7 @@ export default function SignUpPage() {
                 outline: 'none',
                 textTransform: 'uppercase'
               }}
-              placeholder="CASIBETA25"
+              placeholder="Enter your beta code"
             />
             <p style={{
               fontSize: '0.75rem',
