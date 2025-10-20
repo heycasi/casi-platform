@@ -2,6 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 IMPORTANT: Multi-Machine Development Workflow
+
+**This project is developed across TWO machines (PC + MacBook).**
+
+### At the START of EVERY session:
+1. **ALWAYS remind the user to sync**: Ask if they've run `git pull && npm install`
+2. If they haven't, prompt them to run `/start` slash command or run it manually
+3. Only proceed with work after confirming the sync is complete
+
+### At the END of sessions (when user says "done" or similar):
+1. Remind them to commit and push changes
+2. Suggest using `/done` slash command to automate this
+
+### Quick Commands Available:
+- `/start` - Syncs repo and installs dependencies before starting work
+- `/done` - Commits and pushes changes when ending work session
+
+**Never skip the sync reminder at session start - merge conflicts are costly!**
+
 ## Project Overview
 
 Casi Platform is a Next.js application for real-time streaming analytics with AI-powered chat analysis for streamers. The platform includes Twitch authentication, waitlist management, and multilingual chat analysis capabilities.
