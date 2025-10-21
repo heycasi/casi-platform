@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
   const [status, setStatus] = useState('Processing authorization...')
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -184,5 +184,24 @@ export default function AuthCallback() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, sans-serif'
+      }}>
+        <div style={{ color: 'white', fontSize: '1.2rem' }}>Loading...</div>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   )
 }

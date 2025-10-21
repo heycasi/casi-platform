@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import PageLayout from '../../../components/PageLayout'
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -211,5 +211,24 @@ export default function CheckoutSuccessPage() {
         }
       `}</style>
     </PageLayout>
+  )
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <PageLayout>
+        <div style={{
+          minHeight: '70vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ color: 'white', fontSize: '1.2rem' }}>Loading...</div>
+        </div>
+      </PageLayout>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   )
 }
