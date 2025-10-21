@@ -70,24 +70,32 @@ export default function Home() {
           src="/landing-robot.png"
           alt=""
           style={{
-            width: '800px',
+            width: '850px',
             height: 'auto',
             objectFit: 'contain',
-            opacity: 0.08,
-            animation: 'pulse 8s ease-in-out infinite'
+            opacity: 0.1,
+            animation: 'robotWave 6s ease-in-out infinite'
           }}
         />
       </div>
 
       <style jsx>{`
-        @keyframes pulse {
+        @keyframes robotWave {
           0%, 100% {
             opacity: 0.08;
-            transform: scale(1);
+            transform: scale(1) rotate(0deg);
+          }
+          25% {
+            opacity: 0.12;
+            transform: scale(1.02) rotate(2deg);
           }
           50% {
+            opacity: 0.1;
+            transform: scale(1.03) rotate(0deg);
+          }
+          75% {
             opacity: 0.12;
-            transform: scale(1.02);
+            transform: scale(1.02) rotate(-2deg);
           }
         }
       `}</style>
@@ -97,9 +105,9 @@ export default function Home() {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        background: 'rgba(11, 13, 20, 0.7)',
+        background: 'linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15))',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        borderBottom: '1px solid rgba(105, 50, 255, 0.3)',
         padding: '1rem 1.5rem'
       }}>
         <style dangerouslySetInnerHTML={{__html: `
@@ -323,7 +331,7 @@ export default function Home() {
               }}
             />
 
-            {/* Dual CTAs */}
+            {/* Primary CTA */}
             <div style={{
               display: 'flex',
               gap: '1.5rem',
@@ -358,34 +366,6 @@ export default function Home() {
                 }}
               >
                 Start Free Trial
-              </Link>
-              <Link
-                href="/features"
-                style={{
-                  padding: '1rem 2.5rem',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  border: '2px solid rgba(94, 234, 212, 0.5)',
-                  borderRadius: '50px',
-                  color: 'white',
-                  textDecoration: 'none',
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  transition: 'all 0.3s ease',
-                  display: 'inline-block'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(94, 234, 212, 0.2)'
-                  e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.8)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-                  e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.5)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                See Features
               </Link>
             </div>
 
@@ -442,141 +422,230 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Bar */}
+        {/* Now in Beta Section */}
         <section style={{
-          padding: '3rem 1.5rem',
+          padding: '4rem 1.5rem',
           borderTop: '1px solid rgba(255, 255, 255, 0.1)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           background: 'rgba(255, 255, 255, 0.02)'
         }}>
           <div style={{
-            maxWidth: '1400px',
+            maxWidth: '900px',
             margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '2rem',
             textAlign: 'center'
           }}>
-            <div>
+            {/* Main Headline */}
+            <h2 style={{
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+              fontWeight: '700',
+              marginBottom: '1rem',
+              lineHeight: '1.1'
+            }}>
+              <GradientText animate={true}>Now in Beta</GradientText>
+            </h2>
+
+            {/* Subheadline */}
+            <p style={{
+              fontSize: 'clamp(1.1rem, 2vw, 1.3rem)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '3rem',
+              lineHeight: '1.6',
+              maxWidth: '700px',
+              margin: '0 auto 3rem'
+            }}>
+              Be one of the first creators shaping the future of live streaming analytics.
+            </p>
+
+            {/* Features Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '1.5rem',
+              marginBottom: '3rem',
+              textAlign: 'left'
+            }}>
               <div style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontWeight: '700',
-                background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                marginBottom: '0.5rem'
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(94, 234, 212, 0.2)',
+                transition: 'all 0.3s ease'
               }}>
-                Pre-Launch
+                <div style={{
+                  fontSize: '1.5rem',
+                  marginBottom: '0.5rem',
+                  color: '#5EEAD4'
+                }}>✓</div>
+                <div style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  marginBottom: '0.3rem',
+                  color: 'white'
+                }}>Real-time chat insights</div>
               </div>
+
               <div style={{
-                fontSize: '1rem',
-                color: 'rgba(255, 255, 255, 0.6)'
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(184, 238, 138, 0.2)',
+                transition: 'all 0.3s ease'
               }}>
-                Beta Testing Phase
+                <div style={{
+                  fontSize: '1.5rem',
+                  marginBottom: '0.5rem',
+                  color: '#B8EE8A'
+                }}>✓</div>
+                <div style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  marginBottom: '0.3rem',
+                  color: 'white'
+                }}>AI-powered audience feedback</div>
+              </div>
+
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(105, 50, 255, 0.2)',
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{
+                  fontSize: '1.5rem',
+                  marginBottom: '0.5rem',
+                  color: '#6932FF'
+                }}>✓</div>
+                <div style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  marginBottom: '0.3rem',
+                  color: 'white'
+                }}>Automated post-stream reports</div>
               </div>
             </div>
-            <div>
-              <div style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontWeight: '700',
-                marginBottom: '0.5rem'
+
+            {/* Bottom Info */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem',
+              alignItems: 'center'
+            }}>
+              <p style={{
+                fontSize: '0.95rem',
+                color: 'rgba(255, 255, 255, 0.6)',
+                maxWidth: '600px'
               }}>
-                <GradientText animate={false}>
-                  <CountUp
-                    end={waitlistCount > 0 ? waitlistCount : 20}
-                    suffix="+"
-                    duration={2500}
-                  />
-                </GradientText>
-              </div>
-              <BlurText
-                text="Streamers on Waitlist"
-                delay={200}
+                Spots available for early testers • Full launch 2025
+              </p>
+
+              <p style={{
+                fontSize: '0.9rem',
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontStyle: 'italic'
+              }}>
+                Built with Twitch creators, tested across 13+ languages
+              </p>
+
+              {/* CTA Button */}
+              <Link
+                href="/beta"
                 style={{
-                  fontSize: '1rem',
-                  color: 'rgba(255, 255, 255, 0.6)'
+                  padding: '1.1rem 3rem',
+                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                  borderRadius: '50px',
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontSize: '1.15rem',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 40px rgba(105, 50, 255, 0.6)',
+                  transition: 'all 0.3s ease',
+                  display: 'inline-block',
+                  marginTop: '1rem'
                 }}
-              />
-            </div>
-            <div>
-              <div style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontWeight: '700',
-                background: 'linear-gradient(135deg, #B8EE8A, #5EEAD4)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                marginBottom: '0.5rem'
-              }}>
-                99.9%
-              </div>
-              <div style={{
-                fontSize: '1rem',
-                color: 'rgba(255, 255, 255, 0.6)'
-              }}>
-                Target Uptime
-              </div>
-            </div>
-            <div>
-              <div style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontWeight: '700',
-                background: 'linear-gradient(135deg, #932FFE, #6932FF)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                marginBottom: '0.5rem'
-              }}>
-                2025
-              </div>
-              <div style={{
-                fontSize: '1rem',
-                color: 'rgba(255, 255, 255, 0.6)'
-              }}>
-                Full Launch Coming
-              </div>
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)'
+                  e.currentTarget.style.boxShadow = '0 15px 50px rgba(105, 50, 255, 0.8)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(105, 50, 255, 0.6)'
+                }}
+              >
+                Join the Beta
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Final CTA */}
+        {/* Final CTA - Founder-Led Mission */}
         <section style={{
           padding: '5rem 1.5rem',
-          textAlign: 'center'
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15))',
+          borderTop: '1px solid rgba(105, 50, 255, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <h2 style={{
-            fontSize: 'clamp(2rem, 4vw, 3rem)',
-            fontWeight: '700',
-            marginBottom: '1rem'
+          {/* Subtle gradient overlay */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(circle at 50% 50%, rgba(105, 50, 255, 0.1), transparent 70%)',
+            pointerEvents: 'none'
+          }}></div>
+
+          <div style={{
+            position: 'relative',
+            zIndex: 1,
+            maxWidth: '700px',
+            margin: '0 auto'
           }}>
-            <GradientText animate={true}>Ready to Get Started?</GradientText>
-          </h2>
-          <BlurText
-            text="Join the beta program today and transform how you engage with your audience."
-            delay={200}
-            style={{
-              fontSize: '1.2rem',
-              color: 'rgba(255, 255, 255, 0.7)',
-              marginBottom: '2rem',
-              maxWidth: '600px',
-              margin: '0 auto 2rem'
-            }}
-          />
-          <Link
-            href="/beta"
-            style={{
-              padding: '1rem 2.5rem',
-              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-              borderRadius: '50px',
-              color: 'white',
-              textDecoration: 'none',
-              fontSize: '1.1rem',
-              fontWeight: '600',
-              boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
-              transition: 'all 0.3s ease',
-              display: 'inline-block'
-            }}
-          >
-            Join Beta Program
-          </Link>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: '700',
+              marginBottom: '1.5rem',
+              lineHeight: '1.2'
+            }}>
+              <GradientText animate={true}>Built for creators who care about their communities.</GradientText>
+            </h2>
+            <p style={{
+              fontSize: 'clamp(1.1rem, 2vw, 1.3rem)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              marginBottom: '2.5rem',
+              lineHeight: '1.7',
+              maxWidth: '650px',
+              margin: '0 auto 2.5rem'
+            }}>
+              Casi isn't just analytics — it's a new way to understand, respond, and grow with your audience in real time.
+            </p>
+            <Link
+              href="/beta"
+              style={{
+                padding: '1.1rem 3rem',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                borderRadius: '50px',
+                color: 'white',
+                textDecoration: 'none',
+                fontSize: '1.15rem',
+                fontWeight: '600',
+                boxShadow: '0 10px 40px rgba(105, 50, 255, 0.6)',
+                transition: 'all 0.3s ease',
+                display: 'inline-block'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)'
+                e.currentTarget.style.boxShadow = '0 15px 50px rgba(105, 50, 255, 0.8)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(105, 50, 255, 0.6)'
+              }}
+            >
+              Start Testing with Casi
+            </Link>
+          </div>
         </section>
 
       </main>
