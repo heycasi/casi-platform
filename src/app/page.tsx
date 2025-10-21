@@ -73,8 +73,9 @@ export default function Home() {
             width: '850px',
             height: 'auto',
             objectFit: 'contain',
-            opacity: 0.1,
-            animation: 'robotWave 6s ease-in-out infinite'
+            opacity: 0.06,
+            animation: 'robotWave 6s ease-in-out infinite',
+            filter: 'brightness(0.7)'
           }}
         />
       </div>
@@ -316,16 +317,35 @@ export default function Home() {
                   marginBottom: '0.5rem'
                 }}
               />
-              <GradientText animate={true}>Content Gold</GradientText>
+              <span style={{
+                background: 'linear-gradient(135deg, #6932FF, #5EEAD4)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundSize: '200% 200%',
+                animation: 'gradientShift 3s ease infinite'
+              }}>
+                Real-Time Growth
+              </span>
             </h1>
 
+            <style jsx>{`
+              @keyframes gradientShift {
+                0%, 100% {
+                  background-position: 0% 50%;
+                }
+                50% {
+                  background-position: 100% 50%;
+                }
+              }
+            `}</style>
+
             <BlurText
-              text="Real-time analytics for Twitch streamers. See sentiment, spot questions, and act fast—so you never miss what matters."
+              text="Casi turns your Twitch chat into live insights — tracking sentiment, questions, and engagement moments so you can focus on creating, not guessing."
               delay={400}
               style={{
                 fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
                 color: 'rgba(255, 255, 255, 0.8)',
-                maxWidth: '700px',
+                maxWidth: '750px',
                 margin: '0 auto 3rem',
                 lineHeight: '1.6'
               }}
@@ -365,7 +385,7 @@ export default function Home() {
                   e.currentTarget.style.boxShadow = '0 8px 30px rgba(105, 50, 255, 0.5)'
                 }}
               >
-                Start Free Trial
+                Start Free Beta
               </Link>
             </div>
 
@@ -380,13 +400,13 @@ export default function Home() {
               color: 'rgba(255, 255, 255, 0.6)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>✓</span> Free 2-week beta
+                <span>✓</span> Free early access
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>✓</span> No credit card required
+                <span>✓</span> No credit card needed
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>✓</span> {waitlistCount > 0 ? `${waitlistCount}+` : '20+'} streamers waiting
+                <span>✓</span> Built with Twitch creators
               </div>
             </div>
           </div>
