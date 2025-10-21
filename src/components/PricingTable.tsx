@@ -7,63 +7,61 @@ export default function PricingTable() {
 
   const tiers = [
     {
-      name: 'Creator',
+      name: '🟣 Creator',
       monthlyPrice: 19,
       yearlyPrice: 190,
       monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY || 'price_1Rlx2DEEgFiyIrnTAomiE2J3',
       yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY || 'price_1Rlx2DEEgFiyIrnTGQZSVs8q',
-      description: 'Perfect for growing streamers',
-      viewerLimit: '50 avg viewers',
+      description: 'For streamers finding their audience',
+      viewerLimit: 'Up to 50 avg viewers',
       features: [
-        'Up to 50 average viewers',
-        'Real-time sentiment tracking',
-        'Question detection & alerts',
-        'Basic analytics dashboard',
-        'Email support',
-        'Up to 1,000 messages/hour'
+        'Track sentiment in real time',
+        'Get automatic question alerts',
+        'View basic analytics dashboard',
+        'Receive post-stream summaries',
+        'Smart highlights after every stream',
+        'Email support • Up to 1,000 messages/hour'
       ],
       cta: 'Start Creator Plan',
       popular: false
     },
     {
-      name: 'Pro',
+      name: '💫 Pro',
       monthlyPrice: 37,
       yearlyPrice: 370,
       monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || 'price_1RlxA7EEgFiyIrnTVR20se38',
       yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY || 'price_1RlxA7EEgFiyIrnTSuiyywVq',
-      description: 'For serious content creators',
-      viewerLimit: '250 avg viewers',
+      description: 'For creators growing fast and ready to scale',
+      viewerLimit: 'Up to 250 avg viewers',
       features: [
-        'Up to 250 average viewers',
         'Everything in Creator',
-        'Advanced sentiment analysis',
-        'Priority question alerts',
-        'Export analytics reports',
-        'Priority support',
-        'Up to 5,000 messages/hour',
-        'Multi-platform dashboard'
+        'Get advanced sentiment insights',
+        'Receive priority question alerts',
+        'Export detailed analytics reports',
+        'Automated post-stream email reports',
+        'Connect multi-platform dashboard (Twitch, YouTube, Kick)',
+        'Priority support • Up to 5,000 messages/hour'
       ],
       cta: 'Start Pro Plan',
       popular: true
     },
     {
-      name: 'Streamer+',
+      name: '🟡 Streamer+',
       monthlyPrice: 75,
       yearlyPrice: 750,
       monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || 'price_1RlzDHEEgFiyIrnThpPdz7gV',
       yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY || 'price_1RlzDHEEgFiyIrnT45NkAklL',
-      description: 'For top-tier streamers',
-      viewerLimit: 'Unlimited',
+      description: 'For established channels and teams who need everything automated',
+      viewerLimit: 'Unlimited viewers',
       features: [
-        'Unlimited average viewers',
         'Everything in Pro',
-        'AI response suggestions',
-        'OBS overlay integration',
-        'Custom alerts & webhooks',
-        'Dedicated account manager',
-        'Unlimited messages',
-        'White-label options',
-        'API access'
+        'Get AI-powered response suggestions',
+        'Custom AI coaching for engagement peaks',
+        'Integrate OBS overlay',
+        'Create custom alerts & webhooks',
+        'Access dedicated account manager',
+        'Use white-label & API access',
+        'Unlimited messages'
       ],
       cta: 'Start Streamer+ Plan',
       popular: false
@@ -308,7 +306,7 @@ export default function PricingTable() {
         ))}
       </div>
 
-      {/* Beta Note */}
+      {/* Footer Message */}
       <div style={{ marginTop: '3rem', textAlign: 'center' }}>
         <div style={{
           background: 'rgba(94, 234, 212, 0.1)',
@@ -316,21 +314,21 @@ export default function PricingTable() {
           padding: '2rem',
           border: '1px solid rgba(94, 234, 212, 0.3)'
         }}>
-          <h4 style={{
-            fontWeight: '700',
-            color: '#5EEAD4',
-            marginBottom: '0.5rem',
-            fontSize: '1.2rem'
-          }}>
-            Beta Pricing
-          </h4>
           <p style={{
             color: 'rgba(255, 255, 255, 0.9)',
-            lineHeight: '1.6'
+            lineHeight: '1.8',
+            fontSize: '1rem'
           }}>
-            🎉 Beta is free for your first 2 weeks — email signup only. No card required.
+            All plans include real-time chat analysis, 13+ language support, and secure Twitch authentication.
             <br />
-            Lock in these launch prices during the beta period!
+            <span style={{
+              color: '#5EEAD4',
+              fontWeight: '600',
+              marginTop: '0.5rem',
+              display: 'inline-block'
+            }}>
+              Start free • No credit card required • Cancel anytime
+            </span>
           </p>
         </div>
       </div>
