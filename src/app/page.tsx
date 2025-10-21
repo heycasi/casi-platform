@@ -547,34 +547,6 @@ export default function Home() {
               }}>
                 Built with Twitch creators, tested across 13+ languages
               </p>
-
-              {/* CTA Button */}
-              <Link
-                href="/beta"
-                style={{
-                  padding: '1.1rem 3rem',
-                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                  borderRadius: '50px',
-                  color: 'white',
-                  textDecoration: 'none',
-                  fontSize: '1.15rem',
-                  fontWeight: '600',
-                  boxShadow: '0 10px 40px rgba(105, 50, 255, 0.6)',
-                  transition: 'all 0.3s ease',
-                  display: 'inline-block',
-                  marginTop: '1rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)'
-                  e.currentTarget.style.boxShadow = '0 15px 50px rgba(105, 50, 255, 0.8)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)'
-                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(105, 50, 255, 0.6)'
-                }}
-              >
-                Join the Beta
-              </Link>
             </div>
           </div>
         </section>
