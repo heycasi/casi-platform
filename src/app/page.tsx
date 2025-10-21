@@ -80,7 +80,7 @@ export default function Home() {
         />
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes robotWave {
           0%, 100% {
             opacity: 0.08;
@@ -97,6 +97,15 @@ export default function Home() {
           75% {
             opacity: 0.12;
             transform: scale(1.02) rotate(-2deg);
+          }
+        }
+
+        @keyframes gradientShift {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
           }
         }
       `}</style>
@@ -327,17 +336,6 @@ export default function Home() {
                 Real-Time Growth
               </span>
             </h1>
-
-            <style jsx>{`
-              @keyframes gradientShift {
-                0%, 100% {
-                  background-position: 0% 50%;
-                }
-                50% {
-                  background-position: 100% 50%;
-                }
-              }
-            `}</style>
 
             <BlurText
               text="Casi turns your Twitch chat into live insights — tracking sentiment, questions, and engagement moments so you can focus on creating, not guessing."
