@@ -259,9 +259,14 @@ export default function Dashboard() {
         await AnalyticsService.endSession(currentSessionId)
         console.log('Ended session:', currentSessionId)
 
-        setTimeout(() => {
-          generateReport(currentSessionId)
-        }, 2000)
+        // Only generate reports for regular users, not admins monitoring other channels
+        if (!isAdmin) {
+          setTimeout(() => {
+            generateReport(currentSessionId)
+          }, 2000)
+        } else {
+          console.log('Admin user - skipping automatic report generation')
+        }
       } catch (error) {
         console.error('Failed to end session:', error)
       }
@@ -932,6 +937,36 @@ export default function Dashboard() {
 
                 {/* Menu Items */}
                 <div style={{ padding: '0.5rem' }}>
+                  {isAdmin && (
+                    <a
+                      href="/admin/reports"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.75rem 1rem',
+                        color: 'white',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        borderRadius: '8px',
+                        transition: 'background 0.2s',
+                        cursor: 'pointer',
+                        background: 'rgba(255, 215, 0, 0.1)',
+                        border: '1px solid rgba(255, 215, 0, 0.3)',
+                        marginBottom: '0.5rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 215, 0, 0.2)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 215, 0, 0.1)'
+                      }}
+                    >
+                      <span>🛠️</span>
+                      <span style={{ fontWeight: '600' }}>Admin Tools</span>
+                    </a>
+                  )}
+
                   <a
                     href="/account"
                     style={{
