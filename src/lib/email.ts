@@ -146,7 +146,7 @@ export class EmailService {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
           </head>
-          <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f7fa;">
+          <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15)); background-color: #1a1a2e;">
             <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
               <!-- Header -->
@@ -229,7 +229,7 @@ function generateReportHTML(report: StreamReport): string {
       <title>Stream Report - ${session.channel_name}</title>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     </head>
-    <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f7fa; color: #333; line-height: 1.6;">
+    <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15)); background-color: #1a1a2e; color: #333; line-height: 1.6;">
       <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
         
         <!-- Header with Casi Branding -->
