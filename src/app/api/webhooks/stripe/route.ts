@@ -279,13 +279,34 @@ async function upsertSubscription(
   const priceId = subscription.items.data[0].price.id
   const price = await stripe.prices.retrieve(priceId)
 
-  // Determine plan name from price ID
-  let planName = 'Creator'
-  if (priceId.includes('pro') || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY) {
+  // Determine plan name from price ID - check exact matches first, then patterns
+  let planName = 'Creator' // Default
+
+  // Check for Creator plan (explicit match)
+  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY ||
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY ||
+      priceId === 'price_1Rlx2DEEgFiyIrnTAomiE2J3' ||
+      priceId === 'price_1Rlx2DEEgFiyIrnTGQZSVs8q') {
+    planName = 'Creator'
+  }
+  // Check for Pro plan
+  else if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
+           priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
+           priceId === 'price_1RlxA7EEgFiyIrnTVR20se38' ||
+           priceId === 'price_1RlxA7EEgFiyIrnTSuiyywVq' ||
+           priceId.toLowerCase().includes('pro')) {
     planName = 'Pro'
-  } else if (priceId.includes('streamer') || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY) {
+  }
+  // Check for Streamer+ plan
+  else if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
+           priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
+           priceId === 'price_1RlzDHEEgFiyIrnThpPdz7gV' ||
+           priceId === 'price_1RlzDHEEgFiyIrnT45NkAklL' ||
+           priceId.toLowerCase().includes('streamer')) {
     planName = 'Streamer+'
   }
+
+  console.log(`[Stripe Webhook] Price ID ${priceId} determined as tier: ${planName}`)
 
   // Determine viewer limit based on tier
   let avgViewerLimit = 50 // Creator default

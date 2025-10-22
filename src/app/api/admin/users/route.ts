@@ -46,12 +46,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Create maps for matching subscriptions by both email and user_id
+    // Prefer active subscriptions, and most recent if there are multiple
     const subscriptionByEmail = new Map()
     const subscriptionByUserId = new Map()
+
     subscriptions?.forEach(sub => {
-      if (sub.email) subscriptionByEmail.set(sub.email, sub)
-      if (sub.user_email) subscriptionByEmail.set(sub.user_email, sub)
-      if (sub.user_id) subscriptionByUserId.set(sub.user_id, sub)
+      // Helper to update map only if this sub is better than existing
+      const updateIfBetter = (map: Map<any, any>, key: any) => {
+        const existing = map.get(key)
+        if (!existing ||
+            (sub.status === 'active' && existing.status !== 'active') ||
+            (sub.status === existing.status && new Date(sub.updated_at || sub.created_at) > new Date(existing.updated_at || existing.created_at))) {
+          map.set(key, sub)
+        }
+      }
+
+      if (sub.email) updateIfBetter(subscriptionByEmail, sub.email)
+      if (sub.user_email) updateIfBetter(subscriptionByEmail, sub.user_email)
+      if (sub.user_id) updateIfBetter(subscriptionByUserId, sub.user_id)
     })
 
     // Combine user data with subscription data
@@ -59,6 +71,17 @@ export async function GET(request: NextRequest) {
       // Try to match by user_id first (most reliable), then fall back to email
       const subscription = subscriptionByUserId.get(user.id) || subscriptionByEmail.get(user.email)
       const metadata = user.user_metadata || {}
+
+      // Debug logging for subscription matching
+      if (subscription) {
+        console.log(`[Admin Users] User ${user.email}:`, {
+          tier_name: subscription.tier_name,
+          plan_name: subscription.plan_name,
+          tier: subscription.tier,
+          stripe_price_id: subscription.stripe_price_id,
+          status: subscription.status
+        })
+      }
 
       return {
         id: user.id,
