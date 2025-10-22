@@ -481,12 +481,14 @@ export default function Dashboard() {
     else if (recentNegative > recentPositive) currentMood = 'Slightly Negative'
 
     // Calculate engagement level based on message/viewer ratio
-    const currentViewerCount = stats.viewerCount || 1
-    const messageRatio = messages.length / currentViewerCount
-    let newEngagementLevel: 'Low' | 'Moderate' | 'High' = 'Low'
-    if (messageRatio > 0.5) newEngagementLevel = 'High'
-    else if (messageRatio > 0.2) newEngagementLevel = 'Moderate'
-    setEngagementLevel(newEngagementLevel)
+    // Only calculate if we have a valid viewer count (not 0)
+    if (stats.viewerCount > 0) {
+      const messageRatio = messages.length / stats.viewerCount
+      let newEngagementLevel: 'Low' | 'Moderate' | 'High' = 'Low'
+      if (messageRatio > 0.5) newEngagementLevel = 'High'
+      else if (messageRatio > 0.2) newEngagementLevel = 'Moderate'
+      setEngagementLevel(newEngagementLevel)
+    }
 
     // Detect mood change for animation
     if (currentMood !== previousMood && messages.length > 5) {
@@ -495,16 +497,16 @@ export default function Dashboard() {
       setTimeout(() => setMoodChanged(false), 2000)
     }
 
-    setStats({
+    setStats(prev => ({
+      ...prev, // Preserve viewerCount from Twitch API fetches
       totalMessages: messages.length,
       questions: questions.length,
       avgSentiment,
       positiveMessages,
       negativeMessages,
-      viewerCount: stats.viewerCount, // Use real viewer count from Twitch API
       activeUsers: uniqueUsers,
       currentMood
-    })
+    }))
 
     const counts: Record<string, number> = {}
     const userTopics: Record<string, Set<string>> = {}
