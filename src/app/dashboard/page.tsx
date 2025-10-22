@@ -87,6 +87,8 @@ export default function Dashboard() {
   const [twitchUser, setTwitchUser] = useState<any>(null)
   const [showAccountDropdown, setShowAccountDropdown] = useState(false)
   const [tierStatus, setTierStatus] = useState<TierStatus | null>(null)
+  const [previousMood, setPreviousMood] = useState<string>('Neutral')
+  const [moodChanged, setMoodChanged] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -458,6 +460,13 @@ export default function Dashboard() {
     else if (recentNegative > recentPositive) currentMood = 'Slightly Negative'
 
     const viewerCount = Math.max(50, uniqueUsers * 3 + Math.floor(Math.random() * 100))
+
+    // Detect mood change for animation
+    if (currentMood !== previousMood && messages.length > 5) {
+      setPreviousMood(currentMood)
+      setMoodChanged(true)
+      setTimeout(() => setMoodChanged(false), 2000)
+    }
 
     setStats({
       totalMessages: messages.length,
@@ -1254,7 +1263,7 @@ export default function Dashboard() {
                         stats.currentMood === 'Negative' ? '😢' :
                         stats.currentMood === 'Slightly Negative' ? '😕' : '😐',
                   value: stats.currentMood,
-                  label: 'Mood',
+                  label: 'Sentiment',
                   color: stats.currentMood.includes('Positive') ? '#B8EE8A' :
                          stats.currentMood.includes('Negative') ? '#FF9F9F' : '#F7F7F7'
                 },
@@ -1268,7 +1277,9 @@ export default function Dashboard() {
                   textAlign: 'center',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   minWidth: '80px',
-                  flex: '1 1 auto'
+                  flex: '1 1 auto',
+                  animation: stat.label === 'Sentiment' && moodChanged ? 'sentimentGlow 2s ease' : 'none',
+                  transition: 'all 0.3s ease'
                 }}>
                   <div style={{ fontSize: '1rem', margin: '0 0 0.25rem 0' }}>{stat.icon}</div>
                   <p style={{
@@ -1284,6 +1295,36 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
+
+            {/* Contextual Insight Tip */}
+            {messages.length > 5 && (
+              <div style={{
+                background: 'rgba(94, 234, 212, 0.05)',
+                border: '1px solid rgba(94, 234, 212, 0.2)',
+                borderRadius: '8px',
+                padding: '0.75rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem'
+              }}>
+                <span style={{ fontSize: '1.2rem' }}>💡</span>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.85rem',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  lineHeight: '1.4'
+                }}>
+                  {stats.currentMood.includes('Positive')
+                    ? <><strong style={{ color: '#B8EE8A' }}>Tip:</strong> Positive spikes often mean highlight-worthy moments — great for clips!</>
+                    : stats.totalMessages < 10
+                    ? <><strong style={{ color: '#5EEAD4' }}>Tip:</strong> Chat's quiet — try engaging with a question to spark conversation</>
+                    : stats.questions > 3
+                    ? <><strong style={{ color: '#FF9F9F' }}>Tip:</strong> {stats.questions} questions waiting — addressing them boosts engagement!</>
+                    : <><strong style={{ color: '#5EEAD4' }}>Tip:</strong> Keep an eye on sentiment shifts to catch the room's vibe changes</>
+                  }
+                </p>
+              </div>
+            )}
 
             {/* Main Content Area */}
             <div style={{
@@ -1329,8 +1370,8 @@ export default function Dashboard() {
                     }}>
                       <div>
                         <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</div>
-                        <p style={{ fontSize: '0.9rem', margin: 0 }}>Waiting for chat messages...</p>
-                        <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0' }}>Make sure the channel is live and has active chat</p>
+                        <p style={{ fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>Chat's quiet for now... 🤔</p>
+                        <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0' }}>Casi's ready to analyze as soon as someone says hi!</p>
                       </div>
                     </div>
                   ) : (
@@ -1472,7 +1513,10 @@ export default function Dashboard() {
                 }}>
                   <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters</h3>
                   {topChatters.length === 0 ? (
-                    <p style={{ margin: '0.75rem 0 0 0', opacity: 0.7 }}>No chatters yet</p>
+                    <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                      <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
+                      <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>Waiting for your first chatters...</p>
+                    </div>
                   ) : (
                     <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0 0' }}>
                       {topChatters.map((c) => (
@@ -1518,7 +1562,10 @@ export default function Dashboard() {
                   </div>
                   <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
                     {questions.length === 0 ? (
-                      <p style={{ margin: 0, opacity: 0.7 }}>No questions yet</p>
+                      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👀</div>
+                        <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', fontWeight: '500' }}>No questions yet — looks like chat's chill for now 😌</p>
+                      </div>
                     ) : (
                       questions.slice(-10).reverse().map((q) => (
                         <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
@@ -1564,11 +1611,31 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* CSS Animation for pulse effect */}
+      {/* CSS Animations */}
       <style jsx>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+        @keyframes sentimentGlow {
+          0%, 100% {
+            box-shadow: 0 0 0 rgba(184, 238, 138, 0);
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(184, 238, 138, 0.6);
+            transform: scale(1.05);
+          }
+        }
+        @keyframes slideIn {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
       `}</style>
     </div>

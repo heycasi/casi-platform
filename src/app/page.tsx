@@ -80,7 +80,7 @@ export default function Home() {
         />
       </div>
 
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes robotWave {
           0%, 100% {
             opacity: 0.08;
@@ -108,7 +108,7 @@ export default function Home() {
             background-position: 100% 50%;
           }
         }
-      `}</style>
+      `}} />
 
       {/* Header */}
       <header style={{
