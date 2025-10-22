@@ -449,7 +449,7 @@ export default function Dashboard() {
     viewerInterval = window.setInterval(() => {
       console.log('[Viewer Count] Interval tick - fetching viewers')
       fetchViewers()
-    }, 15000) // Update every 15 seconds
+    }, 5000) // Update every 5 seconds to stay in sync with Twitch
 
     console.log('[Viewer Count] Interval ID:', viewerInterval)
 
