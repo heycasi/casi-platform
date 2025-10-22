@@ -83,12 +83,14 @@ export default function Dashboard() {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
   const [streamStartTime, setStreamStartTime] = useState<number | null>(null)
   const [elapsedDuration, setElapsedDuration] = useState<string>('00:00:00')
-  const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number }>>([])
+  const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number; topics: string[] }>>([])
   const [twitchUser, setTwitchUser] = useState<any>(null)
   const [showAccountDropdown, setShowAccountDropdown] = useState(false)
   const [tierStatus, setTierStatus] = useState<TierStatus | null>(null)
   const [previousMood, setPreviousMood] = useState<string>('Neutral')
   const [moodChanged, setMoodChanged] = useState(false)
+  const [highlightedQuestionId, setHighlightedQuestionId] = useState<string | null>(null)
+  const [engagementLevel, setEngagementLevel] = useState<'Low' | 'Moderate' | 'High'>('Low')
   const [stats, setStats] = useState<DashboardStats>({
     totalMessages: 0,
     questions: 0,
@@ -353,7 +355,12 @@ export default function Dashboard() {
             setMessages(prev => [...prev.slice(-49), chatMessage])
 
             if (analysis.isQuestion) {
-              setQuestions(prev => [...prev.slice(-9), chatMessage])
+              // Highlight the question in the live feed first
+              setHighlightedQuestionId(chatMessage.id)
+              setTimeout(() => {
+                setQuestions(prev => [...prev.slice(-9), chatMessage])
+                setHighlightedQuestionId(null)
+              }, 1500) // Show highlight for 1.5 seconds before moving to Questions panel
             }
 
             if (currentSessionId) {
@@ -459,7 +466,13 @@ export default function Dashboard() {
     else if (recentNegative > recentPositive * 2) currentMood = 'Negative'
     else if (recentNegative > recentPositive) currentMood = 'Slightly Negative'
 
-    const viewerCount = Math.max(50, uniqueUsers * 3 + Math.floor(Math.random() * 100))
+    // Calculate engagement level based on message/viewer ratio
+    const currentViewerCount = stats.viewerCount || 1
+    const messageRatio = messages.length / currentViewerCount
+    let newEngagementLevel: 'Low' | 'Moderate' | 'High' = 'Low'
+    if (messageRatio > 0.5) newEngagementLevel = 'High'
+    else if (messageRatio > 0.2) newEngagementLevel = 'Moderate'
+    setEngagementLevel(newEngagementLevel)
 
     // Detect mood change for animation
     if (currentMood !== previousMood && messages.length > 5) {
@@ -474,22 +487,33 @@ export default function Dashboard() {
       avgSentiment,
       positiveMessages,
       negativeMessages,
-      viewerCount: stats.viewerCount || viewerCount,
+      viewerCount: stats.viewerCount, // Use real viewer count from Twitch API
       activeUsers: uniqueUsers,
       currentMood
     })
 
     const counts: Record<string, number> = {}
-    messages.forEach(m => { counts[m.username] = (counts[m.username] || 0) + 1 })
+    const userTopics: Record<string, Set<string>> = {}
+    messages.forEach(m => {
+      counts[m.username] = (counts[m.username] || 0) + 1
+      if (!userTopics[m.username]) userTopics[m.username] = new Set()
+      if (m.topics && m.topics.length > 0) {
+        m.topics.forEach(topic => userTopics[m.username].add(topic))
+      }
+    })
     const top = Object.entries(counts)
       .sort((a,b) => b[1]-a[1])
       .slice(0,5)
-      .map(([username,count]) => ({ username, count }))
+      .map(([username,count]) => ({
+        username,
+        count,
+        topics: Array.from(userTopics[username] || []).slice(0, 2) // Top 2 topics per chatter
+      }))
     setTopChatters(top)
 
     if (currentSessionId && messages.length > 0) {
       AnalyticsService.updateSessionStats(currentSessionId, {
-        peak_viewer_count: Math.max(stats.viewerCount, viewerCount),
+        peak_viewer_count: stats.viewerCount || 0,
         total_messages: messages.length,
         unique_chatters: uniqueUsers
       }).catch(error => {
@@ -1254,8 +1278,14 @@ export default function Dashboard() {
               justifyContent: 'space-between'
             }}>
               {[
-                { icon: '👥', value: stats.viewerCount, label: 'Viewers', color: '#5EEAD4' },
+                { icon: '👥', value: stats.viewerCount || 0, label: 'Viewers', color: '#5EEAD4' },
                 { icon: '💬', value: stats.totalMessages, label: 'Messages', color: '#5EEAD4' },
+                {
+                  icon: engagementLevel === 'High' ? '🔥' : engagementLevel === 'Moderate' ? '📊' : '📉',
+                  value: `${engagementLevel}`,
+                  label: 'Engagement',
+                  color: engagementLevel === 'High' ? '#B8EE8A' : engagementLevel === 'Moderate' ? '#5EEAD4' : '#FF9F9F'
+                },
                 { icon: '❓', value: stats.questions, label: 'Questions', color: '#FF9F9F' },
                 {
                   icon: stats.currentMood === 'Very Positive' ? '😊' :
@@ -1399,7 +1429,11 @@ export default function Dashboard() {
                               ? '1px solid rgba(184, 238, 138, 0.2)'
                               : msg.sentiment === 'negative'
                               ? '1px solid rgba(255, 159, 159, 0.2)'
-                              : '1px solid rgba(255, 255, 255, 0.1)'
+                              : '1px solid rgba(255, 255, 255, 0.1)',
+                            animation: msg.id === highlightedQuestionId ? 'questionPulse 1.5s ease' : 'none',
+                            boxShadow: msg.id === highlightedQuestionId ? '0 0 20px rgba(255, 159, 159, 0.8)' : 'none',
+                            transform: msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
+                            transition: 'all 0.3s ease'
                           }}
                         >
                           <div style={{
@@ -1504,14 +1538,14 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Top Chatters / Stats */}
+                {/* Top Chatters & Topics */}
                 <div style={{
                   background: 'rgba(255, 255, 255, 0.05)',
                   borderRadius: '16px',
                   padding: '1rem',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters</h3>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters & Topics</h3>
                   {topChatters.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '1rem 0' }}>
                       <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
@@ -1520,9 +1554,29 @@ export default function Dashboard() {
                   ) : (
                     <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0 0' }}>
                       {topChatters.map((c) => (
-                        <li key={c.username} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px dashed rgba(255,255,255,0.1)' }}>
-                          <span style={{ color: '#F7F7F7' }}>@{c.username}</span>
-                          <span style={{ color: '#5EEAD4', fontWeight: 700 }}>{c.count}</span>
+                        <li key={c.username} style={{
+                          padding: '0.5rem 0',
+                          borderBottom: '1px dashed rgba(255,255,255,0.1)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                            <span style={{ color: '#F7F7F7', fontSize: '0.9rem', fontWeight: '600' }}>@{c.username}</span>
+                            <span style={{ color: '#5EEAD4', fontWeight: 700, fontSize: '0.85rem' }}>{c.count}</span>
+                          </div>
+                          {c.topics && c.topics.length > 0 && (
+                            <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                              {c.topics.map((topic, idx) => (
+                                <span key={idx} style={{
+                                  fontSize: '0.65rem',
+                                  background: 'rgba(94, 234, 212, 0.15)',
+                                  color: '#5EEAD4',
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: '4px'
+                                }}>
+                                  {topic}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -1635,6 +1689,20 @@ export default function Dashboard() {
           100% {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        @keyframes questionPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 rgba(255, 159, 159, 0);
+            transform: scale(1);
+          }
+          25%, 75% {
+            box-shadow: 0 0 25px rgba(255, 159, 159, 0.8);
+            transform: scale(1.03);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(255, 159, 159, 1);
+            transform: scale(1.05);
           }
         }
       `}</style>
