@@ -439,10 +439,20 @@ export default function Dashboard() {
       }
     }
 
+    console.log('[Viewer Count] Setting up viewer count fetch interval')
+    console.log('[Viewer Count] twitchUser:', twitchUser)
+    console.log('[Viewer Count] channelName:', channelName)
+
     fetchViewers() // Fetch immediately on connect
-    viewerInterval = window.setInterval(fetchViewers, 15000) // Update every 15 seconds
+    viewerInterval = window.setInterval(() => {
+      console.log('[Viewer Count] Interval tick - fetching viewers')
+      fetchViewers()
+    }, 15000) // Update every 15 seconds
+
+    console.log('[Viewer Count] Interval ID:', viewerInterval)
 
     return () => {
+      console.log('[Viewer Count] Cleaning up - clearing interval')
       if (ws) {
         ws.close()
       }
