@@ -1,36 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { sendUpgradeNudgeEmail } from '@/lib/emailTemplates/upgradeNudge'
+// Test email endpoint - send a test email with the new gradient background
 
-/**
- * Test endpoint to send upgrade nudge email
- * POST /api/test-email
- * Body: { "email": "test@example.com" }
- */
-export async function POST(req: NextRequest) {
+import { NextRequest, NextResponse } from 'next/server'
+import { EmailService } from '../../../lib/email'
+
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json()
-    const { email } = body
+    const { email } = await request.json()
 
     if (!email) {
-      return NextResponse.json({ error: 'Email required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      )
     }
 
-    await sendUpgradeNudgeEmail({
-      email,
-      userName: email.split('@')[0],
-      currentTier: 'Pro',
-      avgViewers: 300,
-      viewerLimit: 250
-    })
+    console.log('Sending test email to:', email)
+    const success = await EmailService.sendTestEmail(email)
 
-    return NextResponse.json({
-      success: true,
-      message: `Test upgrade nudge email sent to ${email}`
-    })
-  } catch (error: any) {
-    console.error('Error sending test email:', error)
+    if (success) {
+      return NextResponse.json({
+        success: true,
+        message: `Test email sent to ${email}`
+      })
+    } else {
+      return NextResponse.json(
+        { error: 'Failed to send test email' },
+        { status: 500 }
+      )
+    }
+
+  } catch (error) {
+    console.error('Test email error:', error)
     return NextResponse.json(
-      { error: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
