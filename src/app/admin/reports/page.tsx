@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import AdminLayout from '../../../components/AdminLayout'
 
 // Admin usernames (must match dashboard and API)
 const ADMIN_USERNAMES = ['conzooo_']
@@ -136,67 +137,19 @@ export default function AdminReportsPage() {
     : deliveries.filter(d => d.delivery_status === filterStatus)
 
   if (!isAuthenticated || !isAdmin) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontFamily: 'Poppins, sans-serif'
-      }}>
-        <div>Loading...</div>
-      </div>
-    )
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1a1a1a', color: 'white' }}>Loading...</div>
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      padding: '2rem',
-      fontFamily: 'Poppins, sans-serif',
-      color: 'white'
-    }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem'
-        }}>
-          <div>
-            <h1 style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              margin: 0,
-              marginBottom: '0.5rem'
-            }}>
-              📊 Admin - Report Deliveries
-            </h1>
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.7)',
-              margin: 0
-            }}>
-              Monitor and resend stream reports
-            </p>
-          </div>
-          <button
-            onClick={() => router.push('/dashboard')}
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            ← Back to Dashboard
-          </button>
+    <AdminLayout>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: 0, marginBottom: '0.5rem' }}>
+            📊 Report Deliveries
+          </h1>
+          <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: 0 }}>
+            Monitor and resend stream reports
+          </p>
         </div>
 
         {/* Filter Tabs */}
@@ -408,6 +361,6 @@ export default function AdminReportsPage() {
           </button>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   )
 }
