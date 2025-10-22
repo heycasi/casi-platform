@@ -45,15 +45,19 @@ export async function GET(request: NextRequest) {
       console.error('Failed to fetch subscriptions:', subsError)
     }
 
-    // Create a map of email -> subscription
-    const subscriptionMap = new Map()
+    // Create maps for matching subscriptions by both email and user_id
+    const subscriptionByEmail = new Map()
+    const subscriptionByUserId = new Map()
     subscriptions?.forEach(sub => {
-      subscriptionMap.set(sub.user_email, sub)
+      if (sub.email) subscriptionByEmail.set(sub.email, sub)
+      if (sub.user_email) subscriptionByEmail.set(sub.user_email, sub)
+      if (sub.user_id) subscriptionByUserId.set(sub.user_id, sub)
     })
 
     // Combine user data with subscription data
     const users = authUsers.users.map(user => {
-      const subscription = subscriptionMap.get(user.email)
+      // Try to match by user_id first (most reliable), then fall back to email
+      const subscription = subscriptionByUserId.get(user.id) || subscriptionByEmail.get(user.email)
       const metadata = user.user_metadata || {}
 
       return {
@@ -65,7 +69,7 @@ export async function GET(request: NextRequest) {
         avatar_url: metadata.avatar_url || null,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at,
-        subscription_tier: subscription?.tier || 'None',
+        subscription_tier: subscription?.tier_name || subscription?.plan_name || subscription?.tier || 'None',
         subscription_status: subscription?.status || 'inactive',
         subscription_id: subscription?.stripe_subscription_id || null,
         stripe_customer_id: subscription?.stripe_customer_id || null,
