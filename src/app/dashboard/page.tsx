@@ -407,15 +407,15 @@ export default function Dashboard() {
 
     connectToTwitch()
 
-    // Real viewer count from Twitch API - works for both regular users and admin mode
+    // Real viewer count from Twitch API
+    // Always use the channelName (the channel we're monitoring) for viewer count
     const fetchViewers = async () => {
       try {
-        // Use user_id for regular users, user_login for admin manual connections
-        const queryParam = twitchUser?.id
-          ? `user_id=${encodeURIComponent(twitchUser.id)}`
-          : `user_login=${encodeURIComponent(channelName)}`
+        // Use channelName for viewer count - this is the channel being monitored
+        const queryParam = `user_login=${encodeURIComponent(channelName)}`
 
-        console.log(`[Viewer Count] Fetching from: /api/twitch/stream-info?${queryParam}`)
+        console.log(`[Viewer Count] Fetching viewer count for channel: ${channelName}`)
+        console.log(`[Viewer Count] API URL: /api/twitch/stream-info?${queryParam}`)
 
         const res = await fetch(`/api/twitch/stream-info?${queryParam}`)
         const info = await res.json()
@@ -423,10 +423,12 @@ export default function Dashboard() {
         console.log('[Viewer Count] API Response:', info)
 
         if (info?.live && info?.viewer_count != null) {
-          console.log(`[Viewer Count] Setting viewer count to: ${info.viewer_count}`)
+          console.log(`[Viewer Count] ✅ Setting viewer count to: ${info.viewer_count}`)
           setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
         } else if (!info?.live) {
-          console.warn('[Viewer Count] Stream reported as not live by Twitch API')
+          console.warn('[Viewer Count] ⚠️ Stream reported as not live by Twitch API')
+        } else {
+          console.warn('[Viewer Count] ⚠️ No viewer_count in API response')
         }
 
         if (info?.started_at) {
@@ -435,7 +437,7 @@ export default function Dashboard() {
           setElapsedDuration(formatDurationMs(Date.now() - start))
         }
       } catch (error) {
-        console.error('[Viewer Count] Failed to fetch:', error)
+        console.error('[Viewer Count] ❌ Failed to fetch:', error)
       }
     }
 
