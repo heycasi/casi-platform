@@ -225,6 +225,10 @@ export default function Dashboard() {
         const res = await fetch(`/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`)
         const info = await res.json()
         if (info?.live) {
+          // Set initial viewer count when auto-connecting
+          if (info?.viewer_count != null) {
+            setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
+          }
           setIsConnected(true)
         }
       } catch {}
@@ -403,23 +407,33 @@ export default function Dashboard() {
 
     connectToTwitch()
 
-    // Real viewer count from Twitch API
-    if (twitchUser) {
-      const fetchViewers = async () => {
-        try {
-          const res = await fetch(`/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`)
-          const info = await res.json()
-          if (info?.viewer_count != null) setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
-          if (info?.started_at) {
-            const start = new Date(info.started_at).getTime()
-            setStreamStartTime(start)
-            setElapsedDuration(formatDurationMs(Date.now() - start))
-          }
-        } catch {}
+    // Real viewer count from Twitch API - works for both regular users and admin mode
+    const fetchViewers = async () => {
+      try {
+        // Use user_id for regular users, user_login for admin manual connections
+        const queryParam = twitchUser?.id
+          ? `user_id=${encodeURIComponent(twitchUser.id)}`
+          : `user_login=${encodeURIComponent(channelName)}`
+        const res = await fetch(`/api/twitch/stream-info?${queryParam}`)
+        const info = await res.json()
+
+        console.log('Viewer count fetch:', info) // Debug log
+
+        if (info?.viewer_count != null) {
+          setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
+        }
+        if (info?.started_at) {
+          const start = new Date(info.started_at).getTime()
+          setStreamStartTime(start)
+          setElapsedDuration(formatDurationMs(Date.now() - start))
+        }
+      } catch (error) {
+        console.error('Failed to fetch viewer count:', error)
       }
-      fetchViewers()
-      viewerInterval = window.setInterval(fetchViewers, 15000)
     }
+
+    fetchViewers() // Fetch immediately on connect
+    viewerInterval = window.setInterval(fetchViewers, 15000) // Update every 15 seconds
 
     return () => {
       if (ws) {
