@@ -414,21 +414,28 @@ export default function Dashboard() {
         const queryParam = twitchUser?.id
           ? `user_id=${encodeURIComponent(twitchUser.id)}`
           : `user_login=${encodeURIComponent(channelName)}`
+
+        console.log(`[Viewer Count] Fetching from: /api/twitch/stream-info?${queryParam}`)
+
         const res = await fetch(`/api/twitch/stream-info?${queryParam}`)
         const info = await res.json()
 
-        console.log('Viewer count fetch:', info) // Debug log
+        console.log('[Viewer Count] API Response:', info)
 
-        if (info?.viewer_count != null) {
+        if (info?.live && info?.viewer_count != null) {
+          console.log(`[Viewer Count] Setting viewer count to: ${info.viewer_count}`)
           setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
+        } else if (!info?.live) {
+          console.warn('[Viewer Count] Stream reported as not live by Twitch API')
         }
+
         if (info?.started_at) {
           const start = new Date(info.started_at).getTime()
           setStreamStartTime(start)
           setElapsedDuration(formatDurationMs(Date.now() - start))
         }
       } catch (error) {
-        console.error('Failed to fetch viewer count:', error)
+        console.error('[Viewer Count] Failed to fetch:', error)
       }
     }
 
