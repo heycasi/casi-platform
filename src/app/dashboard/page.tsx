@@ -1350,12 +1350,11 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Analytics - Mobile Friendly */}
+            {/* Analytics - Compact Version */}
             <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0.75rem',
-              justifyContent: 'space-between'
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))',
+              gap: '0.5rem'
             }}>
               {[
                 { icon: '👥', value: stats.viewerCount || 0, label: 'Viewers', color: '#5EEAD4' },
@@ -1382,26 +1381,25 @@ export default function Dashboard() {
               ].map((stat, index) => (
                 <div key={index} style={{
                   background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '10px',
-                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  padding: '0.5rem 0.4rem',
                   textAlign: 'center',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  minWidth: '80px',
-                  flex: '1 1 auto',
                   animation: stat.label === 'Sentiment' && moodChanged ? 'sentimentGlow 2s ease' : 'none',
                   transition: 'all 0.3s ease'
                 }}>
-                  <div style={{ fontSize: '1rem', margin: '0 0 0.25rem 0' }}>{stat.icon}</div>
+                  <div style={{ fontSize: '0.9rem', margin: '0 0 0.15rem 0' }}>{stat.icon}</div>
                   <p style={{
                     margin: 0,
-                    fontSize: '1rem',
+                    fontSize: '0.85rem',
                     fontWeight: 'bold',
                     color: stat.color,
-                    wordBreak: 'break-word'
+                    wordBreak: 'break-word',
+                    lineHeight: '1.2'
                   }}>
                     {stat.value}
                   </p>
-                  <p style={{ margin: 0, fontSize: '0.7rem', opacity: 0.7 }}>{stat.label}</p>
+                  <p style={{ margin: 0, fontSize: '0.65rem', opacity: 0.7, marginTop: '0.1rem' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -1452,7 +1450,7 @@ export default function Dashboard() {
                 padding: '1rem',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 60%',
-                height: '500px',
+                height: '380px',
                 display: 'flex',
                 flexDirection: 'column',
                 minWidth: 0
@@ -1627,7 +1625,7 @@ export default function Dashboard() {
                   borderRadius: '16px',
                   padding: '1rem',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  height: '250px',
+                  height: '180px',
                   display: 'flex',
                   flexDirection: 'column',
                   overflow: 'hidden'
@@ -1678,7 +1676,7 @@ export default function Dashboard() {
                   borderRadius: '16px',
                   padding: '1rem',
                   border: '1px solid rgba(255, 159, 159, 0.3)',
-                  height: '350px',
+                  height: '420px',
                   display: 'flex',
                   flexDirection: 'column',
                   overflow: 'hidden'
