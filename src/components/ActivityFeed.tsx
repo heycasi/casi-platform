@@ -13,20 +13,20 @@ interface StreamEvent {
 }
 
 interface ActivityFeedProps {
-  email: string
+  channelName: string
   maxHeight?: string
 }
 
-export default function ActivityFeed({ email, maxHeight = '500px' }: ActivityFeedProps) {
+export default function ActivityFeed({ channelName, maxHeight = '500px' }: ActivityFeedProps) {
   const [events, setEvents] = useState<StreamEvent[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!email) return
+    if (!channelName) return
 
     const fetchEvents = async () => {
       try {
-        const response = await fetch(`/api/stream-events?email=${encodeURIComponent(email)}&limit=50`)
+        const response = await fetch(`/api/stream-events?channel=${encodeURIComponent(channelName)}&limit=50`)
         const data = await response.json()
 
         if (data.events) {
@@ -44,7 +44,7 @@ export default function ActivityFeed({ email, maxHeight = '500px' }: ActivityFee
     // Poll for new events every 10 seconds
     const interval = setInterval(fetchEvents, 10000)
     return () => clearInterval(interval)
-  }, [email])
+  }, [channelName])
 
   const getEventIcon = (eventType: string) => {
     switch (eventType) {

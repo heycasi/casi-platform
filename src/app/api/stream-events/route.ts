@@ -1,5 +1,5 @@
 // Stream Events API
-// GET /api/stream-events?email=user@example.com&limit=50
+// GET /api/stream-events?channel=channelname&limit=50
 // Fetches recent stream events for a channel
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -13,21 +13,21 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const email = searchParams.get('email')
+    const channel = searchParams.get('channel')
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    if (!email) {
+    if (!channel) {
       return NextResponse.json(
-        { error: 'Email parameter is required' },
+        { error: 'Channel parameter is required' },
         { status: 400 }
       )
     }
 
-    // Fetch events from database
+    // Fetch events from database by channel name (case-insensitive)
     const { data: events, error } = await supabase
       .from('stream_events')
       .select('*')
-      .eq('channel_email', email)
+      .ilike('channel_name', channel)
       .order('created_at', { ascending: false })
       .limit(limit)
 

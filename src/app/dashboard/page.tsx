@@ -1801,7 +1801,7 @@ export default function Dashboard() {
                 minWidth: 0,
                 minHeight: 0
               }}>
-                <ActivityFeed email={email} maxHeight="650px" />
+                <ActivityFeed channelName={channelName} maxHeight="650px" />
               </div>
             </div>
           </>
