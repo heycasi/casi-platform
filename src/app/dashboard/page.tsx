@@ -191,6 +191,13 @@ export default function Dashboard() {
             currentMood: 'Neutral'
           })
           setTopChatters(session.topChatters || [])
+
+          // Restore admin channel if present
+          if (session.adminChannel) {
+            setChannelName(session.adminChannel)
+            setAdminChannelInput(session.adminChannel)
+          }
+
           console.log('Restored session:', session.sessionId)
         } else {
           // Clear old session
@@ -270,6 +277,7 @@ export default function Dashboard() {
       questions: questions.slice(-50), // Keep last 50 questions
       stats,
       topChatters: topChatters.slice(0, 10), // Keep top 10 chatters
+      adminChannel: isAdmin && channelName !== twitchUser?.login ? channelName : null, // Save admin channel if monitoring another channel
       timestamp: Date.now()
     }
 
@@ -278,7 +286,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to save session state:', error)
     }
-  }, [currentSessionId, isConnected, streamStartTime, messages, questions, stats, topChatters])
+  }, [currentSessionId, isConnected, streamStartTime, messages, questions, stats, topChatters, channelName, isAdmin, twitchUser])
 
   // Clear session state when disconnecting
   useEffect(() => {
