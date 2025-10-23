@@ -1,6 +1,6 @@
 // src/app/dashboard/page.tsx - Secure Dashboard with OAuth
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
 import { AnalyticsService } from '../../lib/analytics'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
@@ -101,6 +101,9 @@ export default function Dashboard() {
     activeUsers: 0,
     currentMood: 'Neutral'
   })
+
+  // Ref for auto-scrolling chat feed
+  const chatFeedRef = useRef<HTMLDivElement>(null)
 
   const botUsernames = [
     'nightbot', 'streamelements', 'moobot', 'fossabot', 'wizebot',
@@ -215,6 +218,13 @@ export default function Dashboard() {
     const interval = setInterval(fetchTierStatus, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [email])
+
+  // Auto-scroll chat feed to bottom when new messages arrive
+  useEffect(() => {
+    if (chatFeedRef.current) {
+      chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight
+    }
+  }, [messages])
 
   // Auto-connect when Twitch user is present and live
   useEffect(() => {
@@ -1442,7 +1452,7 @@ export default function Dashboard() {
                 padding: '1rem',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 60%',
-                minHeight: '300px',
+                height: '500px',
                 display: 'flex',
                 flexDirection: 'column',
                 minWidth: 0
@@ -1451,14 +1461,17 @@ export default function Dashboard() {
                   💬 Live Chat Feed
                 </h3>
 
-                <div style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  borderRadius: '8px',
-                  padding: '0.75rem',
-                  minHeight: 0
-                }}>
+                <div
+                  ref={chatFeedRef}
+                  style={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    minHeight: 0
+                  }}
+                >
                   {messages.length === 0 ? (
                     <div style={{
                       display: 'flex',
@@ -1613,16 +1626,21 @@ export default function Dashboard() {
                   background: 'rgba(255, 255, 255, 0.05)',
                   borderRadius: '16px',
                   padding: '1rem',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  height: '250px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden'
                 }}>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>🏆 Top Chatters & Topics</h3>
-                  {topChatters.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                      <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
-                      <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>Waiting for your first chatters...</p>
-                    </div>
-                  ) : (
-                    <ul style={{ listStyle: 'none', padding: 0, margin: '0.75rem 0 0 0' }}>
+                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>🏆 Top Chatters & Topics</h3>
+                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+                    {topChatters.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
+                        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>Waiting for your first chatters...</p>
+                      </div>
+                    ) : (
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                       {topChatters.map((c) => (
                         <li key={c.username} style={{
                           padding: '0.5rem 0',
@@ -1649,8 +1667,9 @@ export default function Dashboard() {
                           )}
                         </li>
                       ))}
-                    </ul>
-                  )}
+                      </ul>
+                    )}
+                  </div>
                 </div>
 
                 {/* Questions - always visible */}
@@ -1659,10 +1678,10 @@ export default function Dashboard() {
                   borderRadius: '16px',
                   padding: '1rem',
                   border: '1px solid rgba(255, 159, 159, 0.3)',
-                  flex: 1,
-                  minHeight: 0,
+                  height: '350px',
                   display: 'flex',
-                  flexDirection: 'column'
+                  flexDirection: 'column',
+                  overflow: 'hidden'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -1736,7 +1755,7 @@ export default function Dashboard() {
       </div>
 
       {/* CSS Animations */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
@@ -1775,7 +1794,29 @@ export default function Dashboard() {
             transform: scale(1.05);
           }
         }
-      `}</style>
+        /* Custom Scrollbar Styles */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(94, 234, 212, 0.3);
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(94, 234, 212, 0.5);
+        }
+        /* Firefox Scrollbar */
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(94, 234, 212, 0.3) rgba(0, 0, 0, 0.3);
+        }
+      `}} />
     </div>
   )
 }
