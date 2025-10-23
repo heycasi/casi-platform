@@ -149,6 +149,182 @@ This document tracks all development sessions and what was accomplished each nig
 
 ---
 
+## **Session 3 - October 23, 2025**
+**Duration:** ~4 hours
+**Focus:** Activity Feed Implementation & EventSub Webhook Integration
+
+### **What We Built**
+
+**🎯 Complete Activity Feed System**
+- ✅ Implemented real-time Activity Feed component showing stream events
+- ✅ Created `/api/webhooks/twitch-events` endpoint to receive EventSub webhooks
+- ✅ Built webhook signature verification using HMAC SHA256
+- ✅ Created event storage in `stream_events` table
+- ✅ Implemented real-time polling (10-second intervals)
+- ✅ Added visual event cards with icons, colors, and timestamps
+
+**🔐 User Authorization & Token Management**
+- ✅ Updated Twitch OAuth scopes to request all required permissions:
+  - `channel:read:subscriptions` - for sub events
+  - `moderator:read:followers` - for follow events
+  - `bits:read` - for bit/cheer events
+- ✅ Stored Twitch access_token and refresh_token in Supabase user metadata
+- ✅ Updated auth callback to store tokens on every login
+- ✅ Rewritten `/api/subscribe-user-events` to use user access tokens
+
+**🎭 Hybrid Admin System (Option 1)**
+- ✅ Created `/api/admin/setup-raid-subscription` - admins can monitor any streamer's raids
+- ✅ Created `/api/check-streamer-authorization` - checks if streamer has authorized
+- ✅ Added authorization status banner in Activity Feed
+- ✅ Auto-setup raid subscriptions when admin enters channel name
+- ✅ Clear UX showing "Available: Raids" vs "Requires auth: Subs, Follows, Bits"
+
+**📊 Event Types Supported**
+- ⭐ `channel.subscribe` - New subscriptions
+- 🎁 `channel.subscription.message` - Resubs with messages
+- ❤️ `channel.follow` - New followers
+- 💎 `channel.cheer` - Bit donations
+- ⚔️ `channel.raid` - Incoming raids
+
+### **What We Fixed**
+
+**🐛 Critical Webhook Verification Failure**
+- ❌ **Root Cause #1:** Webhook URL was `https://heycasi.com` but Vercel redirects to `https://www.heycasi.com`
+  - Twitch sends webhook to `heycasi.com`
+  - Gets HTTP 307 redirect
+  - Twitch doesn't follow redirects → verification fails
+- ✅ **Solution:** Updated all webhook URLs to use `https://www.heycasi.com` (with www)
+
+- ❌ **Root Cause #2:** EventSub subscription types require different authorization:
+  - Subs/Follows/Bits need **user access tokens** (not app tokens)
+  - Was using app tokens for all subscriptions → forbidden errors
+- ✅ **Solution:** Implemented user token storage and usage in subscription API
+
+**🔧 Other Fixes**
+- ✅ Fixed Activity Feed to query by `channel_name` instead of email (works for admins)
+- ✅ Fixed admin session persistence - saves `adminChannel` in localStorage
+- ✅ Fixed session save logic to allow admin saves without sessionId
+- ✅ Removed chat feed auto-scroll (was scrolling to old messages)
+
+### **What We Tested**
+
+**✅ Webhook Verification**
+- Tested signature calculation with HMAC SHA256
+- Verified webhook endpoint responds with challenge
+- Confirmed HTTP 200 response with correct www domain
+- Created test subscription for fifakillvizualz - successfully enabled!
+
+**✅ Subscription Creation**
+- Deleted all 61 failed subscriptions
+- Created fresh raid subscription - status: **enabled** ✅
+- Confirmed webhook verification passed
+
+**📋 Scripts Created for Testing**
+- `scripts/check-subscriptions.sh` - List all EventSub subscriptions
+- `scripts/delete-all-subscriptions.sh` - Clean up failed subscriptions
+- `scripts/create-subscription.sh` - Create subscriptions for testing
+- `scripts/test-webhook.sh` - Test webhook with proper HMAC signature
+
+### **What We Deployed**
+
+**Commit 1:** `0b39f5a` - "fix: Update webhook URL to use www.heycasi.com to avoid redirect"
+- Fixed webhook URL in all scripts
+- Added subscription management scripts
+
+**Commit 2:** `78bf1a3` - "feat: Enable all Activity Feed event types with user authorization"
+- OAuth scopes updated
+- Token storage implemented
+- User-authorized subscriptions API
+- All 5 event types supported
+
+**Commit 3:** `2e6c70a` - "feat: Hybrid Activity Feed for admins - raid events without authorization"
+- Admin raid subscription API
+- Authorization check API
+- Activity Feed authorization notice
+- Auto-setup for admin channels
+
+### **🏗️ Technical Architecture**
+
+**EventSub Webhook Flow:**
+```
+Twitch → HTTPS POST → www.heycasi.com/api/webhooks/twitch-events
+         ↓
+    Verify HMAC signature
+         ↓
+    Parse event type
+         ↓
+    Store in stream_events table
+         ↓
+    Activity Feed polls every 10s
+         ↓
+    Display to user in real-time
+```
+
+**Authorization Levels:**
+```
+App Access Token:
+  ✅ channel.raid
+
+User Access Token (requires streamer login):
+  ✅ channel.subscribe
+  ✅ channel.subscription.message
+  ✅ channel.follow
+  ✅ channel.cheer
+```
+
+### **📊 Database Changes**
+- Using existing `stream_events` table
+- Storing events with:
+  - `channel_name` (for admin queries)
+  - `channel_email` (for user queries)
+  - `event_type`, `event_data`, `event_timestamp`
+  - `user_id`, `user_name`, `user_display_name`
+
+### **🎯 Status at End of Session**
+
+**✅ Fully Working:**
+- Webhook verification passing
+- Raid events enabled for fifakillvizualz
+- Activity Feed component complete
+- Admin hybrid system operational
+- Session persistence for admins
+- Authorization status checking
+
+**⏳ Pending Testing (Tomorrow):**
+- millzaatv login and authorization
+- Full event types (subs, follows, bits, raids)
+- Real-time event display during live stream
+- Admin monitoring of millzaatv's channel
+
+**🎓 Key Learnings:**
+1. Twitch doesn't follow HTTP redirects during webhook verification
+2. EventSub requires different token types for different event subscriptions
+3. User access tokens must be stored and refreshed for ongoing access
+4. Hybrid approach gives admins immediate value (raids) while encouraging full authorization
+
+### **📝 Files Changed**
+
+**New Files Created:**
+- `src/app/api/admin/setup-raid-subscription/route.ts`
+- `src/app/api/check-streamer-authorization/route.ts`
+- `scripts/delete-all-subscriptions.sh`
+- `scripts/create-subscription.sh`
+- `scripts/test-webhook.sh`
+
+**Files Modified:**
+- `src/app/login/page.tsx` - OAuth scopes
+- `src/app/auth/callback/page.tsx` - Token storage
+- `src/app/api/subscribe-user-events/route.ts` - User token usage
+- `src/components/ActivityFeed.tsx` - Authorization status
+- `src/app/dashboard/page.tsx` - Admin auto-setup
+- `scripts/setup-twitch-eventsub-simple.sh` - www URL
+- `scripts/setup-twitch-eventsub.sh` - www URL
+
+**Git Commits:** 3 commits | ~500 lines added
+**Production Status:** ✅ All deployed and live
+
+---
+
 ## **Session Template (for future sessions)**
 
 ## **Session [NUMBER] - [DATE]**
