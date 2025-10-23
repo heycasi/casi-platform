@@ -326,7 +326,17 @@ export default function Dashboard() {
   const startSession = async () => {
     if (email && channelName) {
       try {
-        const sessionId = await AnalyticsService.createSession(email, channelName)
+        const response = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ streamerEmail: email, channelName })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create session')
+        }
+
+        const { sessionId } = await response.json()
         setCurrentSessionId(sessionId)
         console.log('Started session:', sessionId)
       } catch (error) {
@@ -339,8 +349,15 @@ export default function Dashboard() {
   const endSession = async () => {
     if (currentSessionId) {
       try {
-        await AnalyticsService.endSession(currentSessionId)
-        console.log('Ended session:', currentSessionId)
+        const response = await fetch('/api/sessions', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSessionId })
+        })
+
+        if (response.ok) {
+          console.log('Ended session:', currentSessionId)
+        }
 
         // Only generate reports for regular users, not admins monitoring other channels
         if (!isAdmin) {
