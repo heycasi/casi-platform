@@ -12,7 +12,7 @@ echo ""
 # Configuration
 CLIENT_ID="8lmg8rwlkhlom3idj51xka2eipxd18"
 CLIENT_SECRET="iyup8v7s485sg1flaj018xcon1z9w5"
-WEBHOOK_URL="https://heycasi.com/api/webhooks/twitch-events"
+WEBHOOK_URL="https://www.heycasi.com/api/webhooks/twitch-events"
 SECRET="d2bd5da65bffed6462aef4f8adbd44a1b7ba5223560a92e85549c91fd9d20854"
 
 # Colors

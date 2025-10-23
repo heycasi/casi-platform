@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-WEBHOOK_URL="https://heycasi.com/api/webhooks/twitch-events"
+WEBHOOK_URL="https://www.heycasi.com/api/webhooks/twitch-events"
 SECRET="d2bd5da65bffed6462aef4f8adbd44a1b7ba5223560a92e85549c91fd9d20854"
 
 # Check if twitch CLI is installed
