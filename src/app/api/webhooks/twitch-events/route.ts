@@ -39,21 +39,26 @@ export async function POST(request: NextRequest) {
 
     const messageType = request.headers.get('Twitch-Eventsub-Message-Type')
 
-    // Verify Twitch signature
+    // Handle webhook verification challenge FIRST (before signature check)
+    if (messageType === 'webhook_callback_verification') {
+      console.log('✅ Webhook verification challenge received')
+      // Verify signature for the challenge
+      if (!verifyTwitchSignature(request, body)) {
+        console.error('❌ Invalid Twitch signature for verification challenge')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
+      }
+      return new NextResponse(data.challenge, {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' }
+      })
+    }
+
+    // Verify Twitch signature for all other message types
     if (!verifyTwitchSignature(request, body)) {
       console.error('❌ Invalid Twitch signature')
       console.error('Message Type:', messageType)
       console.error('Has Secret:', !!process.env.TWITCH_EVENTSUB_SECRET)
       return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
-    }
-
-    // Handle webhook verification challenge
-    if (messageType === 'webhook_callback_verification') {
-      console.log('✅ Webhook verification challenge received')
-      return new NextResponse(data.challenge, {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain' }
-      })
     }
 
     // Handle revocation
