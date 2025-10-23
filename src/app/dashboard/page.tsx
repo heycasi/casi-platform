@@ -165,6 +165,42 @@ export default function Dashboard() {
     if (savedEmail) {
       setEmail(savedEmail)
     }
+
+    // Restore session state from localStorage
+    try {
+      const savedSession = localStorage.getItem('casi_active_session')
+      if (savedSession) {
+        const session = JSON.parse(savedSession)
+
+        // Only restore if session is less than 12 hours old
+        const sessionAge = Date.now() - session.timestamp
+        if (sessionAge < 12 * 60 * 60 * 1000) {
+          setCurrentSessionId(session.sessionId)
+          setIsConnected(session.isConnected)
+          setStreamStartTime(session.streamStartTime)
+          setMessages(session.messages || [])
+          setQuestions(session.questions || [])
+          setStats(session.stats || {
+            totalMessages: 0,
+            questions: 0,
+            avgSentiment: 0,
+            positiveMessages: 0,
+            negativeMessages: 0,
+            viewerCount: 0,
+            activeUsers: 0,
+            currentMood: 'Neutral'
+          })
+          setTopChatters(session.topChatters || [])
+          console.log('Restored session:', session.sessionId)
+        } else {
+          // Clear old session
+          localStorage.removeItem('casi_active_session')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to restore session:', error)
+      localStorage.removeItem('casi_active_session')
+    }
   }, [])
 
   // Check user access (subscription or trial)
@@ -222,6 +258,35 @@ export default function Dashboard() {
 
   // Removed auto-scroll - newest messages now appear at top
 
+  // Save session state to localStorage whenever it changes
+  useEffect(() => {
+    if (!currentSessionId || !isConnected) return
+
+    const sessionState = {
+      sessionId: currentSessionId,
+      isConnected,
+      streamStartTime,
+      messages: messages.slice(-100), // Keep last 100 messages to avoid localStorage limits
+      questions: questions.slice(-50), // Keep last 50 questions
+      stats,
+      topChatters: topChatters.slice(0, 10), // Keep top 10 chatters
+      timestamp: Date.now()
+    }
+
+    try {
+      localStorage.setItem('casi_active_session', JSON.stringify(sessionState))
+    } catch (error) {
+      console.error('Failed to save session state:', error)
+    }
+  }, [currentSessionId, isConnected, streamStartTime, messages, questions, stats, topChatters])
+
+  // Clear session state when disconnecting
+  useEffect(() => {
+    if (!isConnected && currentSessionId === null) {
+      localStorage.removeItem('casi_active_session')
+    }
+  }, [isConnected, currentSessionId])
+
   // Auto-connect when Twitch user is present and live
   useEffect(() => {
     if (!twitchUser || isConnected || isAdmin) return // Don't auto-connect for admins
@@ -278,6 +343,9 @@ export default function Dashboard() {
       }
     }
     setStreamStartTime(null)
+
+    // Clear session state from localStorage
+    localStorage.removeItem('casi_active_session')
   }
 
   // Duration ticker lifecycle
@@ -317,7 +385,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
-    startSession()
+    // Only create a new session if one doesn't exist
+    if (!currentSessionId) {
+      startSession()
+    }
 
     let ws: WebSocket | null = null
     let viewerInterval: number | null = null
