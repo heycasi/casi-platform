@@ -1350,7 +1350,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Analytics - Compact Stats */}
+            {/* Analytics - v2.0 Compact Stats */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))',
