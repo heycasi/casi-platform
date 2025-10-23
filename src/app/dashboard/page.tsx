@@ -267,10 +267,13 @@ export default function Dashboard() {
 
   // Save session state to localStorage whenever it changes
   useEffect(() => {
-    if (!currentSessionId || !isConnected) return
+    // For admins, save even without a sessionId (they might be monitoring without a session)
+    // For regular users, require both sessionId and connection
+    if (!isConnected) return
+    if (!isAdmin && !currentSessionId) return
 
     const sessionState = {
-      sessionId: currentSessionId,
+      sessionId: currentSessionId || null,
       isConnected,
       streamStartTime,
       messages: messages.slice(-100), // Keep last 100 messages to avoid localStorage limits
@@ -283,6 +286,7 @@ export default function Dashboard() {
 
     try {
       localStorage.setItem('casi_active_session', JSON.stringify(sessionState))
+      console.log('Session saved:', { channel: channelName, adminChannel: sessionState.adminChannel })
     } catch (error) {
       console.error('Failed to save session state:', error)
     }
