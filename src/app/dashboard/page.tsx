@@ -220,12 +220,7 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [email])
 
-  // Auto-scroll chat feed to bottom when new messages arrive
-  useEffect(() => {
-    if (chatFeedRef.current) {
-      chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight
-    }
-  }, [messages])
+  // Removed auto-scroll - newest messages now appear at top
 
   // Auto-connect when Twitch user is present and live
   useEffect(() => {
