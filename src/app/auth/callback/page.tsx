@@ -136,6 +136,17 @@ function AuthCallbackContent() {
             if (signUpError) {
               console.error('Supabase signup error:', signUpError)
               setStatus('⚠️ Account creation failed, but you can still use the dashboard')
+            } else {
+              // Subscribe to Twitch events for this new user
+              try {
+                await fetch('/api/subscribe-user-events', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ broadcaster_user_id: tokenData.user.id })
+                })
+              } catch (error) {
+                console.error('Failed to subscribe to events:', error)
+              }
             }
           }
         }
