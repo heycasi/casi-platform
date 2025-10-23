@@ -96,15 +96,47 @@ export class EmailService {
         to: [email],
         subject: '🧪 Test Email from Casi',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #6932FF;">🤖 Test Email</h1>
-            <p>This is a test email from your Casi platform to verify email delivery is working!</p>
-            <p>If you received this, your email configuration is set up correctly.</p>
-            <hr style="border: 1px solid #eee; margin: 20px 0;">
-            <p style="color: #666; font-size: 14px;">
-              <strong>Casi</strong> • Your stream's brainy co-pilot
-            </p>
-          </div>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+          </head>
+          <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15)); background-color: #1a1a2e; position: relative;">
+            <!-- Background robot mascot -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; pointer-events: none; z-index: 0; display: flex; align-items: center; justify-content: center;">
+              <img src="https://heycasi.com/landing-robot.png" alt="" style="width: 850px; height: auto; max-width: 100%; object-fit: contain; opacity: 0.08; filter: brightness(0.7);" />
+            </div>
+
+            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 1;">
+
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #6932FF 0%, #932FFE 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 32px;">🧪 Test Email</h1>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px;">
+                <p style="font-size: 18px; color: #333; margin-bottom: 20px;">This is a test email from your Casi platform to verify email delivery is working!</p>
+                <p style="font-size: 16px; color: #666; margin-bottom: 20px;">If you received this, your email configuration is set up correctly.</p>
+
+                <div style="background: rgba(105, 50, 255, 0.05); border-left: 4px solid #6932FF; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                  <p style="margin: 0; color: #333; font-weight: 600;">✅ Email delivery confirmed</p>
+                  <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">All systems are working correctly!</p>
+                </div>
+
+                <p style="color: #666; font-size: 14px; margin-top: 30px;">Questions? Just reply to this email - we're here to help!</p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #f8f9fb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0; color: #6932FF; font-weight: 700;">Casi</p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Your stream's brainy co-pilot</p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       })
 

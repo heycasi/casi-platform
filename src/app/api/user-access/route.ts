@@ -41,9 +41,12 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Check if it's a beta trial
-    if (subscription.is_beta_trial) {
-      const trialEndsAt = new Date(subscription.trial_ends_at)
+    // Check if it's a trial (either is_beta_trial flag or status='trialing')
+    const isTrialing = subscription.is_beta_trial || subscription.status === 'trialing'
+    const trialEndDate = subscription.trial_ends_at || subscription.trial_end
+
+    if (isTrialing && trialEndDate) {
+      const trialEndsAt = new Date(trialEndDate)
       const now = new Date()
 
       if (trialEndsAt > now) {
@@ -54,9 +57,9 @@ export async function GET(req: NextRequest) {
           has_access: true,
           status: 'trial',
           is_trial: true,
-          trial_ends_at: subscription.trial_ends_at,
+          trial_ends_at: trialEndDate,
           trial_days_remaining: daysRemaining,
-          plan_name: subscription.plan_name,
+          plan_name: subscription.plan_name || subscription.tier_name,
           beta_code: subscription.beta_code,
           message: `You have ${daysRemaining} days remaining in your beta trial.`
         })
@@ -67,7 +70,7 @@ export async function GET(req: NextRequest) {
           status: 'trial_expired',
           is_trial: true,
           trial_ended: true,
-          trial_ends_at: subscription.trial_ends_at,
+          trial_ends_at: trialEndDate,
           message: 'Your beta trial has expired. Please subscribe to continue using Casi.',
           require_subscription: true
         })

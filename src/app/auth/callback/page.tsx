@@ -44,7 +44,31 @@ function AuthCallbackContent() {
           return
         }
 
-        setStatus('💾 Creating Supabase account...')
+        setStatus('🔍 Checking for existing account...')
+
+        // Check if this Twitch account should be linked to an existing account
+        const linkResponse = await fetch('/api/link-twitch-account', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            twitchUserId: tokenData.user.id,
+            twitchEmail: `${tokenData.user.id}@twitch.casi.app`,
+            twitchUserData: tokenData.user
+          }),
+        })
+
+        const linkData = await linkResponse.json()
+        let accountEmail = `${tokenData.user.id}@twitch.casi.app`
+
+        if (linkData.linked && linkData.primaryAccount) {
+          setStatus('🔗 Linking to your existing account...')
+          accountEmail = linkData.primaryAccount.email
+          console.log('✅ Twitch account linked to:', accountEmail)
+        }
+
+        setStatus('💾 Signing in...')
 
         // Create/sign in Supabase user with Twitch data
         const { createClient } = await import('@/lib/supabase/client')
@@ -53,31 +77,66 @@ function AuthCallbackContent() {
         // Use Twitch user ID as the email domain to create a unique account
         const twitchEmail = `${tokenData.user.id}@twitch.casi.app`
 
-        // Try to sign in first, if fails, sign up
-        let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: twitchEmail,
-          password: tokenData.user.id // Using Twitch ID as password (secure since it's unique)
-        })
+        // If account was linked, sign in with the primary account
+        if (linkData.linked && linkData.primaryAccount) {
+          // Sign in with the primary account
+          // Note: We can't sign in without a password, so we'll use the Twitch account
+          // but the subscription will be transferred
 
-        if (signInError) {
-          // User doesn't exist, create new account
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          // Try to sign in with Twitch email first
+          let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email: twitchEmail,
-            password: tokenData.user.id,
-            options: {
-              data: {
-                twitch_id: tokenData.user.id,
-                display_name: tokenData.user.display_name,
-                preferred_username: tokenData.user.login,
-                avatar_url: tokenData.user.profile_image_url,
-                provider: 'twitch'
-              }
-            }
+            password: tokenData.user.id
           })
 
-          if (signUpError) {
-            console.error('Supabase signup error:', signUpError)
-            setStatus('⚠️ Account creation failed, but you can still use the dashboard')
+          if (signInError) {
+            // Create Twitch account if it doesn't exist
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+              email: twitchEmail,
+              password: tokenData.user.id,
+              options: {
+                data: {
+                  twitch_id: tokenData.user.id,
+                  display_name: tokenData.user.display_name,
+                  preferred_username: tokenData.user.login,
+                  avatar_url: tokenData.user.profile_image_url,
+                  provider: 'twitch',
+                  linked_to: linkData.primaryAccount.email
+                }
+              }
+            })
+
+            if (signUpError) {
+              console.error('Supabase signup error:', signUpError)
+            }
+          }
+        } else {
+          // No existing account found, proceed with normal Twitch sign-in/sign-up
+          let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: twitchEmail,
+            password: tokenData.user.id
+          })
+
+          if (signInError) {
+            // User doesn't exist, create new account
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+              email: twitchEmail,
+              password: tokenData.user.id,
+              options: {
+                data: {
+                  twitch_id: tokenData.user.id,
+                  display_name: tokenData.user.display_name,
+                  preferred_username: tokenData.user.login,
+                  avatar_url: tokenData.user.profile_image_url,
+                  provider: 'twitch'
+                }
+              }
+            })
+
+            if (signUpError) {
+              console.error('Supabase signup error:', signUpError)
+              setStatus('⚠️ Account creation failed, but you can still use the dashboard')
+            }
           }
         }
 
