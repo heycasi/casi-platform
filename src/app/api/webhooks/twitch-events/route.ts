@@ -37,13 +37,15 @@ export async function POST(request: NextRequest) {
     const body = await request.text()
     const data = JSON.parse(body)
 
+    const messageType = request.headers.get('Twitch-Eventsub-Message-Type')
+
     // Verify Twitch signature
     if (!verifyTwitchSignature(request, body)) {
       console.error('❌ Invalid Twitch signature')
+      console.error('Message Type:', messageType)
+      console.error('Has Secret:', !!process.env.TWITCH_EVENTSUB_SECRET)
       return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
     }
-
-    const messageType = request.headers.get('Twitch-Eventsub-Message-Type')
 
     // Handle webhook verification challenge
     if (messageType === 'webhook_callback_verification') {
