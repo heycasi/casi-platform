@@ -20,6 +20,11 @@ interface ActivityFeedProps {
 export default function ActivityFeed({ channelName, maxHeight = '500px' }: ActivityFeedProps) {
   const [events, setEvents] = useState<StreamEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [authStatus, setAuthStatus] = useState<{
+    authorized: boolean
+    hasAccount: boolean
+    message: string
+  } | null>(null)
 
   useEffect(() => {
     if (!channelName) return
@@ -39,7 +44,18 @@ export default function ActivityFeed({ channelName, maxHeight = '500px' }: Activ
       }
     }
 
+    const checkAuthorization = async () => {
+      try {
+        const response = await fetch(`/api/check-streamer-authorization?channelName=${encodeURIComponent(channelName)}`)
+        const data = await response.json()
+        setAuthStatus(data)
+      } catch (error) {
+        console.error('Failed to check authorization:', error)
+      }
+    }
+
     fetchEvents()
+    checkAuthorization()
 
     // Poll for new events every 10 seconds
     const interval = setInterval(fetchEvents, 10000)
@@ -144,6 +160,36 @@ export default function ActivityFeed({ channelName, maxHeight = '500px' }: Activ
           </span>
         )}
       </h3>
+
+      {/* Authorization Notice */}
+      {authStatus && !authStatus.authorized && (
+        <div style={{
+          background: 'rgba(255, 165, 0, 0.1)',
+          border: '1px solid rgba(255, 165, 0, 0.3)',
+          borderRadius: '8px',
+          padding: '0.75rem',
+          marginBottom: '1rem',
+          fontSize: '0.85rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+            <strong>Limited Event Access</strong>
+          </div>
+          <p style={{ margin: '0 0 0.5rem 0', color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.4' }}>
+            {authStatus.message}
+          </p>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            padding: '0.5rem',
+            borderRadius: '6px',
+            fontSize: '0.8rem',
+            color: 'rgba(255, 255, 255, 0.7)'
+          }}>
+            <div style={{ marginBottom: '0.3rem' }}>✅ <strong>Available:</strong> Raid events</div>
+            <div>🔒 <strong>Requires auth:</strong> Subs, Follows, Bits</div>
+          </div>
+        </div>
+      )}
 
       <div style={{
         flex: 1,

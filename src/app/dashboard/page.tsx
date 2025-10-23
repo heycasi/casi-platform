@@ -1181,13 +1181,32 @@ export default function Dashboard() {
                     }}
                   />
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (adminChannelInput.trim()) {
-                        setChannelName(adminChannelInput.trim())
+                        const channel = adminChannelInput.trim()
+                        setChannelName(channel)
                         setIsConnected(true)
                         setMessages([])
                         setQuestions([])
                         setMotivationalMessage(null)
+
+                        // Automatically set up raid subscription for this channel
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession()
+                          if (session?.access_token) {
+                            await fetch('/api/admin/setup-raid-subscription', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${session.access_token}`
+                              },
+                              body: JSON.stringify({ channelName: channel })
+                            })
+                            console.log(`✅ Raid subscription set up for ${channel}`)
+                          }
+                        } catch (error) {
+                          console.error('Failed to set up raid subscription:', error)
+                        }
                       }
                     }}
                     disabled={!adminChannelInput.trim()}
