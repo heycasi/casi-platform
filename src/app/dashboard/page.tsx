@@ -1434,7 +1434,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Main Content Area */}
+            {/* Main Content Area - 3 Column Layout */}
             <div style={{
               display: 'flex',
               flexDirection: window.innerWidth < 900 ? 'column' : 'row',
@@ -1443,14 +1443,20 @@ export default function Dashboard() {
               minHeight: '400px',
               minWidth: 0
             }}>
-              {/* Chat Feed (60%) */}
+              {/* LEFT COLUMN - Chat Feed + Questions (45%) */}
+              <div style={{
+                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 45%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                minWidth: 0
+              }}>
               <div style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 borderRadius: '16px',
                 padding: '1rem',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 60%',
-                height: '380px',
+                height: '300px',
                 display: 'flex',
                 flexDirection: 'column',
                 minWidth: 0
@@ -1584,7 +1590,58 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Right Column (40%) - Stream Preview + Top Chatters + Questions */}
+              {/* Questions Panel - Moved to Left Column */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
+                borderRadius: '16px',
+                padding: '1rem',
+                border: '1px solid rgba(255, 159, 159, 0.3)',
+                height: '350px',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '1rem'
+                }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
+                    🚨 Questions ({questions.length})
+                  </h3>
+                  <div style={{
+                    background: '#FF9F9F',
+                    color: '#151E3C',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '8px',
+                    fontSize: '0.7rem',
+                    fontWeight: '600'
+                  }}>
+                    PRIORITY
+                  </div>
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
+                  {questions.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                      <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👀</div>
+                      <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', fontWeight: '500' }}>No questions yet — looks like chat's chill for now 😌</p>
+                    </div>
+                  ) : (
+                    questions.slice(-10).reverse().map((q) => (
+                      <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>@{q.username}</span>
+                        </div>
+                        <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.8rem', lineHeight: '1.3' }}>{q.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              </div>
+
+              {/* Right Column (40%) - Stream Preview + Top Chatters */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%', minWidth: 0, minHeight: 0 }}>
                 {/* Stream Preview */}
                 <div style={{
@@ -1670,55 +1727,6 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Questions - always visible */}
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
-                  borderRadius: '16px',
-                  padding: '1rem',
-                  border: '1px solid rgba(255, 159, 159, 0.3)',
-                  height: '420px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '1rem'
-                  }}>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
-                      🚨 Questions ({questions.length})
-                    </h3>
-                    <div style={{
-                      background: '#FF9F9F',
-                      color: '#151E3C',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '8px',
-                      fontSize: '0.7rem',
-                      fontWeight: '600'
-                    }}>
-                      PRIORITY
-                    </div>
-                  </div>
-                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
-                    {questions.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👀</div>
-                        <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', fontWeight: '500' }}>No questions yet — looks like chat's chill for now 😌</p>
-                      </div>
-                    ) : (
-                      questions.slice(-10).reverse().map((q) => (
-                        <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                            <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>@{q.username}</span>
-                          </div>
-                          <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.8rem', lineHeight: '1.3' }}>{q.message}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
           </>
