@@ -15,7 +15,7 @@ export default function LoginPage() {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
-      scope: 'user:read:email chat:read channel:read:subscriptions',
+      scope: 'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
       force_verify: 'true'
     })
 

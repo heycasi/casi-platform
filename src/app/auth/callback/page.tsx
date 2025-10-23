@@ -101,7 +101,9 @@ function AuthCallbackContent() {
                   preferred_username: tokenData.user.login,
                   avatar_url: tokenData.user.profile_image_url,
                   provider: 'twitch',
-                  linked_to: linkData.primaryAccount.email
+                  linked_to: linkData.primaryAccount.email,
+                  twitch_access_token: tokenData.access_token,
+                  twitch_refresh_token: tokenData.refresh_token
                 }
               }
             })
@@ -128,7 +130,9 @@ function AuthCallbackContent() {
                   display_name: tokenData.user.display_name,
                   preferred_username: tokenData.user.login,
                   avatar_url: tokenData.user.profile_image_url,
-                  provider: 'twitch'
+                  provider: 'twitch',
+                  twitch_access_token: tokenData.access_token,
+                  twitch_refresh_token: tokenData.refresh_token
                 }
               }
             })
@@ -142,13 +146,32 @@ function AuthCallbackContent() {
                 await fetch('/api/subscribe-user-events', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ broadcaster_user_id: tokenData.user.id })
+                  body: JSON.stringify({
+                    broadcaster_user_id: tokenData.user.id,
+                    user_access_token: tokenData.access_token
+                  })
                 })
               } catch (error) {
                 console.error('Failed to subscribe to events:', error)
               }
             }
           }
+        }
+
+        // Update user metadata with fresh tokens (for both new and existing users)
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: {
+            twitch_access_token: tokenData.access_token,
+            twitch_refresh_token: tokenData.refresh_token,
+            twitch_id: tokenData.user.id,
+            display_name: tokenData.user.display_name,
+            preferred_username: tokenData.user.login,
+            avatar_url: tokenData.user.profile_image_url
+          }
+        })
+
+        if (updateError) {
+          console.error('Failed to update user metadata:', updateError)
         }
 
         // Store tokens in localStorage as well for backward compatibility
