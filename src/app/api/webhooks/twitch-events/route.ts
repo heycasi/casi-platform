@@ -42,11 +42,21 @@ export async function POST(request: NextRequest) {
     // Handle webhook verification challenge FIRST (before signature check)
     if (messageType === 'webhook_callback_verification') {
       console.log('✅ Webhook verification challenge received')
+      console.log('Headers:', {
+        messageId: request.headers.get('Twitch-Eventsub-Message-Id'),
+        timestamp: request.headers.get('Twitch-Eventsub-Message-Timestamp'),
+        signature: request.headers.get('Twitch-Eventsub-Message-Signature'),
+      })
+      console.log('Body length:', body.length)
+      console.log('Has secret:', !!process.env.TWITCH_EVENTSUB_SECRET)
+      console.log('Secret length:', process.env.TWITCH_EVENTSUB_SECRET?.length)
+
       // Verify signature for the challenge
       if (!verifyTwitchSignature(request, body)) {
         console.error('❌ Invalid Twitch signature for verification challenge')
         return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
       }
+      console.log('✅ Signature verified successfully!')
       return new NextResponse(data.challenge, {
         status: 200,
         headers: { 'Content-Type': 'text/plain' }
