@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
 import { AnalyticsService } from '../../lib/analytics'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
+import ActivityFeed from '@/components/ActivityFeed'
 
 interface TierStatus {
   avgViewers: number
@@ -1443,9 +1444,9 @@ export default function Dashboard() {
               minHeight: '400px',
               minWidth: 0
             }}>
-              {/* LEFT COLUMN - Chat Feed + Questions (45%) */}
+              {/* LEFT COLUMN - Chat Feed + Questions (40%) */}
               <div style={{
-                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 45%',
+                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1rem',
@@ -1641,8 +1642,8 @@ export default function Dashboard() {
               </div>
               </div>
 
-              {/* Right Column (40%) - Stream Preview + Top Chatters */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%', minWidth: 0, minHeight: 0 }}>
+              {/* MIDDLE COLUMN (30%) - Stream Preview + Top Chatters */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 30%', minWidth: 0, minHeight: 0 }}>
                 {/* Stream Preview */}
                 <div style={{
                   background: 'rgba(255, 255, 255, 0.05)',
@@ -1726,7 +1727,15 @@ export default function Dashboard() {
                     )}
                   </div>
                 </div>
+              </div>
 
+              {/* RIGHT COLUMN (25%) - Activity Feed */}
+              <div style={{
+                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 25%',
+                minWidth: 0,
+                minHeight: 0
+              }}>
+                <ActivityFeed email={email} maxHeight="650px" />
               </div>
             </div>
           </>
