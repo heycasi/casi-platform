@@ -345,8 +345,8 @@ export default function Dashboard() {
     }
   }
 
-  // End session and generate report
-  const endSession = async () => {
+  // End session and optionally generate report
+  const endSession = async (skipReport = false) => {
     if (currentSessionId) {
       try {
         const response = await fetch('/api/sessions', {
@@ -356,24 +356,65 @@ export default function Dashboard() {
         })
 
         if (response.ok) {
-          console.log('Ended session:', currentSessionId)
+          console.log('✅ Ended session:', currentSessionId)
         }
 
         // Only generate reports for regular users, not admins monitoring other channels
-        if (!isAdmin) {
+        if (!isAdmin && !skipReport) {
+          console.log('📊 Scheduling report generation in 2 seconds...')
           setTimeout(() => {
             generateReport(currentSessionId)
           }, 2000)
-        } else {
-          console.log('Admin user - skipping automatic report generation')
+        } else if (isAdmin) {
+          console.log('👤 Admin user - skipping automatic report generation')
+        } else if (skipReport) {
+          console.log('⏭️ Report generation skipped (manual disconnect)')
         }
       } catch (error) {
-        console.error('Failed to end session:', error)
+        console.error('❌ Failed to end session:', error)
       }
     }
     setStreamStartTime(null)
 
     // Clear session state from localStorage
+    localStorage.removeItem('casi_active_session')
+  }
+
+  // Manual disconnect with report generation
+  const handleManualDisconnect = async () => {
+    if (currentSessionId && !isAdmin) {
+      setIsGeneratingReport(true)
+      try {
+        // End the session first
+        const response = await fetch('/api/sessions', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSessionId })
+        })
+
+        if (response.ok) {
+          console.log('✅ Session ended via manual disconnect')
+        }
+
+        // Generate report immediately
+        console.log('📊 Generating post-stream report...')
+        await generateReport(currentSessionId)
+
+      } catch (error) {
+        console.error('❌ Failed during manual disconnect:', error)
+      } finally {
+        setIsGeneratingReport(false)
+      }
+    }
+
+    // Disconnect UI
+    setIsConnected(false)
+    setMessages([])
+    setQuestions([])
+    setMotivationalMessage(null)
+    setCurrentSessionId(null)
+    setAdminChannelInput('')
+    setStreamStartTime(null)
     localStorage.removeItem('casi_active_session')
   }
 
@@ -1330,26 +1371,35 @@ export default function Dashboard() {
               )}
 
               <button
-                onClick={() => {
-                  setIsConnected(false)
-                  setMessages([])
-                  setQuestions([])
-                  setMotivationalMessage(null)
-                  setCurrentSessionId(null)
-                  setAdminChannelInput('')
-                }}
+                onClick={handleManualDisconnect}
+                disabled={isGeneratingReport}
                 style={{
-                  padding: '0.3rem 0.6rem',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: 'none',
+                  padding: '0.4rem 0.8rem',
+                  background: isGeneratingReport
+                    ? 'linear-gradient(135deg, rgba(147, 47, 254, 0.3), rgba(105, 50, 255, 0.3))'
+                    : isAdmin
+                      ? 'rgba(255, 159, 159, 0.2)'
+                      : 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.2))',
+                  border: isGeneratingReport
+                    ? '1px solid rgba(147, 47, 254, 0.5)'
+                    : isAdmin
+                      ? '1px solid rgba(255, 159, 159, 0.4)'
+                      : '1px solid rgba(184, 238, 138, 0.4)',
                   borderRadius: '12px',
-                  color: 'white',
-                  cursor: 'pointer',
+                  color: isGeneratingReport ? '#B8A4FF' : isAdmin ? '#FF9F9F' : '#B8EE8A',
+                  cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
                   fontSize: '0.7rem',
-                  fontFamily: 'Poppins, Arial, sans-serif'
+                  fontWeight: '600',
+                  fontFamily: 'Poppins, Arial, sans-serif',
+                  opacity: isGeneratingReport ? 0.7 : 1,
+                  transition: 'all 0.3s ease'
                 }}
               >
-                Disconnect
+                {isGeneratingReport
+                  ? '📧 Generating Report...'
+                  : isAdmin
+                    ? 'Disconnect'
+                    : '🎬 End Stream & Get Report'}
               </button>
             </div>
 
