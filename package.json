@@ -17,6 +17,7 @@
     "verify:all": "npm run verify:env && npm run verify:supabase"
   },
   "dependencies": {
+    "@notionhq/client": "^5.3.0",
     "@stripe/stripe-js": "^7.9.0",
     "@supabase/supabase-js": "^2.50.3",
     "@tailwindcss/postcss": "^4.1.13",

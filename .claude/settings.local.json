@@ -22,7 +22,8 @@
       "Bash(python3:*)",
       "Bash(chmod:*)",
       "Bash(./scripts/delete-all-subscriptions.sh:*)",
-      "Bash(./scripts/create-subscription.sh:*)"
+      "Bash(./scripts/create-subscription.sh:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

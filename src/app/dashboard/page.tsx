@@ -389,6 +389,26 @@ export default function Dashboard() {
     return () => clearInterval(intervalId)
   }, [isConnected, streamStartTime])
 
+  // Handle page close/refresh - auto-end session
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (currentSessionId && isConnected) {
+        // End session synchronously before page closes
+        navigator.sendBeacon('/api/sessions', JSON.stringify({
+          sessionId: currentSessionId
+        }))
+
+        // Show confirmation dialog if user is connected to a stream
+        e.preventDefault()
+        e.returnValue = 'You have an active stream session. Are you sure you want to leave?'
+        return e.returnValue
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [currentSessionId, isConnected])
+
   // Generate and send report
   const generateReport = async (sessionId: string) => {
     setIsGeneratingReport(true)
@@ -493,8 +513,15 @@ export default function Dashboard() {
                 engagement_level: analysis.engagementLevel,
                 topics: analysis.topics
               }).catch(error => {
-                console.error('Failed to store message:', error)
+                console.error('❌ Failed to store message to database:', {
+                  error: error.message || error,
+                  sessionId: currentSessionId,
+                  username,
+                  messagePreview: messageText.substring(0, 50)
+                })
               })
+            } else {
+              console.warn('⚠️ Cannot store message - no active sessionId')
             }
           }
         }

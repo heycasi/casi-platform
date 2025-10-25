@@ -69,6 +69,12 @@ export class AnalyticsService {
     engagement_level?: 'high' | 'medium' | 'low'
     topics?: string[]
   }): Promise<void> {
+    // Validate sessionId exists
+    if (!sessionId) {
+      console.error('❌ storeChatMessage: sessionId is null or undefined')
+      throw new Error('sessionId is required')
+    }
+
     const { error } = await supabase
       .from('stream_chat_messages')
       .insert({
@@ -88,7 +94,14 @@ export class AnalyticsService {
       })
 
     if (error) {
-      console.error('Failed to store chat message:', error)
+      console.error('❌ Failed to store chat message:', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        sessionId: sessionId,
+        username: messageData.username
+      })
+      throw error
     }
   }
 

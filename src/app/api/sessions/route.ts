@@ -53,7 +53,23 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { sessionId } = await request.json()
+    // Handle both JSON and plain text (from sendBeacon)
+    const contentType = request.headers.get('content-type')
+    let sessionId: string
+
+    if (contentType?.includes('application/json')) {
+      const body = await request.json()
+      sessionId = body.sessionId
+    } else {
+      // Handle sendBeacon plain text
+      const body = await request.text()
+      try {
+        const parsed = JSON.parse(body)
+        sessionId = parsed.sessionId
+      } catch {
+        sessionId = body // In case it's just the ID
+      }
+    }
 
     if (!sessionId) {
       return NextResponse.json(
