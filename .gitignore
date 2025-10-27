@@ -21,6 +21,7 @@ SUPABASE_EMAIL_SETUP.txt
 out/
 dist/
 build/
+*.tsbuildinfo
 
 # OS-specific files (Mac/PC)
 .DS_Store
