@@ -1,32 +1,49 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { KickChatClient, KickMessage } from '@/lib/chat/kick'
 
 export default function TestKickPage() {
+  console.log('🚀 TestKickPage component mounted!')
+
   const [channelName, setChannelName] = useState('trainwreckstv') // Popular Kick streamer
   const [messages, setMessages] = useState<KickMessage[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [client, setClient] = useState<KickChatClient | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  console.log('🟡 Current state:', { isConnected, channelName, messageCount: messages.length })
+
   const connect = async () => {
+    console.log('🔴 CONNECT FUNCTION CALLED!')
     try {
+      console.log('🟢 Button clicked! Attempting to connect...')
       setError(null)
       console.log(`Connecting to Kick channel: ${channelName}`)
 
+      console.log('🟢 Creating KickChatClient instance...')
       const kickClient = new KickChatClient(channelName)
+      console.log('🟢 KickChatClient created:', kickClient)
 
+      console.log('🟢 Setting up message callback...')
       kickClient.onMessage((message: KickMessage) => {
-        setMessages(prev => [...prev.slice(-49), message])
+        console.log('🟢 Message callback triggered:', message)
+        setMessages((prev) => [...prev.slice(-49), message])
       })
 
+      console.log('🟢 About to call kickClient.connect()...')
       await kickClient.connect()
+      console.log('🟢 kickClient.connect() completed!')
 
       setClient(kickClient)
       setIsConnected(true)
-
+      console.log('🟢 State updated - isConnected is now true')
     } catch (err: any) {
-      console.error('Connection error:', err)
+      console.error('❌ Connection error:', err)
+      console.error('❌ Error details:', {
+        message: err.message,
+        stack: err.stack,
+        full: err,
+      })
       setError(err.message || 'Failed to connect')
       setIsConnected(false)
     }
@@ -42,22 +59,25 @@ export default function TestKickPage() {
   }
 
   return (
-    <div style={{
-      padding: '2rem',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-      color: 'white',
-      fontFamily: 'Poppins, Arial, sans-serif'
-    }}>
+    <div
+      style={{
+        padding: '2rem',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+        color: 'white',
+        fontFamily: 'Poppins, Arial, sans-serif',
+      }}
+    >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-
-        <h1 style={{
-          fontSize: '2.5rem',
-          marginBottom: '1rem',
-          background: 'linear-gradient(135deg, #53FC18, #7FFF3F)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
+        <h1
+          style={{
+            fontSize: '2.5rem',
+            marginBottom: '1rem',
+            background: 'linear-gradient(135deg, #53FC18, #7FFF3F)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
           🟢 Kick Chat Test
         </h1>
 
@@ -66,13 +86,15 @@ export default function TestKickPage() {
         </p>
 
         {/* Connection Panel */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '16px',
-          padding: '2rem',
-          marginBottom: '2rem',
-          border: '1px solid rgba(83, 252, 24, 0.2)'
-        }}>
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            padding: '2rem',
+            marginBottom: '2rem',
+            border: '1px solid rgba(83, 252, 24, 0.2)',
+          }}
+        >
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
             <input
               type="text"
@@ -87,7 +109,7 @@ export default function TestKickPage() {
                 border: '1px solid rgba(83, 252, 24, 0.3)',
                 background: 'rgba(255, 255, 255, 0.05)',
                 color: 'white',
-                fontSize: '1rem'
+                fontSize: '1rem',
               }}
             />
 
@@ -103,7 +125,7 @@ export default function TestKickPage() {
                 color: 'white',
                 fontSize: '1rem',
                 fontWeight: '600',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               {isConnected ? '🔴 Disconnect' : '🟢 Connect'}
@@ -111,25 +133,29 @@ export default function TestKickPage() {
           </div>
 
           {error && (
-            <div style={{
-              background: 'rgba(255, 100, 100, 0.1)',
-              border: '1px solid rgba(255, 100, 100, 0.3)',
-              padding: '1rem',
-              borderRadius: '8px',
-              color: '#FF6464'
-            }}>
+            <div
+              style={{
+                background: 'rgba(255, 100, 100, 0.1)',
+                border: '1px solid rgba(255, 100, 100, 0.3)',
+                padding: '1rem',
+                borderRadius: '8px',
+                color: '#FF6464',
+              }}
+            >
               ❌ {error}
             </div>
           )}
 
           {isConnected && (
-            <div style={{
-              background: 'rgba(83, 252, 24, 0.1)',
-              border: '1px solid rgba(83, 252, 24, 0.3)',
-              padding: '1rem',
-              borderRadius: '8px',
-              color: '#53FC18'
-            }}>
+            <div
+              style={{
+                background: 'rgba(83, 252, 24, 0.1)',
+                border: '1px solid rgba(83, 252, 24, 0.3)',
+                padding: '1rem',
+                borderRadius: '8px',
+                color: '#53FC18',
+              }}
+            >
               ✅ Connected to {channelName}'s chat
             </div>
           )}
@@ -137,19 +163,23 @@ export default function TestKickPage() {
 
         {/* Stats */}
         {isConnected && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '1rem',
-            marginBottom: '2rem'
-          }}>
-            <div style={{
-              background: 'rgba(83, 252, 24, 0.1)',
-              border: '1px solid rgba(83, 252, 24, 0.3)',
-              padding: '1.5rem',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem',
+              marginBottom: '2rem',
+            }}
+          >
+            <div
+              style={{
+                background: 'rgba(83, 252, 24, 0.1)',
+                border: '1px solid rgba(83, 252, 24, 0.3)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                textAlign: 'center',
+              }}
+            >
               <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#53FC18' }}>
                 {messages.length}
               </div>
@@ -158,15 +188,17 @@ export default function TestKickPage() {
               </div>
             </div>
 
-            <div style={{
-              background: 'rgba(83, 252, 24, 0.1)',
-              border: '1px solid rgba(83, 252, 24, 0.3)',
-              padding: '1.5rem',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
+            <div
+              style={{
+                background: 'rgba(83, 252, 24, 0.1)',
+                border: '1px solid rgba(83, 252, 24, 0.3)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                textAlign: 'center',
+              }}
+            >
               <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#53FC18' }}>
-                {new Set(messages.map(m => m.username)).size}
+                {new Set(messages.map((m) => m.username)).size}
               </div>
               <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
                 Unique Chatters
@@ -176,20 +208,24 @@ export default function TestKickPage() {
         )}
 
         {/* Chat Messages */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '16px',
-          padding: '2rem',
-          border: '1px solid rgba(83, 252, 24, 0.2)',
-          minHeight: '400px',
-          maxHeight: '600px',
-          overflowY: 'auto'
-        }}>
-          <h2 style={{
-            fontSize: '1.5rem',
-            marginBottom: '1.5rem',
-            color: '#53FC18'
-          }}>
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            padding: '2rem',
+            border: '1px solid rgba(83, 252, 24, 0.2)',
+            minHeight: '400px',
+            maxHeight: '600px',
+            overflowY: 'auto',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '1.5rem',
+              marginBottom: '1.5rem',
+              color: '#53FC18',
+            }}
+          >
             💬 Live Chat
           </h2>
 
@@ -214,7 +250,7 @@ export default function TestKickPage() {
                   border: '1px solid rgba(83, 252, 24, 0.2)',
                   borderLeft: '4px solid #53FC18',
                   padding: '0.75rem 1rem',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -233,13 +269,15 @@ export default function TestKickPage() {
         </div>
 
         {/* Instructions */}
-        <div style={{
-          marginTop: '2rem',
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '12px',
-          padding: '1.5rem',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
+        <div
+          style={{
+            marginTop: '2rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
           <h3 style={{ marginBottom: '1rem', color: '#53FC18' }}>📝 How to Test:</h3>
           <ol style={{ color: 'rgba(255,255,255,0.8)', lineHeight: '1.8' }}>
             <li>Enter a Kick channel name (try: trainwreckstv, adin, xqc)</li>
@@ -248,7 +286,6 @@ export default function TestKickPage() {
             <li>Check browser console for detailed logs</li>
           </ol>
         </div>
-
       </div>
     </div>
   )

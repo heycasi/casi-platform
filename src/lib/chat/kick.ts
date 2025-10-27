@@ -1,19 +1,18 @@
 // Kick.com Chat WebSocket Client
 // Uses Pusher protocol to connect to Kick chatrooms
+// Implements IChatClient interface for multi-platform support
 
-export interface KickMessage {
-  id: string
-  username: string
-  message: string
-  timestamp: number
-  platform: 'kick'
-}
+import type { IChatClient, UnifiedChatMessage, Platform } from '@/types/chat'
+import { analyzeMessage } from '@/lib/multilingual'
 
-export class KickChatClient {
+export class KickChatClient implements IChatClient {
   private ws: WebSocket | null = null
   private chatroomId: number | null = null
   private channelName: string
-  private onMessageCallback: ((message: KickMessage) => void) | null = null
+  private connected: boolean = false
+  private messageCallback: ((message: UnifiedChatMessage) => void) | null = null
+  private errorCallback: ((error: Error) => void) | null = null
+  private connectionChangeCallback: ((connected: boolean) => void) | null = null
 
   constructor(channelName: string) {
     this.channelName = channelName.toLowerCase()
@@ -24,9 +23,7 @@ export class KickChatClient {
     try {
       console.log(`🟢 [Kick] Fetching chatroom ID for ${this.channelName}...`)
 
-      const response = await fetch(
-        `https://kick.com/api/v2/channels/${this.channelName}`
-      )
+      const response = await fetch(`https://kick.com/api/v2/channels/${this.channelName}`)
 
       if (!response.ok) {
         throw new Error(`Channel ${this.channelName} not found on Kick`)
@@ -48,40 +45,56 @@ export class KickChatClient {
     }
   }
 
-  // Connect to Kick WebSocket
+  /**
+   * Connect to Kick WebSocket
+   */
   async connect(): Promise<void> {
-    try {
-      // Get chatroom ID first
-      this.chatroomId = await this.getChatroomId()
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Get chatroom ID first
+        this.chatroomId = await this.getChatroomId()
 
-      console.log(`🟢 [Kick] Connecting to Pusher WebSocket...`)
+        console.log(`🟢 [Kick] Connecting to Pusher WebSocket...`)
 
-      // Kick uses Pusher WebSocket
-      this.ws = new WebSocket(
-        'wss://ws-us2.pusher.com/app/eb1d5f283081a78b932c?protocol=7&client=js&version=7.6.0&flash=false'
-      )
+        // Kick uses Pusher WebSocket - updated app key
+        this.ws = new WebSocket(
+          'wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false'
+        )
 
-      this.ws.onopen = () => {
-        console.log('🟢 [Kick] WebSocket connected')
-        this.subscribe()
+        this.ws.onopen = () => {
+          console.log('🟢 [Kick] WebSocket connected')
+          this.subscribe()
+          this.connected = true
+          this.connectionChangeCallback?.(true)
+          resolve()
+        }
+
+        this.ws.onmessage = (event) => {
+          this.handleMessage(event.data)
+        }
+
+        this.ws.onerror = (error) => {
+          console.error('🔴 [Kick] WebSocket error:', error)
+          const err = new Error('Kick WebSocket error')
+          this.errorCallback?.(err)
+
+          if (!this.connected) {
+            reject(err)
+          }
+        }
+
+        this.ws.onclose = () => {
+          console.log('🟢 [Kick] WebSocket closed')
+          this.connected = false
+          this.connectionChangeCallback?.(false)
+        }
+      } catch (error) {
+        console.error('🔴 [Kick] Connection failed:', error)
+        const err = error instanceof Error ? error : new Error('Failed to connect to Kick')
+        this.errorCallback?.(err)
+        reject(err)
       }
-
-      this.ws.onmessage = (event) => {
-        this.handleMessage(event.data)
-      }
-
-      this.ws.onerror = (error) => {
-        console.error('🟢 [Kick] WebSocket error:', error)
-      }
-
-      this.ws.onclose = () => {
-        console.log('🟢 [Kick] WebSocket closed')
-      }
-
-    } catch (error) {
-      console.error('🟢 [Kick] Connection failed:', error)
-      throw error
-    }
+    })
   }
 
   // Subscribe to chatroom channel
@@ -92,8 +105,8 @@ export class KickChatClient {
       event: 'pusher:subscribe',
       data: {
         auth: '',
-        channel: `chatrooms.${this.chatroomId}.v2`
-      }
+        channel: `chatrooms.${this.chatroomId}.v2`,
+      },
     }
 
     console.log(`🟢 [Kick] Subscribing to channel: chatrooms.${this.chatroomId}.v2`)
@@ -125,10 +138,14 @@ export class KickChatClient {
       }
 
       // Log other events for debugging
-      if (message.event) {
-        console.log('🟢 [Kick] Event:', message.event)
+      if (message.event === 'pusher:error') {
+        console.error('🔴 [Kick] Pusher Error:', message)
+        return
       }
 
+      if (message.event) {
+        console.log('🟢 [Kick] Event:', message.event, message)
+      }
     } catch (error) {
       console.error('🟢 [Kick] Error parsing message:', error)
     }
@@ -137,43 +154,85 @@ export class KickChatClient {
   // Process chat message from Kick
   private processChatMessage(data: any): void {
     try {
-      const kickMessage: KickMessage = {
-        id: data.id || `${Date.now()}-${Math.random()}`,
-        username: data.sender?.username || 'unknown',
-        message: data.content || '',
-        timestamp: new Date(data.created_at).getTime(),
-        platform: 'kick'
+      const username = data.sender?.username || 'unknown'
+      const messageText = data.content || ''
+
+      console.log(`🟢 [Kick] @${username}: ${messageText}`)
+
+      // Analyze message
+      const analysis = analyzeMessage(messageText)
+
+      // Transform to UnifiedChatMessage format
+      const unifiedMessage: UnifiedChatMessage = {
+        id: `kick-${data.id || Date.now()}-${Math.random()}`,
+        username,
+        message: messageText,
+        timestamp: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+        platform: 'kick' as Platform,
+
+        // Analysis results
+        language: analysis.language,
+        language_confidence: analysis.confidence,
+        sentiment: analysis.sentiment,
+        sentiment_score: analysis.sentimentScore,
+        sentiment_reason: analysis.sentimentReason,
+        is_question: analysis.isQuestion,
+        question_type: analysis.questionType,
+        engagement_level: analysis.engagementLevel,
+        topics: analysis.topics,
+
+        // Platform-specific metadata
+        platform_message_id: data.id || `kick-${username}-${Date.now()}`,
+        user_id: data.sender?.id?.toString() || username.toLowerCase(),
+        display_name: data.sender?.username || username,
       }
 
-      console.log(`🟢 [Kick] @${kickMessage.username}: ${kickMessage.message}`)
-
-      // Call callback if registered
-      if (this.onMessageCallback) {
-        this.onMessageCallback(kickMessage)
-      }
-
+      // Emit message to callback
+      this.messageCallback?.(unifiedMessage)
     } catch (error) {
-      console.error('🟢 [Kick] Error processing chat message:', error)
+      console.error('🔴 [Kick] Error processing chat message:', error)
     }
   }
 
-  // Register message callback
-  onMessage(callback: (message: KickMessage) => void): void {
-    this.onMessageCallback = callback
+  /**
+   * Register message callback
+   */
+  onMessage(callback: (message: UnifiedChatMessage) => void): void {
+    this.messageCallback = callback
   }
 
-  // Disconnect from WebSocket
+  /**
+   * Register error callback
+   */
+  onError(callback: (error: Error) => void): void {
+    this.errorCallback = callback
+  }
+
+  /**
+   * Register connection change callback
+   */
+  onConnectionChange(callback: (connected: boolean) => void): void {
+    this.connectionChangeCallback = callback
+  }
+
+  /**
+   * Disconnect from WebSocket
+   */
   disconnect(): void {
     if (this.ws) {
       console.log('🟢 [Kick] Disconnecting...')
       this.ws.close()
       this.ws = null
     }
+    this.connected = false
+    this.connectionChangeCallback?.(false)
   }
 
-  // Check if connected
+  /**
+   * Check if connected
+   */
   isConnected(): boolean {
-    return this.ws?.readyState === WebSocket.OPEN
+    return this.connected && this.ws !== null && this.ws.readyState === WebSocket.OPEN
   }
 }
 
