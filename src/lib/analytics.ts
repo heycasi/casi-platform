@@ -1,7 +1,7 @@
 // Analytics service for stream data persistence and processing
 
 import { createClient } from '@supabase/supabase-js'
-import { StreamSession, ChatMessage, SessionAnalytics, StreamReport } from '../types/analytics'
+import { StreamSession, ChatMessage, SessionAnalytics } from '../types/analytics'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,13 +10,18 @@ const supabase = createClient(
 
 export class AnalyticsService {
   // Create a new stream session
-  static async createSession(streamerEmail: string, channelName: string): Promise<string> {
+  static async createSession(
+    streamerEmail: string,
+    channelName: string,
+    platform: 'twitch' | 'kick' = 'twitch' // NEW: Platform parameter with default
+  ): Promise<string> {
     const { data, error } = await supabase
       .from('stream_report_sessions')
       .insert({
         streamer_email: streamerEmail,
         channel_name: channelName.toLowerCase(),
-        session_start: new Date().toISOString()
+        session_start: new Date().toISOString(),
+        platform, // NEW: Store platform
       })
       .select('id')
       .single()
@@ -32,7 +37,7 @@ export class AnalyticsService {
   // End a stream session
   static async endSession(sessionId: string): Promise<void> {
     const sessionEnd = new Date()
-    
+
     // Get session start time to calculate duration
     const { data: session } = await supabase
       .from('stream_report_sessions')
@@ -48,50 +53,55 @@ export class AnalyticsService {
         .from('stream_report_sessions')
         .update({
           session_end: sessionEnd.toISOString(),
-          duration_minutes: durationMinutes
+          duration_minutes: durationMinutes,
         })
         .eq('id', sessionId)
     }
   }
 
   // Store a chat message with analysis
-  static async storeChatMessage(sessionId: string, messageData: {
-    username: string
-    message: string
-    timestamp: Date
-    language?: string
-    language_confidence?: number
-    sentiment?: 'positive' | 'negative' | 'neutral'
-    sentiment_score?: number
-    sentiment_reason?: string
-    is_question: boolean
-    question_type?: string
-    engagement_level?: 'high' | 'medium' | 'low'
-    topics?: string[]
-  }): Promise<void> {
+  static async storeChatMessage(
+    sessionId: string,
+    messageData: {
+      username: string
+      message: string
+      timestamp: Date
+      language?: string
+      language_confidence?: number
+      sentiment?: 'positive' | 'negative' | 'neutral'
+      sentiment_score?: number
+      sentiment_reason?: string
+      is_question: boolean
+      question_type?: string
+      engagement_level?: 'high' | 'medium' | 'low'
+      topics?: string[]
+      platform?: 'twitch' | 'kick' // NEW: Platform parameter
+      platform_message_id?: string // NEW: Platform-specific message ID
+    }
+  ): Promise<void> {
     // Validate sessionId exists
     if (!sessionId) {
       console.error('❌ storeChatMessage: sessionId is null or undefined')
       throw new Error('sessionId is required')
     }
 
-    const { error } = await supabase
-      .from('stream_chat_messages')
-      .insert({
-        session_id: sessionId,
-        username: messageData.username,
-        message: messageData.message,
-        timestamp: messageData.timestamp.toISOString(),
-        language: messageData.language,
-        language_confidence: messageData.language_confidence,
-        sentiment: messageData.sentiment,
-        sentiment_score: messageData.sentiment_score,
-        sentiment_reason: messageData.sentiment_reason,
-        is_question: messageData.is_question,
-        question_type: messageData.question_type,
-        engagement_level: messageData.engagement_level,
-        topics: messageData.topics
-      })
+    const { error } = await supabase.from('stream_chat_messages').insert({
+      session_id: sessionId,
+      username: messageData.username,
+      message: messageData.message,
+      timestamp: messageData.timestamp.toISOString(),
+      language: messageData.language,
+      language_confidence: messageData.language_confidence,
+      sentiment: messageData.sentiment,
+      sentiment_score: messageData.sentiment_score,
+      sentiment_reason: messageData.sentiment_reason,
+      is_question: messageData.is_question,
+      question_type: messageData.question_type,
+      engagement_level: messageData.engagement_level,
+      topics: messageData.topics,
+      platform: messageData.platform || 'twitch', // Default to 'twitch' for backward compatibility
+      platform_message_id: messageData.platform_message_id,
+    })
 
     if (error) {
       console.error('❌ Failed to store chat message:', {
@@ -99,18 +109,21 @@ export class AnalyticsService {
         code: error.code,
         details: error.details,
         sessionId: sessionId,
-        username: messageData.username
+        username: messageData.username,
       })
       throw error
     }
   }
 
   // Update session statistics in real-time
-  static async updateSessionStats(sessionId: string, stats: {
-    peak_viewer_count?: number
-    total_messages?: number
-    unique_chatters?: number
-  }): Promise<void> {
+  static async updateSessionStats(
+    sessionId: string,
+    stats: {
+      peak_viewer_count?: number
+      total_messages?: number
+      unique_chatters?: number
+    }
+  ): Promise<void> {
     const { error } = await supabase
       .from('stream_report_sessions')
       .update(stats)
@@ -136,7 +149,7 @@ export class AnalyticsService {
 
     // Calculate analytics
     const analytics = this.processMessages(messages, sessionId)
-    
+
     // Store analytics in database
     const { data, error } = await supabase
       .from('stream_session_analytics')
@@ -153,23 +166,29 @@ export class AnalyticsService {
   }
 
   // Process messages to generate analytics
-  private static processMessages(messages: any[], sessionId: string): Omit<SessionAnalytics, 'id' | 'created_at'> {
+  private static processMessages(
+    messages: any[],
+    sessionId: string
+  ): Omit<SessionAnalytics, 'id' | 'created_at'> {
     const totalMessages = messages.length
-    const questionsCount = messages.filter(m => m.is_question).length
-    const positiveMessages = messages.filter(m => m.sentiment === 'positive').length
-    const negativeMessages = messages.filter(m => m.sentiment === 'negative').length
-    const neutralMessages = messages.filter(m => m.sentiment === 'neutral').length
-    const highEngagementMessages = messages.filter(m => m.engagement_level === 'high').length
+    const questionsCount = messages.filter((m) => m.is_question).length
+    const positiveMessages = messages.filter((m) => m.sentiment === 'positive').length
+    const negativeMessages = messages.filter((m) => m.sentiment === 'negative').length
+    const neutralMessages = messages.filter((m) => m.sentiment === 'neutral').length
+    const highEngagementMessages = messages.filter((m) => m.engagement_level === 'high').length
 
     // Calculate average sentiment score
-    const sentimentScores = messages.filter(m => m.sentiment_score !== null).map(m => m.sentiment_score)
-    const avgSentimentScore = sentimentScores.length > 0 
-      ? sentimentScores.reduce((a, b) => a + b, 0) / sentimentScores.length 
-      : 0
+    const sentimentScores = messages
+      .filter((m) => m.sentiment_score !== null)
+      .map((m) => m.sentiment_score)
+    const avgSentimentScore =
+      sentimentScores.length > 0
+        ? sentimentScores.reduce((a, b) => a + b, 0) / sentimentScores.length
+        : 0
 
     // Language detection counts
     const languagesDetected: Record<string, number> = {}
-    messages.forEach(m => {
+    messages.forEach((m) => {
       if (m.language) {
         languagesDetected[m.language] = (languagesDetected[m.language] || 0) + 1
       }
@@ -177,9 +196,9 @@ export class AnalyticsService {
 
     // Topic discussion counts
     const topicsDiscussed: Record<string, number> = {}
-    messages.forEach(m => {
+    messages.forEach((m) => {
       if (m.topics && Array.isArray(m.topics)) {
-        m.topics.forEach(topic => {
+        m.topics.forEach((topic) => {
           topicsDiscussed[topic] = (topicsDiscussed[topic] || 0) + 1
         })
       }
@@ -189,8 +208,11 @@ export class AnalyticsService {
     const engagementPeaks = this.findEngagementPeaks(messages)
 
     // Most active chatters
-    const chatterCounts: Record<string, { count: number, sentimentSum: number, sentimentCount: number }> = {}
-    messages.forEach(m => {
+    const chatterCounts: Record<
+      string,
+      { count: number; sentimentSum: number; sentimentCount: number }
+    > = {}
+    messages.forEach((m) => {
       if (!chatterCounts[m.username]) {
         chatterCounts[m.username] = { count: 0, sentimentSum: 0, sentimentCount: 0 }
       }
@@ -205,7 +227,7 @@ export class AnalyticsService {
       .map(([username, data]) => ({
         username,
         count: data.count,
-        sentiment_avg: data.sentimentCount > 0 ? data.sentimentSum / data.sentimentCount : 0
+        sentiment_avg: data.sentimentCount > 0 ? data.sentimentSum / data.sentimentCount : 0,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
@@ -217,7 +239,7 @@ export class AnalyticsService {
       positiveMessages,
       negativeMessages,
       topicsDiscussed,
-      avgSentimentScore
+      avgSentimentScore,
     })
 
     return {
@@ -233,7 +255,7 @@ export class AnalyticsService {
       engagement_peaks: engagementPeaks,
       high_engagement_messages: highEngagementMessages,
       most_active_chatters: mostActiveChatters,
-      motivational_insights: motivationalInsights
+      motivational_insights: motivationalInsights,
     }
   }
 
@@ -244,33 +266,39 @@ export class AnalyticsService {
     message_count: number
   }> {
     const windowSize = 300000 // 5 minutes in milliseconds
-    const peaks: Array<{ timestamp: string, intensity: number, message_count: number }> = []
-    
+    const peaks: Array<{ timestamp: string; intensity: number; message_count: number }> = []
+
     if (messages.length === 0) return peaks
 
     const startTime = new Date(messages[0].timestamp).getTime()
     const endTime = new Date(messages[messages.length - 1].timestamp).getTime()
-    
+
     for (let windowStart = startTime; windowStart < endTime; windowStart += windowSize) {
       const windowEnd = windowStart + windowSize
-      const windowMessages = messages.filter(m => {
+      const windowMessages = messages.filter((m) => {
         const msgTime = new Date(m.timestamp).getTime()
         return msgTime >= windowStart && msgTime < windowEnd
       })
 
       if (windowMessages.length > 0) {
-        const highEngagement = windowMessages.filter(m => m.engagement_level === 'high').length
-        const positiveMessages = windowMessages.filter(m => m.sentiment === 'positive').length
-        const questions = windowMessages.filter(m => m.is_question).length
-        
+        const highEngagement = windowMessages.filter((m) => m.engagement_level === 'high').length
+        const positiveMessages = windowMessages.filter((m) => m.sentiment === 'positive').length
+        const questions = windowMessages.filter((m) => m.is_question).length
+
         // Calculate intensity based on message volume and engagement quality
-        const intensity = (windowMessages.length * 0.4 + highEngagement * 0.4 + positiveMessages * 0.15 + questions * 0.05) / windowMessages.length
-        
-        if (intensity > 0.3) { // Only include meaningful peaks
+        const intensity =
+          (windowMessages.length * 0.4 +
+            highEngagement * 0.4 +
+            positiveMessages * 0.15 +
+            questions * 0.05) /
+          windowMessages.length
+
+        if (intensity > 0.3) {
+          // Only include meaningful peaks
           peaks.push({
             timestamp: new Date(windowStart).toISOString(),
             intensity: Math.round(intensity * 100) / 100,
-            message_count: windowMessages.length
+            message_count: windowMessages.length,
           })
         }
       }
@@ -285,17 +313,19 @@ export class AnalyticsService {
 
     // Positive engagement insights
     if (stats.positiveMessages / stats.totalMessages > 0.6) {
-      insights.push("🔥 Exceptional positive engagement! Your audience was loving the content.")
+      insights.push('🔥 Exceptional positive engagement! Your audience was loving the content.')
     }
 
     // Question engagement insights
     if (stats.questionsCount / stats.totalMessages > 0.2) {
-      insights.push("❓ High question rate indicates very engaged and curious viewers.")
+      insights.push('❓ High question rate indicates very engaged and curious viewers.')
     }
 
     // Topic insights
-    const topTopic = Object.keys(stats.topicsDiscussed).reduce((a, b) => 
-      stats.topicsDiscussed[a] > stats.topicsDiscussed[b] ? a : b, '')
+    const topTopic = Object.keys(stats.topicsDiscussed).reduce(
+      (a, b) => (stats.topicsDiscussed[a] > stats.topicsDiscussed[b] ? a : b),
+      ''
+    )
     if (topTopic) {
       insights.push(`🎮 "${topTopic}" was the hot topic - consider more content around this theme.`)
     }
@@ -304,14 +334,16 @@ export class AnalyticsService {
     if (stats.avgSentimentScore > 0.5) {
       insights.push("✨ Overall sentiment was very positive - you're creating great vibes!")
     } else if (stats.avgSentimentScore < -0.2) {
-      insights.push("💡 Some negative sentiment detected - might be worth addressing viewer concerns.")
+      insights.push(
+        '💡 Some negative sentiment detected - might be worth addressing viewer concerns.'
+      )
     }
 
     // Activity insights
-    const uniqueChatters = new Set(messages.map(m => m.username)).size
+    const uniqueChatters = new Set(messages.map((m) => m.username)).size
     const chattersToMessages = uniqueChatters / stats.totalMessages
     if (chattersToMessages > 0.3) {
-      insights.push("👥 Great chat participation - many viewers were actively engaging!")
+      insights.push('👥 Great chat participation - many viewers were actively engaging!')
     }
 
     return insights

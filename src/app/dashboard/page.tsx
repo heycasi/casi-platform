@@ -1,10 +1,12 @@
-// src/app/dashboard/page.tsx - Secure Dashboard with OAuth
+// src/app/dashboard/page.tsx - Secure Dashboard with OAuth (Multi-Platform Support)
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { analyzeMessage, generateMotivationalSuggestion } from '../../lib/multilingual'
+import { generateMotivationalSuggestion } from '../../lib/multilingual'
 import { AnalyticsService } from '../../lib/analytics'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
 import ActivityFeed from '@/components/ActivityFeed'
+import { createChatClient } from '@/lib/chat/factory'
+import type { IChatClient, UnifiedChatMessage, Platform } from '@/types/chat'
 
 interface TierStatus {
   avgViewers: number
@@ -39,6 +41,7 @@ interface ChatMessage {
   confidence?: number
   topics?: string[]
   engagementLevel?: 'high' | 'medium' | 'low'
+  platform?: Platform // NEW: Platform support
 }
 
 interface DashboardStats {
@@ -59,7 +62,7 @@ const ADMIN_USER_IDS = [
 
 // Admin usernames (Twitch login names)
 const ADMIN_USERNAMES = [
-  'conzooo_' // Your Twitch username (case-insensitive)
+  'conzooo_', // Your Twitch username (case-insensitive)
 ]
 
 // Admin email addresses as fallback
@@ -84,7 +87,9 @@ export default function Dashboard() {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
   const [streamStartTime, setStreamStartTime] = useState<number | null>(null)
   const [elapsedDuration, setElapsedDuration] = useState<string>('00:00:00')
-  const [topChatters, setTopChatters] = useState<Array<{ username: string; count: number; topics: string[] }>>([])
+  const [topChatters, setTopChatters] = useState<
+    Array<{ username: string; count: number; topics: string[] }>
+  >([])
   const [twitchUser, setTwitchUser] = useState<any>(null)
   const [showAccountDropdown, setShowAccountDropdown] = useState(false)
   const [tierStatus, setTierStatus] = useState<TierStatus | null>(null)
@@ -100,19 +105,103 @@ export default function Dashboard() {
     negativeMessages: 0,
     viewerCount: 0,
     activeUsers: 0,
-    currentMood: 'Neutral'
+    currentMood: 'Neutral',
   })
 
   // Ref for auto-scrolling chat feed
   const chatFeedRef = useRef<HTMLDivElement>(null)
 
+  // NEW: Multi-platform state
+  const [kickUsername, setKickUsername] = useState<string | null>(null)
+  const [kickConnected, setKickConnected] = useState(false)
+  const twitchClientRef = useRef<IChatClient | null>(null)
+  const kickClientRef = useRef<IChatClient | null>(null)
+
   const botUsernames = [
-    'nightbot', 'streamelements', 'moobot', 'fossabot', 'wizebot',
-    'streamlabs', 'botisimo', 'deepbot', 'ankhbot', 'revlobot',
-    'phantombot', 'coebot', 'ohbot', 'tipeeebot', 'chatty',
-    'streamdeckerbot', 'vivbot', 'soundalerts', 'own3dbot',
-    'pretzelrocks', 'songrequestbot', 'musicbot'
+    'nightbot',
+    'streamelements',
+    'moobot',
+    'fossabot',
+    'wizebot',
+    'streamlabs',
+    'botisimo',
+    'deepbot',
+    'ankhbot',
+    'revlobot',
+    'phantombot',
+    'coebot',
+    'ohbot',
+    'tipeeebot',
+    'chatty',
+    'streamdeckerbot',
+    'vivbot',
+    'soundalerts',
+    'own3dbot',
+    'pretzelrocks',
+    'songrequestbot',
+    'musicbot',
   ]
+
+  // NEW: Unified message handler for both platforms
+  const handleUnifiedMessage = (unifiedMessage: UnifiedChatMessage) => {
+    const chatMessage: ChatMessage = {
+      id: unifiedMessage.id,
+      username: unifiedMessage.username,
+      message: unifiedMessage.message,
+      timestamp: unifiedMessage.timestamp,
+      sentiment: unifiedMessage.sentiment,
+      sentimentReason: unifiedMessage.sentiment_reason,
+      sentimentScore: unifiedMessage.sentiment_score,
+      isQuestion: unifiedMessage.is_question,
+      language: unifiedMessage.language,
+      confidence: unifiedMessage.language_confidence,
+      topics: unifiedMessage.topics,
+      engagementLevel: unifiedMessage.engagement_level,
+      priority: unifiedMessage.is_question
+        ? 'high'
+        : unifiedMessage.engagement_level === 'high'
+          ? 'medium'
+          : 'low',
+      platform: unifiedMessage.platform, // NEW: Include platform
+    }
+
+    setMessages((prev) => [...prev.slice(-49), chatMessage])
+
+    if (unifiedMessage.is_question) {
+      setHighlightedQuestionId(chatMessage.id)
+      setTimeout(() => {
+        setQuestions((prev) => [...prev.slice(-9), chatMessage])
+        setHighlightedQuestionId(null)
+      }, 1500)
+    }
+
+    if (currentSessionId) {
+      AnalyticsService.storeChatMessage(currentSessionId, {
+        username: unifiedMessage.username,
+        message: unifiedMessage.message,
+        timestamp: new Date(unifiedMessage.timestamp),
+        language: unifiedMessage.language,
+        language_confidence: unifiedMessage.language_confidence,
+        sentiment: unifiedMessage.sentiment,
+        sentiment_score: unifiedMessage.sentiment_score,
+        sentiment_reason: unifiedMessage.sentiment_reason,
+        is_question: unifiedMessage.is_question,
+        question_type: unifiedMessage.question_type,
+        engagement_level: unifiedMessage.engagement_level,
+        topics: unifiedMessage.topics,
+        platform: unifiedMessage.platform, // NEW: Include platform
+        platform_message_id: unifiedMessage.platform_message_id,
+      }).catch((error) => {
+        console.error('❌ Failed to store message to database:', {
+          error: error.message || error,
+          sessionId: currentSessionId,
+          username: unifiedMessage.username,
+          platform: unifiedMessage.platform,
+          messagePreview: unifiedMessage.message.substring(0, 50),
+        })
+      })
+    }
+  }
 
   // Check if user is admin
   const checkAdminStatus = (user: any) => {
@@ -124,12 +213,18 @@ export default function Dashboard() {
     }
 
     // Check by Twitch username (case-insensitive)
-    if (user.login && ADMIN_USERNAMES.map(u => u.toLowerCase()).includes(user.login.toLowerCase())) {
+    if (
+      user.login &&
+      ADMIN_USERNAMES.map((u) => u.toLowerCase()).includes(user.login.toLowerCase())
+    ) {
       return true
     }
 
     // Check by display_name as fallback
-    if (user.display_name && ADMIN_USERNAMES.map(u => u.toLowerCase()).includes(user.display_name.toLowerCase())) {
+    if (
+      user.display_name &&
+      ADMIN_USERNAMES.map((u) => u.toLowerCase()).includes(user.display_name.toLowerCase())
+    ) {
       return true
     }
 
@@ -180,16 +275,18 @@ export default function Dashboard() {
           setStreamStartTime(session.streamStartTime)
           setMessages(session.messages || [])
           setQuestions(session.questions || [])
-          setStats(session.stats || {
-            totalMessages: 0,
-            questions: 0,
-            avgSentiment: 0,
-            positiveMessages: 0,
-            negativeMessages: 0,
-            viewerCount: 0,
-            activeUsers: 0,
-            currentMood: 'Neutral'
-          })
+          setStats(
+            session.stats || {
+              totalMessages: 0,
+              questions: 0,
+              avgSentiment: 0,
+              positiveMessages: 0,
+              negativeMessages: 0,
+              viewerCount: 0,
+              activeUsers: 0,
+              currentMood: 'Neutral',
+            }
+          )
           setTopChatters(session.topChatters || [])
 
           // Restore admin channel if present
@@ -241,6 +338,28 @@ export default function Dashboard() {
     checkAccess()
   }, [email, isAdmin])
 
+  // NEW: Fetch Kick username from database
+  useEffect(() => {
+    if (!email) return
+
+    const fetchKickUsername = async () => {
+      try {
+        const response = await fetch(`/api/user/kick-username?email=${encodeURIComponent(email)}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.kick_username) {
+            setKickUsername(data.kick_username)
+            console.log(`🟢 Kick username loaded: ${data.kick_username}`)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch Kick username:', error)
+      }
+    }
+
+    fetchKickUsername()
+  }, [email])
+
   // Fetch tier status for the user
   useEffect(() => {
     if (!email) return
@@ -281,16 +400,30 @@ export default function Dashboard() {
       stats,
       topChatters: topChatters.slice(0, 10), // Keep top 10 chatters
       adminChannel: isAdmin && channelName !== twitchUser?.login ? channelName : null, // Save admin channel if monitoring another channel
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
 
     try {
       localStorage.setItem('casi_active_session', JSON.stringify(sessionState))
-      console.log('Session saved:', { channel: channelName, adminChannel: sessionState.adminChannel })
+      console.log('Session saved:', {
+        channel: channelName,
+        adminChannel: sessionState.adminChannel,
+      })
     } catch (error) {
       console.error('Failed to save session state:', error)
     }
-  }, [currentSessionId, isConnected, streamStartTime, messages, questions, stats, topChatters, channelName, isAdmin, twitchUser])
+  }, [
+    currentSessionId,
+    isConnected,
+    streamStartTime,
+    messages,
+    questions,
+    stats,
+    topChatters,
+    channelName,
+    isAdmin,
+    twitchUser,
+  ])
 
   // Clear session state when disconnecting
   useEffect(() => {
@@ -305,12 +438,14 @@ export default function Dashboard() {
 
     const checkLiveAndConnect = async () => {
       try {
-        const res = await fetch(`/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`)
+        const res = await fetch(
+          `/api/twitch/stream-info?user_id=${encodeURIComponent(twitchUser.id)}`
+        )
         const info = await res.json()
         if (info?.live) {
           // Set initial viewer count when auto-connecting
           if (info?.viewer_count != null) {
-            setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
+            setStats((prev) => ({ ...prev, viewerCount: info.viewer_count }))
           }
           setIsConnected(true)
         }
@@ -329,7 +464,7 @@ export default function Dashboard() {
         const response = await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ streamerEmail: email, channelName })
+          body: JSON.stringify({ streamerEmail: email, channelName }),
         })
 
         if (!response.ok) {
@@ -352,7 +487,7 @@ export default function Dashboard() {
         const response = await fetch('/api/sessions', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: currentSessionId })
+          body: JSON.stringify({ sessionId: currentSessionId }),
         })
 
         if (response.ok) {
@@ -389,7 +524,7 @@ export default function Dashboard() {
         const response = await fetch('/api/sessions', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: currentSessionId })
+          body: JSON.stringify({ sessionId: currentSessionId }),
         })
 
         if (response.ok) {
@@ -399,7 +534,6 @@ export default function Dashboard() {
         // Generate report immediately
         console.log('📊 Generating post-stream report...')
         await generateReport(currentSessionId)
-
       } catch (error) {
         console.error('❌ Failed during manual disconnect:', error)
       } finally {
@@ -435,9 +569,12 @@ export default function Dashboard() {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (currentSessionId && isConnected) {
         // End session synchronously before page closes
-        navigator.sendBeacon('/api/sessions', JSON.stringify({
-          sessionId: currentSessionId
-        }))
+        navigator.sendBeacon(
+          '/api/sessions',
+          JSON.stringify({
+            sessionId: currentSessionId,
+          })
+        )
 
         // Show confirmation dialog if user is connected to a stream
         e.preventDefault()
@@ -457,7 +594,7 @@ export default function Dashboard() {
       const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, email })
+        body: JSON.stringify({ sessionId, email }),
       })
 
       if (response.ok) {
@@ -472,6 +609,7 @@ export default function Dashboard() {
     }
   }
 
+  // NEW: Multi-platform connection useEffect
   useEffect(() => {
     if (typeof window === 'undefined' || !isConnected || !channelName) return
 
@@ -480,111 +618,69 @@ export default function Dashboard() {
       startSession()
     }
 
-    let ws: WebSocket | null = null
     let viewerInterval: number | null = null
 
-    const connectToTwitch = () => {
+    // Connect to Twitch
+    const connectToTwitch = async () => {
       try {
-        ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443')
+        console.log(`🟣 Connecting to Twitch: ${channelName}`)
 
-        ws.onopen = () => {
-          ws?.send('PASS SCHMOOPIIE')
-          ws?.send('NICK justinfan12345')
-          ws?.send(`JOIN #${channelName.toLowerCase()}`)
-        }
+        const client = createChatClient('twitch', channelName)
+        twitchClientRef.current = client
 
-        ws.onmessage = (event) => {
-          const message = event.data.trim()
+        client.onMessage(handleUnifiedMessage)
+        client.onError((error) => {
+          console.error('🔴 [Twitch Error]:', error)
+        })
 
-          if (message.startsWith('PING')) {
-            ws?.send('PONG :tmi.twitch.tv')
-            return
-          }
-
-          const chatMatch = message.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :(.+)/)
-          if (chatMatch) {
-            const [, username, messageText] = chatMatch
-
-            if (botUsernames.includes(username.toLowerCase())) {
-              return
-            }
-
-            const analysis = analyzeMessage(messageText)
-
-            const timestamp = new Date()
-            const chatMessage: ChatMessage = {
-              id: Date.now().toString() + Math.random(),
-              username,
-              message: messageText,
-              timestamp: timestamp.getTime(),
-              sentiment: analysis.sentiment,
-              sentimentReason: analysis.sentimentReason,
-              sentimentScore: analysis.sentimentScore,
-              isQuestion: analysis.isQuestion,
-              language: analysis.language,
-              confidence: analysis.confidence,
-              topics: analysis.topics,
-              engagementLevel: analysis.engagementLevel,
-              priority: analysis.isQuestion ? 'high' : analysis.engagementLevel === 'high' ? 'medium' : 'low'
-            }
-
-            setMessages(prev => [...prev.slice(-49), chatMessage])
-
-            if (analysis.isQuestion) {
-              // Highlight the question in the live feed first
-              setHighlightedQuestionId(chatMessage.id)
-              setTimeout(() => {
-                setQuestions(prev => [...prev.slice(-9), chatMessage])
-                setHighlightedQuestionId(null)
-              }, 1500) // Show highlight for 1.5 seconds before moving to Questions panel
-            }
-
-            if (currentSessionId) {
-              AnalyticsService.storeChatMessage(currentSessionId, {
-                username,
-                message: messageText,
-                timestamp,
-                language: analysis.language,
-                language_confidence: analysis.confidence,
-                sentiment: analysis.sentiment,
-                sentiment_score: analysis.sentimentScore,
-                sentiment_reason: analysis.sentimentReason,
-                is_question: analysis.isQuestion,
-                question_type: analysis.questionType,
-                engagement_level: analysis.engagementLevel,
-                topics: analysis.topics
-              }).catch(error => {
-                console.error('❌ Failed to store message to database:', {
-                  error: error.message || error,
-                  sessionId: currentSessionId,
-                  username,
-                  messagePreview: messageText.substring(0, 50)
-                })
-              })
-            } else {
-              console.warn('⚠️ Cannot store message - no active sessionId')
-            }
-          }
-        }
-
-        ws.onerror = () => {
-          // Handle error silently
-        }
-
-        ws.onclose = () => {
-          if (isConnected) {
-            setTimeout(connectToTwitch, 3000)
-          } else {
-            endSession()
-          }
-        }
-
-      } catch {
-        setTimeout(connectToTwitch, 3000)
+        await client.connect()
+        console.log('🟣 Twitch connected successfully')
+      } catch (error) {
+        console.error('🔴 Failed to connect to Twitch:', error)
       }
     }
 
+    // Connect to Kick
+    const connectToKick = async () => {
+      // Determine which Kick channel to connect to
+      // If admin is monitoring a different channel, use that channel name
+      // Otherwise use the user's configured Kick username
+      const kickChannelToMonitor =
+        isAdmin && adminChannelInput
+          ? channelName // Use the same channel name as Twitch
+          : kickUsername // Use user's configured Kick username
+
+      if (!kickChannelToMonitor) {
+        console.log('🟢 No Kick channel to monitor, skipping Kick connection')
+        return
+      }
+
+      try {
+        console.log(`🟢 Connecting to Kick: ${kickChannelToMonitor}`)
+
+        const client = createChatClient('kick', kickChannelToMonitor)
+        kickClientRef.current = client
+
+        client.onMessage(handleUnifiedMessage)
+        client.onError((error) => {
+          console.error('🔴 [Kick Error]:', error)
+        })
+        client.onConnectionChange?.((connected) => {
+          setKickConnected(connected)
+        })
+
+        await client.connect()
+        console.log('🟢 Kick connected successfully')
+        setKickConnected(true)
+      } catch (error) {
+        console.error('🔴 Failed to connect to Kick:', error)
+        setKickConnected(false)
+      }
+    }
+
+    // Connect to both platforms
     connectToTwitch()
+    connectToKick()
 
     // Real viewer count from Twitch API
     // Always use the channelName (the channel we're monitoring) for viewer count
@@ -603,7 +699,7 @@ export default function Dashboard() {
 
         if (info?.live && info?.viewer_count != null) {
           console.log(`[Viewer Count] ✅ Setting viewer count to: ${info.viewer_count}`)
-          setStats(prev => ({ ...prev, viewerCount: info.viewer_count }))
+          setStats((prev) => ({ ...prev, viewerCount: info.viewer_count }))
         } else if (!info?.live) {
           console.warn('[Viewer Count] ⚠️ Stream reported as not live by Twitch API')
         } else {
@@ -633,15 +729,27 @@ export default function Dashboard() {
     console.log('[Viewer Count] Interval ID:', viewerInterval)
 
     return () => {
-      console.log('[Viewer Count] Cleaning up - clearing interval')
-      if (ws) {
-        ws.close()
+      console.log('[Multi-Platform] Cleaning up - disconnecting clients and clearing interval')
+
+      // Disconnect Twitch client
+      if (twitchClientRef.current) {
+        twitchClientRef.current.disconnect()
+        twitchClientRef.current = null
       }
+
+      // Disconnect Kick client
+      if (kickClientRef.current) {
+        kickClientRef.current.disconnect()
+        kickClientRef.current = null
+        setKickConnected(false)
+      }
+
+      // Clear viewer count interval
       if (viewerInterval) {
         clearInterval(viewerInterval)
       }
     }
-  }, [isConnected, channelName])
+  }, [isConnected, channelName, kickUsername])
 
   useEffect(() => {
     if (!isConnected || messages.length < 10) return
@@ -659,18 +767,20 @@ export default function Dashboard() {
   }, [messages, isConnected])
 
   useEffect(() => {
-    const uniqueUsers = new Set(messages.map(m => m.username)).size
-    const positiveMessages = messages.filter(m => m.sentiment === 'positive').length
-    const negativeMessages = messages.filter(m => m.sentiment === 'negative').length
+    const uniqueUsers = new Set(messages.map((m) => m.username)).size
+    const positiveMessages = messages.filter((m) => m.sentiment === 'positive').length
+    const negativeMessages = messages.filter((m) => m.sentiment === 'negative').length
 
-    const sentimentValues = messages.map(m => m.sentimentScore || 0)
-    const avgSentiment = sentimentValues.length > 0
-      ? Math.round((sentimentValues.reduce((a, b) => a + b, 0) / sentimentValues.length) * 100) / 100
-      : 0
+    const sentimentValues = messages.map((m) => m.sentimentScore || 0)
+    const avgSentiment =
+      sentimentValues.length > 0
+        ? Math.round((sentimentValues.reduce((a, b) => a + b, 0) / sentimentValues.length) * 100) /
+          100
+        : 0
 
     const recentMessages = messages.slice(-10)
-    const recentPositive = recentMessages.filter(m => m.sentiment === 'positive').length
-    const recentNegative = recentMessages.filter(m => m.sentiment === 'negative').length
+    const recentPositive = recentMessages.filter((m) => m.sentiment === 'positive').length
+    const recentNegative = recentMessages.filter((m) => m.sentiment === 'negative').length
 
     let currentMood = 'Neutral'
     if (recentPositive > recentNegative * 2) currentMood = 'Very Positive'
@@ -695,7 +805,7 @@ export default function Dashboard() {
       setTimeout(() => setMoodChanged(false), 2000)
     }
 
-    setStats(prev => ({
+    setStats((prev) => ({
       ...prev, // Preserve viewerCount from Twitch API fetches
       totalMessages: messages.length,
       questions: questions.length,
@@ -703,25 +813,25 @@ export default function Dashboard() {
       positiveMessages,
       negativeMessages,
       activeUsers: uniqueUsers,
-      currentMood
+      currentMood,
     }))
 
     const counts: Record<string, number> = {}
     const userTopics: Record<string, Set<string>> = {}
-    messages.forEach(m => {
+    messages.forEach((m) => {
       counts[m.username] = (counts[m.username] || 0) + 1
       if (!userTopics[m.username]) userTopics[m.username] = new Set()
       if (m.topics && m.topics.length > 0) {
-        m.topics.forEach(topic => userTopics[m.username].add(topic))
+        m.topics.forEach((topic) => userTopics[m.username].add(topic))
       }
     })
     const top = Object.entries(counts)
-      .sort((a,b) => b[1]-a[1])
-      .slice(0,5)
-      .map(([username,count]) => ({
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([username, count]) => ({
         username,
         count,
-        topics: Array.from(userTopics[username] || []).slice(0, 2) // Top 2 topics per chatter
+        topics: Array.from(userTopics[username] || []).slice(0, 2), // Top 2 topics per chatter
       }))
     setTopChatters(top)
 
@@ -729,8 +839,8 @@ export default function Dashboard() {
       AnalyticsService.updateSessionStats(currentSessionId, {
         peak_viewer_count: stats.viewerCount || 0,
         total_messages: messages.length,
-        unique_chatters: uniqueUsers
-      }).catch(error => {
+        unique_chatters: uniqueUsers,
+      }).catch((error) => {
         console.error('Failed to update session stats:', error)
       })
     }
@@ -739,36 +849,42 @@ export default function Dashboard() {
   // Not authenticated - require Twitch login
   if (!isAuthenticated) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Poppins, Arial, sans-serif',
-        padding: '1rem'
-      }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          padding: '2rem',
-          maxWidth: '400px',
-          width: '100%',
-          textAlign: 'center',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '1.5rem'
-          }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'Poppins, Arial, sans-serif',
+          padding: '1rem',
+        }}
+      >
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '100%',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '1.5rem',
+            }}
+          >
             <img
               src="/landing-logo.png"
               alt="Casi"
               style={{
                 width: '200px',
-                height: 'auto'
+                height: 'auto',
               }}
               onError={(e) => {
                 const target = e.currentTarget
@@ -777,28 +893,32 @@ export default function Dashboard() {
             />
           </div>
 
-          <h1 style={{
-            color: 'white',
-            fontSize: '2rem',
-            fontWeight: 'bold',
-            margin: '0 0 1rem 0',
-            background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
+          <h1
+            style={{
+              color: 'white',
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              margin: '0 0 1rem 0',
+              background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
             Connect your Twitch
           </h1>
 
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            margin: '0 0 1.5rem 0',
-            fontSize: '1rem'
-          }}>
+          <p
+            style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              margin: '0 0 1.5rem 0',
+              fontSize: '1rem',
+            }}
+          >
             Sign in with Twitch to auto-connect to your channel and sync viewers.
           </p>
 
           <a
-            href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18')}&redirect_uri=${encodeURIComponent('https://heycasi.com/auth/callback')}&response_type=code&scope=user%3Aread%3Aemail`}
+            href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18')}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com')}/auth/callback&response_type=code&scope=user%3Aread%3Aemail`}
             style={{
               display: 'inline-block',
               width: '100%',
@@ -809,17 +929,19 @@ export default function Dashboard() {
               textDecoration: 'none',
               fontWeight: 600,
               fontFamily: 'Poppins, Arial, sans-serif',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
             }}
           >
             Connect with Twitch
           </a>
 
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: '0.8rem',
-            margin: '1.5rem 0 0 0'
-          }}>
+          <p
+            style={{
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontSize: '0.8rem',
+              margin: '1.5rem 0 0 0',
+            }}
+          >
             Secure OAuth • Read-only access • Privacy protected
           </p>
         </div>
@@ -830,15 +952,17 @@ export default function Dashboard() {
   // Checking access...
   if (accessLoading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Poppins, Arial, sans-serif',
-        color: 'white'
-      }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'Poppins, Arial, sans-serif',
+          color: 'white',
+        }}
+      >
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Checking your access...</p>
@@ -850,58 +974,71 @@ export default function Dashboard() {
   // No access - require subscription or beta code
   if (!hasAccess && !isAdmin) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Poppins, Arial, sans-serif',
-        padding: '1rem'
-      }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          padding: '2.5rem 2rem',
-          maxWidth: '500px',
-          width: '100%',
-          textAlign: 'center',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <div style={{
-            fontSize: '4rem',
-            marginBottom: '1rem'
-          }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'Poppins, Arial, sans-serif',
+          padding: '1rem',
+        }}
+      >
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '2.5rem 2rem',
+            maxWidth: '500px',
+            width: '100%',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '4rem',
+              marginBottom: '1rem',
+            }}
+          >
             🔒
           </div>
 
-          <h1 style={{
-            color: 'white',
-            fontSize: '1.875rem',
-            fontWeight: 'bold',
-            margin: '0 0 1rem 0'
-          }}>
+          <h1
+            style={{
+              color: 'white',
+              fontSize: '1.875rem',
+              fontWeight: 'bold',
+              margin: '0 0 1rem 0',
+            }}
+          >
             {accessDetails?.status === 'trial_expired' ? 'Trial Expired' : 'Subscription Required'}
           </h1>
 
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            margin: '0 0 1.5rem 0',
-            fontSize: '1rem',
-            lineHeight: '1.6'
-          }}>
-            {accessDetails?.message || 'You need an active subscription or beta code to access the dashboard.'}
+          <p
+            style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              margin: '0 0 1.5rem 0',
+              fontSize: '1rem',
+              lineHeight: '1.6',
+            }}
+          >
+            {accessDetails?.message ||
+              'You need an active subscription or beta code to access the dashboard.'}
           </p>
 
           {accessDetails?.status === 'trial_expired' && accessDetails?.trial_ends_at && (
-            <div style={{
-              background: 'rgba(255, 159, 159, 0.1)',
-              border: '1px solid rgba(255, 159, 159, 0.3)',
-              borderRadius: '12px',
-              padding: '1rem',
-              marginBottom: '1.5rem'
-            }}>
+            <div
+              style={{
+                background: 'rgba(255, 159, 159, 0.1)',
+                border: '1px solid rgba(255, 159, 159, 0.3)',
+                borderRadius: '12px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+              }}
+            >
               <p style={{ margin: 0, fontSize: '0.875rem', color: '#FF9F9F' }}>
                 Your trial ended on {new Date(accessDetails.trial_ends_at).toLocaleDateString()}
               </p>
@@ -920,7 +1057,7 @@ export default function Dashboard() {
                 color: 'white',
                 textDecoration: 'none',
                 fontWeight: 600,
-                fontSize: '1rem'
+                fontSize: '1rem',
               }}
             >
               View Plans & Subscribe
@@ -939,7 +1076,7 @@ export default function Dashboard() {
                   color: '#B8EE8A',
                   textDecoration: 'none',
                   fontWeight: 600,
-                  fontSize: '1rem'
+                  fontSize: '1rem',
                 }}
               >
                 Have a Beta Code? Sign Up
@@ -953,7 +1090,7 @@ export default function Dashboard() {
                 color: 'rgba(255, 255, 255, 0.6)',
                 textDecoration: 'none',
                 fontSize: '0.875rem',
-                marginTop: '0.5rem'
+                marginTop: '0.5rem',
               }}
             >
               ← Back to Home
@@ -965,21 +1102,25 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      color: 'white'
-    }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        fontFamily: 'Poppins, Arial, sans-serif',
+        color: 'white',
+      }}
+    >
       {/* Header with Navigation */}
-      <div style={{
-        padding: '0.75rem 1rem',
-        background: 'rgba(255, 255, 255, 0.05)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+      <div
+        style={{
+          padding: '0.75rem 1rem',
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <img
             src="/landing-logo.png"
@@ -989,7 +1130,8 @@ export default function Dashboard() {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('h1')
-              fallback.style.cssText = 'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+              fallback.style.cssText =
+                'margin: 0; font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
               fallback.textContent = 'Casi'
               target.parentNode?.appendChild(fallback)
             }}
@@ -1003,22 +1145,25 @@ export default function Dashboard() {
               const target = e.currentTarget
               target.style.display = 'none'
               const fallback = document.createElement('div')
-              fallback.style.cssText = 'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
+              fallback.style.cssText =
+                'width: 32px; height: 32px; background: #B8EE8A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;'
               fallback.textContent = '🤖'
               target.parentNode?.appendChild(fallback)
             }}
           />
 
           {isAdmin && (
-            <span style={{
-              background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-              color: '#000',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '12px',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              marginLeft: '0.5rem'
-            }}>
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                color: '#000',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                fontWeight: '700',
+                marginLeft: '0.5rem',
+              }}
+            >
               👑 ADMIN
             </span>
           )}
@@ -1031,7 +1176,7 @@ export default function Dashboard() {
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
               fontSize: '0.8rem',
-              fontWeight: '500'
+              fontWeight: '500',
             }}
           >
             Home
@@ -1042,7 +1187,7 @@ export default function Dashboard() {
               color: 'rgba(255, 255, 255, 0.8)',
               textDecoration: 'none',
               fontSize: '0.8rem',
-              fontWeight: '500'
+              fontWeight: '500',
             }}
           >
             Beta Program
@@ -1065,7 +1210,7 @@ export default function Dashboard() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'white',
-                fontSize: '1rem'
+                fontSize: '1rem',
               }}
             >
               {!twitchUser?.profile_image_url && '👤'}
@@ -1083,28 +1228,34 @@ export default function Dashboard() {
                   boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
                   minWidth: '200px',
                   zIndex: 1000,
-                  overflow: 'hidden'
+                  overflow: 'hidden',
                 }}
                 onMouseLeave={() => setShowAccountDropdown(false)}
               >
                 {/* User Info */}
-                <div style={{
-                  padding: '1rem',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  background: 'rgba(105, 50, 255, 0.1)'
-                }}>
-                  <div style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    color: 'white',
-                    marginBottom: '0.25rem'
-                  }}>
+                <div
+                  style={{
+                    padding: '1rem',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(105, 50, 255, 0.1)',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: 'white',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
                     {twitchUser?.display_name || 'User'}
                   </div>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: 'rgba(255, 255, 255, 0.6)'
-                  }}>
+                  <div
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                    }}
+                  >
                     {email}
                   </div>
                 </div>
@@ -1127,7 +1278,7 @@ export default function Dashboard() {
                         cursor: 'pointer',
                         background: 'rgba(255, 215, 0, 0.1)',
                         border: '1px solid rgba(255, 215, 0, 0.3)',
-                        marginBottom: '0.5rem'
+                        marginBottom: '0.5rem',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'rgba(255, 215, 0, 0.2)'
@@ -1153,7 +1304,7 @@ export default function Dashboard() {
                       fontSize: '0.875rem',
                       borderRadius: '8px',
                       transition: 'background 0.2s',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
@@ -1187,7 +1338,7 @@ export default function Dashboard() {
                       cursor: 'pointer',
                       textAlign: 'left',
                       transition: 'background 0.2s',
-                      fontFamily: 'Poppins, Arial, sans-serif'
+                      fontFamily: 'Poppins, Arial, sans-serif',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
@@ -1206,25 +1357,28 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{
-        padding: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        minHeight: 'calc(100vh - 80px)'
-      }}>
-
+      <div
+        style={{
+          padding: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          minHeight: 'calc(100vh - 80px)',
+        }}
+      >
         {/* Connection Panel - Admin can view any channel */}
         {!isConnected && (
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            maxWidth: '500px',
-            margin: '0 auto',
-            textAlign: 'center'
-          }}>
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              maxWidth: '500px',
+              margin: '0 auto',
+              textAlign: 'center',
+            }}
+          >
             {isAdmin ? (
               <>
                 <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#F7F7F7' }}>
@@ -1245,7 +1399,7 @@ export default function Dashboard() {
                       border: 'none',
                       background: 'rgba(255,255,255,0.1)',
                       color: 'white',
-                      flex: 1
+                      flex: 1,
                     }}
                   />
                   <button
@@ -1260,15 +1414,17 @@ export default function Dashboard() {
 
                         // Automatically set up raid subscription for this channel
                         try {
-                          const { data: { session } } = await supabase.auth.getSession()
+                          const {
+                            data: { session },
+                          } = await supabase.auth.getSession()
                           if (session?.access_token) {
                             await fetch('/api/admin/setup-raid-subscription', {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${session.access_token}`
+                                Authorization: `Bearer ${session.access_token}`,
                               },
-                              body: JSON.stringify({ channelName: channel })
+                              body: JSON.stringify({ channelName: channel }),
                             })
                             console.log(`✅ Raid subscription set up for ${channel}`)
                           }
@@ -1282,10 +1438,12 @@ export default function Dashboard() {
                       padding: '0.6rem 1.5rem',
                       borderRadius: '20px',
                       border: 'none',
-                      background: adminChannelInput.trim() ? 'linear-gradient(135deg, #FFD700, #FFA500)' : 'rgba(255,255,255,0.1)',
+                      background: adminChannelInput.trim()
+                        ? 'linear-gradient(135deg, #FFD700, #FFA500)'
+                        : 'rgba(255,255,255,0.1)',
                       color: adminChannelInput.trim() ? '#000' : 'white',
                       fontWeight: '600',
-                      cursor: adminChannelInput.trim() ? 'pointer' : 'not-allowed'
+                      cursor: adminChannelInput.trim() ? 'pointer' : 'not-allowed',
                     }}
                   >
                     Connect
@@ -1300,17 +1458,25 @@ export default function Dashboard() {
                 <p style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0 1rem 0' }}>
                   Go live on Twitch and your dashboard will auto-connect!
                 </p>
-                <div style={{
-                  background: 'rgba(184, 238, 138, 0.1)',
-                  border: '1px solid rgba(184, 238, 138, 0.3)',
-                  borderRadius: '12px',
-                  padding: '1rem',
-                  marginTop: '1rem'
-                }}>
+                <div
+                  style={{
+                    background: 'rgba(184, 238, 138, 0.1)',
+                    border: '1px solid rgba(184, 238, 138, 0.3)',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                  }}
+                >
                   <p style={{ margin: 0, fontSize: '0.9rem', color: '#B8EE8A' }}>
                     ✨ Connected as <strong>@{twitchUser?.login || 'Unknown'}</strong>
                   </p>
-                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
+                  <p
+                    style={{
+                      margin: '0.5rem 0 0 0',
+                      fontSize: '0.8rem',
+                      color: 'rgba(255,255,255,0.7)',
+                    }}
+                  >
                     Your dashboard will automatically activate when you start streaming
                   </p>
                 </div>
@@ -1323,35 +1489,42 @@ export default function Dashboard() {
         {isConnected && (
           <>
             {/* Combined Status & Welcome Banner - Left Aligned */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.15))',
-              borderRadius: '8px',
-              padding: '0.6rem 1rem',
-              border: '1px solid rgba(184, 238, 138, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              width: 'fit-content',
-              flexWrap: 'wrap'
-            }}>
+            <div
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(94, 234, 212, 0.15))',
+                borderRadius: '8px',
+                padding: '0.6rem 1rem',
+                border: '1px solid rgba(184, 238, 138, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                width: 'fit-content',
+                flexWrap: 'wrap',
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{
-                  width: '6px',
-                  height: '6px',
-                  background: '#B8EE8A',
-                  borderRadius: '50%',
-                  animation: 'pulse 2s infinite'
-                }} />
+                <div
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    background: '#B8EE8A',
+                    borderRadius: '50%',
+                    animation: 'pulse 2s infinite',
+                  }}
+                />
                 <span style={{ color: '#F7F7F7', fontSize: '0.8rem', fontWeight: '500' }}>
                   Connected to @{channelName}
                 </span>
               </div>
 
-              <div style={{
-                height: '12px',
-                width: '1px',
-                background: 'rgba(255, 255, 255, 0.2)'
-              }} />
+              <div
+                style={{
+                  height: '12px',
+                  width: '1px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                }}
+              />
 
               <span style={{ color: '#F7F7F7', fontSize: '0.8rem' }}>
                 Hey! Your friendly stream sidekick is analyzing chat 🎮✨
@@ -1359,11 +1532,13 @@ export default function Dashboard() {
 
               {streamStartTime && (
                 <>
-                  <div style={{
-                    height: '12px',
-                    width: '1px',
-                    background: 'rgba(255, 255, 255, 0.2)'
-                  }} />
+                  <div
+                    style={{
+                      height: '12px',
+                      width: '1px',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                    }}
+                  />
                   <span style={{ color: '#B8EE8A', fontSize: '0.8rem', fontWeight: '600' }}>
                     ⏱️ {elapsedDuration}
                   </span>
@@ -1392,7 +1567,7 @@ export default function Dashboard() {
                   fontWeight: '600',
                   fontFamily: 'Poppins, Arial, sans-serif',
                   opacity: isGeneratingReport ? 0.7 : 1,
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
                 }}
               >
                 {isGeneratingReport
@@ -1405,34 +1580,47 @@ export default function Dashboard() {
 
             {/* Trial Status Banner */}
             {accessDetails?.is_trial && accessDetails?.trial_days_remaining && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(184, 238, 138, 0.1))',
-                borderRadius: '12px',
-                padding: '1rem',
-                border: '1px solid rgba(184, 238, 138, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}>
+              <div
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(184, 238, 138, 0.2), rgba(184, 238, 138, 0.1))',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  border: '1px solid rgba(184, 238, 138, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                  <div style={{
-                    background: '#B8EE8A',
-                    color: '#151E3C',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    whiteSpace: 'nowrap'
-                  }}>
+                  <div
+                    style={{
+                      background: '#B8EE8A',
+                      color: '#151E3C',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '8px',
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     BETA TRIAL
                   </div>
                   <div>
-                    <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: '600', color: '#F7F7F7' }}>
+                    <p
+                      style={{ margin: 0, fontSize: '0.9rem', fontWeight: '600', color: '#F7F7F7' }}
+                    >
                       {accessDetails.trial_days_remaining} days remaining
                     </p>
-                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                    <p
+                      style={{
+                        margin: '0.25rem 0 0 0',
+                        fontSize: '0.8rem',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      }}
+                    >
                       Trial ends {new Date(accessDetails.trial_ends_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -1447,7 +1635,7 @@ export default function Dashboard() {
                     textDecoration: 'none',
                     fontSize: '0.875rem',
                     fontWeight: '600',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   Upgrade Now
@@ -1468,25 +1656,30 @@ export default function Dashboard() {
 
             {/* AI Motivational Message */}
             {motivationalMessage && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(94, 234, 212, 0.1))',
-                borderRadius: '12px',
-                padding: '1rem',
-                border: '1px solid rgba(94, 234, 212, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                flexWrap: 'wrap'
-              }}>
-                <div style={{
-                  background: '#5EEAD4',
-                  color: '#151E3C',
-                  padding: '0.25rem 0.75rem',
+              <div
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(94, 234, 212, 0.1))',
                   borderRadius: '12px',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  whiteSpace: 'nowrap'
-                }}>
+                  padding: '1rem',
+                  border: '1px solid rgba(94, 234, 212, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div
+                  style={{
+                    background: '#5EEAD4',
+                    color: '#151E3C',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '12px',
+                    fontSize: '0.7rem',
+                    fontWeight: '600',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   🤖 AI INSIGHT
                 </div>
 
@@ -1507,7 +1700,7 @@ export default function Dashboard() {
                     fontSize: '0.9rem',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
                   }}
                 >
                   ×
@@ -1517,23 +1710,28 @@ export default function Dashboard() {
 
             {/* Report Generation Status */}
             {isGeneratingReport && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(147, 47, 254, 0.2), rgba(147, 47, 254, 0.1))',
-                borderRadius: '12px',
-                padding: '1rem',
-                border: '1px solid rgba(147, 47, 254, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem'
-              }}>
-                <div style={{
-                  background: '#932FFE',
-                  color: 'white',
-                  padding: '0.25rem 0.75rem',
+              <div
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(147, 47, 254, 0.2), rgba(147, 47, 254, 0.1))',
                   borderRadius: '12px',
-                  fontSize: '0.7rem',
-                  fontWeight: '600'
-                }}>
+                  padding: '1rem',
+                  border: '1px solid rgba(147, 47, 254, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                }}
+              >
+                <div
+                  style={{
+                    background: '#932FFE',
+                    color: 'white',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '12px',
+                    fontSize: '0.7rem',
+                    fontWeight: '600',
+                  }}
+                >
                   📊 GENERATING REPORT
                 </div>
                 <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.9rem' }}>
@@ -1543,314 +1741,471 @@ export default function Dashboard() {
             )}
 
             {/* Analytics - v2.0 Compact Stats */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))',
-              gap: '0.5rem'
-            }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))',
+                gap: '0.5rem',
+              }}
+            >
               {[
                 { icon: '👥', value: stats.viewerCount || 0, label: 'Viewers', color: '#5EEAD4' },
                 { icon: '💬', value: stats.totalMessages, label: 'Messages', color: '#5EEAD4' },
                 {
-                  icon: engagementLevel === 'High' ? '🔥' : engagementLevel === 'Moderate' ? '📊' : '📉',
+                  icon:
+                    engagementLevel === 'High'
+                      ? '🔥'
+                      : engagementLevel === 'Moderate'
+                        ? '📊'
+                        : '📉',
                   value: `${engagementLevel}`,
                   label: 'Engagement',
-                  color: engagementLevel === 'High' ? '#B8EE8A' : engagementLevel === 'Moderate' ? '#5EEAD4' : '#FF9F9F'
+                  color:
+                    engagementLevel === 'High'
+                      ? '#B8EE8A'
+                      : engagementLevel === 'Moderate'
+                        ? '#5EEAD4'
+                        : '#FF9F9F',
                 },
                 { icon: '❓', value: stats.questions, label: 'Questions', color: '#FF9F9F' },
                 {
-                  icon: stats.currentMood === 'Very Positive' ? '😊' :
-                        stats.currentMood === 'Positive' ? '🙂' :
-                        stats.currentMood === 'Negative' ? '😢' :
-                        stats.currentMood === 'Slightly Negative' ? '😕' : '😐',
+                  icon:
+                    stats.currentMood === 'Very Positive'
+                      ? '😊'
+                      : stats.currentMood === 'Positive'
+                        ? '🙂'
+                        : stats.currentMood === 'Negative'
+                          ? '😢'
+                          : stats.currentMood === 'Slightly Negative'
+                            ? '😕'
+                            : '😐',
                   value: stats.currentMood,
                   label: 'Sentiment',
-                  color: stats.currentMood.includes('Positive') ? '#B8EE8A' :
-                         stats.currentMood.includes('Negative') ? '#FF9F9F' : '#F7F7F7'
+                  color: stats.currentMood.includes('Positive')
+                    ? '#B8EE8A'
+                    : stats.currentMood.includes('Negative')
+                      ? '#FF9F9F'
+                      : '#F7F7F7',
                 },
                 { icon: '✨', value: stats.positiveMessages, label: 'Positive', color: '#B8EE8A' },
-                { icon: '💔', value: stats.negativeMessages, label: 'Negative', color: '#FF9F9F' }
+                { icon: '💔', value: stats.negativeMessages, label: 'Negative', color: '#FF9F9F' },
               ].map((stat, index) => (
-                <div key={index} style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '8px',
-                  padding: '0.5rem 0.4rem',
-                  textAlign: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  animation: stat.label === 'Sentiment' && moodChanged ? 'sentimentGlow 2s ease' : 'none',
-                  transition: 'all 0.3s ease'
-                }}>
+                <div
+                  key={index}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '8px',
+                    padding: '0.5rem 0.4rem',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    animation:
+                      stat.label === 'Sentiment' && moodChanged ? 'sentimentGlow 2s ease' : 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
                   <div style={{ fontSize: '0.9rem', margin: '0 0 0.15rem 0' }}>{stat.icon}</div>
-                  <p style={{
-                    margin: 0,
-                    fontSize: '0.85rem',
-                    fontWeight: 'bold',
-                    color: stat.color,
-                    wordBreak: 'break-word',
-                    lineHeight: '1.2'
-                  }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      color: stat.color,
+                      wordBreak: 'break-word',
+                      lineHeight: '1.2',
+                    }}
+                  >
                     {stat.value}
                   </p>
-                  <p style={{ margin: 0, fontSize: '0.65rem', opacity: 0.7, marginTop: '0.1rem' }}>{stat.label}</p>
+                  <p style={{ margin: 0, fontSize: '0.65rem', opacity: 0.7, marginTop: '0.1rem' }}>
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
 
             {/* Contextual Insight Tip */}
             {messages.length > 5 && (
-              <div style={{
-                background: 'rgba(94, 234, 212, 0.05)',
-                border: '1px solid rgba(94, 234, 212, 0.2)',
-                borderRadius: '8px',
-                padding: '0.75rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem'
-              }}>
+              <div
+                style={{
+                  background: 'rgba(94, 234, 212, 0.05)',
+                  border: '1px solid rgba(94, 234, 212, 0.2)',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                }}
+              >
                 <span style={{ fontSize: '1.2rem' }}>💡</span>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.85rem',
-                  color: 'rgba(255, 255, 255, 0.85)',
-                  lineHeight: '1.4'
-                }}>
-                  {stats.currentMood.includes('Positive')
-                    ? <><strong style={{ color: '#B8EE8A' }}>Tip:</strong> Positive spikes often mean highlight-worthy moments — great for clips!</>
-                    : stats.totalMessages < 10
-                    ? <><strong style={{ color: '#5EEAD4' }}>Tip:</strong> Chat's quiet — try engaging with a question to spark conversation</>
-                    : stats.questions > 3
-                    ? <><strong style={{ color: '#FF9F9F' }}>Tip:</strong> {stats.questions} questions waiting — addressing them boosts engagement!</>
-                    : <><strong style={{ color: '#5EEAD4' }}>Tip:</strong> Keep an eye on sentiment shifts to catch the room's vibe changes</>
-                  }
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '0.85rem',
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    lineHeight: '1.4',
+                  }}
+                >
+                  {stats.currentMood.includes('Positive') ? (
+                    <>
+                      <strong style={{ color: '#B8EE8A' }}>Tip:</strong> Positive spikes often mean
+                      highlight-worthy moments — great for clips!
+                    </>
+                  ) : stats.totalMessages < 10 ? (
+                    <>
+                      <strong style={{ color: '#5EEAD4' }}>Tip:</strong> Chat's quiet — try engaging
+                      with a question to spark conversation
+                    </>
+                  ) : stats.questions > 3 ? (
+                    <>
+                      <strong style={{ color: '#FF9F9F' }}>Tip:</strong> {stats.questions} questions
+                      waiting — addressing them boosts engagement!
+                    </>
+                  ) : (
+                    <>
+                      <strong style={{ color: '#5EEAD4' }}>Tip:</strong> Keep an eye on sentiment
+                      shifts to catch the room's vibe changes
+                    </>
+                  )}
                 </p>
               </div>
             )}
 
             {/* Main Content Area - 3 Column Layout */}
-            <div style={{
-              display: 'flex',
-              flexDirection: window.innerWidth < 900 ? 'column' : 'row',
-              gap: '1rem',
-              flex: 1,
-              minHeight: '400px',
-              minWidth: 0
-            }}>
-              {/* LEFT COLUMN - Chat Feed + Questions (40%) */}
-              <div style={{
-                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%',
+            <div
+              style={{
                 display: 'flex',
-                flexDirection: 'column',
+                flexDirection: window.innerWidth < 900 ? 'column' : 'row',
                 gap: '1rem',
-                minWidth: 0
-              }}>
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '16px',
-                padding: '1rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                height: '300px',
-                display: 'flex',
-                flexDirection: 'column',
-                minWidth: 0
-              }}>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
-                  💬 Live Chat Feed
-                </h3>
-
+                flex: 1,
+                minHeight: '400px',
+                minWidth: 0,
+              }}
+            >
+              {/* LEFT COLUMN - Chat Feed + Questions (40%) */}
+              <div
+                style={{
+                  flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  minWidth: 0,
+                }}
+              >
                 <div
-                  ref={chatFeedRef}
                   style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    borderRadius: '8px',
-                    padding: '0.75rem',
-                    minHeight: 0
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '16px',
+                    padding: '1rem',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    height: '300px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minWidth: 0,
                   }}
                 >
-                  {messages.length === 0 ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      textAlign: 'center'
-                    }}>
-                      <div>
-                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</div>
-                        <p style={{ fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>Chat's quiet for now... 🤔</p>
-                        <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0' }}>Casi's ready to analyze as soon as someone says hi!</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem'
-                    }}>
-                      {messages.slice(-50).reverse().map((msg) => (
-                        <div
-                          key={msg.id}
-                          style={{
-                            padding: '0.5rem',
-                            background: msg.isQuestion
-                              ? 'rgba(255, 159, 159, 0.2)'
-                              : msg.sentiment === 'positive'
-                              ? 'rgba(184, 238, 138, 0.1)'
-                              : msg.sentiment === 'negative'
-                              ? 'rgba(255, 159, 159, 0.1)'
-                              : 'rgba(255, 255, 255, 0.05)',
-                            borderRadius: '6px',
-                            border: msg.isQuestion
-                              ? '1px solid rgba(255, 159, 159, 0.3)'
-                              : msg.sentiment === 'positive'
-                              ? '1px solid rgba(184, 238, 138, 0.2)'
-                              : msg.sentiment === 'negative'
-                              ? '1px solid rgba(255, 159, 159, 0.2)'
-                              : '1px solid rgba(255, 255, 255, 0.1)',
-                            animation: msg.id === highlightedQuestionId ? 'questionPulse 1.5s ease' : 'none',
-                            boxShadow: msg.id === highlightedQuestionId ? '0 0 20px rgba(255, 159, 159, 0.8)' : 'none',
-                            transform: msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.3rem',
-                            marginBottom: '0.25rem',
-                            flexWrap: 'wrap'
-                          }}>
-                            <span style={{
-                              fontWeight: '600',
-                              color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
-                              fontSize: '0.8rem'
-                            }}>
-                              {msg.username}
-                            </span>
-                            {msg.isQuestion && (
-                              <span style={{
-                                fontSize: '0.6rem',
-                                background: '#FF9F9F',
-                                padding: '0.1rem 0.25rem',
-                                borderRadius: '3px',
-                                color: '#151E3C',
-                                fontWeight: '600'
-                              }}>
-                                Q
-                              </span>
-                            )}
-                            <span style={{
-                              fontSize: '0.6rem',
-                              padding: '0.1rem 0.25rem',
-                              borderRadius: '3px',
-                              background: msg.sentiment === 'positive'
-                                ? '#B8EE8A'
-                                : msg.sentiment === 'negative'
-                                ? '#FF9F9F'
-                                : 'rgba(107, 114, 128, 0.8)'
-                            }}>
-                              {msg.sentiment === 'positive' ? '😊' : msg.sentiment === 'negative' ? '😢' : '😐'}
-                            </span>
-                            {msg.engagementLevel === 'high' && (
-                              <span style={{
-                                fontSize: '0.6rem',
-                                background: '#FFD700',
-                                padding: '0.1rem 0.25rem',
-                                borderRadius: '3px',
-                                color: '#000',
-                                fontWeight: '600'
-                              }}>
-                                🔥
-                              </span>
-                            )}
-                          </div>
-                          <p style={{
-                            margin: 0,
-                            color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
-                            lineHeight: '1.3',
-                            fontSize: '0.8rem',
-                            wordBreak: 'break-word'
-                          }}>
-                            {msg.message}
+                  <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>💬 Live Chat Feed</h3>
+
+                  <div
+                    ref={chatFeedRef}
+                    style={{
+                      flex: 1,
+                      overflowY: 'auto',
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      minHeight: 0,
+                    }}
+                  >
+                    {messages.length === 0 ? (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</div>
+                          <p style={{ fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>
+                            Chat's quiet for now... 🤔
+                          </p>
+                          <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0' }}>
+                            Casi's ready to analyze as soon as someone says hi!
                           </p>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.5rem',
+                        }}
+                      >
+                        {messages
+                          .slice(-50)
+                          .reverse()
+                          .map((msg) => (
+                            <div
+                              key={msg.id}
+                              style={{
+                                padding: '0.5rem',
+                                background: msg.isQuestion
+                                  ? 'rgba(255, 159, 159, 0.2)'
+                                  : msg.sentiment === 'positive'
+                                    ? 'rgba(184, 238, 138, 0.1)'
+                                    : msg.sentiment === 'negative'
+                                      ? 'rgba(255, 159, 159, 0.1)'
+                                      : 'rgba(255, 255, 255, 0.05)',
+                                borderRadius: '6px',
+                                borderLeft: `4px solid ${msg.platform === 'kick' ? '#53FC18' : '#6441A5'}`, // NEW: Platform color!
+                                border: msg.isQuestion
+                                  ? '1px solid rgba(255, 159, 159, 0.3)'
+                                  : msg.sentiment === 'positive'
+                                    ? '1px solid rgba(184, 238, 138, 0.2)'
+                                    : msg.sentiment === 'negative'
+                                      ? '1px solid rgba(255, 159, 159, 0.2)'
+                                      : '1px solid rgba(255, 255, 255, 0.1)',
+                                borderLeftWidth: '4px', // Thick platform border
+                                animation:
+                                  msg.id === highlightedQuestionId
+                                    ? 'questionPulse 1.5s ease'
+                                    : 'none',
+                                boxShadow:
+                                  msg.id === highlightedQuestionId
+                                    ? '0 0 20px rgba(255, 159, 159, 0.8)'
+                                    : 'none',
+                                transform:
+                                  msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
+                                transition: 'all 0.3s ease',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem',
+                                  marginBottom: '0.25rem',
+                                  flexWrap: 'wrap',
+                                }}
+                              >
+                                {/* NEW: Platform Icon */}
+                                <span style={{ fontSize: '0.9rem' }}>
+                                  {msg.platform === 'kick' ? '🟢' : '🟣'}
+                                </span>
 
-              {/* Questions Panel - Moved to Left Column */}
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
-                borderRadius: '16px',
-                padding: '1rem',
-                border: '1px solid rgba(255, 159, 159, 0.3)',
-                height: '350px',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '1rem'
-                }}>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
-                    🚨 Questions ({questions.length})
-                  </h3>
-                  <div style={{
-                    background: '#FF9F9F',
-                    color: '#151E3C',
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '8px',
-                    fontSize: '0.7rem',
-                    fontWeight: '600'
-                  }}>
-                    PRIORITY
+                                <span
+                                  style={{
+                                    fontWeight: '600',
+                                    color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
+                                    fontSize: '0.8rem',
+                                  }}
+                                >
+                                  {msg.username}
+                                </span>
+                                {msg.isQuestion && (
+                                  <span
+                                    style={{
+                                      fontSize: '0.6rem',
+                                      background: '#FF9F9F',
+                                      padding: '0.1rem 0.25rem',
+                                      borderRadius: '3px',
+                                      color: '#151E3C',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    Q
+                                  </span>
+                                )}
+                                <span
+                                  style={{
+                                    fontSize: '0.6rem',
+                                    padding: '0.1rem 0.25rem',
+                                    borderRadius: '3px',
+                                    background:
+                                      msg.sentiment === 'positive'
+                                        ? '#B8EE8A'
+                                        : msg.sentiment === 'negative'
+                                          ? '#FF9F9F'
+                                          : 'rgba(107, 114, 128, 0.8)',
+                                  }}
+                                >
+                                  {msg.sentiment === 'positive'
+                                    ? '😊'
+                                    : msg.sentiment === 'negative'
+                                      ? '😢'
+                                      : '😐'}
+                                </span>
+                                {msg.engagementLevel === 'high' && (
+                                  <span
+                                    style={{
+                                      fontSize: '0.6rem',
+                                      background: '#FFD700',
+                                      padding: '0.1rem 0.25rem',
+                                      borderRadius: '3px',
+                                      color: '#000',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    🔥
+                                  </span>
+                                )}
+                              </div>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
+                                  lineHeight: '1.3',
+                                  fontSize: '0.8rem',
+                                  wordBreak: 'break-word',
+                                }}
+                              >
+                                {msg.message}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
-                  {questions.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                      <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👀</div>
-                      <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', fontWeight: '500' }}>No questions yet — looks like chat's chill for now 😌</p>
+
+                {/* Questions Panel - Moved to Left Column */}
+                <div
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
+                    borderRadius: '16px',
+                    padding: '1rem',
+                    border: '1px solid rgba(255, 159, 159, 0.3)',
+                    height: '350px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
+                      🚨 Questions ({questions.length})
+                    </h3>
+                    <div
+                      style={{
+                        background: '#FF9F9F',
+                        color: '#151E3C',
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '8px',
+                        fontSize: '0.7rem',
+                        fontWeight: '600',
+                      }}
+                    >
+                      PRIORITY
                     </div>
-                  ) : (
-                    questions.slice(-10).reverse().map((q) => (
-                      <div key={q.id} style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255, 159, 159, 0.3)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}>@{q.username}</span>
-                        </div>
-                        <p style={{ margin: 0, color: '#F7F7F7', fontSize: '0.8rem', lineHeight: '1.3' }}>{q.message}</p>
+                  </div>
+                  <div
+                    style={{
+                      flex: 1,
+                      overflowY: 'auto',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                      minHeight: 0,
+                    }}
+                  >
+                    {questions.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👀</div>
+                        <p
+                          style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', fontWeight: '500' }}
+                        >
+                          No questions yet — looks like chat's chill for now 😌
+                        </p>
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      questions
+                        .slice(-10)
+                        .reverse()
+                        .map((q) => (
+                          <div
+                            key={q.id}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.1)',
+                              borderRadius: '8px',
+                              padding: '0.75rem',
+                              border: '1px solid rgba(255, 159, 159, 0.3)',
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                marginBottom: '0.5rem',
+                                flexWrap: 'wrap',
+                              }}
+                            >
+                              <span
+                                style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}
+                              >
+                                @{q.username}
+                              </span>
+                            </div>
+                            <p
+                              style={{
+                                margin: 0,
+                                color: '#F7F7F7',
+                                fontSize: '0.8rem',
+                                lineHeight: '1.3',
+                              }}
+                            >
+                              {q.message}
+                            </p>
+                          </div>
+                        ))
+                    )}
+                  </div>
                 </div>
-              </div>
               </div>
 
               {/* MIDDLE COLUMN (30%) - Stream Preview + Top Chatters */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 30%', minWidth: 0, minHeight: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 30%',
+                  minWidth: 0,
+                  minHeight: 0,
+                }}
+              >
                 {/* Stream Preview */}
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '16px',
-                  padding: '1rem',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
+                <div
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '16px',
+                    padding: '1rem',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                >
                   <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>📺 Preview</h3>
-                  <div style={{
-                    position: 'relative',
-                    paddingBottom: '56.25%',
-                    height: 0,
-                    overflow: 'hidden',
-                    borderRadius: '8px',
-                    background: '#000'
-                  }}>
+                  <div
+                    style={{
+                      position: 'relative',
+                      paddingBottom: '56.25%',
+                      height: 0,
+                      overflow: 'hidden',
+                      borderRadius: '8px',
+                      background: '#000',
+                    }}
+                  >
                     <iframe
                       src={`https://player.twitch.tv/?channel=${channelName}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'heycasi.com'}&parent=localhost&muted=true`}
                       height="100%"
@@ -1862,58 +2217,85 @@ export default function Dashboard() {
                         left: 0,
                         width: '100%',
                         height: '100%',
-                        border: 'none'
+                        border: 'none',
                       }}
                     />
                   </div>
                 </div>
 
                 {/* Top Chatters & Topics */}
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '16px',
-                  padding: '1rem',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  height: '180px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden'
-                }}>
-                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>🏆 Top Chatters & Topics</h3>
+                <div
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '16px',
+                    padding: '1rem',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    height: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>
+                    🏆 Top Chatters & Topics
+                  </h3>
                   <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
                     {topChatters.length === 0 ? (
                       <div style={{ textAlign: 'center', padding: '1rem 0' }}>
                         <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
-                        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>Waiting for your first chatters...</p>
+                        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>
+                          Waiting for your first chatters...
+                        </p>
                       </div>
                     ) : (
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                      {topChatters.map((c) => (
-                        <li key={c.username} style={{
-                          padding: '0.5rem 0',
-                          borderBottom: '1px dashed rgba(255,255,255,0.1)'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                            <span style={{ color: '#F7F7F7', fontSize: '0.9rem', fontWeight: '600' }}>@{c.username}</span>
-                            <span style={{ color: '#5EEAD4', fontWeight: 700, fontSize: '0.85rem' }}>{c.count}</span>
-                          </div>
-                          {c.topics && c.topics.length > 0 && (
-                            <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                              {c.topics.map((topic, idx) => (
-                                <span key={idx} style={{
-                                  fontSize: '0.65rem',
-                                  background: 'rgba(94, 234, 212, 0.15)',
-                                  color: '#5EEAD4',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: '4px'
-                                }}>
-                                  {topic}
-                                </span>
-                              ))}
+                        {topChatters.map((c) => (
+                          <li
+                            key={c.username}
+                            style={{
+                              padding: '0.5rem 0',
+                              borderBottom: '1px dashed rgba(255,255,255,0.1)',
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '0.25rem',
+                              }}
+                            >
+                              <span
+                                style={{ color: '#F7F7F7', fontSize: '0.9rem', fontWeight: '600' }}
+                              >
+                                @{c.username}
+                              </span>
+                              <span
+                                style={{ color: '#5EEAD4', fontWeight: 700, fontSize: '0.85rem' }}
+                              >
+                                {c.count}
+                              </span>
                             </div>
-                          )}
-                        </li>
-                      ))}
+                            {c.topics && c.topics.length > 0 && (
+                              <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                {c.topics.map((topic, idx) => (
+                                  <span
+                                    key={idx}
+                                    style={{
+                                      fontSize: '0.65rem',
+                                      background: 'rgba(94, 234, 212, 0.15)',
+                                      color: '#5EEAD4',
+                                      padding: '0.1rem 0.4rem',
+                                      borderRadius: '4px',
+                                    }}
+                                  >
+                                    {topic}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </li>
+                        ))}
                       </ul>
                     )}
                   </div>
@@ -1921,11 +2303,13 @@ export default function Dashboard() {
               </div>
 
               {/* RIGHT COLUMN (25%) - Activity Feed */}
-              <div style={{
-                flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 25%',
-                minWidth: 0,
-                minHeight: 0
-              }}>
+              <div
+                style={{
+                  flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 25%',
+                  minWidth: 0,
+                  minHeight: 0,
+                }}
+              >
                 <ActivityFeed channelName={channelName} maxHeight="650px" />
               </div>
             </div>
@@ -1933,15 +2317,18 @@ export default function Dashboard() {
         )}
 
         {/* Footer - Always visible */}
-        <div style={{
-          textAlign: 'center',
-          padding: '1rem 0',
-          color: 'rgba(255, 255, 255, 0.6)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          marginTop: 'auto'
-        }}>
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '1rem 0',
+            color: 'rgba(255, 255, 255, 0.6)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: 'auto',
+          }}
+        >
           <p style={{ margin: 0, fontSize: '0.8rem' }}>
-            <strong style={{ color: '#5EEAD4' }}>Casi</strong> • Your stream's brainy co-pilot. Reads the room so you don't have to.
+            <strong style={{ color: '#5EEAD4' }}>Casi</strong> • Your stream's brainy co-pilot.
+            Reads the room so you don't have to.
           </p>
           {!isConnected && (
             <a
@@ -1951,7 +2338,7 @@ export default function Dashboard() {
                 marginTop: '0.5rem',
                 color: '#5EEAD4',
                 textDecoration: 'none',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
               }}
             >
               ← Back to Landing Page
@@ -1961,7 +2348,9 @@ export default function Dashboard() {
       </div>
 
       {/* CSS Animations */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
@@ -2022,7 +2411,9 @@ export default function Dashboard() {
           scrollbar-width: thin;
           scrollbar-color: rgba(94, 234, 212, 0.3) rgba(0, 0, 0, 0.3);
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   )
 }

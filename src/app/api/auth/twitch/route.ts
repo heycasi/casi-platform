@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': rateLimitResult.reset.toString()
-          }
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          },
         }
       )
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     console.log('Environment check:', {
       hasClientId: !!twitchClientId,
       hasClientSecret: !!twitchClientSecret,
-      clientId: twitchClientId?.substring(0, 8) + '...' // Log first 8 chars only
+      clientId: twitchClientId?.substring(0, 8) + '...', // Log first 8 chars only
     })
 
     if (!twitchClientId || !twitchClientSecret) {
@@ -52,8 +52,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 })
     }
 
-    // Force production URL
-    const redirectUri = 'https://heycasi.com/auth/callback'
+    // Use localhost for development, production URL otherwise
+    const redirectUri =
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:3000/auth/callback'
+        : 'https://heycasi.com/auth/callback'
 
     console.log('Token exchange params:', { clientId: twitchClientId, redirectUri })
 
@@ -73,11 +76,11 @@ export async function POST(request: NextRequest) {
     })
 
     const tokenData = await tokenResponse.json()
-    
-    console.log('Twitch token response:', { 
-      ok: tokenResponse.ok, 
+
+    console.log('Twitch token response:', {
+      ok: tokenResponse.ok,
       status: tokenResponse.status,
-      hasError: !!tokenData.error 
+      hasError: !!tokenData.error,
     })
 
     if (tokenData.error) {
@@ -88,17 +91,17 @@ export async function POST(request: NextRequest) {
     // Get user information
     const userResponse = await fetch('https://api.twitch.tv/helix/users', {
       headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
+        Authorization: `Bearer ${tokenData.access_token}`,
         'Client-Id': twitchClientId,
       },
     })
 
     const userData = await userResponse.json()
-    
-    console.log('User data response:', { 
-      ok: userResponse.ok, 
+
+    console.log('User data response:', {
+      ok: userResponse.ok,
       status: userResponse.status,
-      hasData: !!userData.data?.[0] 
+      hasData: !!userData.data?.[0],
     })
 
     return NextResponse.json({
@@ -106,20 +109,25 @@ export async function POST(request: NextRequest) {
       refresh_token: tokenData.refresh_token,
       user: userData.data?.[0] || null,
     })
-
   } catch (error) {
     console.error('API route error:', error)
 
     // Handle validation errors
     if (error instanceof ValidationError) {
-      return NextResponse.json({
-        error: error.message
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: error.message,
+        },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    )
   }
 }

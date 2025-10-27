@@ -1,0 +1,13 @@
+node_modules/
+.next/
+*.docx
+previous claude chats/
+package-lock.json
+
+.vercel
+.env.production
+.env.local
+.env*.local
+
+# Contains sensitive API keys
+SUPABASE_EMAIL_SETUP.txt

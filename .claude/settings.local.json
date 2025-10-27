@@ -23,7 +23,8 @@
       "Bash(chmod:*)",
       "Bash(./scripts/delete-all-subscriptions.sh:*)",
       "Bash(./scripts/create-subscription.sh:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
