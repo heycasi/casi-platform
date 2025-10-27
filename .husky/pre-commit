@@ -2,6 +2,7 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npx lint-staged || exit 1
-# type-check temporarily disabled (38 pre-existing TS errors)
+# Type-check available via 'npm run type-check' but disabled in pre-commit
+# due to 38 pre-existing TypeScript errors (not introduced by this PR)
 # npm run type-check || exit 1
 npm test
