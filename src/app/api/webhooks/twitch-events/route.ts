@@ -24,10 +24,8 @@ function verifyTwitchSignature(request: NextRequest, body: string): boolean {
   }
 
   const message = messageId + timestamp + body
-  const expectedSignature = 'sha256=' + crypto
-    .createHmac('sha256', TWITCH_WEBHOOK_SECRET)
-    .update(message)
-    .digest('hex')
+  const expectedSignature =
+    'sha256=' + crypto.createHmac('sha256', TWITCH_WEBHOOK_SECRET).update(message).digest('hex')
 
   return signature === expectedSignature
 }
@@ -59,7 +57,7 @@ export async function POST(request: NextRequest) {
       console.log('✅ Signature verified successfully!')
       return new NextResponse(data.challenge, {
         status: 200,
-        headers: { 'Content-Type': 'text/plain' }
+        headers: { 'Content-Type': 'text/plain' },
       })
     }
 
@@ -93,13 +91,28 @@ export async function POST(request: NextRequest) {
 
       switch (subscription.type) {
         case 'channel.subscribe':
-          eventType = event.is_gift ? 'gift_sub' : 'subscription'
-          userId = event.user_id
-          userName = event.user_login
-          userDisplayName = event.user_name
-          eventData = {
-            tier: event.tier,
-            is_gift: event.is_gift || false
+          // For gifted subs, store the recipient info
+          if (event.is_gift) {
+            eventType = 'gift_sub_received'
+            userId = event.user_id
+            userName = event.user_login
+            userDisplayName = event.user_name
+            eventData = {
+              tier: event.tier,
+              is_gift: true,
+              recipient_id: event.user_id,
+              recipient_login: event.user_login,
+              recipient_name: event.user_name,
+            }
+          } else {
+            eventType = 'subscription'
+            userId = event.user_id
+            userName = event.user_login
+            userDisplayName = event.user_name
+            eventData = {
+              tier: event.tier,
+              is_gift: false,
+            }
           }
           break
 
@@ -113,7 +126,24 @@ export async function POST(request: NextRequest) {
             cumulative_months: event.cumulative_months,
             streak_months: event.streak_months,
             duration_months: event.duration_months,
-            message: event.message?.text || ''
+            message: event.message?.text || '',
+          }
+          break
+
+        case 'channel.subscription.gift':
+          eventType = 'gift_sub'
+          // This event shows the gifter, not individual recipients
+          userId = event.user_id || 'anonymous'
+          userName = event.user_login || 'anonymous'
+          userDisplayName = event.user_name || 'Anonymous'
+          eventData = {
+            tier: event.tier,
+            total: event.total, // Number of subs gifted in this event
+            cumulative_total: event.cumulative_total, // Total subs ever gifted by this user
+            is_anonymous: event.is_anonymous || false,
+            gifter_id: event.user_id,
+            gifter_login: event.user_login,
+            gifter_name: event.user_name,
           }
           break
 
@@ -123,7 +153,7 @@ export async function POST(request: NextRequest) {
           userName = event.user_login
           userDisplayName = event.user_name
           eventData = {
-            followed_at: event.followed_at
+            followed_at: event.followed_at,
           }
           break
 
@@ -135,7 +165,7 @@ export async function POST(request: NextRequest) {
           eventData = {
             amount: event.bits,
             message: event.message || '',
-            is_anonymous: event.is_anonymous || false
+            is_anonymous: event.is_anonymous || false,
           }
           break
 
@@ -145,7 +175,7 @@ export async function POST(request: NextRequest) {
           userName = event.from_broadcaster_user_login
           userDisplayName = event.from_broadcaster_user_name
           eventData = {
-            viewer_count: event.viewers
+            viewer_count: event.viewers,
           }
           break
 
@@ -159,9 +189,7 @@ export async function POST(request: NextRequest) {
 
       // Find the channel email by looking up Twitch user ID in auth metadata
       const { data: users } = await supabase.auth.admin.listUsers()
-      const channelUser = users?.users.find(u =>
-        u.user_metadata?.twitch_id === broadcasterId
-      )
+      const channelUser = users?.users.find((u) => u.user_metadata?.twitch_id === broadcasterId)
 
       if (!channelUser?.email) {
         console.error(`❌ Could not find channel email for broadcaster ID: ${broadcasterId}`)
@@ -169,19 +197,17 @@ export async function POST(request: NextRequest) {
       }
 
       // Store event in database
-      const { error: insertError } = await supabase
-        .from('stream_events')
-        .insert({
-          event_type: eventType,
-          event_id: `${subscription.type}_${event.id || Date.now()}`,
-          channel_email: channelUser.email,
-          channel_name: event.broadcaster_user_login,
-          user_id: userId,
-          user_name: userName,
-          user_display_name: userDisplayName,
-          event_data: eventData,
-          event_timestamp: new Date().toISOString()
-        })
+      const { error: insertError } = await supabase.from('stream_events').insert({
+        event_type: eventType,
+        event_id: `${subscription.type}_${event.id || Date.now()}`,
+        channel_email: channelUser.email,
+        channel_name: event.broadcaster_user_login,
+        user_id: userId,
+        user_name: userName,
+        user_display_name: userDisplayName,
+        event_data: eventData,
+        event_timestamp: new Date().toISOString(),
+      })
 
       if (insertError) {
         console.error('❌ Failed to store event:', insertError)
@@ -193,7 +219,6 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Unknown message type' }, { status: 400 })
-
   } catch (error) {
     console.error('❌ Webhook error:', error)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
@@ -204,6 +229,6 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status: 'Twitch EventSub webhook endpoint',
-    ready: true
+    ready: true,
   })
 }
