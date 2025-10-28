@@ -44,7 +44,11 @@ export default function ActivityFeed({ channelName, maxHeight = '500px' }: Activ
         const data = await response.json()
 
         if (data.events) {
-          setEvents(data.events)
+          // Filter out gift_sub_received events (we only show the gifter)
+          const filteredEvents = data.events.filter(
+            (event: StreamEvent) => event.event_type !== 'gift_sub_received'
+          )
+          setEvents(filteredEvents)
         }
       } catch (error) {
         console.error('Failed to fetch stream events:', error)
