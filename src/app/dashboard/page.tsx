@@ -918,7 +918,7 @@ export default function Dashboard() {
           </p>
 
           <a
-            href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18')}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com')}/auth/callback&response_type=code&scope=user%3Aread%3Aemail`}
+            href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18')}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com')}/auth/callback&response_type=code&scope=user%3Aread%3Aemail%20chat%3Aread%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers%20bits%3Aread`}
             style={{
               display: 'inline-block',
               width: '100%',
