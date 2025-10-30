@@ -180,7 +180,13 @@ function AuthCallbackContent() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('twitch_access_token', tokenData.access_token)
           localStorage.setItem('twitch_user', JSON.stringify(tokenData.user))
-          localStorage.setItem('casi_user_email', twitchEmail)
+
+          // For linked accounts, use the real email; otherwise use pseudo-email
+          const emailToStore =
+            linkData.linked && linkData.primaryAccount ? linkData.primaryAccount.email : twitchEmail
+
+          localStorage.setItem('casi_user_email', emailToStore)
+          console.log('📧 Stored email for sessions:', emailToStore)
         }
 
         setStatus('✅ Authentication successful! Redirecting...')
