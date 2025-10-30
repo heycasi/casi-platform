@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': rateLimitResult.reset.toString()
-          }
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          },
         }
       )
     }
@@ -32,10 +32,7 @@ export async function POST(request: NextRequest) {
     const { sessionId, messages } = await request.json()
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'sessionId is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'sessionId is required' }, { status: 400 })
     }
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -53,14 +50,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (sessionError || !session) {
-      return NextResponse.json(
-        { error: 'Invalid session ID' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Invalid session ID' }, { status: 404 })
     }
 
     // Prepare messages for insertion
-    const messagesToInsert = messages.map(msg => ({
+    const messagesToInsert = messages.map((msg) => ({
       session_id: sessionId,
       channel_name: session.channel_name,
       channel_email: session.streamer_email,
@@ -70,7 +64,7 @@ export async function POST(request: NextRequest) {
       sentiment: msg.sentiment || 0,
       is_question: msg.isQuestion || false,
       language: msg.language || 'english',
-      engagement_level: msg.engagementLevel || 'normal'
+      engagement_level: msg.engagementLevel || 'normal',
     }))
 
     // Batch insert messages
@@ -87,11 +81,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Update session's total_messages count
+    const messageCount = data?.length || 0
+    if (messageCount > 0) {
+      const { error: updateError } = await supabase.rpc('increment_session_messages', {
+        p_session_id: sessionId,
+        p_increment: messageCount,
+      })
+
+      if (updateError) {
+        console.error('Failed to update total_messages:', updateError)
+        // Don't fail the request - messages were saved successfully
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      saved: data?.length || 0
+      saved: messageCount,
     })
-
   } catch (error: any) {
     console.error('Chat message save error:', error)
     return NextResponse.json(
