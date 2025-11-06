@@ -38,7 +38,7 @@ export class EmailService {
         console.error('Report structure:', {
           hasReport: !!report,
           hasSession: !!report?.session,
-          hasAnalytics: !!report?.analytics
+          hasAnalytics: !!report?.analytics,
         })
         return false
       }
@@ -65,7 +65,7 @@ export class EmailService {
       console.log('Email send result:', {
         success: !!data,
         emailId: data?.id,
-        hasError: !!error
+        hasError: !!error,
       })
 
       if (error) {
@@ -237,8 +237,8 @@ export class EmailService {
 }
 
 function generateReportHTML(report: StreamReport): string {
-  const { session, analytics, highlights, recommendations } = report
-  
+  const { session, analytics, highlights, recommendations, events } = report
+
   // Helper function to format duration
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -246,11 +246,51 @@ function generateReportHTML(report: StreamReport): string {
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
   }
 
-  // Use hosted URLs instead of base64 for better reliability
-  // Email clients handle URLs better than large base64 strings
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com';
-  const casiLogoUrl = `${siteUrl}/landing-logo.png`;
-  const robotImageUrl = `${siteUrl}/landing-robot.png`;
+  // Helper functions for event formatting
+  const getEventIcon = (eventType: string) => {
+    switch (eventType) {
+      case 'subscription':
+      case 'resub':
+        return '⭐'
+      case 'gift_sub':
+        return '🎁'
+      case 'follow':
+        return '❤️'
+      case 'bits':
+        return '💎'
+      case 'raid':
+        return '⚔️'
+      default:
+        return '📢'
+    }
+  }
+
+  const getEventTitle = (event: any) => {
+    switch (event.event_type) {
+      case 'subscription':
+        return `${event.user_display_name} subscribed!`
+      case 'resub':
+        return `${event.user_display_name} resubscribed!`
+      case 'gift_sub':
+        const count = event.event_data?.total || 1
+        return `${event.user_display_name} gifted ${count} ${count > 1 ? 'subs' : 'sub'}!`
+      case 'follow':
+        return `${event.user_display_name} followed!`
+      case 'bits':
+        return `${event.user_display_name} cheered ${event.event_data?.bits || 0} bits!`
+      case 'raid':
+        return `${event.user_display_name} raided with ${event.event_data?.viewers || 0} viewers!`
+      default:
+        return `${event.user_display_name} - ${event.event_type}`
+    }
+  }
+
+  // Use absolute HTTPS URLs for production
+  const siteUrl = 'https://heycasi.com'
+
+  // Construct full image URLs
+  const casiLogoUrl = `${siteUrl}/landing-logo.png`
+  const robotImageUrl = `${siteUrl}/landing-robot.png`
 
   return `
     <!DOCTYPE html>
@@ -263,27 +303,38 @@ function generateReportHTML(report: StreamReport): string {
     </head>
     <body style="font-family: 'Poppins', Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15)); background-color: #1a1a2e; color: #333; line-height: 1.6;">
       <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        
+
         <!-- Header with Casi Branding -->
         <div style="background: linear-gradient(135deg, #6932FF 0%, #932FFE 100%); background-color: #6932FF; padding: 40px 30px; text-align: center; color: #FFFFFF;">
           <div style="text-align: center; margin-bottom: 20px;">
-            <img src="${casiLogoUrl}" alt="Casi" style="height: 32px; filter: brightness(0) invert(1); vertical-align: middle;" onerror="this.style.display='none'" />
-            <img src="${robotImageUrl}" alt="Casi Robot" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); padding: 2px; margin-left: 12px; vertical-align: middle;" onerror="this.style.display='none'" />
+            <img src="${casiLogoUrl}" alt="Casi" style="max-width: 200px; height: auto; filter: brightness(0) invert(1); vertical-align: middle;" onerror="this.alt='Casi'" />
+            <img src="${robotImageUrl}" alt="🤖" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); padding: 4px; margin-left: 12px; vertical-align: middle;" onerror="this.alt='🤖'" />
           </div>
           <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 700; font-family: 'Poppins', Arial, sans-serif; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;">🎮 Your Stream Report</h1>
           <p style="margin: 0; font-size: 18px; font-weight: 600; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;"><strong style="color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF;">@${session.channel_name}</strong></p>
-          <p style="margin: 8px 0 0 0; font-size: 14px; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;">${new Date(session.session_start).toLocaleDateString('en-US', { 
-            weekday: 'long', 
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;">${new Date(
+            session.session_start
+          ).toLocaleDateString('en-US', {
+            weekday: 'long',
             year: 'numeric',
-            month: 'long', 
-            day: 'numeric' 
+            month: 'long',
+            day: 'numeric',
           })}</p>
           <p style="margin: 5px 0 0 0; font-size: 14px; color: #FFFFFF !important; text-shadow: none; -webkit-text-fill-color: #FFFFFF;">${formatDuration(session.duration_minutes || 0)} streamed</p>
         </div>
-        
+
         <!-- Main Content -->
         <div style="padding: 40px 30px;">
-          
+
+          <!-- Interactive Report Button -->
+          <div style="background: rgba(105, 50, 255, 0.05); border: 3px dashed #6932FF; border-radius: 16px; padding: 30px; text-align: center; margin-bottom: 40px;">
+            <h2 style="color: #6932FF; font-size: 24px; font-weight: 700; margin-bottom: 15px;">🎮 View Your Interactive Report!</h2>
+            <p style="color: #374151; margin-bottom: 20px;">Experience your stream stats with animations, achievements, and social sharing!</p>
+            <a href="${siteUrl}/report/${session.id}" style="display: inline-block; background: linear-gradient(135deg, #6932FF 0%, #932FFE 100%); color: white; padding: 18px 40px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 18px; box-shadow: 0 4px 15px rgba(105, 50, 255, 0.4);">
+              ✨ Open Interactive Report
+            </a>
+          </div>
+
           <!-- Key Metrics Section -->
           <div style="margin-bottom: 40px;">
             <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">📊 Stream Overview</h2>
@@ -321,31 +372,70 @@ function generateReportHTML(report: StreamReport): string {
             </div>
           </div>
 
+          <!-- Stream Highlights (Activity Feed) -->
+          ${
+            events && events.length > 0
+              ? `
+          <div style="margin-bottom: 40px;">
+            <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">⚡ Stream Highlights</h2>
+            ${events
+              .slice(0, 5)
+              .map((event) => {
+                const icon = getEventIcon(event.event_type)
+                const title = getEventTitle(event)
+                return `
+                <div style="background: #f8f9fb; border-left: 4px solid #6932FF; padding: 16px 20px; margin: 12px 0; border-radius: 0 12px 12px 0; display: flex; align-items: center; gap: 15px;">
+                  <span style="font-size: 32px;">${icon}</span>
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #1f2937; font-size: 15px;">${title}</div>
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${new Date(event.created_at).toLocaleTimeString()}</div>
+                  </div>
+                </div>
+              `
+              })
+              .join('')}
+          </div>
+          `
+              : ''
+          }
+
           <!-- Best Moments Section -->
-          ${highlights.bestMoments && highlights.bestMoments.length > 0 ? `
+          ${
+            highlights.bestMoments && highlights.bestMoments.length > 0
+              ? `
           <div style="margin-bottom: 40px;">
             <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">🔥 Best Moments</h2>
-            ${highlights.bestMoments.map((moment, index) => 
-              `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
+            ${highlights.bestMoments
+              .map(
+                (moment, index) =>
+                  `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
                 <strong style="color: #1f2937; font-size: 16px;">${moment.description}</strong><br>
                 <small style="color: #6b7280; font-size: 14px; margin-top: 8px; display: block;">
                   ${new Date(moment.timestamp).toLocaleTimeString()} • 
                   Excitement: ${Math.round(moment.sentiment_score * 100)}%
                 </small>
               </div>`
-            ).join('')}
+              )
+              .join('')}
           </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Two Column Layout for Questions and Languages -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
             
             <!-- Top Questions -->
-            ${highlights.topQuestions && highlights.topQuestions.length > 0 ? `
+            ${
+              highlights.topQuestions && highlights.topQuestions.length > 0
+                ? `
             <div>
               <h2 style="color: #6932FF !important; font-size: 20px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif;">❓ Top Questions</h2>
-              ${highlights.topQuestions.slice(0, 5).map(q => 
-                `<div style="background: #fef7f7; border-left: 4px solid #ef4444; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
+              ${highlights.topQuestions
+                .slice(0, 5)
+                .map(
+                  (q) =>
+                    `<div style="background: #fef7f7; border-left: 4px solid #ef4444; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
                   <div style="font-weight: 600; color: #1f2937; margin-bottom: 8px;"><strong>@${q.username}:</strong> ${q.message}</div>
                   <div style="font-size: 12px; color: #6b7280; display: flex; gap: 12px; align-items: center;">
                     <span style="background: #6932FF; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">${q.language || 'english'}</span>
@@ -353,9 +443,12 @@ function generateReportHTML(report: StreamReport): string {
                     <span>${new Date(q.timestamp).toLocaleTimeString()}</span>
                   </div>
                 </div>`
-              ).join('')}
+                )
+                .join('')}
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <!-- Global Reach -->
             <div>
@@ -363,62 +456,95 @@ function generateReportHTML(report: StreamReport): string {
               <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 0 8px 8px 0;">
                 <strong style="color: #1f2937; display: block; margin-bottom: 10px;">Languages detected:</strong> 
                 ${Object.entries(highlights.languageBreakdown || {})
-                  .sort(([,a], [,b]) => b.count - a.count)
-                  .map(([lang, data]) => `<span style="display: inline-block; background: #5EEAD4; color: #1f2937; padding: 4px 8px; border-radius: 4px; margin: 2px; font-size: 12px; font-weight: 600;">${lang} (${data.percentage}%)</span>`)
+                  .sort(([, a], [, b]) => b.count - a.count)
+                  .map(
+                    ([lang, data]) =>
+                      `<span style="display: inline-block; background: #5EEAD4; color: #1f2937; padding: 4px 8px; border-radius: 4px; margin: 2px; font-size: 12px; font-weight: 600;">${lang} (${data.percentage}%)</span>`
+                  )
                   .join('')}
               </div>
               
               <!-- Most Engaged Viewers -->
-              ${highlights.mostEngagedViewers && highlights.mostEngagedViewers.length > 0 ? `
+              ${
+                highlights.mostEngagedViewers && highlights.mostEngagedViewers.length > 0
+                  ? `
               <div style="margin-top: 20px;">
                 <h3 style="color: #6932FF !important; font-size: 16px; font-weight: 600; margin-bottom: 15px;">💬 Most Active Chatters</h3>
-                ${highlights.mostEngagedViewers.slice(0, 3).map((viewer, index) => 
-                  `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin: 8px 0; border-radius: 0 6px 6px 0;">
+                ${highlights.mostEngagedViewers
+                  .slice(0, 3)
+                  .map(
+                    (viewer, index) =>
+                      `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin: 8px 0; border-radius: 0 6px 6px 0;">
                     <strong style="color: #1f2937;">@${viewer.username}</strong>
                     <span style="color: #6b7280; font-size: 12px; margin-left: 10px;">${viewer.message_count} messages • ${Math.round(viewer.avg_sentiment * 100)}% positive</span>
                   </div>`
-                ).join('')}
+                  )
+                  .join('')}
               </div>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
           </div>
 
           <!-- AI Insights Section -->
-          ${analytics.motivational_insights && analytics.motivational_insights.length > 0 ? `
+          ${
+            analytics.motivational_insights && analytics.motivational_insights.length > 0
+              ? `
           <div style="margin-bottom: 40px;">
             <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">🤖 AI Insights</h2>
-            ${analytics.motivational_insights.map((insight) => 
-              `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
+            ${analytics.motivational_insights
+              .map(
+                (insight) =>
+                  `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
                 <span style="color: #1f2937; font-size: 16px;">${insight}</span>
               </div>`
-            ).join('')}
+              )
+              .join('')}
           </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Recommendations Section -->
-          ${(recommendations.streamOptimization.length > 0 || recommendations.contentSuggestions.length > 0 || recommendations.engagementTips.length > 0) ? `
+          ${
+            recommendations.streamOptimization.length > 0 ||
+            recommendations.contentSuggestions.length > 0 ||
+            recommendations.engagementTips.length > 0
+              ? `
           <div style="margin-bottom: 40px;">
             <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">🎯 Recommendations</h2>
             
-            ${recommendations.streamOptimization.map((rec) => 
-              `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
+            ${recommendations.streamOptimization
+              .map(
+                (rec) =>
+                  `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
                 <strong style="color: #059669;">⚡ Stream Optimization:</strong> ${rec}
               </div>`
-            ).join('')}
+              )
+              .join('')}
             
-            ${recommendations.contentSuggestions.map((rec) => 
-              `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
+            ${recommendations.contentSuggestions
+              .map(
+                (rec) =>
+                  `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
                 <strong style="color: #059669;">🎨 Content:</strong> ${rec}
               </div>`
-            ).join('')}
+              )
+              .join('')}
             
-            ${recommendations.engagementTips.map((rec) => 
-              `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
+            ${recommendations.engagementTips
+              .map(
+                (rec) =>
+                  `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0;">
                 <strong style="color: #059669;">💬 Engagement:</strong> ${rec}
               </div>`
-            ).join('')}
+              )
+              .join('')}
           </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <!-- Call to Action -->
           <div style="background: rgba(105, 50, 255, 0.05); border: 2px solid #6932FF; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">

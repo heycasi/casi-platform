@@ -85,10 +85,13 @@ export interface StreamReport {
       message_count: number
       avg_sentiment: number
     }>
-    languageBreakdown: Record<string, {
-      count: number
-      percentage: number
-    }>
+    languageBreakdown: Record<
+      string,
+      {
+        count: number
+        percentage: number
+      }
+    >
     topicInsights: Array<{
       topic: string
       count: number
@@ -106,4 +109,38 @@ export interface StreamReport {
     report_version: string
     processing_time_ms: number
   }
+  events?: any[] // Optional array of stream events (subs, gifts, raids, follows, etc.)
+  clipTimestamps?: Array<{
+    timestamp: string
+    relativeTime: string
+    minutesIn: number
+    type: string
+    icon: string
+    title: string
+    description: string
+    intensity: number
+    clipUrl: string
+  }>
+  streamRating?: {
+    grade: string
+    percentage: number
+    score: number
+    maxScore: number
+    color: string
+    emoji: string
+    breakdown: Record<string, string>
+  }
+  previousComparison?: {
+    previousSession: {
+      id: string
+      date: string
+      duration_minutes: number
+    }
+    comparison: {
+      messages: { current: number; previous: number; change: number }
+      viewers: { current: number; previous: number; change: number }
+      positiveRate: { current: number; previous: number; change: number }
+      questions: { current: number; previous: number; change: number }
+    }
+  } | null
 }
