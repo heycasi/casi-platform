@@ -21,13 +21,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create new session
+    const normalizedChannelName = channelName.toLowerCase()
+
+    // Check for existing active session (no session_end)
+    const { data: existingSession } = await supabase
+      .from('stream_report_sessions')
+      .select('id, session_start')
+      .eq('channel_name', normalizedChannelName)
+      .is('session_end', null)
+      .order('session_start', { ascending: false })
+      .limit(1)
+      .single()
+
+    // If active session exists and is less than 12 hours old, reuse it
+    if (existingSession) {
+      const sessionAge = Date.now() - new Date(existingSession.session_start).getTime()
+      const twelveHoursMs = 12 * 60 * 60 * 1000
+
+      if (sessionAge < twelveHoursMs) {
+        console.log(`♻️ Reusing existing session: ${existingSession.id}`)
+        return NextResponse.json({
+          sessionId: existingSession.id,
+          reused: true,
+        })
+      }
+    }
+
+    // Create new session only if none exists
     const { data, error } = await supabase
       .from('stream_report_sessions')
       .insert({
         streamer_email: streamerEmail,
-        channel_name: channelName.toLowerCase(),
-        session_start: new Date().toISOString()
+        channel_name: normalizedChannelName,
+        session_start: new Date().toISOString(),
       })
       .select('id')
       .single()
@@ -40,8 +66,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ sessionId: data.id })
-
+    console.log(`✨ Created new session: ${data.id}`)
+    return NextResponse.json({
+      sessionId: data.id,
+      reused: false,
+    })
   } catch (error: any) {
     console.error('Session creation error:', error)
     return NextResponse.json(
@@ -72,10 +101,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'sessionId is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'sessionId is required' }, { status: 400 })
     }
 
     // Get session start time to calculate duration
@@ -86,10 +112,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (!session) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 })
     }
 
     const sessionEnd = new Date()
@@ -101,7 +124,7 @@ export async function PUT(request: NextRequest) {
       .from('stream_report_sessions')
       .update({
         session_end: sessionEnd.toISOString(),
-        duration_minutes: durationMinutes
+        duration_minutes: durationMinutes,
       })
       .eq('id', sessionId)
 
@@ -114,7 +137,6 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, durationMinutes })
-
   } catch (error: any) {
     console.error('Session end error:', error)
     return NextResponse.json(
