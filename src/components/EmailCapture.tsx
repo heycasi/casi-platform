@@ -68,19 +68,30 @@ export default function EmailCapture({
         setIsSuccess(true)
         setEmail('')
 
-        // Send notification email to admin
+        // Send emails in parallel (admin notification + user welcome)
         try {
-          await fetch('/api/notify-beta-signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: email.toLowerCase().trim(),
-              source,
-              timestamp: new Date().toISOString(),
+          await Promise.all([
+            // Admin notification
+            fetch('/api/notify-beta-signup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email.toLowerCase().trim(),
+                source,
+                timestamp: new Date().toISOString(),
+              }),
             }),
-          })
-        } catch (notifyError) {
-          console.error('Failed to send notification:', notifyError)
+            // User welcome email
+            fetch('/api/send-welcome-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email.toLowerCase().trim(),
+              }),
+            }),
+          ])
+        } catch (emailError) {
+          console.error('Failed to send emails:', emailError)
           // Don't show error to user - signup was successful
         }
       }
