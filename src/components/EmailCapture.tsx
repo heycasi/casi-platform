@@ -17,10 +17,10 @@ interface EmailCaptureProps {
 
 export default function EmailCapture({
   source,
-  title = "Join the Beta",
-  description = "Get early access to Casi Platform",
-  placeholder = "your@email.com",
-  buttonText = "Join Beta"
+  title = 'Join the Beta',
+  description = 'Get early access to Casi Platform',
+  placeholder = 'your@email.com',
+  buttonText = 'Join Beta',
 }: EmailCaptureProps) {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -46,20 +46,18 @@ export default function EmailCapture({
     }
 
     try {
-      const { error } = await supabase
-        .from('waitlist')
-        .insert([
-          {
-            email: email.toLowerCase().trim(),
-            source: source,
-            user_agent: navigator.userAgent,
-            created_at: new Date().toISOString()
-          }
-        ])
+      const { error } = await supabase.from('waitlist').insert([
+        {
+          email: email.toLowerCase().trim(),
+          source: source,
+          user_agent: navigator.userAgent,
+          created_at: new Date().toISOString(),
+        },
+      ])
 
       if (error) {
         if (error.code === '23505') {
-          setMessage('You\'re already signed up! Check your email for updates.')
+          setMessage("You're already signed up! Check your email for updates.")
           setIsSuccess(true)
         } else {
           setMessage('Something went wrong. Please try again.')
@@ -69,6 +67,22 @@ export default function EmailCapture({
         setMessage('🎉 Welcome to the beta! Check your email for next steps.')
         setIsSuccess(true)
         setEmail('')
+
+        // Send notification email to admin
+        try {
+          await fetch('/api/notify-beta-signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email.toLowerCase().trim(),
+              source,
+              timestamp: new Date().toISOString(),
+            }),
+          })
+        } catch (notifyError) {
+          console.error('Failed to send notification:', notifyError)
+          // Don't show error to user - signup was successful
+        }
       }
     } catch (error: unknown) {
       console.error('Error:', error)
@@ -80,26 +94,32 @@ export default function EmailCapture({
 
   if (isSuccess && message.includes('Welcome')) {
     return (
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: '1rem',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        padding: '2rem',
-        textAlign: 'center'
-      }}>
+      <div
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '1rem',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          padding: '2rem',
+          textAlign: 'center',
+        }}
+      >
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-        <h3 style={{
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          color: 'white',
-          marginBottom: '0.5rem'
-        }}>
+        <h3
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '700',
+            color: 'white',
+            marginBottom: '0.5rem',
+          }}
+        >
           You're In!
         </h3>
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.8)',
-          marginBottom: '1.5rem'
-        }}>
+        <p
+          style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            marginBottom: '1.5rem',
+          }}
+        >
           {message}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -113,7 +133,7 @@ export default function EmailCapture({
               borderRadius: '0.5rem',
               fontWeight: '600',
               textDecoration: 'none',
-              transition: 'opacity 0.3s ease'
+              transition: 'opacity 0.3s ease',
             }}
           >
             Go to Dashboard
@@ -128,7 +148,7 @@ export default function EmailCapture({
               borderRadius: '0.5rem',
               fontWeight: '600',
               textDecoration: 'none',
-              transition: 'background 0.3s ease'
+              transition: 'background 0.3s ease',
             }}
           >
             View Features
@@ -139,25 +159,32 @@ export default function EmailCapture({
   }
 
   return (
-    <div style={{
-      background: 'rgba(255, 255, 255, 0.1)',
-      borderRadius: '1rem',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      padding: '2rem'
-    }}>
+    <div
+      style={{
+        background: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '1rem',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        padding: '2rem',
+      }}
+    >
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <h3 style={{
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          color: 'white',
-          marginBottom: '0.5rem'
-        }}>
+        <h3
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '700',
+            color: 'white',
+            marginBottom: '0.5rem',
+          }}
+        >
           {title}
         </h3>
         <p style={{ color: 'rgba(255, 255, 255, 0.8)' }}>{description}</p>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+      >
         <input
           type="email"
           placeholder={placeholder}
@@ -173,7 +200,7 @@ export default function EmailCapture({
             fontSize: '1rem',
             fontFamily: 'Poppins, sans-serif',
             outline: 'none',
-            transition: 'border-color 0.3s ease'
+            transition: 'border-color 0.3s ease',
           }}
           required
         />
@@ -182,7 +209,9 @@ export default function EmailCapture({
           disabled={isSubmitting}
           style={{
             width: '100%',
-            background: isSubmitting ? 'rgba(105, 50, 255, 0.5)' : 'linear-gradient(135deg, #6932FF, #932FFE)',
+            background: isSubmitting
+              ? 'rgba(105, 50, 255, 0.5)'
+              : 'linear-gradient(135deg, #6932FF, #932FFE)',
             color: 'white',
             padding: '0.75rem 2rem',
             borderRadius: '0.5rem',
@@ -192,7 +221,7 @@ export default function EmailCapture({
             border: 'none',
             cursor: isSubmitting ? 'not-allowed' : 'pointer',
             boxShadow: '0 4px 15px rgba(105, 50, 255, 0.4)',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
           }}
           data-event={`cta-email-capture-${source}`}
         >
@@ -201,21 +230,23 @@ export default function EmailCapture({
       </form>
 
       {message && (
-        <div style={{
-          marginTop: '1rem',
-          textAlign: 'center',
-          padding: '0.75rem',
-          borderRadius: '0.5rem',
-          background: message.includes('wrong') || message.includes('valid')
-            ? 'rgba(239, 68, 68, 0.1)'
-            : 'rgba(16, 185, 129, 0.1)',
-          color: message.includes('wrong') || message.includes('valid')
-            ? '#EF4444'
-            : '#10B981',
-          border: message.includes('wrong') || message.includes('valid')
-            ? '1px solid rgba(239, 68, 68, 0.3)'
-            : '1px solid rgba(16, 185, 129, 0.3)'
-        }}>
+        <div
+          style={{
+            marginTop: '1rem',
+            textAlign: 'center',
+            padding: '0.75rem',
+            borderRadius: '0.5rem',
+            background:
+              message.includes('wrong') || message.includes('valid')
+                ? 'rgba(239, 68, 68, 0.1)'
+                : 'rgba(16, 185, 129, 0.1)',
+            color: message.includes('wrong') || message.includes('valid') ? '#EF4444' : '#10B981',
+            border:
+              message.includes('wrong') || message.includes('valid')
+                ? '1px solid rgba(239, 68, 68, 0.3)'
+                : '1px solid rgba(16, 185, 129, 0.3)',
+          }}
+        >
           {message}
         </div>
       )}
