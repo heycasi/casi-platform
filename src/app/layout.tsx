@@ -1,18 +1,14 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'Casi Platform - Real-time Streaming Analytics',
   description: 'AI-powered chat analysis for streamers',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -23,15 +19,19 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        fontFamily: 'Poppins, Arial, sans-serif',
-        color: 'white',
-        margin: 0,
-        padding: 0
-      }}>
+      <body
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          fontFamily: 'Poppins, Arial, sans-serif',
+          color: 'white',
+          margin: 0,
+          padding: 0,
+        }}
+      >
         <main>{children}</main>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
