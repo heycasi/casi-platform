@@ -3,24 +3,23 @@
 export default function LoginPage() {
   const handleTwitchLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
-    
-    // Force production URL to avoid localhost issues
-    const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? 'http://localhost:3000'  // Only use localhost if actually on localhost
-      : 'https://heycasi.com'    // Always use production URL otherwise
-    
+
+    // Use the actual current origin to handle all environments correctly
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://heycasi.com'
+
     const redirectUri = `${baseUrl}/auth/callback`
-    
+
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
-      scope: 'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
-      force_verify: 'true'
+      scope:
+        'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
+      force_verify: 'true',
     })
 
     const authUrl = `https://id.twitch.tv/oauth2/authorize?${params.toString()}`
-    
+
     console.log('Base URL detected:', baseUrl)
     console.log('Redirect URI:', redirectUri)
     console.log('Full auth URL:', authUrl)
@@ -28,58 +27,66 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'Poppins, sans-serif',
-      padding: '1rem'
-    }}>
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '20px',
-        border: '2px solid rgba(255, 255, 255, 0.2)',
-        padding: '3rem 2rem',
-        textAlign: 'center',
-        maxWidth: '400px',
-        width: '100%'
-      }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, sans-serif',
+        padding: '1rem',
+      }}
+    >
+      <div
+        style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          border: '2px solid rgba(255, 255, 255, 0.2)',
+          padding: '3rem 2rem',
+          textAlign: 'center',
+          maxWidth: '400px',
+          width: '100%',
+        }}
+      >
         {/* Casi Logo */}
         <div style={{ marginBottom: '2rem' }}>
-          <img 
-            src="/landing-logo.png" 
-            alt="Casi" 
-            style={{ 
-              width: '250px', 
+          <img
+            src="/landing-logo.png"
+            alt="Casi"
+            style={{
+              width: '250px',
               height: 'auto',
-              maxWidth: '100%'
-            }} 
+              maxWidth: '100%',
+            }}
           />
         </div>
-        
+
         {/* Headline */}
         <div style={{ marginBottom: '2.5rem' }}>
-          <h2 style={{
-            fontSize: '1.8rem',
-            fontWeight: '600',
-            marginBottom: '1rem',
-            background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
+          <h2
+            style={{
+              fontSize: '1.8rem',
+              fontWeight: '600',
+              marginBottom: '1rem',
+              background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
             Connect Your Stream
           </h2>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '1rem',
-            lineHeight: '1.6',
-            fontWeight: '400',
-            margin: 0
-          }}>
+          <p
+            style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '1rem',
+              lineHeight: '1.6',
+              fontWeight: '400',
+              margin: 0,
+            }}
+          >
             Get real-time chat analysis, AI-powered insights, and boost your audience engagement.
           </p>
         </div>
@@ -104,7 +111,7 @@ export default function LoginPage() {
               justifyContent: 'center',
               gap: '12px',
               boxShadow: '0 8px 25px rgba(105, 50, 255, 0.3)',
-              fontFamily: 'Poppins, sans-serif'
+              fontFamily: 'Poppins, sans-serif',
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)'
@@ -116,23 +123,39 @@ export default function LoginPage() {
             }}
           >
             <svg style={{ width: '24px', height: '24px' }} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z" />
             </svg>
             Connect with Twitch
           </button>
         </div>
-        
+
         {/* Security Features */}
-        <div style={{
-          fontSize: '0.9rem',
-          color: 'rgba(255, 255, 255, 0.7)',
-          marginBottom: '2rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+        <div
+          style={{
+            fontSize: '0.9rem',
+            color: 'rgba(255, 255, 255, 0.7)',
+            marginBottom: '2rem',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '0.5rem',
+            }}
+          >
             <span style={{ color: '#5EEAD4', marginRight: '8px' }}>✓</span>
             <span>Secure OAuth authentication</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '0.5rem',
+            }}
+          >
             <span style={{ color: '#5EEAD4', marginRight: '8px' }}>✓</span>
             <span>Read-only access to chat</span>
           </div>
@@ -143,12 +166,14 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div style={{
-          paddingTop: '1.5rem',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          fontSize: '0.8rem',
-          color: 'rgba(255, 255, 255, 0.6)'
-        }}>
+        <div
+          style={{
+            paddingTop: '1.5rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            fontSize: '0.8rem',
+            color: 'rgba(255, 255, 255, 0.6)',
+          }}
+        >
           <p style={{ fontWeight: '600', margin: '0 0 0.5rem 0' }}>Phase 1: MVP Development</p>
           <p style={{ margin: 0 }}>Real-time Analytics • Privacy Protected • Beta Access</p>
         </div>
