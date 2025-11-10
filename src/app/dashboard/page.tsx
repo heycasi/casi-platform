@@ -927,6 +927,14 @@ export default function Dashboard() {
               const scopes =
                 'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read'
               const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scopes)}`
+
+              // Debug logging
+              console.log('🔍 Twitch OAuth Debug:')
+              console.log('  window.location.origin:', window.location.origin)
+              console.log('  baseUrl:', baseUrl)
+              console.log('  redirectUri:', redirectUri)
+              console.log('  Full auth URL:', authUrl)
+
               window.location.href = authUrl
             }}
             style={{
