@@ -917,8 +917,18 @@ export default function Dashboard() {
             Sign in with Twitch to auto-connect to your channel and sync viewers.
           </p>
 
-          <a
-            href={`https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18')}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com')}/auth/callback&response_type=code&scope=user%3Aread%3Aemail%20chat%3Aread%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers%20bits%3Aread`}
+          <button
+            onClick={() => {
+              const clientId =
+                process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
+              const baseUrl =
+                typeof window !== 'undefined' ? window.location.origin : 'https://heycasi.com'
+              const redirectUri = `${baseUrl}/auth/callback`
+              const scopes =
+                'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read'
+              const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scopes)}`
+              window.location.href = authUrl
+            }}
             style={{
               display: 'inline-block',
               width: '100%',
@@ -930,10 +940,12 @@ export default function Dashboard() {
               fontWeight: 600,
               fontFamily: 'Poppins, Arial, sans-serif',
               boxSizing: 'border-box',
+              border: 'none',
+              cursor: 'pointer',
             }}
           >
             Connect with Twitch
-          </a>
+          </button>
 
           <p
             style={{
