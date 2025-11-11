@@ -566,10 +566,23 @@ function generateReportHTML(report: StreamReport): string {
                           ? '💬'
                           : '😴'
 
+                  // Format time range for this bucket (2-minute window)
+                  const bucketStart = new Date(bucket.time_bucket)
+                  const bucketEnd = new Date(bucketStart.getTime() + 2 * 60 * 1000) // Add 2 minutes
+                  const timeRange = `${bucketStart.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                  })} - ${bucketEnd.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                  })}`
+
                   return `
                   <div style="margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                      <span style="color: #1f2937; font-weight: 600; font-size: 13px;">${bucket.minute_offset} min</span>
+                      <span style="color: #1f2937; font-weight: 600; font-size: 13px;">${timeRange}</span>
                       <span style="color: #6b7280; font-size: 12px;">${intensityEmoji} ${intensityLabel}</span>
                     </div>
                     <div style="background: #e5e7eb; height: 24px; border-radius: 4px; overflow: hidden; position: relative;">
