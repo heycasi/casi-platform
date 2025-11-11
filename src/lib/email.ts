@@ -399,24 +399,93 @@ function generateReportHTML(report: StreamReport): string {
               : ''
           }
 
-          <!-- Best Moments Section -->
+          <!-- Chat Highlights Section - Memorable Messages -->
           ${
-            highlights.bestMoments && highlights.bestMoments.length > 0
+            highlights.chatHighlights && Object.keys(highlights.chatHighlights).length > 0
               ? `
           <div style="margin-bottom: 40px;">
-            <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">🔥 Best Moments</h2>
-            ${highlights.bestMoments
-              .map(
-                (moment, index) =>
-                  `<div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
-                <strong style="color: #1f2937; font-size: 16px;">${moment.description}</strong><br>
-                <small style="color: #6b7280; font-size: 14px; margin-top: 8px; display: block;">
-                  ${new Date(moment.timestamp).toLocaleTimeString()} • 
-                  Excitement: ${Math.round(moment.sentiment_score * 100)}%
-                </small>
-              </div>`
-              )
-              .join('')}
+            <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">💬 Chat Highlights</h2>
+            <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Memorable moments from your community</p>
+
+            ${
+              highlights.chatHighlights.funniest
+                ? `
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
+              <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 24px; margin-right: 10px;">🤣</span>
+                <strong style="color: #78350f; font-size: 16px;">Funniest Moment</strong>
+              </div>
+              <div style="color: #1f2937; font-size: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 6px;">
+                <strong>@${highlights.chatHighlights.funniest.username}:</strong> "${highlights.chatHighlights.funniest.message}"
+              </div>
+              <small style="color: #92400e; font-size: 13px;">
+                ${new Date(highlights.chatHighlights.funniest.timestamp).toLocaleTimeString()} •
+                ${Math.round(highlights.chatHighlights.funniest.sentiment_score * 100)}% positive vibes
+              </small>
+            </div>
+            `
+                : ''
+            }
+
+            ${
+              highlights.chatHighlights.mostThoughtful
+                ? `
+            <div style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); border-left: 4px solid #8b5cf6; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
+              <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 24px; margin-right: 10px;">💡</span>
+                <strong style="color: #4c1d95; font-size: 16px;">Most Thoughtful Question</strong>
+              </div>
+              <div style="color: #1f2937; font-size: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 6px;">
+                <strong>@${highlights.chatHighlights.mostThoughtful.username}:</strong> "${highlights.chatHighlights.mostThoughtful.message}"
+              </div>
+              <small style="color: #5b21b6; font-size: 13px;">
+                ${new Date(highlights.chatHighlights.mostThoughtful.timestamp).toLocaleTimeString()}
+                ${highlights.chatHighlights.mostThoughtful.language && highlights.chatHighlights.mostThoughtful.language !== 'english' ? ` • ${highlights.chatHighlights.mostThoughtful.language}` : ''}
+              </small>
+            </div>
+            `
+                : ''
+            }
+
+            ${
+              highlights.chatHighlights.mostSupportive
+                ? `
+            <div style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-left: 4px solid #ec4899; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
+              <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 24px; margin-right: 10px;">💜</span>
+                <strong style="color: #831843; font-size: 16px;">Most Supportive Message</strong>
+              </div>
+              <div style="color: #1f2937; font-size: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 6px;">
+                <strong>@${highlights.chatHighlights.mostSupportive.username}:</strong> "${highlights.chatHighlights.mostSupportive.message}"
+              </div>
+              <small style="color: #9f1239; font-size: 13px;">
+                ${new Date(highlights.chatHighlights.mostSupportive.timestamp).toLocaleTimeString()} •
+                Lifted the whole chat
+              </small>
+            </div>
+            `
+                : ''
+            }
+
+            ${
+              highlights.chatHighlights.peakHype
+                ? `
+            <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-left: 4px solid #ef4444; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0;">
+              <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 24px; margin-right: 10px;">🔥</span>
+                <strong style="color: #7f1d1d; font-size: 16px;">Peak Hype Moment</strong>
+              </div>
+              <div style="color: #1f2937; font-size: 15px; margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 6px;">
+                <strong>@${highlights.chatHighlights.peakHype.username}:</strong> "${highlights.chatHighlights.peakHype.message}"
+              </div>
+              <small style="color: #991b1b; font-size: 13px;">
+                ${new Date(highlights.chatHighlights.peakHype.timestamp).toLocaleTimeString()} •
+                During peak chat activity
+              </small>
+            </div>
+            `
+                : ''
+            }
           </div>
           `
               : ''

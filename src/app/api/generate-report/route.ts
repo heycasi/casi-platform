@@ -182,9 +182,16 @@ async function generateComprehensiveReport(
   // Get comparison to previous stream
   const previousComparison = await getPreviousStreamComparison(session, analytics)
 
+  // Get messages for chat highlights
+  const { data: messages } = await supabase
+    .from('stream_chat_messages')
+    .select('*')
+    .eq('session_id', session.id)
+    .order('timestamp', { ascending: true })
+
   // Calculate highlights
   const highlights = {
-    bestMoments: generateBestMoments(analytics),
+    chatHighlights: await generateChatHighlights(messages || [], chatTimeline),
     topQuestions: topQuestions.slice(0, 5),
     mostEngagedViewers: analytics.most_active_chatters.slice(0, 5),
     languageBreakdown: calculateLanguageBreakdown(
@@ -218,12 +225,99 @@ async function generateComprehensiveReport(
   }
 }
 
-function generateBestMoments(analytics: any) {
-  return analytics.engagement_peaks.slice(0, 3).map((peak: any, index: number) => ({
-    timestamp: peak.timestamp,
-    description: `High engagement period ${index + 1} - ${peak.message_count} messages with ${Math.round(peak.intensity * 100)}% excitement`,
-    sentiment_score: peak.intensity,
-  }))
+async function generateChatHighlights(messages: any[], chatTimeline: any[]) {
+  if (!messages || messages.length === 0) {
+    return {}
+  }
+
+  const highlights: any = {}
+
+  // 1. Funniest Moment - Highest positive sentiment with decent length
+  const funnyMessages = messages
+    .filter(
+      (m) =>
+        m.sentiment === 'positive' &&
+        m.sentiment_score > 0.7 &&
+        m.message.length > 20 &&
+        m.message.length < 200 &&
+        !m.is_question
+    )
+    .sort((a, b) => b.sentiment_score - a.sentiment_score)
+
+  if (funnyMessages.length > 0) {
+    highlights.funniest = funnyMessages[0]
+  }
+
+  // 2. Most Thoughtful Question - Longest question with good engagement
+  const thoughtfulQuestions = messages
+    .filter((m) => m.is_question && m.message.length > 30 && m.message.length < 250)
+    .sort((a, b) => b.message.length - a.message.length)
+
+  if (thoughtfulQuestions.length > 0) {
+    highlights.mostThoughtful = thoughtfulQuestions[0]
+  }
+
+  // 3. Most Supportive Message - High positive sentiment with supportive keywords
+  const supportiveKeywords = [
+    'love',
+    'awesome',
+    'amazing',
+    'great',
+    'nice',
+    'good job',
+    'well done',
+    'proud',
+    'keep it up',
+    'you got this',
+    'believe',
+    'support',
+  ]
+  const supportiveMessages = messages
+    .filter((m) => {
+      const lowerMessage = m.message.toLowerCase()
+      return (
+        m.sentiment === 'positive' &&
+        m.sentiment_score > 0.6 &&
+        supportiveKeywords.some((keyword) => lowerMessage.includes(keyword)) &&
+        m.message.length > 15
+      )
+    })
+    .sort((a, b) => b.sentiment_score - a.sentiment_score)
+
+  if (supportiveMessages.length > 0) {
+    highlights.mostSupportive = supportiveMessages[0]
+  }
+
+  // 4. Peak Hype Moment - Message during highest activity period
+  if (chatTimeline && chatTimeline.length > 0) {
+    const peakPeriod = chatTimeline
+      .filter((b) => b.activity_intensity === 'peak' || b.activity_intensity === 'high')
+      .sort((a, b) => b.message_count - a.message_count)[0]
+
+    if (peakPeriod) {
+      const peakStart = new Date(peakPeriod.time_bucket).getTime()
+      const peakEnd = peakStart + 2 * 60 * 1000
+
+      const hypeMessages = messages
+        .filter((m) => {
+          const msgTime = new Date(m.timestamp).getTime()
+          return (
+            msgTime >= peakStart &&
+            msgTime < peakEnd &&
+            m.engagement_level === 'high' &&
+            m.message.length > 10 &&
+            m.message.length < 200
+          )
+        })
+        .sort((a, b) => b.sentiment_score - a.sentiment_score)
+
+      if (hypeMessages.length > 0) {
+        highlights.peakHype = hypeMessages[0]
+      }
+    }
+  }
+
+  return highlights
 }
 
 function calculateLanguageBreakdown(languages: Record<string, number>, totalMessages: number) {
