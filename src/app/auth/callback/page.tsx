@@ -39,8 +39,21 @@ function AuthCallbackContent() {
 
         const tokenData = await response.json()
 
+        console.log('Token exchange response:', {
+          status: response.status,
+          hasError: !!tokenData.error,
+          hasUser: !!tokenData.user,
+          tokenData,
+        })
+
         if (tokenData.error) {
           setStatus(`❌ Token exchange failed: ${tokenData.error}`)
+          return
+        }
+
+        if (!tokenData.user || !tokenData.user.id) {
+          console.error('Missing user data in token response:', tokenData)
+          setStatus(`❌ Failed to get user data from Twitch. Please try again.`)
           return
         }
 
