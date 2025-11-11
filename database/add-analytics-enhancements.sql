@@ -107,6 +107,12 @@ COMMENT ON FUNCTION calculate_activity_intensity IS 'Calculates activity intensi
 ALTER TABLE stream_top_chatters ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stream_chat_timeline ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Users can view their own top chatters" ON stream_top_chatters;
+DROP POLICY IF EXISTS "Users can view their own chat timeline" ON stream_chat_timeline;
+DROP POLICY IF EXISTS "Service role can manage top chatters" ON stream_top_chatters;
+DROP POLICY IF EXISTS "Service role can manage chat timeline" ON stream_chat_timeline;
+
 -- Users can only access their own stream data
 CREATE POLICY "Users can view their own top chatters" ON stream_top_chatters
   FOR SELECT USING (
