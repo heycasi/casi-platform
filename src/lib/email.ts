@@ -464,22 +464,44 @@ function generateReportHTML(report: StreamReport): string {
                   .join('')}
               </div>
               
-              <!-- Most Engaged Viewers -->
+              <!-- Top Chatters (Community MVPs) - ENHANCED -->
               ${
-                highlights.mostEngagedViewers && highlights.mostEngagedViewers.length > 0
+                report.topChatters && report.topChatters.length > 0
                   ? `
               <div style="margin-top: 20px;">
-                <h3 style="color: #6932FF !important; font-size: 16px; font-weight: 600; margin-bottom: 15px;">💬 Most Active Chatters</h3>
-                ${highlights.mostEngagedViewers
-                  .slice(0, 3)
-                  .map(
-                    (viewer, index) =>
-                      `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin: 8px 0; border-radius: 0 6px 6px 0;">
-                    <strong style="color: #1f2937;">@${viewer.username}</strong>
-                    <span style="color: #6b7280; font-size: 12px; margin-left: 10px;">${viewer.message_count} messages • ${Math.round(viewer.avg_sentiment * 100)}% positive</span>
+                <h3 style="color: #6932FF !important; font-size: 16px; font-weight: 600; margin-bottom: 15px;">🏆 Community MVPs - Top Chatters</h3>
+                ${report.topChatters
+                  .slice(0, 5)
+                  .map((chatter, index) => {
+                    const medal =
+                      index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '⭐'
+                    const recurringBadge = chatter.is_recurring
+                      ? '<span style="background: #8B5CF6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 8px;">RECURRING</span>'
+                      : ''
+                    return `<div style="background: ${index < 3 ? '#f0fdf4' : '#fafafa'}; border-left: 4px solid ${index < 3 ? '#22c55e' : '#9ca3af'}; padding: 12px; margin: 8px 0; border-radius: 0 6px 6px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <strong style="color: #1f2937;">${medal} @${chatter.username}</strong>
+                        ${recurringBadge}
+                      </div>
+                      <span style="color: #6b7280; font-size: 11px; font-weight: 600;">#${index + 1}</span>
+                    </div>
+                    <div style="margin-top: 8px; color: #6b7280; font-size: 12px;">
+                      <span>💬 ${chatter.message_count} messages</span>
+                      ${chatter.question_count > 0 ? ` • <span>❓ ${chatter.question_count} questions</span>` : ''}
+                      <span> • 😊 ${Math.round(chatter.avg_sentiment_score * 100)}% positive</span>
+                      ${chatter.high_engagement_count > 0 ? ` • <span>🔥 ${chatter.high_engagement_count} hype messages</span>` : ''}
+                    </div>
                   </div>`
-                  )
+                  })
                   .join('')}
+                <p style="margin-top: 12px; color: #6b7280; font-size: 12px; font-style: italic;">
+                  ${
+                    report.topChatters.filter((c) => c.is_recurring).length > 0
+                      ? `💜 ${report.topChatters.filter((c) => c.is_recurring).length} recurring community members - they've chatted in your previous streams!`
+                      : 'Great job building new relationships in chat!'
+                  }
+                </p>
               </div>
               `
                   : ''
@@ -501,6 +523,84 @@ function generateReportHTML(report: StreamReport): string {
               </div>`
               )
               .join('')}
+          </div>
+          `
+              : ''
+          }
+
+          <!-- Chat Activity Timeline - NEW -->
+          ${
+            report.chatTimeline && report.chatTimeline.length > 0
+              ? `
+          <div style="margin-bottom: 40px;">
+            <h2 style="color: #6932FF !important; font-size: 24px; font-weight: 700; margin-bottom: 20px; font-family: 'Poppins', Arial, sans-serif; border-bottom: 3px solid #6932FF; padding-bottom: 10px;">📊 Chat Activity Timeline</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">See how chat engagement evolved throughout your stream</p>
+
+            <!-- Timeline visualization -->
+            <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
+              ${report.chatTimeline
+                .filter((_, i) => i % 5 === 0) // Show every 5th bucket (every 10 minutes)
+                .slice(0, 10) // Max 10 data points
+                .map((bucket) => {
+                  const barColor =
+                    bucket.activity_intensity === 'peak'
+                      ? '#ef4444'
+                      : bucket.activity_intensity === 'high'
+                        ? '#f59e0b'
+                        : bucket.activity_intensity === 'medium'
+                          ? '#10b981'
+                          : '#6b7280'
+                  const barWidth = Math.max(
+                    5,
+                    (bucket.message_count /
+                      Math.max(...report.chatTimeline.map((b) => b.message_count))) *
+                      100
+                  )
+                  const intensityLabel = bucket.activity_intensity.toUpperCase()
+                  const intensityEmoji =
+                    bucket.activity_intensity === 'peak'
+                      ? '🔥'
+                      : bucket.activity_intensity === 'high'
+                        ? '⚡'
+                        : bucket.activity_intensity === 'medium'
+                          ? '💬'
+                          : '😴'
+
+                  return `
+                  <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="color: #1f2937; font-weight: 600; font-size: 13px;">${bucket.minute_offset} min</span>
+                      <span style="color: #6b7280; font-size: 12px;">${intensityEmoji} ${intensityLabel}</span>
+                    </div>
+                    <div style="background: #e5e7eb; height: 24px; border-radius: 4px; overflow: hidden; position: relative;">
+                      <div style="background: ${barColor}; height: 100%; width: ${barWidth}%; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #6b7280;">
+                      <span>💬 ${bucket.message_count} messages</span>
+                      <span>👥 ${bucket.unique_chatters} chatters</span>
+                      ${bucket.question_count > 0 ? `<span>❓ ${bucket.question_count} questions</span>` : ''}
+                    </div>
+                  </div>`
+                })
+                .join('')}
+            </div>
+
+            <div style="margin-top: 20px; background: #eff6ff; padding: 16px; border-radius: 8px;">
+              <p style="color: #1f2937; font-size: 14px; margin: 0;">
+                <strong>💡 Insight:</strong>
+                ${
+                  report.chatTimeline.filter(
+                    (b) => b.activity_intensity === 'peak' || b.activity_intensity === 'high'
+                  ).length > 0
+                    ? `Your chat peaked ${report.chatTimeline.filter((b) => b.activity_intensity === 'peak' || b.activity_intensity === 'high').length} times during the stream! ${
+                        report.chatTimeline.find((b) => b.activity_intensity === 'peak')
+                          ? `The most active moment was at ${report.chatTimeline.find((b) => b.activity_intensity === 'peak').minute_offset} minutes with ${report.chatTimeline.find((b) => b.activity_intensity === 'peak').message_count} messages!`
+                          : ''
+                      }`
+                    : 'Chat stayed steady throughout the stream. Consider asking viewers questions to spark more engagement!'
+                }
+              </p>
+            </div>
           </div>
           `
               : ''

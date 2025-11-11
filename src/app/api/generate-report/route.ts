@@ -48,6 +48,26 @@ export async function POST(request: NextRequest) {
 
     // Get session data
     const session = await AnalyticsService.getSessionForReport(validatedSessionId)
+
+    // NEW: Generate detailed top chatters data
+    if (session) {
+      try {
+        await AnalyticsService.generateTopChattersData(validatedSessionId, session.channel_name)
+        console.log('✅ Generated top chatters data')
+      } catch (error) {
+        console.error('Failed to generate top chatters data:', error)
+        // Don't fail the entire report if this fails
+      }
+
+      // NEW: Generate chat activity timeline
+      try {
+        await AnalyticsService.generateChatTimeline(validatedSessionId)
+        console.log('✅ Generated chat timeline data')
+      } catch (error) {
+        console.error('Failed to generate chat timeline:', error)
+        // Don't fail the entire report if this fails
+      }
+    }
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 })
     }
@@ -68,8 +88,30 @@ export async function POST(request: NextRequest) {
 
     console.log(`Found ${events?.length || 0} events for session`)
 
+    // NEW: Fetch top chatters data
+    const { data: topChatters } = await supabase
+      .from('stream_top_chatters')
+      .select('*')
+      .eq('session_id', validatedSessionId)
+      .order('message_count', { ascending: false })
+      .limit(10)
+
+    // NEW: Fetch chat timeline data
+    const { data: chatTimeline } = await supabase
+      .from('stream_chat_timeline')
+      .select('*')
+      .eq('session_id', validatedSessionId)
+      .order('minute_offset', { ascending: true })
+
     // Generate comprehensive report
-    const report = await generateComprehensiveReport(session, analytics, topQuestions, events || [])
+    const report = await generateComprehensiveReport(
+      session,
+      analytics,
+      topQuestions,
+      events || [],
+      topChatters || [],
+      chatTimeline || []
+    )
 
     // Send report via email
     const emailSent = await EmailService.sendStreamReport(validatedEmail, report)
@@ -125,7 +167,9 @@ async function generateComprehensiveReport(
   session: any,
   analytics: any,
   topQuestions: any[],
-  events: any[]
+  events: any[],
+  topChatters: any[] = [], // NEW
+  chatTimeline: any[] = [] // NEW
 ): Promise<StreamReport> {
   const startTime = performance.now()
 
@@ -163,9 +207,11 @@ async function generateComprehensiveReport(
     clipTimestamps, // NEW: Clip suggestions
     streamRating, // NEW: Overall performance grade
     previousComparison, // NEW: Growth metrics
+    topChatters, // NEW: Community MVPs
+    chatTimeline, // NEW: Engagement timeline
     metadata: {
       generated_at: new Date().toISOString(),
-      report_version: '1.1', // Bumped version
+      report_version: '1.2', // Bumped version
       processing_time_ms: Math.round(processingTime),
     },
     events,

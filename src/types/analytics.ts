@@ -8,8 +8,12 @@ export interface StreamSession {
   session_end?: string
   duration_minutes?: number
   peak_viewer_count: number
+  avg_viewer_count: number // NEW: Average concurrent viewers
   total_messages: number
   unique_chatters: number
+  stream_title?: string // NEW: Stream title for performance tracking
+  stream_category?: string // NEW: Game/category being streamed
+  stream_tags?: string[] // NEW: Stream tags
   report_generated: boolean
   report_sent: boolean
   created_at: string
@@ -143,4 +147,49 @@ export interface StreamReport {
       questions: { current: number; previous: number; change: number }
     }
   } | null
+}
+
+// NEW: Top Chatters Feature
+export interface TopChatter {
+  id: string
+  session_id: string
+  username: string
+  message_count: number
+  question_count: number
+  avg_sentiment_score: number
+  high_engagement_count: number
+  first_message_at: string
+  last_message_at: string
+  is_recurring: boolean // Has chatted in previous streams
+  platform: string
+  created_at: string
+}
+
+// NEW: Chat Activity Timeline Feature
+export interface ChatTimelineBucket {
+  id: string
+  session_id: string
+  time_bucket: string // Timestamp of the bucket
+  minute_offset: number // Minutes from stream start
+  message_count: number
+  unique_chatters: number
+  question_count: number
+  avg_sentiment_score: number
+  positive_count: number
+  negative_count: number
+  neutral_count: number
+  high_engagement_count: number
+  activity_intensity: 'low' | 'medium' | 'high' | 'peak'
+  created_at: string
+}
+
+// NEW: Stream Title Performance Tracking
+export interface StreamTitlePerformance {
+  title: string
+  avg_viewers: number
+  peak_viewers: number
+  total_messages: number
+  stream_count: number
+  avg_duration_minutes: number
+  last_used: string
 }

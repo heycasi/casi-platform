@@ -18,10 +18,7 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET
 
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     console.log('🔄 Starting stale session cleanup...')
@@ -41,10 +38,7 @@ export async function GET(request: NextRequest) {
 
     if (fetchError) {
       console.error('❌ Failed to fetch stale sessions:', fetchError)
-      return NextResponse.json(
-        { error: 'Failed to fetch stale sessions' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch stale sessions' }, { status: 500 })
     }
 
     if (!staleSessions || staleSessions.length === 0) {
@@ -52,7 +46,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'No stale sessions to cleanup',
-        processed: 0
+        processed: 0,
       })
     }
 
@@ -62,7 +56,7 @@ export async function GET(request: NextRequest) {
       ended: 0,
       reportsGenerated: 0,
       reportsSent: 0,
-      errors: 0
+      errors: 0,
     }
 
     // Process each stale session
@@ -87,7 +81,7 @@ export async function GET(request: NextRequest) {
           .from('stream_report_sessions')
           .update({
             session_end: sessionEnd.toISOString(),
-            duration_minutes: durationMinutes
+            duration_minutes: durationMinutes,
           })
           .eq('id', session.id)
 
@@ -114,6 +108,22 @@ export async function GET(request: NextRequest) {
             const sessionData = await AnalyticsService.getSessionForReport(session.id)
             const topQuestions = await AnalyticsService.getTopQuestions(session.id, 5)
 
+            // NEW: Generate top chatters data
+            if (sessionData) {
+              try {
+                await AnalyticsService.generateTopChattersData(session.id, session.channel_name)
+              } catch (error) {
+                console.error('Failed to generate top chatters for cron job:', error)
+              }
+
+              // NEW: Generate chat timeline
+              try {
+                await AnalyticsService.generateChatTimeline(session.id)
+              } catch (error) {
+                console.error('Failed to generate chat timeline for cron job:', error)
+              }
+            }
+
             if (sessionData) {
               // Generate report
               const report = await generateComprehensiveReport(sessionData, analytics, topQuestions)
@@ -121,7 +131,10 @@ export async function GET(request: NextRequest) {
 
               // Send email if we have an email
               if (session.streamer_email) {
-                const emailSent = await EmailService.sendStreamReport(session.streamer_email, report)
+                const emailSent = await EmailService.sendStreamReport(
+                  session.streamer_email,
+                  report
+                )
 
                 if (emailSent) {
                   results.reportsSent++
@@ -132,20 +145,18 @@ export async function GET(request: NextRequest) {
                     .from('stream_report_sessions')
                     .update({
                       report_generated: true,
-                      report_sent: true
+                      report_sent: true,
                     })
                     .eq('id', session.id)
 
                   // Log delivery
-                  await supabase
-                    .from('stream_report_deliveries')
-                    .insert({
-                      session_id: session.id,
-                      email: session.streamer_email,
-                      delivery_status: 'sent',
-                      delivery_timestamp: new Date().toISOString(),
-                      report_data: report
-                    })
+                  await supabase.from('stream_report_deliveries').insert({
+                    session_id: session.id,
+                    email: session.streamer_email,
+                    delivery_status: 'sent',
+                    delivery_timestamp: new Date().toISOString(),
+                    report_data: report,
+                  })
                 } else {
                   console.error(`❌ Failed to send email to ${session.streamer_email}`)
                   results.errors++
@@ -157,9 +168,10 @@ export async function GET(request: NextRequest) {
             results.errors++
           }
         } else {
-          console.log(`⏭️ Skipping report for ${session.channel_name} - insufficient data (${messageCount} messages, ${durationMinutes} mins)`)
+          console.log(
+            `⏭️ Skipping report for ${session.channel_name} - insufficient data (${messageCount} messages, ${durationMinutes} mins)`
+          )
         }
-
       } catch (error) {
         console.error(`❌ Error processing session ${session.id}:`, error)
         results.errors++
@@ -170,30 +182,23 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      ...results
+      ...results,
     })
-
   } catch (error) {
     console.error('❌ Cleanup cron error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // Check if a Twitch channel is currently live
 async function checkIfChannelIsLive(channelName: string): Promise<boolean> {
   try {
-    const response = await fetch(
-      `https://api.twitch.tv/helix/streams?user_login=${channelName}`,
-      {
-        headers: {
-          'Client-ID': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID!,
-          'Authorization': `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`
-        }
-      }
-    )
+    const response = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channelName}`, {
+      headers: {
+        'Client-ID': process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID!,
+        Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+      },
+    })
 
     if (!response.ok) {
       return false
@@ -214,8 +219,11 @@ async function generateComprehensiveReport(session: any, analytics: any, topQues
     bestMoments: generateBestMoments(analytics),
     topQuestions: topQuestions.slice(0, 5),
     mostEngagedViewers: analytics.most_active_chatters.slice(0, 5),
-    languageBreakdown: calculateLanguageBreakdown(analytics.languages_detected, analytics.total_messages),
-    topicInsights: generateTopicInsights(analytics.topics_discussed, analytics.total_messages)
+    languageBreakdown: calculateLanguageBreakdown(
+      analytics.languages_detected,
+      analytics.total_messages
+    ),
+    topicInsights: generateTopicInsights(analytics.topics_discussed, analytics.total_messages),
   }
 
   const recommendations = generateRecommendations(session, analytics)
@@ -231,8 +239,8 @@ async function generateComprehensiveReport(session: any, analytics: any, topQues
       generated_at: new Date().toISOString(),
       report_version: '1.0',
       processing_time_ms: Math.round(processingTime),
-      generated_by: 'stale_session_cleanup'
-    }
+      generated_by: 'stale_session_cleanup',
+    },
   }
 }
 
@@ -240,17 +248,17 @@ function generateBestMoments(analytics: any) {
   return analytics.engagement_peaks.slice(0, 3).map((peak: any, index: number) => ({
     timestamp: peak.timestamp,
     description: `High engagement period ${index + 1} - ${peak.message_count} messages with ${Math.round(peak.intensity * 100)}% excitement`,
-    sentiment_score: peak.intensity
+    sentiment_score: peak.intensity,
   }))
 }
 
 function calculateLanguageBreakdown(languages: Record<string, number>, totalMessages: number) {
-  const breakdown: Record<string, { count: number, percentage: number }> = {}
+  const breakdown: Record<string, { count: number; percentage: number }> = {}
 
   Object.entries(languages).forEach(([lang, count]) => {
     breakdown[lang] = {
       count,
-      percentage: Math.round((count / totalMessages) * 100)
+      percentage: Math.round((count / totalMessages) * 100),
     }
   })
 
@@ -265,7 +273,7 @@ function generateTopicInsights(topics: Record<string, number>, totalMessages: nu
       topic,
       count,
       sentiment: 0.5,
-      example_messages: []
+      example_messages: [],
     }))
 }
 
@@ -273,38 +281,56 @@ function generateRecommendations(session: any, analytics: any) {
   const recommendations = {
     streamOptimization: [] as string[],
     contentSuggestions: [] as string[],
-    engagementTips: [] as string[]
+    engagementTips: [] as string[],
   }
 
   if (session.duration_minutes && session.duration_minutes > 240) {
-    recommendations.streamOptimization.push('Consider shorter streams (3-4 hours) for better audience retention')
+    recommendations.streamOptimization.push(
+      'Consider shorter streams (3-4 hours) for better audience retention'
+    )
   } else if (session.duration_minutes && session.duration_minutes < 60) {
-    recommendations.streamOptimization.push('Longer streams (2+ hours) often see better engagement growth')
+    recommendations.streamOptimization.push(
+      'Longer streams (2+ hours) often see better engagement growth'
+    )
   }
 
   const questionRatio = analytics.questions_count / analytics.total_messages
   if (questionRatio > 0.2) {
-    recommendations.engagementTips.push('High question rate! Consider dedicated Q&A segments to capitalize on curiosity')
+    recommendations.engagementTips.push(
+      'High question rate! Consider dedicated Q&A segments to capitalize on curiosity'
+    )
   } else if (questionRatio < 0.05) {
-    recommendations.engagementTips.push('Try asking viewers questions to encourage more interaction')
+    recommendations.engagementTips.push(
+      'Try asking viewers questions to encourage more interaction'
+    )
   }
 
   const positiveRatio = analytics.positive_messages / analytics.total_messages
   if (positiveRatio > 0.6) {
-    recommendations.contentSuggestions.push('Your content is resonating well! Consider similar themes in future streams')
+    recommendations.contentSuggestions.push(
+      'Your content is resonating well! Consider similar themes in future streams'
+    )
   } else if (positiveRatio < 0.3) {
-    recommendations.contentSuggestions.push('Try more interactive content or check if technical issues affected viewer experience')
+    recommendations.contentSuggestions.push(
+      'Try more interactive content or check if technical issues affected viewer experience'
+    )
   }
 
   const languageCount = Object.keys(analytics.languages_detected).length
   if (languageCount > 3) {
-    recommendations.engagementTips.push('Great international audience! Consider acknowledging different languages occasionally')
+    recommendations.engagementTips.push(
+      'Great international audience! Consider acknowledging different languages occasionally'
+    )
   }
 
-  const topTopic = Object.keys(analytics.topics_discussed).reduce((a, b) =>
-    analytics.topics_discussed[a] > analytics.topics_discussed[b] ? a : b, '')
+  const topTopic = Object.keys(analytics.topics_discussed).reduce(
+    (a, b) => (analytics.topics_discussed[a] > analytics.topics_discussed[b] ? a : b),
+    ''
+  )
   if (topTopic) {
-    recommendations.contentSuggestions.push(`"${topTopic}" was popular - consider dedicating more time to this topic`)
+    recommendations.contentSuggestions.push(
+      `"${topTopic}" was popular - consider dedicating more time to this topic`
+    )
   }
 
   return recommendations

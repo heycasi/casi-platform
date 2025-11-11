@@ -10,6 +10,88 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Helper function to fetch stream info from Twitch
+async function fetchTwitchStreamInfo(channelName: string) {
+  try {
+    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID
+    const clientSecret = process.env.TWITCH_CLIENT_SECRET
+
+    if (!clientId || !clientSecret) {
+      console.warn('Twitch credentials not configured, skipping stream info fetch')
+      return null
+    }
+
+    // Get OAuth token
+    const tokenResponse = await fetch('https://id.twitch.tv/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+      }),
+    })
+
+    if (!tokenResponse.ok) {
+      console.error('Failed to get Twitch OAuth token')
+      return null
+    }
+
+    const { access_token } = await tokenResponse.json()
+
+    // Get user ID first
+    const userResponse = await fetch(`https://api.twitch.tv/helix/users?login=${channelName}`, {
+      headers: {
+        'Client-ID': clientId,
+        Authorization: `Bearer ${access_token}`,
+      },
+    })
+
+    if (!userResponse.ok) {
+      console.error('Failed to fetch Twitch user')
+      return null
+    }
+
+    const userData = await userResponse.json()
+    if (!userData.data || userData.data.length === 0) {
+      console.warn(`Twitch user not found: ${channelName}`)
+      return null
+    }
+
+    const userId = userData.data[0].id
+
+    // Get current stream info
+    const streamResponse = await fetch(`https://api.twitch.tv/helix/streams?user_id=${userId}`, {
+      headers: {
+        'Client-ID': clientId,
+        Authorization: `Bearer ${access_token}`,
+      },
+    })
+
+    if (!streamResponse.ok) {
+      console.error('Failed to fetch Twitch stream info')
+      return null
+    }
+
+    const streamData = await streamResponse.json()
+    if (!streamData.data || streamData.data.length === 0) {
+      console.warn(`Stream not live for: ${channelName}`)
+      return null
+    }
+
+    const stream = streamData.data[0]
+    return {
+      title: stream.title || null,
+      category: stream.game_name || null,
+      tags: stream.tags || [],
+      viewerCount: stream.viewer_count || 0,
+    }
+  } catch (error) {
+    console.error('Error fetching Twitch stream info:', error)
+    return null
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { streamerEmail, channelName } = await request.json()
@@ -47,13 +129,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create new session only if none exists
+    // Fetch stream info from Twitch (title, category, tags, viewer count)
+    const streamInfo = await fetchTwitchStreamInfo(normalizedChannelName)
+
+    // Create new session with stream metadata
     const { data, error } = await supabase
       .from('stream_report_sessions')
       .insert({
         streamer_email: streamerEmail,
         channel_name: normalizedChannelName,
         session_start: new Date().toISOString(),
+        stream_title: streamInfo?.title || null,
+        stream_category: streamInfo?.category || null,
+        stream_tags: streamInfo?.tags || [],
+        peak_viewer_count: streamInfo?.viewerCount || 0,
+        avg_viewer_count: streamInfo?.viewerCount || 0, // Initialize with current count
       })
       .select('id')
       .single()
@@ -67,9 +157,16 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`✨ Created new session: ${data.id}`)
+    if (streamInfo) {
+      console.log(
+        `📊 Stream info: "${streamInfo.title}" | ${streamInfo.category} | ${streamInfo.viewerCount} viewers`
+      )
+    }
+
     return NextResponse.json({
       sessionId: data.id,
       reused: false,
+      streamInfo,
     })
   } catch (error: any) {
     console.error('Session creation error:', error)

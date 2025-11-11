@@ -5,7 +5,7 @@ import { StreamSession, ChatMessage, SessionAnalytics } from '../types/analytics
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // FIXED: Use service role to bypass RLS
 )
 
 export class AnalyticsService {
@@ -256,6 +256,235 @@ export class AnalyticsService {
       high_engagement_messages: highEngagementMessages,
       most_active_chatters: mostActiveChatters,
       motivational_insights: motivationalInsights,
+    }
+  }
+
+  // NEW: Populate the stream_top_chatters table with detailed stats
+  static async generateTopChattersData(sessionId: string, channelName: string): Promise<void> {
+    try {
+      // Get all messages for the session
+      const { data: messages } = await supabase
+        .from('stream_chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('timestamp', { ascending: true })
+
+      if (!messages || messages.length === 0) {
+        console.log('No messages found for top chatters analysis')
+        return
+      }
+
+      // Calculate detailed stats per chatter
+      const chatterStats: Record<
+        string,
+        {
+          messageCount: number
+          questionCount: number
+          sentimentSum: number
+          sentimentCount: number
+          highEngagementCount: number
+          firstMessageAt: string
+          lastMessageAt: string
+          platform: string
+        }
+      > = {}
+
+      messages.forEach((msg) => {
+        if (!chatterStats[msg.username]) {
+          chatterStats[msg.username] = {
+            messageCount: 0,
+            questionCount: 0,
+            sentimentSum: 0,
+            sentimentCount: 0,
+            highEngagementCount: 0,
+            firstMessageAt: msg.timestamp,
+            lastMessageAt: msg.timestamp,
+            platform: msg.platform || 'twitch',
+          }
+        }
+
+        const stats = chatterStats[msg.username]
+        stats.messageCount++
+        stats.lastMessageAt = msg.timestamp
+
+        if (msg.is_question) {
+          stats.questionCount++
+        }
+
+        if (msg.sentiment_score !== null && msg.sentiment_score !== undefined) {
+          stats.sentimentSum += msg.sentiment_score
+          stats.sentimentCount++
+        }
+
+        if (msg.engagement_level === 'high') {
+          stats.highEngagementCount++
+        }
+      })
+
+      // Check which users are recurring (have chatted in previous streams)
+      const usernames = Object.keys(chatterStats)
+      const { data: previousSessions } = await supabase
+        .from('stream_report_sessions')
+        .select('id')
+        .eq('channel_name', channelName.toLowerCase())
+        .neq('id', sessionId)
+        .order('session_start', { ascending: false })
+        .limit(10) // Check last 10 streams
+
+      const previousSessionIds = previousSessions?.map((s) => s.id) || []
+
+      let recurringUsers: Set<string> = new Set()
+      if (previousSessionIds.length > 0) {
+        const { data: previousMessages } = await supabase
+          .from('stream_chat_messages')
+          .select('username')
+          .in('session_id', previousSessionIds)
+
+        if (previousMessages) {
+          previousMessages.forEach((msg) => recurringUsers.add(msg.username))
+        }
+      }
+
+      // Prepare data for insertion
+      const topChattersData = Object.entries(chatterStats).map(([username, stats]) => ({
+        session_id: sessionId,
+        username,
+        message_count: stats.messageCount,
+        question_count: stats.questionCount,
+        avg_sentiment_score:
+          stats.sentimentCount > 0 ? stats.sentimentSum / stats.sentimentCount : 0,
+        high_engagement_count: stats.highEngagementCount,
+        first_message_at: stats.firstMessageAt,
+        last_message_at: stats.lastMessageAt,
+        is_recurring: recurringUsers.has(username),
+        platform: stats.platform,
+      }))
+
+      // Insert into database (upsert to handle duplicates)
+      const { error } = await supabase.from('stream_top_chatters').upsert(topChattersData, {
+        onConflict: 'session_id,username',
+        ignoreDuplicates: false,
+      })
+
+      if (error) {
+        console.error('Failed to insert top chatters:', error)
+        throw error
+      }
+
+      console.log(`✅ Inserted ${topChattersData.length} top chatters for session ${sessionId}`)
+    } catch (error) {
+      console.error('Error generating top chatters data:', error)
+      throw error
+    }
+  }
+
+  // NEW: Generate chat activity timeline (2-minute buckets)
+  static async generateChatTimeline(sessionId: string): Promise<void> {
+    try {
+      // Get all messages for the session
+      const { data: messages } = await supabase
+        .from('stream_chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('timestamp', { ascending: true })
+
+      if (!messages || messages.length === 0) {
+        console.log('No messages found for chat timeline')
+        return
+      }
+
+      // Get session start time
+      const { data: session } = await supabase
+        .from('stream_report_sessions')
+        .select('session_start')
+        .eq('id', sessionId)
+        .single()
+
+      if (!session) {
+        throw new Error('Session not found')
+      }
+
+      const sessionStart = new Date(session.session_start).getTime()
+      const firstMessageTime = new Date(messages[0].timestamp).getTime()
+      const lastMessageTime = new Date(messages[messages.length - 1].timestamp).getTime()
+
+      // Use session start as the baseline
+      const startTime = sessionStart
+      const endTime = lastMessageTime
+
+      const bucketSize = 2 * 60 * 1000 // 2 minutes in milliseconds
+      const timelineBuckets: any[] = []
+
+      // Create buckets for the entire session duration
+      for (let bucketStart = startTime; bucketStart <= endTime; bucketStart += bucketSize) {
+        const bucketEnd = bucketStart + bucketSize
+        const minuteOffset = Math.floor((bucketStart - sessionStart) / 60000)
+
+        // Filter messages in this time bucket
+        const bucketMessages = messages.filter((msg) => {
+          const msgTime = new Date(msg.timestamp).getTime()
+          return msgTime >= bucketStart && msgTime < bucketEnd
+        })
+
+        // Calculate stats for this bucket
+        const uniqueChatters = new Set(bucketMessages.map((m) => m.username)).size
+        const questionCount = bucketMessages.filter((m) => m.is_question).length
+        const highEngagementCount = bucketMessages.filter(
+          (m) => m.engagement_level === 'high'
+        ).length
+
+        const sentimentScores = bucketMessages
+          .filter((m) => m.sentiment_score !== null && m.sentiment_score !== undefined)
+          .map((m) => m.sentiment_score)
+
+        const avgSentimentScore =
+          sentimentScores.length > 0
+            ? sentimentScores.reduce((a, b) => a + b, 0) / sentimentScores.length
+            : null
+
+        const positiveCount = bucketMessages.filter((m) => m.sentiment === 'positive').length
+        const negativeCount = bucketMessages.filter((m) => m.sentiment === 'negative').length
+        const neutralCount = bucketMessages.filter((m) => m.sentiment === 'neutral').length
+
+        // Calculate activity intensity
+        const messageCount = bucketMessages.length
+        let activityIntensity: 'low' | 'medium' | 'high' | 'peak'
+        if (messageCount < 10) activityIntensity = 'low'
+        else if (messageCount < 30) activityIntensity = 'medium'
+        else if (messageCount < 60) activityIntensity = 'high'
+        else activityIntensity = 'peak'
+
+        timelineBuckets.push({
+          session_id: sessionId,
+          time_bucket: new Date(bucketStart).toISOString(),
+          minute_offset: minuteOffset,
+          message_count: messageCount,
+          unique_chatters: uniqueChatters,
+          question_count: questionCount,
+          avg_sentiment_score: avgSentimentScore,
+          positive_count: positiveCount,
+          negative_count: negativeCount,
+          neutral_count: neutralCount,
+          high_engagement_count: highEngagementCount,
+          activity_intensity: activityIntensity,
+        })
+      }
+
+      // Insert timeline data (upsert to handle duplicates)
+      const { error } = await supabase.from('stream_chat_timeline').upsert(timelineBuckets, {
+        onConflict: 'session_id,time_bucket',
+        ignoreDuplicates: false,
+      })
+
+      if (error) {
+        console.error('Failed to insert chat timeline:', error)
+        throw error
+      }
+
+      console.log(`✅ Inserted ${timelineBuckets.length} timeline buckets for session ${sessionId}`)
+    } catch (error) {
+      console.error('Error generating chat timeline:', error)
+      throw error
     }
   }
 
