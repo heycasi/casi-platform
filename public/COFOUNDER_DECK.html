@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeyCasi - Cofounder Opportunity</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #2a1a4e 100%);
+      color: #F7F7F7;
+      overflow: hidden;
+    }
+
+    .presentation {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      z-index: 10;
+    }
+
+    .slide.prev {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    /* Background robot mascot */
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 850px;
+      height: 850px;
+      background-image: url('landing-robot.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.06;
+      z-index: 0;
+      animation: robotFloat 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes robotFloat {
+      0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.08; }
+      25% { transform: translate(-50%, -48%) scale(1.02) rotate(2deg); opacity: 0.12; }
+      50% { transform: translate(-50%, -50%) scale(1.03) rotate(0deg); opacity: 0.1; }
+      75% { transform: translate(-50%, -52%) scale(1.02) rotate(-2deg); opacity: 0.12; }
+    }
+
+    .slide-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 64px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #F7F7F7;
+    }
+
+    h3 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #5EEAD4;
+      margin-bottom: 20px;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #5EEAD4;
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    .card {
+      background: rgba(105, 50, 255, 0.1);
+      border: 1px solid rgba(105, 50, 255, 0.3);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 20px 0;
+      border-left: 4px solid #6932FF;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 30px 0;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(105, 50, 255, 0.2), rgba(147, 47, 254, 0.2));
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      border: 2px solid rgba(105, 50, 255, 0.3);
+    }
+
+    .stat-number {
+      font-size: 72px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #6932FF, #5EEAD4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 18px;
+      color: #F7F7F7;
+      opacity: 0.8;
+    }
+
+    .pricing-tier {
+      background: rgba(105, 50, 255, 0.15);
+      border-radius: 20px;
+      padding: 40px 30px;
+      text-align: center;
+      border: 2px solid rgba(105, 50, 255, 0.4);
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .pricing-tier:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(105, 50, 255, 0.3);
+    }
+
+    .pricing-tier.popular {
+      border: 3px solid #6932FF;
+      background: rgba(105, 50, 255, 0.25);
+    }
+
+    .pricing-tier.popular::before {
+      content: 'Most Popular';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      padding: 5px 20px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .price {
+      font-size: 48px;
+      font-weight: 700;
+      color: #5EEAD4;
+      margin: 20px 0;
+    }
+
+    .feature-list {
+      list-style: none;
+      text-align: left;
+      margin: 20px 0;
+    }
+
+    .feature-list li {
+      padding: 10px 0;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .feature-list li::before {
+      content: '✓ ';
+      color: #5EEAD4;
+      font-weight: 700;
+      margin-right: 10px;
+    }
+
+    .timeline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 40px 0;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6932FF, #5EEAD4);
+      z-index: 0;
+    }
+
+    .phase {
+      background: rgba(26, 26, 46, 0.95);
+      border: 2px solid #6932FF;
+      border-radius: 16px;
+      padding: 30px;
+      width: 30%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .phase-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #6932FF;
+      margin-bottom: 10px;
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      color: white;
+      padding: 20px 50px;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 20px auto;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(105, 50, 255, 0.5);
+    }
+
+    /* Navigation */
+    .nav-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    .nav-button {
+      background: rgba(105, 50, 255, 0.2);
+      border: 2px solid #6932FF;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+      background: rgba(105, 50, 255, 0.5);
+      transform: scale(1.1);
+    }
+
+    .slide-indicator {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      font-size: 16px;
+      color: #5EEAD4;
+      z-index: 100;
+    }
+
+    .logo {
+      position: fixed;
+      top: 30px;
+      left: 30px;
+      width: 150px;
+      z-index: 100;
+    }
+
+    .screenshot {
+      max-width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(94, 234, 212, 0.3);
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 40% 60%;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .profile-photo {
+      width: 100%;
+      border-radius: 20px;
+      border: 4px solid #6932FF;
+      box-shadow: 0 20px 60px rgba(105, 50, 255, 0.5);
+    }
+
+    .checklist {
+      list-style: none;
+    }
+
+    .checklist li {
+      padding: 15px;
+      font-size: 18px;
+      margin: 10px 0;
+      background: rgba(105, 50, 255, 0.05);
+      border-radius: 8px;
+      border-left: 3px solid #5EEAD4;
+    }
+
+    .checklist li::before {
+      content: '□ ';
+      color: #6932FF;
+      font-weight: 700;
+      margin-right: 15px;
+      font-size: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .slide {
+        padding: 30px;
+      }
+
+      h1 { font-size: 36px; }
+      h2 { font-size: 32px; }
+      h3 { font-size: 24px; }
+
+      .grid, .grid-2, .two-column {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline {
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      .timeline::before {
+        display: none;
+      }
+
+      .phase {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo -->
+  <img src="landing-logo.png" alt="Casi" class="logo">
+
+  <!-- Slide Indicator -->
+  <div class="slide-indicator">
+    <span id="current-slide">1</span> / <span id="total-slides">12</span>
+  </div>
+
+  <div class="presentation" id="presentation">
+
+    <!-- SLIDE 1: TITLE -->
+    <div class="slide active" data-slide="1">
+      <div class="slide-content" style="text-align: center;">
+        <h1 style="font-size: 80px; margin-bottom: 30px;">Cofounder & Head of Growth</h1>
+        <div class="subtitle" style="font-size: 32px; margin-bottom: 20px;">
+          Marketing · Community · GTM
+        </div>
+        <div class="subtitle" style="font-size: 24px; margin-top: 60px;">
+          Join us in building the future of streaming analytics
+        </div>
+        <div style="margin-top: 80px; font-size: 18px; color: #5EEAD4;">
+          Connor Dahl, Founder<br>
+          casi@heycasi.com
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: THE PROBLEM -->
+    <div class="slide" data-slide="2">
+      <div class="slide-content">
+        <h2>Streamers Are Flying Blind</h2>
+
+        <div class="grid">
+          <div class="card">
+            <h3>😫 CHAT OVERLOAD</h3>
+            <p style="margin: 15px 0; font-size: 18px;">Streams get 100+ viewers. Chat scrolls too fast. Miss important questions and supporters.</p>
+            <p style="font-style: italic; color: #5EEAD4; margin-top: 15px;">→ Result: Viewers feel ignored, streamers burn out</p>
+          </div>
+
+          <div class="card">
+            <h3>📊 NO INSIGHTS</h3>
+            <p style="margin: 15px 0; font-size: 18px;">Stream ends. No idea how it went. Just guessing what works.</p>
+            <p style="font-style: italic; color: #5EEAD4; margin-top: 15px;">→ Result: Can't improve, stuck at same viewer count</p>
+          </div>
+
+          <div class="card">
+            <h3>💰 LEAVING MONEY ON THE TABLE</h3>
+            <p style="margin: 15px 0; font-size: 18px;">Can't understand foreign viewers. Don't know who superfans are until they stop donating.</p>
+            <p style="font-style: italic; color: #5EEAD4; margin-top: 15px;">→ Result: Miss revenue opportunities, lose VIPs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: THE SOLUTION -->
+    <div class="slide" data-slide="3">
+      <div class="slide-content">
+        <h2 style="text-align: center;">HeyCasi: Your Stream's Brainy Co-Pilot 🤖</h2>
+        <p class="subtitle" style="font-size: 20px;">AI-powered analytics that turns chat chaos into growth insights</p>
+
+        <div class="grid-2">
+          <div>
+            <ul class="feature-list" style="font-size: 20px;">
+              <li>Real-time sentiment analysis across 13+ languages</li>
+              <li>Auto-detect viewer questions (never miss one)</li>
+              <li>Post-stream email reports with actionable insights</li>
+              <li>Activity Feed: See every sub, follow, bit, raid</li>
+              <li>AI coaching to improve every stream</li>
+            </ul>
+          </div>
+          <div>
+            <img src="casidashboard.png" alt="Casi Dashboard" class="screenshot">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: PRODUCT DEMO -->
+    <div class="slide" data-slide="4">
+      <div class="slide-content">
+        <h2 style="text-align: center;">Built. Tested. Ready to Scale.</h2>
+
+        <div class="grid-2">
+          <div style="text-align: center;">
+            <img src="livechatfeed.png" alt="Live Chat Feed" class="screenshot" style="margin-bottom: 15px;">
+            <p style="color: #5EEAD4;">Real-time sentiment + question detection</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="sentimentanalysis.png" alt="Sentiment Analysis" class="screenshot" style="margin-bottom: 15px;">
+            <p style="color: #5EEAD4;">Understand your audience mood</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: MARKET OPPORTUNITY -->
+    <div class="slide" data-slide="5">
+      <div class="slide-content">
+        <h2 style="text-align: center;">The Creator Economy Is Exploding</h2>
+
+        <div class="grid">
+          <div class="stat-card">
+            <div class="stat-number">$250B</div>
+            <div class="stat-label">Total Creator Economy<br>Growing 22% annually</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">9M+</div>
+            <div class="stat-label">Active Streamers Worldwide<br>Twitch, YouTube, Kick, TikTok</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">$4B+</div>
+            <div class="stat-label">Streaming Tools Market<br>Streamlabs acquired for $89M</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 40px; text-align: center;">
+          <h3>The Opportunity:</h3>
+          <p style="font-size: 20px; margin-top: 15px;">Be the #1 streaming intelligence platform before the market consolidates.<br>
+          Positioned for acquisition by Twitch, YouTube, or TikTok at <strong style="color: #5EEAD4;">£100M-800M valuation.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: BUSINESS MODEL -->
+    <div class="slide" data-slide="6">
+      <div class="slide-content">
+        <h2 style="text-align: center;">Profitable From Day One</h2>
+
+        <div class="grid">
+          <div class="pricing-tier">
+            <div style="font-size: 32px;">🟣 CREATOR</div>
+            <div class="price">£19/mo</div>
+            <p style="opacity: 0.8; margin-bottom: 20px;">50 avg viewers</p>
+            <ul class="feature-list">
+              <li>Basic analytics</li>
+              <li>Question alerts</li>
+              <li>Email reports</li>
+              <li>1K msgs/hr</li>
+            </ul>
+            <p style="margin-top: 20px; font-size: 14px; color: #5EEAD4;">Target: 30% conversion</p>
+          </div>
+
+          <div class="pricing-tier popular">
+            <div style="font-size: 32px;">💫 PRO</div>
+            <div class="price">£37/mo</div>
+            <p style="opacity: 0.8; margin-bottom: 20px;">250 avg viewers</p>
+            <ul class="feature-list">
+              <li>Everything in Creator +</li>
+              <li>Multi-platform</li>
+              <li>Export data</li>
+              <li>5K msgs/hr</li>
+            </ul>
+            <p style="margin-top: 20px; font-size: 14px; color: #5EEAD4;">Target: 50% conversion</p>
+          </div>
+
+          <div class="pricing-tier">
+            <div style="font-size: 32px;">🟡 STREAMER+</div>
+            <div class="price">£75/mo</div>
+            <p style="opacity: 0.8; margin-bottom: 20px;">Unlimited viewers</p>
+            <ul class="feature-list">
+              <li>Everything in Pro +</li>
+              <li>AI coaching</li>
+              <li>White-label API</li>
+              <li>Unlimited msgs</li>
+            </ul>
+            <p style="margin-top: 20px; font-size: 14px; color: #5EEAD4;">Target: 20% conversion</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 40px;">
+          <div class="stat-card">
+            <div style="font-size: 24px; color: #5EEAD4; margin-bottom: 10px;">YEAR 1 TARGET</div>
+            <div style="font-size: 36px; font-weight: 700;">£888K ARR</div>
+            <div style="font-size: 16px; opacity: 0.8;">2,000 paying users | 66% margin</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size: 24px; color: #5EEAD4; margin-bottom: 10px;">YEAR 2 TARGET</div>
+            <div style="font-size: 36px; font-weight: 700;">£8.88M ARR</div>
+            <div style="font-size: 16px; opacity: 0.8;">20,000 paying users | 72% margin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: TRACTION -->
+    <div class="slide" data-slide="7">
+      <div class="slide-content">
+        <h2 style="text-align: center;">What We've Built (Solo, in 6 Months)</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>✅ PRODUCT</h3>
+            <ul class="feature-list">
+              <li>MVP built from scratch (Next.js, Supabase, AI)</li>
+              <li>Twitch OAuth integration</li>
+              <li>Real-time chat analysis (13+ languages)</li>
+              <li>Activity Feed (EventSub integration)</li>
+              <li>Automated email reports</li>
+              <li>Dashboard with live analytics</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>✅ INFRASTRUCTURE</h3>
+            <ul class="feature-list">
+              <li>Deployed on Vercel (production-ready)</li>
+              <li>Database schema designed for scale</li>
+              <li>API architecture built</li>
+              <li>Multi-platform ready (Twitch, YouTube, Kick)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 30px;">
+          <h3>📈 CURRENT STATUS</h3>
+          <p style="font-size: 18px; margin: 15px 0;">
+            • 1 beta tester actively using platform<br>
+            • Platform live at heycasi.com<br>
+            • Ready for user acquisition<br>
+            • Waiting list of interested streamers
+          </p>
+        </div>
+
+        <div class="card" style="margin-top: 30px; background: rgba(94, 234, 212, 0.1); border-left-color: #5EEAD4;">
+          <h3>🎯 NEXT 90 DAYS (With You)</h3>
+          <p style="font-size: 18px; margin: 15px 0;">
+            • Launch beta program (100 streamers)<br>
+            • Content marketing engine<br>
+            • Community building (Discord, TikTok)<br>
+            • First 10 paying customers
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: THE VISION -->
+    <div class="slide" data-slide="8">
+      <div class="slide-content">
+        <h2 style="text-align: center;">From Analytics Tool → Creator OS → Acquisition</h2>
+
+        <div class="timeline">
+          <div class="phase">
+            <div class="phase-number">PHASE 1: MONTHS 0-12</div>
+            <h3 style="font-size: 20px; color: #6932FF;">"Best Streaming Analytics"</h3>
+            <p style="margin: 15px 0;">
+              → 5,000 users<br>
+              → £888K ARR<br>
+              → Prove product-market fit
+            </p>
+            <p style="font-size: 14px; opacity: 0.8;">Features: Sentiment, Questions, Reports</p>
+          </div>
+
+          <div class="phase">
+            <div class="phase-number">PHASE 2: MONTHS 12-18</div>
+            <h3 style="font-size: 20px; color: #6932FF;">"Monetization Platform"</h3>
+            <p style="margin: 15px 0;">
+              → 15,000 users<br>
+              → £3.3M ARR<br>
+              → Revenue optimization tools
+            </p>
+            <p style="font-size: 14px; opacity: 0.8;">Features: Sponsor matching, Viral clips</p>
+          </div>
+
+          <div class="phase">
+            <div class="phase-number">PHASE 3: MONTHS 18-24</div>
+            <h3 style="font-size: 20px; color: #6932FF;">"Acquisition Target"</h3>
+            <p style="margin: 15px 0;">
+              → 40,000 users<br>
+              → £8.88M ARR<br>
+              → Strategic exit
+            </p>
+            <p style="font-size: 14px; color: #5EEAD4;">Valuation: £133M-266M (15-30x ARR)</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 40px; text-align: center;">
+          <p style="font-size: 20px;">
+            <strong>Potential acquirers:</strong> Twitch, YouTube, TikTok, Discord<br>
+            <span style="color: #5EEAD4; font-style: italic;">Why: We'll know more about their creators than they do.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: WHY NOW -->
+    <div class="slide" data-slide="9">
+      <div class="slide-content">
+        <h2 style="text-align: center;">The Perfect Storm</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>🔥 MARKET TIMING</h3>
+            <ul class="feature-list">
+              <li>50M+ creators worldwide</li>
+              <li>Streaming mainstream (not niche)</li>
+              <li>TikTok/Kick disrupting Twitch</li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">📊 COMPETITORS ARE WEAK</h3>
+            <ul class="feature-list">
+              <li>StreamElements: Just overlays</li>
+              <li>Streamlabs: No post-stream insights</li>
+              <li>TwitchTracker: Just viewer counts</li>
+              <li>No one does emotional AI</li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">🤖 AI MAKES THIS POSSIBLE NOW</h3>
+            <ul class="feature-list">
+              <li>Sentiment analysis just matured</li>
+              <li>Multi-language NLP affordable</li>
+              <li>Real-time processing cheap</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: rgba(94, 234, 212, 0.1); border-left-color: #5EEAD4;">
+            <h3>✅ WHY HEYCASI WINS</h3>
+
+            <div style="margin: 30px 0; padding: 20px; background: rgba(105, 50, 255, 0.1); border-radius: 12px;">
+              <h4 style="color: #5EEAD4; font-size: 20px; margin-bottom: 15px;">First-Mover in AI + Streaming</h4>
+              <p style="font-size: 18px;">We're 18 months ahead of competition</p>
+            </div>
+
+            <div style="margin: 30px 0; padding: 20px; background: rgba(105, 50, 255, 0.1); border-radius: 12px;">
+              <h4 style="color: #5EEAD4; font-size: 20px; margin-bottom: 15px;">Product Already Built</h4>
+              <p style="font-size: 18px;">Not just an idea - working MVP with users</p>
+            </div>
+
+            <div style="margin: 30px 0; padding: 20px; background: rgba(105, 50, 255, 0.1); border-radius: 12px;">
+              <h4 style="color: #5EEAD4; font-size: 20px; margin-bottom: 15px;">Profitable Business Model</h4>
+              <p style="font-size: 18px;">66-72% margins, bootstrappable</p>
+            </div>
+
+            <div style="margin: 30px 0; padding: 20px; background: rgba(105, 50, 255, 0.1); border-radius: 12px;">
+              <h4 style="color: #5EEAD4; font-size: 20px; margin-bottom: 15px;">Clear Acquisition Path</h4>
+              <p style="font-size: 18px;">Platforms need this data</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: THE FOUNDER -->
+    <div class="slide" data-slide="10">
+      <div class="slide-content">
+        <h2 style="text-align: center; margin-bottom: 50px;">Who's Building This</h2>
+
+        <div class="two-column">
+          <div>
+            <img src="Connor.png" alt="Connor Dahl" class="profile-photo">
+          </div>
+          <div>
+            <h3 style="font-size: 36px; margin-bottom: 30px;">Hi, I'm Connor 👋</h3>
+
+            <div style="margin: 25px 0;">
+              <h4 style="color: #6932FF; font-size: 20px; margin-bottom: 10px;">BACKGROUND</h4>
+              <p style="font-size: 18px; line-height: 1.6;">
+                • 7+ years in luxury fashion (Burberry, ESCADA)<br>
+                • Currently: Data & AI Governance in Media<br>
+                • Gamer with friends who stream
+              </p>
+            </div>
+
+            <div style="margin: 25px 0;">
+              <h4 style="color: #6932FF; font-size: 20px; margin-bottom: 10px;">WHY CASI</h4>
+              <p style="font-size: 18px; line-height: 1.6;">
+                I saw streamers struggle with what I'm good at: turning messy data into clear insights.
+              </p>
+            </div>
+
+            <div style="margin: 25px 0;">
+              <h4 style="color: #6932FF; font-size: 20px; margin-bottom: 10px;">WHAT I BRING</h4>
+              <p style="font-size: 18px; line-height: 1.6;">
+                • <strong>Technical:</strong> Built the entire platform<br>
+                • <strong>Creative:</strong> Brand, design, product vision<br>
+                • <strong>Hustle:</strong> Move fast, learn faster
+              </p>
+            </div>
+
+            <div style="margin: 25px 0; padding: 20px; background: rgba(94, 234, 212, 0.1); border-radius: 12px; border-left: 3px solid #5EEAD4;">
+              <h4 style="color: #5EEAD4; font-size: 20px; margin-bottom: 10px;">WHAT I NEED</h4>
+              <p style="font-size: 18px; line-height: 1.6;">
+                Someone who challenges my ideas, brings focus to growth, and knows how to build communities.
+              </p>
+              <p style="font-size: 18px; margin-top: 15px; font-weight: 600;">
+                I don't need a "yes person" — I need a partner.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: THE OPPORTUNITY -->
+    <div class="slide" data-slide="11">
+      <div class="slide-content">
+        <h2 style="text-align: center;">This Is Your Shot</h2>
+
+        <div class="grid-2" style="margin-top: 40px;">
+          <div class="card" style="background: rgba(105, 50, 255, 0.15);">
+            <h3>💰 10-20% EQUITY (COFOUNDER LEVEL)</h3>
+            <p style="font-size: 18px; margin: 15px 0;">True ownership in a high-potential startup</p>
+            <p style="font-size: 14px; opacity: 0.8;">Vesting: 4 years, 1-year cliff (standard)</p>
+          </div>
+
+          <div class="card" style="background: rgba(105, 50, 255, 0.15);">
+            <h3>🚀 BUILD FROM GROUND UP</h3>
+            <p style="font-size: 18px; margin: 15px 0;">Shape brand, community, and GTM from day one</p>
+            <p style="font-size: 14px; opacity: 0.8;">Not joining a corporate team — you ARE the team</p>
+          </div>
+
+          <div class="card" style="background: rgba(105, 50, 255, 0.15);">
+            <h3>📈 CLEAR PATH TO SUCCESS</h3>
+            <p style="font-size: 18px; margin: 15px 0;">MVP built, infrastructure ready, beta starting</p>
+            <p style="font-size: 14px; opacity: 0.8;">Your work = direct impact on growth</p>
+          </div>
+
+          <div class="card" style="background: rgba(105, 50, 255, 0.15);">
+            <h3>💡 CREATIVE FREEDOM</h3>
+            <p style="font-size: 18px; margin: 15px 0;">Test, experiment, iterate — no bureaucracy</p>
+            <p style="font-size: 14px; opacity: 0.8;">Bring your ideas to life immediately</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 40px;">
+          <h3>YOU'LL OWN:</h3>
+          <div class="grid-2" style="margin-top: 20px;">
+            <ul class="feature-list">
+              <li>Brand Strategy: Voice, positioning, messaging</li>
+              <li>Content Creation: TikTok, Discord, YouTube, blog</li>
+              <li>Community Building: Discord server, streamer network</li>
+            </ul>
+            <ul class="feature-list">
+              <li>User Acquisition: Beta program → paid conversions</li>
+              <li>Partnerships: Influencer collabs, creator deals</li>
+              <li>Pricing & Positioning: Market fit, tier strategy</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 40px;">
+          <div class="card" style="border-left-color: #5EEAD4;">
+            <h4 style="color: #5EEAD4; margin-bottom: 15px;">COMPENSATION (UNTIL FUNDING)</h4>
+            <p style="font-size: 18px;">
+              • Equity: 10-20% cofounder shares<br>
+              • Salary: £0 (must have runway or moonlight ability)<br>
+              • Benefits: Remote, flexible hours, build your way
+            </p>
+          </div>
+
+          <div class="card" style="border-left-color: #5EEAD4;">
+            <h4 style="color: #5EEAD4; margin-bottom: 15px;">POST-FUNDING (6-12 MONTHS)</h4>
+            <p style="font-size: 18px;">
+              • Salary: £50K-70K base<br>
+              • Equity: Remains + option pool<br>
+              • Team: Hire your growth team
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: WHO WE NEED -->
+    <div class="slide" data-slide="12">
+      <div class="slide-content">
+        <h2 style="text-align: center; margin-bottom: 40px;">Is This You?</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>✅ SKILLS WE NEED</h3>
+            <ul class="checklist">
+              <li>Content & community marketing expert</li>
+              <li>Comfortable with SaaS growth metrics</li>
+              <li>Creator economy or gaming experience</li>
+              <li>Resourceful experimenter (test & iterate)</li>
+              <li>UK-based or overlapping time zone</li>
+            </ul>
+
+            <h3 style="margin-top: 40px;">✅ MINDSET WE VALUE</h3>
+            <ul class="checklist">
+              <li>Challenges ideas, not afraid to disagree</li>
+              <li>Brings focus to chaos</li>
+              <li>Data-driven but creative</li>
+              <li>Comfortable with early-stage risk</li>
+              <li>Wants to build, not just execute</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: rgba(94, 234, 212, 0.1); border-left-color: #5EEAD4;">
+            <h3>🌟 NICE TO HAVE</h3>
+            <ul class="feature-list" style="font-size: 18px;">
+              <li>On-camera confidence (TikTok, YouTube)</li>
+              <li>Design skills (Figma, Canva)</li>
+              <li>Experience launching 0→1 products</li>
+              <li>Existing creator/streamer connections</li>
+              <li>Previous startup or founder experience</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px;">
+          <h3 style="font-size: 36px; margin-bottom: 30px;">THINK THIS IS YOU?</h3>
+
+          <a href="mailto:casi@heycasi.com" class="cta-button">
+            📧 Email: casi@heycasi.com
+          </a>
+
+          <p style="margin-top: 40px; font-size: 24px; color: #5EEAD4;">
+            Let's build the future of streaming together.
+          </p>
+
+          <img src="landing-robot.png" alt="Casi Robot" style="width: 200px; margin-top: 40px; opacity: 0.8;">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Controls -->
+  <div class="nav-controls">
+    <button class="nav-button" id="prev-btn">←</button>
+    <button class="nav-button" id="next-btn">→</button>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 12;
+
+    const slides = document.querySelectorAll('.slide');
+    const currentSlideEl = document.getElementById('current-slide');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function updateSlide(newSlide) {
+      if (newSlide < 1 || newSlide > totalSlides) return;
+
+      // Remove active from current
+      slides[currentSlide - 1].classList.remove('active');
+      slides[currentSlide - 1].classList.add('prev');
+
+      // Add active to new
+      slides[newSlide - 1].classList.remove('prev');
+      slides[newSlide - 1].classList.add('active');
+
+      currentSlide = newSlide;
+      currentSlideEl.textContent = currentSlide;
+    }
+
+    prevBtn.addEventListener('click', () => updateSlide(currentSlide - 1));
+    nextBtn.addEventListener('click', () => updateSlide(currentSlide + 1));
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        updateSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        updateSlide(currentSlide - 1);
+      }
+    });
+
+    // Touch swipe support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 50) updateSlide(currentSlide + 1);
+      if (touchEndX > touchStartX + 50) updateSlide(currentSlide - 1);
+    });
+  </script>
+</body>
+</html>

@@ -68,9 +68,17 @@ export default function EmailCapture({
         setIsSuccess(true)
         setEmail('')
 
-        // Send emails in parallel (admin notification + user welcome)
+        // Generate beta code and send emails
         try {
           await Promise.all([
+            // Generate and send beta code
+            fetch('/api/beta-code/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email.toLowerCase().trim(),
+              }),
+            }),
             // Admin notification
             fetch('/api/notify-beta-signup', {
               method: 'POST',
@@ -79,14 +87,6 @@ export default function EmailCapture({
                 email: email.toLowerCase().trim(),
                 source,
                 timestamp: new Date().toISOString(),
-              }),
-            }),
-            // User welcome email
-            fetch('/api/send-welcome-email', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: email.toLowerCase().trim(),
               }),
             }),
           ])
