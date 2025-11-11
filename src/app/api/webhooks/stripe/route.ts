@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia'
+  apiVersion: '2024-12-18.acacia',
 })
 
 const supabase = createClient(
@@ -21,17 +21,10 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err: any) {
     console.error(`Webhook signature verification failed: ${err.message}`)
-    return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
   }
 
   // Handle the event
@@ -78,19 +71,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   } catch (error: any) {
     console.error(`Webhook handler failed: ${error.message}`)
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 })
   }
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   if (session.mode !== 'subscription') return
 
-  const subscription = await stripe.subscriptions.retrieve(
-    session.subscription as string
-  )
+  const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
 
   // Create Supabase account if customer email is provided
   if (session.customer_details?.email) {
@@ -113,8 +101,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
           email_confirm: true, // Auto-confirm email since they paid
           user_metadata: {
             stripe_customer_id: session.customer,
-            created_via: 'stripe_checkout'
-          }
+            created_via: 'stripe_checkout',
+          },
         })
 
         if (signUpError) {
@@ -126,7 +114,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
           const { error: resetError } = await supabase.auth.resetPasswordForEmail(
             session.customer_details.email,
             {
-              redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`
+              redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
             }
           )
 
@@ -148,9 +136,17 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     const price = await stripe.prices.retrieve(priceId)
 
     let planName = 'Creator'
-    if (priceId.includes('pro') || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY) {
+    if (
+      priceId.includes('pro') ||
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY
+    ) {
       planName = 'Pro'
-    } else if (priceId.includes('streamer') || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY) {
+    } else if (
+      priceId.includes('streamer') ||
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY
+    ) {
       planName = 'Streamer+'
     }
 
@@ -220,7 +216,7 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     .update({
       status: 'canceled',
       canceled_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', subscription.id)
 
@@ -233,17 +229,15 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return
 
-  await supabase
-    .from('subscription_events')
-    .insert({
-      subscription_id: await getSubscriptionId(invoice.subscription as string),
-      event_type: 'payment_succeeded',
-      event_data: {
-        amount_paid: invoice.amount_paid,
-        currency: invoice.currency,
-        invoice_id: invoice.id
-      }
-    })
+  await supabase.from('subscription_events').insert({
+    subscription_id: await getSubscriptionId(invoice.subscription as string),
+    event_type: 'payment_succeeded',
+    event_data: {
+      amount_paid: invoice.amount_paid,
+      currency: invoice.currency,
+      invoice_id: invoice.id,
+    },
+  })
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
@@ -254,28 +248,23 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     .from('subscriptions')
     .update({
       status: 'past_due',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', invoice.subscription)
 
-  await supabase
-    .from('subscription_events')
-    .insert({
-      subscription_id: await getSubscriptionId(invoice.subscription as string),
-      event_type: 'payment_failed',
-      event_data: {
-        amount_due: invoice.amount_due,
-        currency: invoice.currency,
-        invoice_id: invoice.id,
-        attempt_count: invoice.attempt_count
-      }
-    })
+  await supabase.from('subscription_events').insert({
+    subscription_id: await getSubscriptionId(invoice.subscription as string),
+    event_type: 'payment_failed',
+    event_data: {
+      amount_due: invoice.amount_due,
+      currency: invoice.currency,
+      invoice_id: invoice.id,
+      attempt_count: invoice.attempt_count,
+    },
+  })
 }
 
-async function upsertSubscription(
-  subscription: Stripe.Subscription,
-  email?: string | null
-) {
+async function upsertSubscription(subscription: Stripe.Subscription, email?: string | null) {
   const priceId = subscription.items.data[0].price.id
   const price = await stripe.prices.retrieve(priceId)
 
@@ -283,26 +272,32 @@ async function upsertSubscription(
   let planName = 'Creator' // Default
 
   // Check for Creator plan (explicit match)
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY ||
-      priceId === 'price_1Rlx2DEEgFiyIrnTAomiE2J3' ||
-      priceId === 'price_1Rlx2DEEgFiyIrnTGQZSVs8q') {
+  if (
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY ||
+    priceId === 'price_1Rlx2DEEgFiyIrnTAomiE2J3' ||
+    priceId === 'price_1Rlx2DEEgFiyIrnTGQZSVs8q'
+  ) {
     planName = 'Creator'
   }
   // Check for Pro plan
-  else if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
-           priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
-           priceId === 'price_1RlxA7EEgFiyIrnTVR20se38' ||
-           priceId === 'price_1RlxA7EEgFiyIrnTSuiyywVq' ||
-           priceId.toLowerCase().includes('pro')) {
+  else if (
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
+    priceId === 'price_1RlxA7EEgFiyIrnTVR20se38' ||
+    priceId === 'price_1RlxA7EEgFiyIrnTSuiyywVq' ||
+    priceId.toLowerCase().includes('pro')
+  ) {
     planName = 'Pro'
   }
   // Check for Streamer+ plan
-  else if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
-           priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
-           priceId === 'price_1RlzDHEEgFiyIrnThpPdz7gV' ||
-           priceId === 'price_1RlzDHEEgFiyIrnT45NkAklL' ||
-           priceId.toLowerCase().includes('streamer')) {
+  else if (
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
+    priceId === 'price_1RlzDHEEgFiyIrnThpPdz7gV' ||
+    priceId === 'price_1RlzDHEEgFiyIrnT45NkAklL' ||
+    priceId.toLowerCase().includes('streamer')
+  ) {
     planName = 'Streamer+'
   }
 
@@ -331,10 +326,16 @@ async function upsertSubscription(
     current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
     current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
     cancel_at_period_end: subscription.cancel_at_period_end,
-    canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
-    trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
-    trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
-    updated_at: new Date().toISOString()
+    canceled_at: subscription.canceled_at
+      ? new Date(subscription.canceled_at * 1000).toISOString()
+      : null,
+    trial_start: subscription.trial_start
+      ? new Date(subscription.trial_start * 1000).toISOString()
+      : null,
+    trial_end: subscription.trial_end
+      ? new Date(subscription.trial_end * 1000).toISOString()
+      : null,
+    updated_at: new Date().toISOString(),
   }
 
   // Get customer email if not provided
@@ -348,7 +349,7 @@ async function upsertSubscription(
   if (email) {
     try {
       const { data: userData } = await supabase.auth.admin.listUsers()
-      const user = userData?.users.find(u => u.email === email)
+      const user = userData?.users.find((u) => u.email === email)
       if (user) {
         userId = user.id
       }
@@ -357,15 +358,16 @@ async function upsertSubscription(
     }
   }
 
-  const { error } = await supabase
-    .from('subscriptions')
-    .upsert({
+  const { error } = await supabase.from('subscriptions').upsert(
+    {
       ...subscriptionData,
       email: email || 'unknown@email.com',
-      user_id: userId
-    }, {
-      onConflict: 'stripe_subscription_id'
-    })
+      user_id: userId,
+    },
+    {
+      onConflict: 'stripe_subscription_id',
+    }
+  )
 
   if (error) {
     console.error('Error upserting subscription:', error)
@@ -384,6 +386,88 @@ async function getSubscriptionId(stripeSubscriptionId: string): Promise<string> 
 }
 
 async function logSubscriptionEvent(event: Stripe.Event) {
-  // Optional: Log all webhook events for debugging
+  // Log all webhook events to subscription_logs table for admin monitoring
   console.log(`Processed Stripe webhook: ${event.type}`)
+
+  try {
+    // Extract common data from event
+    const eventData = event.data.object as any
+    let userEmail: string | null = null
+    let stripeCustomerId: string | null = null
+    let stripeSubscriptionId: string | null = null
+
+    // Extract email and IDs based on event type
+    if (eventData.customer_email) {
+      userEmail = eventData.customer_email
+    } else if (eventData.email) {
+      userEmail = eventData.email
+    } else if (eventData.customer_details?.email) {
+      userEmail = eventData.customer_details.email
+    }
+
+    if (eventData.customer) {
+      stripeCustomerId =
+        typeof eventData.customer === 'string' ? eventData.customer : eventData.customer.id
+    }
+
+    if (eventData.subscription) {
+      stripeSubscriptionId =
+        typeof eventData.subscription === 'string'
+          ? eventData.subscription
+          : eventData.subscription.id
+    } else if (eventData.id && event.type.includes('subscription')) {
+      stripeSubscriptionId = eventData.id
+    }
+
+    // Determine log level based on event type
+    let level: 'success' | 'warning' | 'error' = 'success'
+    let message = `Stripe event: ${event.type}`
+
+    const errorEvents = [
+      'customer.subscription.deleted',
+      'invoice.payment_failed',
+      'charge.failed',
+      'payment_intent.payment_failed',
+    ]
+
+    const warningEvents = [
+      'customer.subscription.updated',
+      'invoice.payment_action_required',
+      'charge.dispute.created',
+    ]
+
+    if (errorEvents.some((e) => event.type.includes(e))) {
+      level = 'error'
+      message = `Failed: ${event.type}`
+    } else if (warningEvents.some((e) => event.type.includes(e))) {
+      level = 'warning'
+      message = `Attention needed: ${event.type}`
+    } else {
+      message = `Success: ${event.type}`
+    }
+
+    // Insert log entry
+    const { error: logError } = await supabase.from('subscription_logs').insert({
+      event_id: event.id,
+      event_type: event.type,
+      level,
+      message,
+      user_email: userEmail,
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: stripeSubscriptionId,
+      metadata: {
+        event_data: eventData,
+        created: event.created,
+      },
+      created_at: new Date(event.created * 1000).toISOString(),
+    })
+
+    if (logError) {
+      // Don't fail the webhook if logging fails - just log to console
+      console.error('Failed to log subscription event:', logError)
+    }
+  } catch (error) {
+    console.error('Error in logSubscriptionEvent:', error)
+    // Don't throw - logging failures shouldn't break webhook processing
+  }
 }
