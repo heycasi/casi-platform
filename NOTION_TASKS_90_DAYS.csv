@@ -1,0 +1,1667 @@
+Week,Day,Task Name,Category,Priority,Time Required,Status,Detailed Instructions,Scripts & Templates,Success Metric
+1,Mon,Email your 1 beta tester for feedback call,User Research,High,1 hour,Not Started,"Email subject: 'Quick 20-min call - I need your honest feedback on Casi'
+
+Body: 'Hey [Name], I'm working on making Casi even better and I'd love to get your honest feedback. Would you have 20 minutes this week for a quick call? I'll buy you a coffee (Starbucks gift card on me!).
+
+What I want to ask:
+- What do you like most about Casi?
+- What's confusing or frustrating?
+- Would you pay $19/month for this? Why or why not?
+- Who else do you think would find this useful?
+
+Let me know what time works! 🙏'","Email template:
+Subject: Quick 20-min call - I need your honest feedback on Casi
+Body: [Use template above]
+
+Questions to ask on call:
+1. How often do you check the dashboard?
+2. What's the most valuable feature?
+3. What's missing that you wish was there?
+4. Would you recommend this to other streamers?
+5. At what price point would this be a 'no-brainer'?
+6. Can you intro me to 2-3 other streamers?",Call scheduled + 3 key insights documented
+1,Mon,Set up Google Analytics on heycasi.com,Analytics Setup,High,30 mins,Not Started,"1. Go to analytics.google.com
+2. Create new property for heycasi.com
+3. Get tracking code
+4. Add to src/app/layout.tsx in <head> section:
+
+<Script
+  src='https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX'
+  strategy='afterInteractive'
+/>
+<Script id='google-analytics' strategy='afterInteractive'>
+  {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  `}
+</Script>
+
+5. Test by visiting site and checking real-time users in GA","Code to add to layout.tsx:
+import Script from 'next/script'
+
+// In the <head> section:
+<Script src='https://www.googletagmanager.com/gtag/js?id=YOUR_ID' strategy='afterInteractive'/>
+<Script id='google-analytics' strategy='afterInteractive'>
+  {`/* gtag code here */`}
+</Script>
+
+Deploy to Vercel and test within 1 hour.",GA tracking confirmed working in real-time view
+1,Tue,Create simple tracking spreadsheet for metrics,Admin Setup,High,1 hour,Not Started,"Create Google Sheet named 'Casi Metrics - Week 1'
+
+Columns:
+- Date
+- Website Visitors
+- Beta Signups
+- Active Users (logged in last 7 days)
+- Paying Customers
+- MRR
+- Churn (customers lost)
+- Notes
+
+Set up daily reminder to update this every morning at 9am.
+
+Why: You can't improve what you don't measure. Even with 1 user, track EVERYTHING.","Google Sheet template:
+| Date | Visitors | Signups | Active | Paying | MRR | Churn | Notes |
+|------|----------|---------|--------|--------|-----|-------|-------|
+| 11/11| 0        | 1       | 1      | 0      | $0  | 0     | Beta  |
+
+Daily habit: Update this FIRST THING every morning. Takes 2 minutes.
+
+Track even zeros - it shows the starting point.",Spreadsheet created + first week data entered
+1,Tue,Write personalized Twitter DM to 10 small streamers,Outreach,High,2 hours,Not Started,"Find 10 streamers with 100-1000 followers who stream regularly.
+
+DM Template (CUSTOMIZE for each person):
+
+'Hey [Name]! I caught your stream yesterday where you talked about [specific thing they discussed].
+
+I built a tool called Casi that analyzes Twitch chat in real-time - it tracks sentiment, spots questions you might miss, and emails you a full report after stream.
+
+Would you be interested in trying it for free? I'm looking for 5-10 beta testers to give honest feedback. No credit card needed.
+
+Here's a quick demo: [link to loom video of dashboard]'
+
+KEY: Reference something SPECIFIC from their recent stream. Generic DMs get ignored.","DM Script Template:
+
+'Hey [Name]! Saw your [game] stream yesterday - [specific moment/comment]
+
+I built Casi - it's like having a chat analyst watching your stream. It:
+- Tracks sentiment in real-time
+- Catches questions you miss
+- Works in 13+ languages
+- Emails you a full report
+
+I'm looking for 5 beta testers. Want free access? No CC needed.
+
+Quick demo: [link]'
+
+How to find good prospects:
+1. Search Twitter: 'twitch streamer' + posts from last 7 days
+2. Look for 100-1K followers
+3. Check if they stream regularly (click their Twitch)
+4. Watch 5 mins of their latest VOD
+5. Send personalized DM
+
+Target: 10 DMs per day",2-3 positive responses + 1 new beta signup
+1,Wed,Call your 1 beta tester (scheduled Monday),User Research,High,30 mins,Not Started,"On the call:
+1. LISTEN MORE THAN YOU TALK (80/20 rule)
+2. Ask open-ended questions
+3. Probe deeper: 'Tell me more about that'
+4. Don't defend your product if they criticize it
+5. Take detailed notes
+
+After call:
+1. Write up notes immediately
+2. Identify top 3 insights
+3. Decide: What do I change/add this week?
+4. Send thank you email with Starbucks gift card
+
+CRITICAL: Ask for referrals at the end:
+'This was super helpful! Do you know 2-3 other streamers who might want to try this? I'll give them free access too.'","Post-call template:
+
+Subject: Thanks for the feedback! Here's your coffee ☕
+
+Hey [Name],
+
+Thanks so much for the honest feedback today. Here are the top 3 things I'm going to work on based on what you said:
+
+1. [Thing 1]
+2. [Thing 2]
+3. [Thing 3]
+
+Here's a $10 Starbucks card as a thank you: [code]
+
+P.S. - You mentioned [friend's name] might be interested. Mind if I reach out to them? Happy to give them free access too.
+
+Thanks again!
+Connor
+
+---
+
+Document these answers:
+□ Most valuable feature:
+□ Biggest frustration:
+□ Would pay $____ per month
+□ Referral contacts:",3 actionable insights + 1-2 referral intros
+1,Wed,Post first TikTok showing dashboard,Content Marketing,Medium,2 hours,Not Started,"Film vertical video on phone (60 seconds max)
+
+Hook (first 3 seconds): 'This AI tool reads your Twitch chat so you don't have to'
+
+Script:
+[0-3s] Hook: 'This AI tool reads your Twitch chat so you don't have to'
+[3-10s] Show problem: Screen record of busy Twitch chat scrolling fast - 'Ever miss important questions in chat?'
+[10-20s] Show solution: Demo Casi dashboard - 'Casi analyzes every message in real-time'
+[20-35s] Show features: Point to sentiment graph, questions feed, post-stream email
+[35-50s] Show value: 'Works in 13 languages. Catches questions you miss. Emails you a full report.'
+[50-60s] CTA: 'Link in bio for 14-day free trial. No credit card.'
+
+Post with:
+Caption: 'I built an AI that reads Twitch chat so you don't have to 🤖 Works in 13 languages, catches questions you miss, emails you full reports. Link in bio for free trial! #twitch #streaming #aitools #contentcreator'
+
+Hashtags: #twitch #streaming #twitchstreamer #aitools #chatanalysis #contentcreator #smallstreamer #streamertips","TikTok Script Template:
+
+HOOK (0-3s): 'This AI tool reads your Twitch chat so you don't have to'
+[Hold on screen for 3 seconds]
+
+PROBLEM (3-10s):
+[Screen record of fast scrolling chat]
+'Ever miss important questions in chat?'
+'Or wonder how your audience really felt?'
+
+SOLUTION (10-35s):
+[Demo Casi dashboard]
+'Casi analyzes every message in real-time'
+[Point to features]
+'Tracks sentiment'
+'Spots questions'
+'Works in 13 languages'
+
+VALUE (35-50s):
+'After your stream...'
+[Show email report]
+'You get a full breakdown'
+'See what your chat loved'
+'Never miss a question again'
+
+CTA (50-60s):
+'Free 14-day trial'
+'Link in bio 👇'
+'No credit card needed'
+
+---
+
+Filming tips:
+- Natural light (face a window)
+- Hold phone vertically
+- Speak clearly
+- Energy and enthusiasm!
+- Re-record if needed
+
+Equipment needed:
+- Just your phone
+- Screen recording of dashboard
+- Free editing: CapCut app",100+ views + 2-5 profile clicks
+1,Thu,Create simple 2-minute Loom demo video,Content Creation,High,1 hour,Not Started,"Go to loom.com and install Chrome extension.
+
+Script for Loom video (2 minutes max):
+
+'Hey! I'm Connor, founder of Casi. Let me show you how this works in 2 minutes.
+
+[0-15s] This is the dashboard. Right now it's analyzing a live Twitch stream in real-time.
+
+[15-45s] See this sentiment graph? It tracks whether chat is positive, negative, or neutral every minute. You can see exactly when your audience was most engaged.
+
+[45-75s] This questions feed catches every question in chat. Never miss someone asking about your setup or game strategy again.
+
+[75-105s] And here's the coolest part - after your stream, we email you a full report. Shows top chatters, peak moments, common questions, sentiment breakdown. All automatic.
+
+[105-120s] Works in 13 languages. Twitch and Kick support. 14-day free trial, no credit card. Link below to try it out!'
+
+Save this and use in every DM, email, and Twitter reply.","Loom Script (Read this out loud):
+
+'Hey! I'm Connor with Casi. 2-minute demo.
+
+[Show dashboard]
+This is analyzing a live Twitch stream right now.
+
+[Point to sentiment graph]
+Real-time sentiment - see when chat loved something.
+
+[Point to questions]
+Catches every question - never miss one again.
+
+[Point to top chatters]
+See your most engaged viewers.
+
+[Show email report]
+After stream - full report automatically emailed.
+
+[Show languages]
+Works in 13 languages. Twitch and Kick.
+
+[Call to action]
+14 days free at heycasi.com. No credit card.
+
+Questions? DM me on Twitter @HeyCasi_
+
+Thanks!'
+
+---
+
+Upload to Loom and get link. Use this link EVERYWHERE:
+- Twitter DMs
+- Reddit comments
+- Discord servers
+- Email signature
+- Landing page",Loom video created + link saved to clipboard
+1,Thu,Post on 3 streaming subreddits,Community Outreach,Medium,1 hour,Not Started,"Target subreddits:
+- r/Twitch (read rules first - no direct promotion)
+- r/streaming
+- r/TwitchStartup
+
+Post Format (provide value first, mention product last):
+
+Title: 'I analyzed 1,000 Twitch chats to find the most common questions viewers ask [OC]'
+
+Body:
+'Hey streamers! I've been building a chat analytics tool and analyzed over 1,000 streams to see what questions viewers ask most.
+
+Top 10 most common questions:
+1. 'What rank are you?' (Gaming)
+2. 'What's your setup?'
+3. 'How long have you been streaming?'
+4. 'Can you play with viewers?'
+5. 'What keyboard/mouse do you use?'
+... etc
+
+Interesting findings:
+- Questions peak in first 10 mins of stream
+- 23% of questions get missed in fast chat
+- Technical questions are 3x more common in gaming vs Just Chatting
+
+[Only mention product in comments if someone asks how you got this data]'
+
+Comment reply: 'Built a tool called Casi that tracks this stuff automatically. Happy to share more if useful!'","Reddit Post Templates:
+
+VALUE-FIRST POST:
+Title: 'I analyzed 1,000 streams - here's when viewers engage most [OC]'
+
+Body:
+'Hey! I built a chat analysis tool and ran it on 1,000 streams to understand viewer behavior.
+
+Key findings:
+📊 Peak engagement: First 15 mins of stream
+❓ Average questions per hour: 23
+😊 Positive sentiment peaks when: [data]
+💬 Most engaged viewers: [data]
+
+[Continue with insights]
+
+Happy to answer questions!'
+
+ONLY IF ASKED:
+'Yeah I built Casi to track this automatically. Free trial at heycasi.com if you want to try it'
+
+---
+
+Reddit Rules:
+1. Provide value FIRST
+2. Don't lead with promotion
+3. Be helpful in comments
+4. If banned, move on
+5. Check each subreddit's rules",50+ upvotes + 5-10 comments + 2 DM inquiries
+1,Fri,Email 50 people from waitlist,Email Marketing,High,2 hours,Not Started,"Subject line A/B test:
+A: 'Your Casi beta access is ready ✨'
+B: 'I built something for streamers (14 days free)'
+
+Email Body:
+
+Subject: Your Casi beta access is ready ✨
+
+Hey [Name],
+
+You signed up for Casi's waitlist a while back. It's finally ready and I'd love for you to try it.
+
+Here's your beta code: CASI-[UNIQUE]
+
+What Casi does:
+• Analyzes your Twitch chat in real-time
+• Tracks sentiment (positive/negative/neutral)
+• Catches questions you might miss
+• Works in 13+ languages
+• Emails you a full report after stream
+
+14 days free. No credit card required.
+
+Quick demo video (2 mins): [loom link]
+Sign up: heycasi.com/signup
+Redeem code: [code above]
+
+Takes 2 minutes to connect your Twitch. Then you're live.
+
+Let me know if you hit any issues - I'm watching for signups and will personally help you get set up.
+
+Connor
+Founder, Casi Platform
+Twitter: @HeyCasi_
+
+P.S. - Reply and tell me what game you stream. I'll hop in your next stream! 👀'","Email Template (Waitlist):
+
+Subject: Your Casi beta code: [CODE]
+
+Hey [Name],
+
+Your Casi beta is ready! Code: CASI-[UNIQUE]
+
+What you get:
+✓ Real-time chat sentiment analysis
+✓ Question detection (never miss one)
+✓ 13+ language support
+✓ Post-stream email reports
+✓ 14 days free, no credit card
+
+Setup in 2 minutes:
+1. Go to heycasi.com/signup
+2. Sign up with this email
+3. Enter code: [CODE]
+4. Connect Twitch
+5. You're live!
+
+Demo video: [loom]
+
+Need help? Reply to this email - I respond within 1 hour.
+
+Connor
+Casi Founder
+@HeyCasi_
+
+P.S. - What game do you main? I'll check out your stream 🎮
+
+---
+
+Send in batches:
+- Day 1: 10 emails
+- Day 2: Check open rate
+- Day 3: If >20% open, send remaining 40
+- Day 4: Follow up with openers who didn't click
+
+Track:
+□ Emails sent: 50
+□ Open rate: __%
+□ Click rate: __%
+□ Signups: __
+□ Activated: __",5-10 signups from waitlist
+1,Fri,Set up better onboarding flow,Product Development,Medium,2 hours,Not Started,"Current flow: User signs up → dashboard (confusing)
+
+Better flow:
+1. Sign up → Welcome screen
+2. 'Connect your Twitch account' (big button)
+3. Success → 'Your account is connected! ✅'
+4. Interactive tutorial: 'Let's take a quick tour (30 seconds)'
+5. Show 4 key features with tooltips
+6. 'You're all set! Start streaming and check back here to see your analytics.'
+
+Add to dashboard:
+- Progress bar: '3/5 steps complete'
+- Checklist:
+  ☑ Account connected
+  ☑ Twitch linked
+  ☐ First stream tracked
+  ☐ Checked your report
+  ☐ Invited a friend
+
+Reward: 'Complete all 5 steps to unlock [feature]'","Onboarding Checklist Component:
+
+<OnboardingChecklist>
+  <ChecklistItem done={true}>
+    ✓ Account created
+  </ChecklistItem>
+  <ChecklistItem done={true}>
+    ✓ Twitch connected
+  </ChecklistItem>
+  <ChecklistItem done={hasFirstStream}>
+    Stream with Casi active
+  </ChecklistItem>
+  <ChecklistItem done={hasCheckedReport}>
+    Check your email report
+  </ChecklistItem>
+  <ChecklistItem done={hasInvited}>
+    Invite a streamer friend
+  </ChecklistItem>
+</OnboardingChecklist>
+
+Why this matters:
+- Clear next steps = higher activation
+- Gamification = engagement
+- Each completed step = closer to habit
+
+Success metric:
+% of users who complete all 5 steps",Onboarding checklist live in dashboard
+2,Mon,Analyze results from Week 1,Analytics Review,High,1 hour,Not Started,"Open your metrics spreadsheet.
+
+Calculate:
+- Total outreach messages sent: __
+- Responses received: __ (%: __)
+- Signups this week: __
+- Active users: __
+- Conversion rate: __% (signups/outreach)
+
+Questions to ask:
+1. What channel got the best response rate?
+2. Which message template got the most replies?
+3. Did anyone sign up from TikTok/Reddit?
+4. What feedback themes did you hear?
+5. What should you do MORE of this week?
+6. What should you STOP doing?
+
+Document in Notion:
+'Week 1 Retro - [Date]'
+- What worked well:
+- What didn't work:
+- Key learnings:
+- Next week focus:
+
+Share this publicly on Twitter:
+'Week 1 building Casi: [X] outreach messages, [X] signups, [X] active users. Learned: [biggest insight]. Focus this week: [goal]. Building in public 🚀'","Week 1 Metrics Review Template:
+
+📊 WEEK 1 RESULTS
+
+Outreach:
+- Twitter DMs sent: __
+- Responses: __ (%: __)
+- Reddit posts: __
+- Upvotes/comments: __
+- TikToks posted: __
+- Views: __
+
+Signups:
+- Waitlist emails sent: __
+- New signups: __
+- Conversion rate: __%
+- Active users: __
+
+Product:
+- Beta code redemptions: __
+- First streams tracked: __
+- Email reports sent: __
+- User feedback calls: __
+
+💡 KEY LEARNINGS:
+1. [Biggest win]
+2. [Biggest challenge]
+3. [Surprise discovery]
+
+🎯 WEEK 2 FOCUS:
+- [Priority 1]
+- [Priority 2]
+- [Priority 3]
+
+---
+
+Tweet this:
+'Week 1 building @HeyCasi_:
+✅ [X] streamers contacted
+✅ [X] new beta users
+✅ [biggest learning]
+
+Week 2 goal: [goal]
+
+Building in public 🚀 #indiehacker'",Week 1 retro completed + tweeted
+2,Mon,Personal outreach to 15 new streamers,Outreach,High,2 hours,Not Started,"Today's focus: Mid-size streamers (500-2K followers)
+
+Find them:
+1. Twitch.tv → Browse → Filter by 100-500 viewers
+2. Look for English speakers (or your target language)
+3. Watch 5-10 mins of VOD
+4. Find something specific to mention
+
+DM Script (Twitter/Discord):
+'Hey [Name]! Just watched your [game] stream - loved when you [specific moment].
+
+I'm building Casi, an AI that analyzes Twitch chat in real-time. Tracks sentiment, catches questions, works in 13 languages.
+
+Would you try it for your next stream? Free beta access, takes 2 mins to set up.
+
+Demo: [loom link]'
+
+Personalization is KEY. Generic = ignored.","Personalized DM Formula:
+
+[SPECIFIC COMPLIMENT]
+'Watched your [game] stream - [specific thing I noticed]'
+
+[RELEVANT PROBLEM]
+'Ever feel like you miss questions in fast chat?'
+
+[YOUR SOLUTION]
+'Built Casi - AI analyzes chat real-time, catches questions, tracks sentiment'
+
+[SOCIAL PROOF]
+'[Beta tester name] uses it and says [specific quote]'
+
+[EASY ASK]
+'Want to try it for your next stream? 2 min setup, free access'
+
+[DEMO]
+'Quick demo: [link]'
+
+---
+
+Examples of specific compliments:
+✓ 'Loved how you explained that Valorant strat'
+✓ 'Your chat mod team is super engaged'
+✓ 'You answered like 50 questions in 10 mins!'
+
+✗ 'Great stream'
+✗ 'Cool content'
+✗ 'I like your channel'
+
+Template library:
+Save successful DMs that got responses. Reuse structure, change details.",3-5 positive responses + 1-2 signups
+2,Tue,Create case study from beta tester,Content Marketing,High,3 hours,Not Started,"Interview your 1 beta tester and create a mini case study.
+
+Questions to ask:
+1. What problem were you trying to solve?
+2. How were you solving it before Casi?
+3. What results have you seen since using Casi?
+4. What's your favorite feature?
+5. Would you recommend it? Why?
+6. Can I use your name/stream name publicly?
+
+Turn into blog post:
+Title: 'How [Streamer Name] Uses Casi to Never Miss a Question in Chat'
+
+Structure:
+- Intro: Who they are, what they stream
+- The Problem: Missing questions, not understanding sentiment
+- The Solution: Casi dashboard
+- The Results: [Quote], [specific metric]
+- Call to Action: Try Casi free for 14 days
+
+Include:
+- 2-3 screenshots of their dashboard
+- Pull quote in large text
+- Their Twitch username (links back to them)
+- Before/After comparison if possible","Case Study Template:
+
+# How [Name] Uses Casi to [Specific Result]
+
+[Hero image: Screenshot of their dashboard]
+
+## Meet [Name]
+
+[Name] is a [game] streamer with [X] followers who streams [X] hours per week. Like many streamers, they were struggling to [problem].
+
+'[Quote about their frustration]' - [Name]
+
+## The Challenge
+
+Before Casi, [Name] was [how they tried to solve it]:
+- [Method 1]
+- [Method 2]
+- [Problem with each]
+
+The result? [Negative outcome]
+
+## The Solution
+
+[Name] started using Casi in [month]. Here's what changed:
+
+[Screenshot of dashboard with annotation]
+
+'[Quote about first impression]'
+
+## The Results
+
+After [X] weeks using Casi:
+
+📊 [Metric 1]: [Result]
+💬 [Metric 2]: [Result]
+😊 [Metric 3]: [Result]
+
+'[Quote about results]' - [Name]
+
+## [Name]'s Favorite Feature
+
+[Screenshot]
+
+'[Quote about favorite feature]'
+
+## What's Next
+
+[Name] plans to [future goal with Casi]
+
+Want similar results? Try Casi free: [CTA button]
+
+---
+
+Promote this on:
+- Twitter (tag the streamer)
+- Reddit (provide value)
+- Your blog
+- Email to waitlist",Case study published + shared on Twitter
+2,Tue,Post 2 more TikToks with different hooks,Content Marketing,Medium,2 hours,Not Started,"TikTok #2 Hook: 'I analyzed 100 Twitch streams and found something weird'
+
+Script:
+[0-3s] Hook
+[3-15s] 'Most streamers miss 40% of questions in chat'
+[15-30s] Show examples of missed questions scrolling by
+[30-45s] 'So I built an AI that catches them all'
+[45-60s] Demo + CTA
+
+TikTok #3 Hook: 'POV: You missed the best moment of your stream'
+
+Script:
+[0-5s] Show sentiment graph with huge spike
+[5-15s] 'This is what happens when chat goes crazy'
+[15-30s] 'But you probably don't know WHY'
+[30-45s] 'Casi shows you exactly what moment your chat loved'
+[45-60s] Demo + CTA
+
+Post at optimal times:
+- TikTok #2: 7pm EST
+- TikTok #3: Next day 12pm EST","TikTok #2: 'The Missing Questions Problem'
+
+[Screen record fast scrolling chat]
+'I analyzed 100 Twitch streams'
+[Freeze on a question that scrolls by fast]
+'Streamers miss 40% of questions'
+[Show question feed in Casi]
+'Built an AI that catches them all'
+[Point to each question]
+'Works in 13 languages'
+'Emails you every question'
+[Show example email]
+'Never miss one again'
+'Link in bio 👇 14 days free'
+
+---
+
+TikTok #3: 'The Viral Moment You Missed'
+
+[Show sentiment graph with spike]
+'This is your chat going crazy'
+[Point to spike]
+'But you don't know why'
+[Zoom out to show timestamp]
+'Casi tells you the exact moment'
+[Show chat messages at that timestamp]
+'See what made them react'
+[Show full report]
+'After every stream'
+'Link in bio for free trial'
+
+---
+
+TikTok best practices:
+✓ Vertical 9:16 format
+✓ Captions ON (auto-generate)
+✓ 3 relevant hashtags
+✓ Hook in first 3 seconds
+✓ Post 7pm-9pm EST
+
+Save drafts in TikTok app, schedule with Later.com (free tier)",Combined 200+ views + 5+ profile clicks
+2,Wed,Reach out to 3 micro-influencers,Partnership Outreach,High,2 hours,Not Started,"Target: Streamers with 2K-10K followers who actively engage with audience
+
+Find them:
+1. Twitter: Search 'twitch partner' + sort by latest
+2. Look for engagement (replies, not just broadcasts)
+3. Check they stream 3+ times per week
+
+DM Script:
+'Hey [Name]! Love your content, especially [specific stream/moment].
+
+I built Casi for streamers like you who actually care about their community. It analyzes chat in real-time, tracks sentiment, catches questions.
+
+I'm looking for 2-3 streamers to partner with. Free Streamer+ access forever ($149/mo value) + $50 per signup you refer.
+
+Interested? Here's a demo: [loom]
+
+Could also hop on a 15-min call if easier!
+
+Connor
+@HeyCasi_'","Micro-Influencer Outreach Template:
+
+Subject: Partnership opportunity for [Streamer Name]
+
+Hey [Name],
+
+I'm Connor, founder of Casi. Quick question:
+
+Would you be interested in partnering with a streaming analytics tool?
+
+The offer:
+✓ Free Streamer+ account forever ($149/mo)
+✓ $50 per signup you refer
+✓ Custom dashboard for your community
+✓ Feature you in our case studies
+
+What Casi does:
+Real-time chat analysis, sentiment tracking, question detection, works in 13 languages, post-stream reports.
+
+Your audience would benefit because: [custom reason based on their content]
+
+Demo: [loom link]
+
+15-min call to discuss? [Calendly link]
+
+Best,
+Connor
+Founder, Casi
+@HeyCasi_
+
+P.S. - No obligation. If you try it and hate it, no worries!
+
+---
+
+Follow up if no response:
+Day 3: 'Hey [Name], following up on my email about Casi partnership. Genuinely think your audience would love this. Quick call?'
+
+Day 7: 'Last follow up! If timing isn't right, totally understand. Here's the demo in case you're curious: [link]'",1 partnership call scheduled
+2,Wed,Build email drip sequence,Email Marketing,Medium,2 hours,Not Started,"Set up automated email sequence for new signups:
+
+Email 1 (Day 0 - Immediately after signup):
+Subject: 'Welcome to Casi! Here's how to get started ✨'
+- Welcome message
+- 'Connect Twitch in 2 minutes' button
+- Quick video tour
+- Your personal email signature
+
+Email 2 (Day 2 - If Twitch not connected):
+Subject: 'Quick question about your Casi setup'
+- 'Noticed you haven't connected Twitch yet'
+- 'Any issues? Hit reply and I'll personally help'
+- Benefits reminder
+- Connect button
+
+Email 3 (Day 7 - Mid-trial):
+Subject: 'How's Casi working for you?'
+- Quick check-in
+- 'Reply with feedback'
+- Share success story
+- Reminder: 7 days left in trial
+
+Email 4 (Day 12 - Trial ending soon):
+Subject: 'Your trial ends in 2 days'
+- Show them their stats
+- 'You've tracked X streams, X messages, X questions'
+- Upgrade CTA
+- Offer: 'Reply with code FOUNDER50 for 50% off first 3 months'
+
+Email 5 (Day 14 - Last day):
+Subject: 'Last day of your Casi trial'
+- Urgency
+- Their usage stats
+- Upgrade CTA
+- FOUNDER50 code
+- 'Or reach out if you need more time to decide'","Email Sequence (Copy/paste into email tool):
+
+EMAIL 1: Welcome
+Subject: Welcome to Casi! Here's how to get started ✨
+
+Hey [Name],
+
+Welcome to Casi! You're going to love this.
+
+Here's how to get started (takes 2 minutes):
+
+1. Click here to connect your Twitch: [link]
+2. Start streaming like normal
+3. Check your dashboard during stream
+4. Get a full report in your inbox after
+
+Quick demo: [loom]
+
+Need help? Hit reply - I respond within an hour.
+
+Connor
+Casi Founder
+
+---
+
+EMAIL 2: Twitch not connected
+Subject: Quick question about your Casi setup
+
+Hey [Name],
+
+Noticed you signed up but haven't connected Twitch yet.
+
+Any issues with the setup?
+
+Hit reply and I'll personally walk you through it. Takes 2 minutes and you'll be live.
+
+Or click here: [connect link]
+
+Connor
+
+---
+
+EMAIL 3: Mid-trial check-in
+Subject: How's Casi working for you?
+
+Hey [Name],
+
+You're halfway through your trial! How's it going?
+
+Would love your honest feedback:
+- What do you like?
+- What's confusing?
+- What's missing?
+
+Just hit reply.
+
+Also, check out how [other streamer] uses Casi: [case study link]
+
+Connor
+
+---
+
+EMAIL 4: Trial ending soon
+Subject: Your Casi trial ends in 2 days
+
+Hey [Name],
+
+Your trial ends in 2 days.
+
+So far you've tracked:
+- [X] streams
+- [X] chat messages analyzed
+- [X] questions caught
+- [X] reports sent
+
+Want to keep going?
+
+Plans start at $19/mo: [upgrade link]
+
+Use code FOUNDER50 for 50% off first 3 months.
+
+That's just $9.50/month - less than a Twitch sub.
+
+Questions? Reply to this email.
+
+Connor
+
+---
+
+EMAIL 5: Last day
+Subject: Last day of your Casi trial
+
+Hey [Name],
+
+Today's the last day of your free trial.
+
+Your stats:
+📊 [X] streams tracked
+💬 [X] messages analyzed
+❓ [X] questions caught
+📧 [X] reports delivered
+
+Keep this going? Upgrade before midnight: [link]
+
+Code FOUNDER50 = 50% off first 3 months
+
+Need more time to decide? Reply and I'll extend your trial.
+
+Connor
+Casi Founder
+@HeyCasi_",5-email drip sequence set up in email tool
+2,Thu,Create 'How to set up Casi' YouTube video,Content Marketing,Medium,2 hours,Not Started,"Record screen + webcam.
+
+Title: 'How to Set Up Casi - Twitch Chat Analytics (2 Minute Setup)'
+
+Thumbnail: Your face + 'SET UP CASI IN 2 MINUTES' text
+
+Script:
+[0-0:10] 'Hey! Connor here. Going to show you how to set up Casi for your Twitch stream in under 2 minutes. Let's go.'
+
+[0:10-0:30] 'First, go to heycasi.com and sign up. Use your Twitch email if possible.'
+
+[0:30-1:00] Screen record signup process. 'Enter your email, create password, done. Now click Connect Twitch.'
+
+[1:00-1:30] Show OAuth flow. 'Click authorize. This lets Casi read your chat. Your password stays private.'
+
+[1:30-2:00] Show connected dashboard. 'You're done! Now start streaming like normal.'
+
+[2:00-2:30] Show live dashboard during stream. 'During your stream, check the dashboard to see real-time sentiment and questions.'
+
+[2:30-3:00] Show email report. 'After stream, you get this email with full breakdown.'
+
+[3:00-3:15] 'That's it! 14 day free trial, no credit card. Link in description. Questions? Comment below!'
+
+[3:15-3:30] End screen: Subscribe + watch next video
+
+Description:
+'Set up Casi for your Twitch stream in 2 minutes. Real-time chat analytics, sentiment tracking, question detection, post-stream reports. Free trial: heycasi.com
+
+Timestamps:
+0:00 Intro
+0:10 Sign up
+0:30 Connect Twitch
+1:30 Dashboard tour
+2:30 Email reports
+3:00 Final thoughts'
+
+Tags: twitch, streaming, chat analytics, casi, setup tutorial, streamer tools","YouTube Video Script:
+
+INTRO (0-10s)
+[Webcam] 'Hey! Connor from Casi. 2-minute setup tutorial. Let's go.'
+
+STEP 1: SIGNUP (10-30s)
+[Screen record]
+'Go to heycasi.com/signup'
+'Enter your email'
+'Create a password'
+'Click Sign Up'
+[Webcam] 'That's it for step 1'
+
+STEP 2: CONNECT TWITCH (30-1:00)
+[Screen record]
+'Click the big Connect Twitch button'
+'You'll see this OAuth screen'
+'Click Authorize'
+[Webcam] 'This lets Casi read your public chat. Your password stays private. It's safe.'
+
+STEP 3: YOU'RE LIVE (1:00-1:30)
+[Screen record dashboard]
+'That's it! You're connected'
+'Now just start streaming like normal'
+[Webcam] 'Casi will analyze your chat automatically'
+
+WHAT YOU'LL SEE (1:30-2:30)
+[Screen record during stream]
+'During stream - real-time sentiment graph'
+'Questions feed - never miss one'
+'Top chatters - see who's most engaged'
+'Works in 13 languages automatically'
+
+THE REPORT (2:30-3:00)
+[Show email]
+'After stream - full report in your inbox'
+'See what moments chat loved'
+'All questions in one place'
+'Sentiment breakdown'
+'Top chatters'
+
+WRAP UP (3:00-3:15)
+[Webcam]
+'That's it! 2 minutes to set up'
+'14 days free, no credit card'
+'Link in description'
+'Questions? Comment below'
+
+[End screen]
+'Subscribe for more streaming tips'
+
+---
+
+YouTube SEO:
+Title: How to Set Up Casi - Twitch Chat Analytics (2 Min Setup) | Tutorial
+Description: [See above]
+Tags: twitch, streaming, twitch streamer, chat analytics, casi, tutorial, setup, streamer tools, twitch analytics, gaming
+Thumbnail: Your face + text 'CASI SETUP IN 2 MINUTES'
+
+Upload and share in Discord communities",Video published + 50+ views in first week
+2,Thu,Engage in 10 Discord servers,Community Outreach,Medium,1 hour,Not Started,"Don't spam. Provide value first.
+
+Strategy:
+1. Join 10 streamer Discord servers
+2. Introduce yourself in #introductions: 'Hey! I'm Connor, small streamer working on [X]. Also building tools for streamers. Happy to be here!'
+3. Be active for 2-3 days (respond to questions, be helpful)
+4. When appropriate, share: 'Oh if you're looking for chat analytics, I built Casi for this. Free trial if you want to check it out: [link]'
+
+Servers to join:
+- Search Discord: 'twitch streaming'
+- Look for 500+ members, active chat
+- Read rules (many ban self-promotion)
+
+Value-first examples:
+- Answer tech questions
+- Share streaming tips
+- Give feedback on channels
+- Share your learnings
+
+Only mention Casi when:
+- Someone asks about analytics
+- Relevant to conversation
+- You've been helpful first","Discord Engagement Strategy:
+
+DAY 1: Join & Introduce
+- Join 10 servers
+- Read #rules carefully
+- Post in #introductions:
+
+'Hey everyone! I'm Connor, stream [game] at [time]. Still learning but love this community. Also happen to be building tools for streamers (analytics stuff). Always happy to chat streaming tips! 🎮'
+
+DAY 2-3: Provide Value
+- Answer 5-10 questions
+- Give feedback when asked
+- Share your experience
+- DON'T mention Casi unless asked
+
+DAY 4+: Natural Mentions
+Only when relevant:
+
+Example 1:
+Them: 'How do you track your chat analytics?'
+You: 'I built Casi for this actually. Tracks sentiment, questions, all that. Free trial if you want: heycasi.com'
+
+Example 2:
+Them: 'Do you guys miss a lot of questions in chat?'
+You: 'Yeah I used to miss like half. Started using Casi to catch them automatically. Game changer tbh'
+
+Example 3:
+Them: 'Anyone know good streamer tools?'
+You: 'For analytics I use Casi (I built it lol). For alerts I use StreamElements. For chat I use Chatty'
+
+---
+
+Red flags (will get banned):
+✗ Posting link in #general unprompted
+✗ DMing members with your tool
+✗ Only talking about your product
+✗ Ignoring server rules
+
+Green flags:
+✓ Being genuinely helpful
+✓ Sharing knowledge
+✓ Asking questions
+✓ Organic mentions when relevant",Active in 10 servers + 2-3 organic mentions
+2,Fri,Review Week 2 metrics and adjust,Analytics Review,High,1 hour,Not Started,"Same as Week 1 review.
+
+Update spreadsheet with Week 2 data.
+
+Key questions:
+1. Did response rate improve? (Should be 20%+)
+2. How many signups this week vs Week 1?
+3. Is any beta user active? (Logged in 3+ times)
+4. What worked better than Week 1?
+5. What flopped completely?
+
+Make 3 decisions for Week 3:
+1. Stop: [What's not working]
+2. Continue: [What's working]
+3. Start: [What to try new]
+
+Tweet your Week 2 update:
+'Week 2 building @HeyCasi_:
+- [Stat 1]
+- [Stat 2]
+- [Key learning]
+
+Week 3 focus: [Goal]
+
+#buildinpublic #indiehacker'
+
+Be honest. People love transparency.","Week 2 Review Template:
+
+📊 WEEK 2 NUMBERS
+
+Outreach (compare to Week 1):
+- Messages sent: __ (Week 1: __)
+- Response rate: __% (Week 1: __%)
+- Signups: __ (Week 1: __)
+
+Content:
+- TikToks: __ (Views: __)
+- YouTube: __ (Views: __)
+- Blog posts: __
+- Reddit posts: __
+
+Users:
+- Total signups: __
+- Active users: __
+- Streams tracked: __
+- Trial conversions: __
+
+💡 INSIGHTS:
+
+What worked:
+- [Best channel]
+- [Best message]
+- [Unexpected win]
+
+What flopped:
+- [Didn't work]
+- [Low response]
+- [Waste of time]
+
+User feedback:
+- [What they love]
+- [What's confusing]
+- [Feature requests]
+
+🎯 WEEK 3 DECISIONS:
+
+STOP:
+- [Channel/tactic not working]
+
+CONTINUE:
+- [What's working well]
+
+START:
+- [New thing to try]
+
+---
+
+Share on Twitter:
+'Week 2 of @HeyCasi_:
+
+Outreach: [X] messages → [X]% response rate
+Signups: [X] total users
+Content: [X] TikToks, [X] blog posts
+
+Learned: [biggest insight]
+
+Week 3 goal: [specific goal]
+
+Building in public 🚀'
+
+Be vulnerable. Share struggles.",Week 2 retro done + posted publicly
+3,Mon,Launch on Product Hunt,Launch,High,4 hours,Not Started,"Prep 1 week before:
+- Find a 'hunter' (someone with followers to post for you)
+- Create assets: Logo, screenshots, demo video
+- Write tagline: 'AI-powered Twitch chat analytics for streamers'
+- Description: 500 words explaining problem, solution, features
+
+Day of launch (Midnight PST):
+- Hunter posts at 12:01am PST
+- Be online all day to respond to comments
+- Share on all social channels
+- Ask friends to upvote
+
+Comment response templates:
+Q: 'How much does it cost?'
+A: '$19-149/mo depending on tier. Free 14-day trial, no credit card required.'
+
+Q: 'How is this different from X?'
+A: '[Specific differentiator]. Main thing is real-time analysis + post-stream reports.'
+
+Goal: Top 5 in category = 200-500 signups","Product Hunt Launch Checklist:
+
+🗓️ 7 DAYS BEFORE:
+□ Find a hunter (DM someone with 500+ followers on PH)
+□ Write product description (500 words max)
+□ Create 5-7 screenshots
+□ Record 2-min demo video
+□ Prepare 'Maker Comment' (first comment you'll post)
+□ Line up 10 friends to upvote at launch
+
+📝 ASSETS TO PREPARE:
+
+Tagline:
+'AI-powered Twitch chat analytics that actually help you grow'
+
+Description:
+'Casi analyzes your Twitch chat in real-time so you can focus on streaming.
+
+THE PROBLEM:
+Fast chat = missed questions. No idea what your audience actually thinks.
+
+THE SOLUTION:
+• Real-time sentiment tracking
+• Catch every question automatically
+• Works in 13+ languages
+• Post-stream email reports
+• Twitch & Kick support
+
+BUILT BY STREAMERS FOR STREAMERS:
+I'm a small streamer who got tired of missing questions. Built this for me, now sharing with you.
+
+Try free for 14 days: heycasi.com'
+
+Maker Comment:
+'Hey Product Hunt! 👋 Connor here, maker of Casi.
+
+I built this because I kept missing questions in my own streams. Chat moves fast, I'd get focused on gameplay, and by the time I looked at chat the question was gone.
+
+Casi solves this by:
+1. Watching chat for you
+2. Flagging every question
+3. Tracking sentiment in real-time
+4. Emailing you a full report after
+
+It's like having a chat analyst watching your stream.
+
+Would love your feedback! AMA 🚀'
+
+🚀 LAUNCH DAY:
+
+12:01am PST:
+□ Hunter posts
+□ You post maker comment immediately
+□ Share on Twitter with PH link
+□ Message your 10 friends to upvote
+
+All day:
+□ Respond to EVERY comment within 10 mins
+□ Share on Reddit, Discord, Twitter every 2 hours
+□ Update Twitter with 'We're #X on PH!' posts
+
+End of day:
+□ Thank everyone who supported
+□ Share final ranking
+□ Follow up with signups via email
+
+🎯 Success Metrics:
+- Top 5 of the day = win
+- 200+ upvotes = great
+- 50+ signups = amazing",Top 5 on Product Hunt + 50+ signups
+3,Tue,Follow up with all Product Hunt signups,Email Marketing,High,2 hours,Not Started,"Send personal email to every Product Hunt signup (within 24 hours):
+
+Subject: 'Thanks for trying Casi from Product Hunt!'
+
+Body:
+'Hey [Name],
+
+Connor here, founder of Casi. Saw you signed up from Product Hunt - thank you!
+
+Quick question: What made you check it out? Always curious what resonates.
+
+If you have any issues with setup or questions about features, just reply to this email. I respond within an hour.
+
+Also - since you're from the PH launch, here's a special code for 60% off your first 3 months: PRODUCTHUNT60
+
+(Don't share that publicly 😉)
+
+Thanks again for the support!
+
+Connor
+@HeyCasi_
+
+P.S. - If you love it, would mean the world if you could leave a comment on the PH page: [link]'
+
+Personal touch = higher conversion.","Product Hunt Follow-up Email:
+
+Subject: Thanks for trying Casi from Product Hunt!
+
+Hey [Name],
+
+Connor here - I built Casi.
+
+Saw you signed up from Product Hunt yesterday. Thank you!!
+
+Quick question: What problem are you hoping Casi solves for you?
+
+Just want to make sure I'm building the right features.
+
+Also, here's a special code just for PH supporters:
+
+Code: PRODUCTHUNT60
+Discount: 60% off first 3 months
+Applies to: Any plan
+
+That's $7.60/mo for Creator tier 🤯
+
+Questions? Just reply - I respond within an hour.
+
+And if you're loving it so far, would mean everything if you could leave a quick comment on PH: [link]
+
+Thanks again!
+
+Connor
+Founder, Casi
+Twitter: @HeyCasi_
+
+P.S. - Want a 1-on-1 walkthrough? Book 15 mins: [calendly link]
+
+---
+
+Follow-up sequence for PH signups:
+
+Day 1: Personal thank you (above)
+Day 3: 'How's it going with Casi?'
+Day 7: 'You're halfway through trial - questions?'
+Day 12: 'Trial ends in 2 days - use PRODUCTHUNT60'
+
+Track:
+- PH signups who respond: __
+- PH signups who ask questions: __
+- PH signups who convert: __%",50% email open rate + 5-10 responses
+3,Wed,Create comparison blog post vs competitors,Content Marketing,Medium,3 hours,Not Started,"Title: 'Casi vs Yakkr Growth: Which Streaming Tool is Right for You?'
+
+Structure:
+1. Intro: Both are great, different purposes
+2. Feature comparison table
+3. When to use Casi (analytics focus)
+4. When to use Yakkr (growth focus)
+5. Pricing comparison
+6. Verdict: Use both! (not competitors)
+
+Be HONEST. Don't trash competitors.
+Show where you're better AND where they're better.
+
+SEO: Target keyword 'streaming analytics tools comparison'
+
+Promote on:
+- Reddit (provide value, not promotional)
+- Twitter (tag Yakkr respectfully)
+- Submit to aggregators (Hacker News, IndieHackers)","Blog Post Outline:
+
+# Casi vs Yakkr Growth: Honest Comparison (2025)
+
+## TL;DR
+- Casi: Real-time analytics & audience insights ($19-149/mo)
+- Yakkr: Growth coaching & content automation ($9/mo)
+- Use both: They complement each other
+
+## The Breakdown
+
+### Casi Platform
+What it does:
+- Real-time chat sentiment analysis
+- Question detection
+- Post-stream reports
+- 13+ language support
+- Audience engagement metrics
+
+Best for:
+- Streamers who want to understand their audience
+- Multilingual streamers
+- Data-driven streamers
+- Mid-size and up (50+ viewers)
+
+Pricing: $19-149/mo
+
+### Yakkr Growth
+What it does:
+- AI content creation
+- Growth tasks & coaching
+- Stream title optimization
+- Community & guides
+
+Best for:
+- New streamers focused on growth
+- Content creation help
+- Growing from 0 to first 100 followers
+
+Pricing: $9/mo
+
+### Comparison Table
+
+| Feature | Casi | Yakkr |
+|---------|------|-------|
+| Real-time analytics | ✓ | ✗ |
+| Sentiment tracking | ✓ | ✗ |
+| Question detection | ✓ | ✗ |
+| Content automation | ✗ | ✓ |
+| Growth coaching | ✗ | ✓ |
+| Post-stream reports | ✓ | ✗ |
+| Multilingual | ✓ | ? |
+| Price | $19-149 | $9 |
+
+### Which Should You Choose?
+
+Choose Casi if:
+- You want to understand your audience better
+- You're missing questions in chat
+- You stream in multiple languages
+- You make data-driven decisions
+- You have 50+ average viewers
+
+Choose Yakkr if:
+- You're just starting out (0-100 followers)
+- You need help with content creation
+- You want growth coaching
+- Budget is tight ($9/mo)
+
+### The Honest Truth
+
+They're not really competitors. Casi is analytics. Yakkr is growth coaching.
+
+Use Yakkr to GROW your stream.
+Use Casi to UNDERSTAND your audience.
+
+Many successful streamers use both.
+
+### Try Them Both
+
+Casi: 14-day free trial at heycasi.com
+Yakkr: Check out yakkrgrowth.com
+
+---
+
+Questions? Comments below!
+
+---
+
+Promote this:
+Twitter: '@yakkrgrowth and Casi solve different problems for streamers. Not competitors - complementary tools. Here's an honest breakdown 🧵'
+Reddit: 'Compared Casi vs Yakkr Growth - honest take on which is better for what'",Blog post published + 100+ views
+3,Thu,Create Twitter thread about building in public,Content Marketing,Medium,1 hour,Not Started,"Share your journey. Be vulnerable.
+
+Thread structure:
+
+Tweet 1: Hook
+'3 weeks ago I had 1 beta user for my streaming analytics tool.
+
+Today I have [X] users and $[X] MRR.
+
+Here's what I learned building @HeyCasi_ in public 🧵'
+
+Tweet 2-10: Key learnings
+- What worked
+- What failed
+- Surprising insights
+- Metrics
+- Screenshots
+
+Tweet 11: CTA
+'If you stream on Twitch/Kick and want better audience insights, try Casi free: heycasi.com
+
+Building this publicly. Follow along 🚀'
+
+Post at 9am EST on Thursday (best engagement).
+
+Engage with every reply.","Twitter Thread Template:
+
+Tweet 1: Hook
+'3 weeks ago I had 1 beta tester.
+
+Today I have [X] users and $[X] MRR.
+
+What I learned building @HeyCasi_ in public 🧵
+
+(Thread)'
+
+Tweet 2: The Problem
+'I built Casi because I kept missing questions in my own streams.
+
+Fast chat = missed engagement.
+
+Decided to fix it for myself. Figured other streamers had same problem.'
+
+Tweet 3: Week 1 Reality Check
+'Week 1 was humbling:
+- Sent 50 DMs → 3 responses (6%)
+- Posted on Reddit → 2 upvotes
+- 1 TikTok → 47 views
+- New signups: 2
+
+Reality: Nobody cares about your product. They care about their problems.'
+
+Tweet 4: The Pivot
+'Changed strategy Week 2:
+- Stopped pitching product
+- Started solving specific problems
+- Personalized every message
+- Provided value first
+
+Result: 20% response rate'
+
+Tweet 5: What Worked
+'Best channels:
+1. Personal Twitter DMs (20% response)
+2. Discord (if you provide value first)
+3. Product Hunt (50+ signups in 1 day)
+
+What flopped:
+- Reddit (unless you provide data/value)
+- Generic outreach
+- Mass emails'
+
+Tweet 6: Surprising Insight
+'Biggest surprise: Streamers care MORE about:
+- Missing questions (huge pain)
+- Sentiment tracking (unexpected interest)
+
+And LESS about:
+- Post-stream reports (nice to have)
+- Advanced analytics (overwhelming)
+
+Lesson: Build what they ask for, not what you think they need.'
+
+Tweet 7: The Numbers
+'Week 1: 2 signups
+Week 2: 8 signups
+Week 3: [X] signups
+
+Current MRR: $[X]
+Active users: [X]
+Response rate: 20%
+
+Small numbers, but growing. That's what matters.'
+
+Tweet 8: Hardest Part
+'Hardest thing: Staying motivated when nobody cares.
+
+You DM 20 people. 18 ignore you. 2 respond. 1 signs up.
+
+That 1 signup is what keeps you going.
+
+Building in public helps. Accountability.'
+
+Tweet 9: Next 30 Days
+'Next 30 days:
+- Get to $1K MRR
+- 20+ active users
+- 3 video testimonials
+- 2 influencer partnerships
+
+Following this roadmap: [link to roadmap]
+
+Building publicly here.'
+
+Tweet 10: Key Lesson
+'Biggest lesson: Ship fast. Talk to users. Iterate.
+
+I wasted Week 1 building features nobody asked for.
+
+Week 2-3 I just talked to users and fixed what they complained about.
+
+Growth followed.'
+
+Tweet 11: CTA
+'If you stream on Twitch/Kick and want to:
+- Never miss a question
+- Track chat sentiment
+- Get post-stream reports
+- Works in 13 languages
+
+Try Casi free: heycasi.com
+
+14 days. No CC.
+
+Building this publicly. Follow along 🚀'
+
+---
+
+Post and:
+- Pin to profile
+- Engage with every reply
+- Repost next week
+- Track what resonates",100+ impressions + 5-10 new followers + 2-3 signups",5-email drip sequence set up in email tool
+3,Fri,Week 3 review + plan Week 4-12,Planning,High,2 hours,Not Started,"Big picture review.
+
+You should have by now:
+- 5-15 signups
+- 2-5 active users
+- $0-200 MRR (if anyone converted)
+- Clear sense of what channels work
+
+If you DON'T have this, diagnose why:
+- Is product confusing? (Watch user sessions)
+- Is onboarding broken? (Test it yourself)
+- Is message not resonating? (Test new hooks)
+- Wrong audience? (Talk to users)
+
+Plan Weeks 4-12:
+- What worked best Weeks 1-3? 10x that.
+- What flopped? Stop doing it.
+- What should you test? Try 1 new thing per week.
+
+Set milestones:
+- Week 6: 25 users, 5 paying
+- Week 9: 50 users, 15 paying
+- Week 12: 75 users, 30 paying ($1.5K MRR)
+
+Write public update:
+Share wins, losses, and plan.","Week 3 Big Picture Review:
+
+📊 3-WEEK METRICS
+
+Total signups: __
+Active users: __
+Paying customers: __
+MRR: $__
+Churn: __%
+
+Best channel:
+- [Channel]: [X] signups
+- [Conversion rate]: __%
+
+What worked:
+1. [Tactic 1]
+2. [Tactic 2]
+3. [Tactic 3]
+
+What didn't work:
+1. [Tactic that flopped]
+2. [Wasted time on]
+
+🎯 WEEKS 4-12 PLAN
+
+Core Strategy:
+'Do MORE of [best channel], STOP doing [worst channel], TEST [1 new thing]'
+
+Weekly Focus Areas:
+Week 4: [Specific goal]
+Week 5: [Specific goal]
+Week 6 Milestone: 25 users, 5 paying ($250 MRR)
+Week 7: [Specific goal]
+Week 8: [Specific goal]
+Week 9 Milestone: 50 users, 15 paying ($750 MRR)
+Week 10: [Specific goal]
+Week 11: [Specific goal]
+Week 12 Milestone: 75 users, 30 paying ($1.5K MRR)
+
+Daily Habits:
+□ Update metrics spreadsheet (5 mins)
+□ 10 personalized outreach messages (1 hour)
+□ Check user feedback (30 mins)
+□ Respond to all emails/DMs (30 mins)
+□ 1 piece of content (1-2 hours)
+
+Weekly Habits:
+□ Review metrics (1 hour)
+□ Plan next week (1 hour)
+□ User feedback call (30 mins)
+□ Build in public update (30 mins)
+
+---
+
+Post on Twitter:
+'3 weeks building @HeyCasi_ in public:
+
+📈 [X] users
+💰 $[X] MRR
+📊 [Key metric]
+
+What worked: [Top channel]
+What flopped: [What didn't work]
+Surprising insight: [Learning]
+
+Next 9 weeks: [Goal]
+
+Full roadmap: [link]
+
+#buildinpublic'",9-week plan documented + publicly shared
