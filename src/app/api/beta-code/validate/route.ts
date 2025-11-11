@@ -76,7 +76,9 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
       current_period_start: new Date().toISOString(),
       current_period_end: trialEndsAt.toISOString(),
+      // Viewer limit columns (handle both avg_viewer_limit and viewer_limit)
       avg_viewer_limit: 50, // Creator tier limit
+      viewer_limit: 50, // In case DB has viewer_limit column instead
       // Stripe columns are NULL for beta trials (migration makes them nullable)
       stripe_customer_id: null,
       stripe_subscription_id: null,
