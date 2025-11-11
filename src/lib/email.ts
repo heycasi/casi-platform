@@ -538,48 +538,79 @@ function generateReportHTML(report: StreamReport): string {
 
             <!-- Timeline visualization -->
             <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
-              ${report.chatTimeline
-                .filter((_, i) => i % 5 === 0) // Show every 5th bucket (every 10 minutes)
-                .slice(0, 10) // Max 10 data points
-                .map((bucket) => {
-                  const barColor =
-                    bucket.activity_intensity === 'peak'
-                      ? '#ef4444'
-                      : bucket.activity_intensity === 'high'
-                        ? '#f59e0b'
-                        : bucket.activity_intensity === 'medium'
-                          ? '#10b981'
-                          : '#6b7280'
-                  const barWidth = Math.max(
-                    5,
-                    (bucket.message_count /
-                      Math.max(...report.chatTimeline.map((b) => b.message_count))) *
-                      100
-                  )
-                  const intensityLabel = bucket.activity_intensity.toUpperCase()
-                  const intensityEmoji =
-                    bucket.activity_intensity === 'peak'
-                      ? '🔥'
-                      : bucket.activity_intensity === 'high'
-                        ? '⚡'
-                        : bucket.activity_intensity === 'medium'
-                          ? '💬'
-                          : '😴'
+              ${(() => {
+                // Smart selection: Show only the most interesting moments
+                const allBuckets = report.chatTimeline
 
-                  // Format time range for this bucket (2-minute window)
-                  const bucketStart = new Date(bucket.time_bucket)
-                  const bucketEnd = new Date(bucketStart.getTime() + 2 * 60 * 1000) // Add 2 minutes
-                  const timeRange = `${bucketStart.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })} - ${bucketEnd.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}`
+                // 1. Get all peak moments
+                const peakMoments = allBuckets.filter((b) => b.activity_intensity === 'peak')
 
-                  return `
+                // 2. Get high activity moments
+                const highMoments = allBuckets.filter((b) => b.activity_intensity === 'high')
+
+                // 3. Get the opening (first few minutes)
+                const opening = allBuckets.slice(0, 3)
+
+                // 4. Get quiet moments (for contrast)
+                const quietMoments = allBuckets
+                  .filter((b) => b.activity_intensity === 'low')
+                  .sort((a, b) => a.message_count - b.message_count)
+                  .slice(0, 1)
+
+                // Combine and limit to 8-10 highlights
+                const highlights = [
+                  ...opening.slice(0, 1), // Stream start
+                  ...peakMoments.slice(0, 3), // Top 3 peak moments
+                  ...highMoments.slice(0, 2), // Top 2 high moments
+                  ...quietMoments.slice(0, 1), // Quietest moment
+                ]
+
+                // Remove duplicates and sort by time
+                const uniqueHighlights = Array.from(
+                  new Map(highlights.map((b) => [b.time_bucket, b])).values()
+                ).sort((a, b) => a.minute_offset - b.minute_offset)
+
+                return uniqueHighlights
+                  .slice(0, 8)
+                  .map((bucket) => {
+                    const barColor =
+                      bucket.activity_intensity === 'peak'
+                        ? '#ef4444'
+                        : bucket.activity_intensity === 'high'
+                          ? '#f59e0b'
+                          : bucket.activity_intensity === 'medium'
+                            ? '#10b981'
+                            : '#6b7280'
+                    const barWidth = Math.max(
+                      5,
+                      (bucket.message_count /
+                        Math.max(...report.chatTimeline.map((b) => b.message_count))) *
+                        100
+                    )
+                    const intensityLabel = bucket.activity_intensity.toUpperCase()
+                    const intensityEmoji =
+                      bucket.activity_intensity === 'peak'
+                        ? '🔥'
+                        : bucket.activity_intensity === 'high'
+                          ? '⚡'
+                          : bucket.activity_intensity === 'medium'
+                            ? '💬'
+                            : '😴'
+
+                    // Format time range for this bucket (2-minute window)
+                    const bucketStart = new Date(bucket.time_bucket)
+                    const bucketEnd = new Date(bucketStart.getTime() + 2 * 60 * 1000) // Add 2 minutes
+                    const timeRange = `${bucketStart.toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })} - ${bucketEnd.toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}`
+
+                    return `
                   <div style="margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                       <span style="color: #1f2937; font-weight: 600; font-size: 13px;">${timeRange}</span>
@@ -594,8 +625,9 @@ function generateReportHTML(report: StreamReport): string {
                       ${bucket.question_count > 0 ? `<span>❓ ${bucket.question_count} questions</span>` : ''}
                     </div>
                   </div>`
-                })
-                .join('')}
+                  })
+                  .join('')
+              })()}
             </div>
 
             <div style="margin-top: 20px; background: #eff6ff; padding: 16px; border-radius: 8px;">
