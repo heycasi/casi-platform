@@ -52,11 +52,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 })
     }
 
-    // Use localhost for development, production URL otherwise
+    // Get the origin from the request headers to ensure redirect_uri matches
+    const origin =
+      request.headers.get('origin') ||
+      request.headers.get('referer')?.split('/').slice(0, 3).join('/')
     const redirectUri =
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:3000/auth/callback'
-        : 'https://heycasi.com/auth/callback'
+        : origin
+          ? `${origin}/auth/callback`
+          : 'https://heycasi.com/auth/callback'
 
     console.log('Token exchange params:', { clientId: twitchClientId, redirectUri })
 
