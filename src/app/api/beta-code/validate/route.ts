@@ -77,6 +77,19 @@ export async function POST(req: NextRequest) {
       current_period_start: new Date().toISOString(),
       current_period_end: trialEndsAt.toISOString(),
       avg_viewer_limit: 50, // Creator tier limit
+      // Stripe columns are NULL for beta trials (migration makes them nullable)
+      stripe_customer_id: null,
+      stripe_subscription_id: null,
+      stripe_price_id: null,
+      billing_interval: null,
+      // Trial tracking
+      trial_start: new Date().toISOString(),
+      trial_end: trialEndsAt.toISOString(),
+      cancel_at_period_end: false,
+      // Tier tracking defaults
+      avg_viewers_30d: 0,
+      days_over_limit: 0,
+      tier_status: 'within_limit',
     }
 
     // Only add user_id if it looks like a UUID (not a Twitch ID)
