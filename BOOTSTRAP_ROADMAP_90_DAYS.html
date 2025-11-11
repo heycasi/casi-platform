@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casi Platform - 90-Day Bootstrap Roadmap to $5K MRR</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+      width: 200px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 300;
+    }
+
+    .goal-banner {
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 3rem;
+      box-shadow: 0 10px 40px rgba(105, 50, 255, 0.3);
+    }
+
+    .goal-banner h2 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .goal-banner p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .metric-card h3 {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-card p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.95rem;
+    }
+
+    .phase {
+      margin-bottom: 3rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(105, 50, 255, 0.3);
+    }
+
+    .phase-number {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .phase-title h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .phase-subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .objectives {
+      margin-bottom: 2rem;
+    }
+
+    .objectives h3 {
+      color: #5EEAD4;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .objective-item {
+      background: rgba(94, 234, 212, 0.1);
+      border-left: 4px solid #5EEAD4;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border-radius: 5px;
+    }
+
+    .tasks h3 {
+      color: #FFB84D;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .task-item {
+      background: rgba(255, 184, 77, 0.1);
+      border-left: 4px solid #FFB84D;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border-radius: 5px;
+      display: flex;
+      align-items: start;
+      gap: 0.75rem;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #FFB84D;
+      border-radius: 4px;
+      margin-top: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .success-metrics {
+      background: rgba(184, 238, 138, 0.1);
+      border: 1px solid rgba(184, 238, 138, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .success-metrics h3 {
+      color: #B8EE8A;
+      margin-bottom: 1rem;
+    }
+
+    .success-metrics ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .success-metrics li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .success-metrics li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #B8EE8A;
+      font-weight: bold;
+    }
+
+    .warning-box {
+      background: rgba(255, 159, 159, 0.1);
+      border: 1px solid rgba(255, 159, 159, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .warning-box h3 {
+      color: #FF9F9F;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .key-metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .key-metrics-table th {
+      background: linear-gradient(135deg, #6932FF, #932FFE);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .key-metrics-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .key-metrics-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 2rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.9rem;
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .phase, .metric-card, .goal-banner {
+        border: 1px solid #ddd;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="/landing-logo.png" alt="Casi Platform" class="logo">
+      <h1>90-Day Bootstrap Roadmap</h1>
+      <p class="subtitle">Your path from beta to $5K MRR without raising capital</p>
+    </header>
+
+    <div class="goal-banner">
+      <h2>🎯 Goal: $5,000 MRR in 90 Days</h2>
+      <p>Build a sustainable, profitable SaaS business with leverage for future fundraising</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <h3>50+</h3>
+        <p>Paying Customers</p>
+      </div>
+      <div class="metric-card">
+        <h3>$5K</h3>
+        <p>Monthly Recurring Revenue</p>
+      </div>
+      <div class="metric-card">
+        <h3>&lt;10%</h3>
+        <p>Churn Rate</p>
+      </div>
+      <div class="metric-card">
+        <h3>40%+</h3>
+        <p>Monthly Growth</p>
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <h3>⚠️ Critical Success Factors</h3>
+      <ul style="list-style: none; padding-left: 0;">
+        <li style="margin-bottom: 0.5rem;">• <strong>Focus ruthlessly</strong> - No new features during this 90 days unless they directly drive revenue</li>
+        <li style="margin-bottom: 0.5rem;">• <strong>Talk to users daily</strong> - Spend 2+ hours per day talking to customers and prospects</li>
+        <li style="margin-bottom: 0.5rem;">• <strong>Track everything</strong> - Measure conversion rates, churn, CAC, LTV from day 1</li>
+        <li>• <strong>Ship fast, iterate faster</strong> - Weekly releases, not monthly</li>
+      </ul>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">1</div>
+        <div class="phase-title">
+          <h2>Days 1-30: Launch & Validate</h2>
+          <p class="phase-subtitle">Goal: First 10 paying customers ($500-1,000 MRR)</p>
+        </div>
+      </div>
+
+      <div class="objectives">
+        <h3>🎯 Key Objectives</h3>
+        <div class="objective-item">
+          <strong>Convert beta users to paid customers</strong> - Target 20% conversion rate from waitlist
+        </div>
+        <div class="objective-item">
+          <strong>Validate pricing</strong> - Test which tier converts best (Creator $19, Pro $49, or Streamer+ $149)
+        </div>
+        <div class="objective-item">
+          <strong>Build testimonials</strong> - Get 3-5 video testimonials from happy customers
+        </div>
+        <div class="objective-item">
+          <strong>Establish metrics tracking</strong> - Set up analytics dashboard to monitor all key metrics
+        </div>
+      </div>
+
+      <div class="tasks">
+        <h3>📋 Weekly Action Items</h3>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 1: Launch Preparation</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Email all beta waitlist users</strong> (target: 100+ emails)
+            <br><small style="opacity: 0.7;">Subject: "Your Casi Beta Code - 14 Days Free Trial Starts Now"</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Set up payment processing</strong>
+            <br><small style="opacity: 0.7;">Ensure Stripe is working perfectly, test all 3 pricing tiers</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Create landing page with social proof</strong>
+            <br><small style="opacity: 0.7;">Add "Join 1,300+ streamers" type messaging even if numbers are smaller</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Set up analytics tracking</strong>
+            <br><small style="opacity: 0.7;">Google Analytics, Stripe dashboard, custom metrics in admin panel</small>
+          </div>
+        </div>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 2-3: Personal Outreach Blitz</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>DM 50 streamers on Twitter/X</strong>
+            <br><small style="opacity: 0.7;">Personalized messages: "Saw your stream about [topic]. Casi analyzes your chat in real-time - want a free month?"</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Post in 10 Discord communities</strong>
+            <br><small style="opacity: 0.7;">Streamer communities, offer value first (free chat analysis guide), then pitch</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Create TikTok account & post 3x per week</strong>
+            <br><small style="opacity: 0.7;">"This AI tool analyzes your Twitch chat in real-time" - show dashboard demos</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Schedule 1-on-1 calls with 20 beta users</strong>
+            <br><small style="opacity: 0.7;">30 min calls: "What would make you pay for this?" Take notes on everything</small>
+          </div>
+        </div>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 4: Convert & Optimize</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Send "trial ending" emails</strong>
+            <br><small style="opacity: 0.7;">7 days before, 3 days before, 1 day before trial ends - show value stats</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Offer "founder pricing" discount</strong>
+            <br><small style="opacity: 0.7;">50% off first 3 months for early adopters - create urgency</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Record 3 video testimonials</strong>
+            <br><small style="opacity: 0.7;">Ask happiest users to record 60-sec video on phone - offer free month</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Launch on Product Hunt</strong>
+            <br><small style="opacity: 0.7;">Prep: hunter connection, teaser posts, launch assets, response team ready</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-metrics">
+        <h3>✅ Phase 1 Success Metrics</h3>
+        <ul>
+          <li><strong>10 paying customers</strong> ($500-1,000 MRR depending on tier mix)</li>
+          <li><strong>15-20% trial-to-paid conversion</strong></li>
+          <li><strong>3+ video testimonials</strong> recorded and published</li>
+          <li><strong>200+ landing page visitors</strong> from organic/social</li>
+          <li><strong>Analytics dashboard</strong> tracking all key metrics</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">2</div>
+        <div class="phase-title">
+          <h2>Days 31-60: Scale & Optimize</h2>
+          <p class="phase-subtitle">Goal: 30 paying customers ($2,000-3,000 MRR)</p>
+        </div>
+      </div>
+
+      <div class="objectives">
+        <h3>🎯 Key Objectives</h3>
+        <div class="objective-item">
+          <strong>Triple your customer base</strong> - From 10 to 30 paying customers
+        </div>
+        <div class="objective-item">
+          <strong>Reduce churn</strong> - Keep churn under 10% through better onboarding
+        </div>
+        <div class="objective-item">
+          <strong>Build content flywheel</strong> - Create SEO content to drive organic traffic
+        </div>
+        <div class="objective-item">
+          <strong>Partner with influencers</strong> - Get 2-3 mid-tier streamers to promote
+        </div>
+      </div>
+
+      <div class="tasks">
+        <h3>📋 Weekly Action Items</h3>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 5-6: Content Marketing Engine</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Publish 8 blog posts (2/week)</strong>
+            <br><small style="opacity: 0.7;">Topics: "How to analyze Twitch chat," "Best streaming analytics tools," "Understanding viewer sentiment"</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Create YouTube channel & post 4 videos</strong>
+            <br><small style="opacity: 0.7;">Dashboard walkthrough, case study, "I analyzed 1,000 Twitch chats - here's what I learned"</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Guest post on 3 streaming blogs/newsletters</strong>
+            <br><small style="opacity: 0.7;">Offer unique data insights from Casi analytics in exchange for backlinks</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Build SEO landing pages for longtail keywords</strong>
+            <br><small style="opacity: 0.7;">"Twitch chat analytics," "Kick stream insights," "multilingual chat analysis"</small>
+          </div>
+        </div>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 7: Influencer Partnerships</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Reach out to 20 mid-tier streamers (1K-10K followers)</strong>
+            <br><small style="opacity: 0.7;">Offer: Free Streamer+ tier for life + $100 per 10 signups they refer</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Create affiliate program</strong>
+            <br><small style="opacity: 0.7;">20% recurring commission for anyone who refers customers - track with Stripe</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Build streamer onboarding kit</strong>
+            <br><small style="opacity: 0.7;">Graphics, talking points, demo video - make it easy for partners to promote</small>
+          </div>
+        </div>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 8: Retention & Expansion</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Implement better onboarding</strong>
+            <br><small style="opacity: 0.7;">Interactive product tour, "Quick wins" checklist, welcome video from you</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Set up automated email sequences</strong>
+            <br><small style="opacity: 0.7;">Day 1: Welcome, Day 3: Quick tip, Day 7: Success story, Day 14: Upgrade prompt</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Add "upgrade prompts" for Creator tier users</strong>
+            <br><small style="opacity: 0.7;">When they hit 40+ avg viewers: "You're growing! Upgrade to Pro for deeper analytics"</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Call every churned customer</strong>
+            <br><small style="opacity: 0.7;">Learn why they left - fix those issues immediately</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-metrics">
+        <h3>✅ Phase 2 Success Metrics</h3>
+        <ul>
+          <li><strong>30 paying customers</strong> ($2,000-3,000 MRR)</li>
+          <li><strong>&lt;10% churn rate</strong></li>
+          <li><strong>2-3 active influencer partners</strong> promoting Casi</li>
+          <li><strong>500+ monthly organic visitors</strong> from SEO/content</li>
+          <li><strong>40%+ monthly growth</strong> rate</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">3</div>
+        <div class="phase-title">
+          <h2>Days 61-90: Accelerate Growth</h2>
+          <p class="phase-subtitle">Goal: 50-70 paying customers ($5,000+ MRR)</p>
+        </div>
+      </div>
+
+      <div class="objectives">
+        <h3>🎯 Key Objectives</h3>
+        <div class="objective-item">
+          <strong>Hit $5K MRR milestone</strong> - 50-70 customers depending on tier mix
+        </div>
+        <div class="objective-item">
+          <strong>Build predictable acquisition channels</strong> - Know your CAC and LTV
+        </div>
+        <div class="objective-item">
+          <strong>Prepare for funding</strong> - Get metrics, pitch deck, and story ready
+        </div>
+        <div class="objective-item">
+          <strong>Scale what works</strong> - Double down on best-performing channels
+        </div>
+      </div>
+
+      <div class="tasks">
+        <h3>📋 Weekly Action Items</h3>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 9-10: Paid Acquisition Testing</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Launch Twitter/X ads ($500 budget)</strong>
+            <br><small style="opacity: 0.7;">Target streamers with 100-10K followers, test 5 different ad creatives</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Test Reddit ads ($300 budget)</strong>
+            <br><small style="opacity: 0.7;">r/Twitch, r/streaming - native ad format with educational content</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Calculate true CAC and LTV</strong>
+            <br><small style="opacity: 0.7;">Track: Cost per signup, trial-to-paid %, avg customer lifetime, payback period</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Double down on best channel</strong>
+            <br><small style="opacity: 0.7;">Whatever worked best (influencers? SEO? Twitter?) - 10x your effort there</small>
+          </div>
+        </div>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 11: Community Building</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Launch Discord community for customers</strong>
+            <br><small style="opacity: 0.7;">Channels: #wins, #feature-requests, #analytics-tips, #general - be active daily</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Host first "Casi Creator Meetup" (virtual)</strong>
+            <br><small style="opacity: 0.7;">Zoom call with customers - share insights, get feedback, build community</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Feature "Creator of the Week" on social media</strong>
+            <br><small style="opacity: 0.7;">Showcase customer success stories - free marketing for them, social proof for you</small>
+          </div>
+        </div>
+
+        <h4 style="color: rgba(255,255,255,0.8); margin: 1.5rem 0 1rem;">Week 12: Fundraising Prep</h4>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Create pitch deck</strong>
+            <br><small style="opacity: 0.7;">Problem, Solution, Traction, Market, Team, Ask - 12 slides max</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Document all metrics in investor-ready format</strong>
+            <br><small style="opacity: 0.7;">MRR growth chart, cohort retention, CAC/LTV, churn rate - clean visuals</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Record customer testimonial supercut video</strong>
+            <br><small style="opacity: 0.7;">2-3 minute compilation of best customer quotes - use in pitch meetings</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Research 20 seed-stage VCs</strong>
+            <br><small style="opacity: 0.7;">Focus: SaaS, creator economy, UK/Europe - look for warm intros via LinkedIn</small>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div>
+            <strong>Celebrate hitting $5K MRR! 🎉</strong>
+            <br><small style="opacity: 0.7;">Share milestone publicly on Twitter, LinkedIn - builds credibility</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-metrics">
+        <h3>✅ Phase 3 Success Metrics</h3>
+        <ul>
+          <li><strong>$5,000+ MRR</strong> (50-70 paying customers)</li>
+          <li><strong>40%+ monthly growth rate</strong></li>
+          <li><strong>&lt;10% churn rate</strong></li>
+          <li><strong>CAC &lt; $50</strong> and LTV &gt; $500 (10:1 ratio minimum)</li>
+          <li><strong>Pitch deck ready</strong> with all traction metrics documented</li>
+          <li><strong>3+ acquisition channels</strong> validated and working</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- KEY METRICS TABLE -->
+    <div style="margin: 3rem 0;">
+      <h2 style="text-align: center; margin-bottom: 2rem; background: linear-gradient(135deg, #6932FF, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📊 Track These Metrics Weekly</h2>
+      <table class="key-metrics-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Target</th>
+            <th>Why It Matters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MRR (Monthly Recurring Revenue)</strong></td>
+            <td>$5,000+</td>
+            <td>Shows business viability and growth trajectory</td>
+          </tr>
+          <tr>
+            <td><strong>Paying Customers</strong></td>
+            <td>50-70</td>
+            <td>Need volume to prove market demand</td>
+          </tr>
+          <tr>
+            <td><strong>Trial → Paid Conversion</strong></td>
+            <td>15-25%</td>
+            <td>Shows product-market fit - people find it valuable</td>
+          </tr>
+          <tr>
+            <td><strong>Monthly Churn Rate</strong></td>
+            <td>&lt;10%</td>
+            <td>Low churn = customers love your product</td>
+          </tr>
+          <tr>
+            <td><strong>CAC (Customer Acquisition Cost)</strong></td>
+            <td>&lt;$50</td>
+            <td>Lower = more efficient growth, better margins</td>
+          </tr>
+          <tr>
+            <td><strong>LTV (Customer Lifetime Value)</strong></td>
+            <td>&gt;$500</td>
+            <td>Higher = can afford to spend more on acquisition</td>
+          </tr>
+          <tr>
+            <td><strong>LTV:CAC Ratio</strong></td>
+            <td>&gt;10:1</td>
+            <td>Shows healthy unit economics for investors</td>
+          </tr>
+          <tr>
+            <td><strong>Monthly Growth Rate</strong></td>
+            <td>40%+</td>
+            <td>Investors want to see hockey stick growth</td>
+          </tr>
+          <tr>
+            <td><strong>Payback Period</strong></td>
+            <td>&lt;3 months</td>
+            <td>How fast you recover CAC from revenue</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AFTER 90 DAYS -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">🚀</div>
+        <div class="phase-title">
+          <h2>After 90 Days: Your Options</h2>
+          <p class="phase-subtitle">You now have leverage - choose your path</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+        <div style="background: rgba(184, 238, 138, 0.1); border: 1px solid rgba(184, 238, 138, 0.3); border-radius: 15px; padding: 2rem;">
+          <h3 style="color: #B8EE8A; margin-bottom: 1rem;">Option 1: Keep Bootstrapping</h3>
+          <p><strong>Best if:</strong> You're profitable, growing steadily, and don't want to give up equity</p>
+          <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+            <li>Keep 100% ownership</li>
+            <li>Scale at your own pace</li>
+            <li>Target $10K-20K MRR in next 6 months</li>
+            <li>Profitable lifestyle business</li>
+            <li>No pressure from investors</li>
+          </ul>
+        </div>
+
+        <div style="background: rgba(94, 234, 212, 0.1); border: 1px solid rgba(94, 234, 212, 0.3); border-radius: 15px; padding: 2rem;">
+          <h3 style="color: #5EEAD4; margin-bottom: 1rem;">Option 2: Raise Seed Round</h3>
+          <p><strong>Best if:</strong> You want to scale faster and compete with VC-backed competitors</p>
+          <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+            <li>Raise $500K-1M at $3-5M valuation</li>
+            <li>Keep 80-90% of company</li>
+            <li>Hire 2-3 key people</li>
+            <li>Accelerate growth to $50K+ MRR</li>
+            <li>Build defensible moat quickly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="background: rgba(105, 50, 255, 0.1); border: 1px solid rgba(105, 50, 255, 0.3); border-radius: 15px; padding: 2rem; margin-top: 2rem;">
+        <h3 style="color: #6932FF; margin-bottom: 1rem;">💡 Pro Tip: You Don't Need to Decide Yet</h3>
+        <p>With $5K MRR and 40%+ growth, you have OPTIONS. Take investor meetings to see what terms you get, but don't feel pressured to take money. The best founders negotiate from a position of strength: "We don't NEED your money, but here's why we might WANT it."</p>
+      </div>
+    </div>
+
+    <!-- COMPARISON WITH VC PATH -->
+    <div style="margin: 3rem 0;">
+      <h2 style="text-align: center; margin-bottom: 2rem; background: linear-gradient(135deg, #6932FF, #932FFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">⚖️ Bootstrap vs VC: The Math</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div style="background: rgba(255, 159, 159, 0.1); border: 1px solid rgba(255, 159, 159, 0.3); border-radius: 15px; padding: 2rem;">
+          <h3 style="color: #FF9F9F; margin-bottom: 1rem;">❌ If You Raised Pre-Seed Now (Like Yakkr)</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 1rem;">💰 Raise: $250K</li>
+            <li style="margin-bottom: 1rem;">📊 Valuation: $1-2M</li>
+            <li style="margin-bottom: 1rem;">📉 Give up: 15-20% equity</li>
+            <li style="margin-bottom: 1rem;">⏱️ Fundraising time: 3-6 months</li>
+            <li style="margin-bottom: 1rem;">🏃 Still need to prove PMF</li>
+            <li style="margin-bottom: 1rem;">😰 Pressure to grow fast or die</li>
+          </ul>
+          <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">You'd own 80-85% of a company with no proven revenue model and 6-12 months to prove it works.</p>
+        </div>
+
+        <div style="background: rgba(184, 238, 138, 0.1); border: 1px solid rgba(184, 238, 138, 0.3); border-radius: 15px; padding: 2rem;">
+          <h3 style="color: #B8EE8A; margin-bottom: 1rem;">✅ If You Bootstrap to $5K MRR First</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 1rem;">💰 Raise: $500K-1M (optional)</li>
+            <li style="margin-bottom: 1rem;">📊 Valuation: $3-5M</li>
+            <li style="margin-bottom: 1rem;">📈 Give up: 10-20% equity</li>
+            <li style="margin-bottom: 1rem;">⏱️ Fundraising time: 1-2 months</li>
+            <li style="margin-bottom: 1rem;">✅ PMF already proven</li>
+            <li style="margin-bottom: 1rem;">😎 You have leverage & options</li>
+          </ul>
+          <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">You'd own 80-90% of a company with proven revenue and could turn down bad terms.</p>
+        </div>
+      </div>
+
+      <div style="background: linear-gradient(135deg, #6932FF, #932FFE); padding: 2rem; border-radius: 15px; margin-top: 2rem; text-align: center;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">🎯 The Bottom Line</h3>
+        <p style="font-size: 1.1rem; line-height: 1.8;">Bootstrap to $5K MRR = 2-3x higher valuation, better terms, keep more equity, and you're in control. Plus, if you never raise, you still have a profitable business!</p>
+      </div>
+    </div>
+
+    <footer>
+      <p><strong>Casi Platform</strong> - AI-Powered Streaming Analytics</p>
+      <p style="margin-top: 0.5rem;">Created: November 2025 | Target: $5K MRR by February 2026</p>
+      <p style="margin-top: 1rem; font-size: 0.85rem;">
+        This roadmap is a living document. Update weekly with actual results, pivot when needed, and stay focused on the goal.
+        <br>Remember: Execution beats ideas. Ship fast, talk to users, iterate daily.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
