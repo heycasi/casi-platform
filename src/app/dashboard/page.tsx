@@ -8,6 +8,150 @@ import ActivityFeed from '@/components/ActivityFeed'
 import { createChatClient } from '@/lib/chat/factory'
 import type { IChatClient, UnifiedChatMessage, Platform } from '@/types/chat'
 
+// Beta Code Redemption Component
+function BetaCodeRedemption() {
+  const [betaCode, setBetaCode] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState<'success' | 'error'>('error')
+
+  const handleRedeem = async () => {
+    if (!betaCode.trim()) {
+      setMessage('Please enter a beta code')
+      setMessageType('error')
+      return
+    }
+
+    setIsSubmitting(true)
+    setMessage('')
+
+    try {
+      // Get user email from localStorage
+      const userEmail = localStorage.getItem('casi_user_email')
+      const twitchUser = localStorage.getItem('twitch_user')
+      let userId = null
+
+      if (twitchUser) {
+        try {
+          const user = JSON.parse(twitchUser)
+          userId = user.id
+        } catch (e) {
+          console.error('Failed to parse twitch user:', e)
+        }
+      }
+
+      if (!userEmail) {
+        setMessage('Please log in first to redeem a beta code')
+        setMessageType('error')
+        setIsSubmitting(false)
+        return
+      }
+
+      const response = await fetch('/api/beta-code/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: betaCode.toUpperCase(),
+          email: userEmail,
+          userId,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setMessage(`✅ ${data.message}`)
+        setMessageType('success')
+        setBetaCode('')
+        // Reload page after 2 seconds to show dashboard
+        setTimeout(() => window.location.reload(), 2000)
+      } else {
+        setMessage(data.error || 'Failed to redeem beta code')
+        setMessageType('error')
+      }
+    } catch (error) {
+      console.error('Beta code redemption error:', error)
+      setMessage('Something went wrong. Please try again.')
+      setMessageType('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div
+      style={{
+        background: 'rgba(184, 238, 138, 0.05)',
+        border: '1px solid rgba(184, 238, 138, 0.2)',
+        borderRadius: '12px',
+        padding: '1.5rem',
+      }}
+    >
+      <p style={{ color: '#B8EE8A', fontWeight: 600, margin: '0 0 1rem 0', fontSize: '1rem' }}>
+        Have a Beta Code?
+      </p>
+      <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+        <input
+          type="text"
+          value={betaCode}
+          onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
+          placeholder="Enter code (e.g., CASI-XXXXX)"
+          disabled={isSubmitting}
+          style={{
+            width: '100%',
+            padding: '0.875rem 1rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(184, 238, 138, 0.3)',
+            borderRadius: '8px',
+            color: 'white',
+            fontSize: '1rem',
+            fontFamily: 'Poppins, monospace',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+          }}
+        />
+        <button
+          onClick={handleRedeem}
+          disabled={isSubmitting || !betaCode.trim()}
+          style={{
+            width: '100%',
+            padding: '0.875rem 1rem',
+            background: isSubmitting ? 'rgba(184, 238, 138, 0.3)' : 'rgba(184, 238, 138, 0.2)',
+            border: '1px solid rgba(184, 238, 138, 0.4)',
+            borderRadius: '8px',
+            color: '#B8EE8A',
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: isSubmitting || !betaCode.trim() ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting || !betaCode.trim() ? 0.6 : 1,
+          }}
+        >
+          {isSubmitting ? 'Activating...' : 'Activate Beta Code'}
+        </button>
+      </div>
+      {message && (
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '0.75rem',
+            borderRadius: '8px',
+            background:
+              messageType === 'success' ? 'rgba(184, 238, 138, 0.1)' : 'rgba(255, 159, 159, 0.1)',
+            border:
+              messageType === 'success'
+                ? '1px solid rgba(184, 238, 138, 0.3)'
+                : '1px solid rgba(255, 159, 159, 0.3)',
+            color: messageType === 'success' ? '#B8EE8A' : '#FF9F9F',
+            fontSize: '0.875rem',
+          }}
+        >
+          {message}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface TierStatus {
   avgViewers: number
   limit: number
@@ -1083,25 +1227,7 @@ export default function Dashboard() {
               View Plans & Subscribe
             </a>
 
-            {!accessDetails?.beta_code && (
-              <a
-                href="/signup"
-                style={{
-                  display: 'inline-block',
-                  width: '100%',
-                  padding: '1rem 1.5rem',
-                  background: 'rgba(184, 238, 138, 0.1)',
-                  border: '1px solid rgba(184, 238, 138, 0.3)',
-                  borderRadius: '12px',
-                  color: '#B8EE8A',
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                }}
-              >
-                Have a Beta Code? Sign Up
-              </a>
-            )}
+            {!accessDetails?.beta_code && <BetaCodeRedemption />}
 
             <a
               href="/"
