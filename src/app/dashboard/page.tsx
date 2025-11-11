@@ -66,7 +66,11 @@ function BetaCodeRedemption() {
         // Reload page after 2 seconds to show dashboard
         setTimeout(() => window.location.reload(), 2000)
       } else {
-        setMessage(data.error || 'Failed to redeem beta code')
+        console.error('Beta code redemption failed:', data)
+        const errorMsg = data.details
+          ? `${data.error}: ${data.details}`
+          : data.error || 'Failed to redeem beta code'
+        setMessage(errorMsg)
         setMessageType('error')
       }
     } catch (error) {

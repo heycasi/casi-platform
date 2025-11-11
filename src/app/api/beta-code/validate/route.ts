@@ -17,10 +17,7 @@ export async function POST(req: NextRequest) {
     const { code, email, userId } = await req.json()
 
     if (!code || !email) {
-      return NextResponse.json(
-        { error: 'Beta code and email are required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Beta code and email are required' }, { status: 400 })
     }
 
     // 1. Check if beta code exists and is valid
@@ -32,18 +29,12 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (codeError || !betaCode) {
-      return NextResponse.json(
-        { error: 'Invalid or inactive beta code' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Invalid or inactive beta code' }, { status: 404 })
     }
 
     // 2. Check if code has expired
     if (betaCode.expires_at && new Date(betaCode.expires_at) < new Date()) {
-      return NextResponse.json(
-        { error: 'This beta code has expired' },
-        { status: 410 }
-      )
+      return NextResponse.json({ error: 'This beta code has expired' }, { status: 410 })
     }
 
     // 3. Check if code has reached max uses
@@ -87,15 +78,25 @@ export async function POST(req: NextRequest) {
         created_at: new Date().toISOString(),
         current_period_start: new Date().toISOString(),
         current_period_end: trialEndsAt.toISOString(),
-        avg_viewer_limit: 50 // Creator tier limit
+        avg_viewer_limit: 50, // Creator tier limit
       })
       .select()
       .single()
 
     if (subError) {
       console.error('Error creating trial subscription:', subError)
+      console.error('Subscription error details:', {
+        code: subError.code,
+        message: subError.message,
+        details: subError.details,
+        hint: subError.hint,
+      })
       return NextResponse.json(
-        { error: 'Failed to create trial subscription' },
+        {
+          error: 'Failed to create trial subscription',
+          details: subError.message,
+          hint: subError.hint,
+        },
         { status: 500 }
       )
     }
@@ -107,18 +108,16 @@ export async function POST(req: NextRequest) {
       .eq('code', code.toUpperCase())
 
     // 7. Log the beta code redemption
-    await supabase
-      .from('subscription_events')
-      .insert({
-        subscription_id: newSubscription.id,
-        event_type: 'beta_trial_started',
-        event_data: {
-          beta_code: code.toUpperCase(),
-          trial_days: betaCode.trial_days,
-          trial_ends_at: trialEndsAt.toISOString()
-        },
-        created_at: new Date().toISOString()
-      })
+    await supabase.from('subscription_events').insert({
+      subscription_id: newSubscription.id,
+      event_type: 'beta_trial_started',
+      event_data: {
+        beta_code: code.toUpperCase(),
+        trial_days: betaCode.trial_days,
+        trial_ends_at: trialEndsAt.toISOString(),
+      },
+      created_at: new Date().toISOString(),
+    })
 
     console.log(`✅ Beta trial created for ${email} with code ${code.toUpperCase()}`)
 
@@ -128,11 +127,10 @@ export async function POST(req: NextRequest) {
         plan_name: newSubscription.plan_name,
         status: newSubscription.status,
         trial_ends_at: newSubscription.trial_ends_at,
-        trial_days: betaCode.trial_days
+        trial_days: betaCode.trial_days,
       },
-      message: `Beta trial activated! You have ${betaCode.trial_days} days of free access.`
+      message: `Beta trial activated! You have ${betaCode.trial_days} days of free access.`,
     })
-
   } catch (error: any) {
     console.error('Beta code validation error:', error)
     return NextResponse.json(
@@ -152,10 +150,7 @@ export async function GET(req: NextRequest) {
     const code = searchParams.get('code')
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Beta code is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Beta code is required' }, { status: 400 })
     }
 
     const { data: betaCode, error: codeError } = await supabase
@@ -192,14 +187,10 @@ export async function GET(req: NextRequest) {
       valid: true,
       trial_days: betaCode.trial_days,
       description: betaCode.description,
-      uses_remaining: betaCode.max_uses - betaCode.current_uses
+      uses_remaining: betaCode.max_uses - betaCode.current_uses,
     })
-
   } catch (error: any) {
     console.error('Beta code check error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
