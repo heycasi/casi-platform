@@ -64,22 +64,29 @@ export async function POST(req: NextRequest) {
     const trialEndsAt = new Date()
     trialEndsAt.setDate(trialEndsAt.getDate() + betaCode.trial_days)
 
+    // Build subscription data - only include user_id if it's a valid UUID
+    const subscriptionData: any = {
+      email,
+      status: 'trialing',
+      plan_name: 'Beta Trial',
+      tier_name: 'Creator', // Give Creator tier features during trial
+      is_beta_trial: true,
+      beta_code: code.toUpperCase(),
+      trial_ends_at: trialEndsAt.toISOString(),
+      created_at: new Date().toISOString(),
+      current_period_start: new Date().toISOString(),
+      current_period_end: trialEndsAt.toISOString(),
+      avg_viewer_limit: 50, // Creator tier limit
+    }
+
+    // Only add user_id if it looks like a UUID (not a Twitch ID)
+    if (userId && userId.includes('-')) {
+      subscriptionData.user_id = userId
+    }
+
     const { data: newSubscription, error: subError } = await supabase
       .from('subscriptions')
-      .insert({
-        email,
-        user_id: userId || null,
-        status: 'trialing',
-        plan_name: 'Beta Trial',
-        tier_name: 'Creator', // Give Creator tier features during trial
-        is_beta_trial: true,
-        beta_code: code.toUpperCase(),
-        trial_ends_at: trialEndsAt.toISOString(),
-        created_at: new Date().toISOString(),
-        current_period_start: new Date().toISOString(),
-        current_period_end: trialEndsAt.toISOString(),
-        avg_viewer_limit: 50, // Creator tier limit
-      })
+      .insert(subscriptionData)
       .select()
       .single()
 
