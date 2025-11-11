@@ -102,12 +102,28 @@ export async function POST(request: NextRequest) {
       ok: userResponse.ok,
       status: userResponse.status,
       hasData: !!userData.data?.[0],
+      userData: userData,
+      dataLength: userData.data?.length,
     })
+
+    if (!userResponse.ok || !userData.data?.[0]) {
+      console.error('Failed to fetch Twitch user data:', {
+        status: userResponse.status,
+        userData,
+      })
+      return NextResponse.json(
+        {
+          error: 'Failed to fetch user data from Twitch',
+          details: userData.message || 'Unknown error',
+        },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
-      user: userData.data?.[0] || null,
+      user: userData.data[0],
     })
   } catch (error) {
     console.error('API route error:', error)
