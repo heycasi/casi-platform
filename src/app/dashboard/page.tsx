@@ -2,7 +2,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { generateMotivationalSuggestion } from '../../lib/multilingual'
-import { AnalyticsService } from '../../lib/analytics'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
 import ActivityFeed from '@/components/ActivityFeed'
 import { createChatClient } from '@/lib/chat/factory'
@@ -265,6 +264,10 @@ export default function Dashboard() {
   const twitchClientRef = useRef<IChatClient | null>(null)
   const kickClientRef = useRef<IChatClient | null>(null)
 
+  // Message batching for efficient API calls
+  const messageBatchRef = useRef<any[]>([])
+  const batchTimerRef = useRef<NodeJS.Timeout | null>(null)
+
   const botUsernames = [
     'nightbot',
     'streamelements',
@@ -289,6 +292,67 @@ export default function Dashboard() {
     'songrequestbot',
     'musicbot',
   ]
+
+  // Batch message storage to database
+  const flushMessageBatch = async () => {
+    if (!currentSessionId || messageBatchRef.current.length === 0) return
+
+    const batch = [...messageBatchRef.current]
+    messageBatchRef.current = []
+
+    try {
+      const response = await fetch('/api/chat-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          messages: batch,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Failed to save message batch:', error)
+      }
+    } catch (error) {
+      console.error('Error saving message batch:', error)
+    }
+  }
+
+  // Add message to batch and schedule flush
+  const batchStoreMessage = (message: any) => {
+    messageBatchRef.current.push(message)
+
+    // Flush every 10 messages or every 5 seconds
+    if (messageBatchRef.current.length >= 10) {
+      flushMessageBatch()
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current)
+        batchTimerRef.current = null
+      }
+    } else if (!batchTimerRef.current) {
+      batchTimerRef.current = setTimeout(() => {
+        flushMessageBatch()
+        batchTimerRef.current = null
+      }, 5000)
+    }
+  }
+
+  // Update session stats via API
+  const updateSessionStats = async (sessionId: string, stats: any) => {
+    try {
+      await fetch('/api/sessions/stats', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          stats,
+        }),
+      })
+    } catch (error) {
+      console.error('Failed to update session stats:', error)
+    }
+  }
 
   // NEW: Unified message handler for both platforms
   const handleUnifiedMessage = (unifiedMessage: UnifiedChatMessage) => {
@@ -324,29 +388,14 @@ export default function Dashboard() {
     }
 
     if (currentSessionId) {
-      AnalyticsService.storeChatMessage(currentSessionId, {
+      batchStoreMessage({
         username: unifiedMessage.username,
         message: unifiedMessage.message,
-        timestamp: new Date(unifiedMessage.timestamp),
+        timestamp: unifiedMessage.timestamp,
         language: unifiedMessage.language,
-        language_confidence: unifiedMessage.language_confidence,
-        sentiment: unifiedMessage.sentiment,
-        sentiment_score: unifiedMessage.sentiment_score,
-        sentiment_reason: unifiedMessage.sentiment_reason,
-        is_question: unifiedMessage.is_question,
-        question_type: unifiedMessage.question_type,
-        engagement_level: unifiedMessage.engagement_level,
-        topics: unifiedMessage.topics,
-        platform: unifiedMessage.platform, // NEW: Include platform
-        platform_message_id: unifiedMessage.platform_message_id,
-      }).catch((error) => {
-        console.error('❌ Failed to store message to database:', {
-          error: error.message || error,
-          sessionId: currentSessionId,
-          username: unifiedMessage.username,
-          platform: unifiedMessage.platform,
-          messagePreview: unifiedMessage.message.substring(0, 50),
-        })
+        sentiment: unifiedMessage.sentiment_score,
+        isQuestion: unifiedMessage.is_question,
+        engagementLevel: unifiedMessage.engagement_level,
       })
     }
   }
@@ -984,12 +1033,10 @@ export default function Dashboard() {
     setTopChatters(top)
 
     if (currentSessionId && messages.length > 0) {
-      AnalyticsService.updateSessionStats(currentSessionId, {
+      updateSessionStats(currentSessionId, {
         peak_viewer_count: stats.viewerCount || 0,
         total_messages: messages.length,
         unique_chatters: uniqueUsers,
-      }).catch((error) => {
-        console.error('Failed to update session stats:', error)
       })
     }
   }, [messages, questions])
