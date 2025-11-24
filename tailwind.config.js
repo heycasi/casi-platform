@@ -56,7 +56,7 @@ module.exports = {
           800: '#454545',
           900: '#3d3d3d',
           950: '#1a1a1a',
-        }
+        },
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
@@ -64,11 +64,33 @@ module.exports = {
         'gradient-dark': 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       },
       fontFamily: {
-        'poppins': ['Poppins', 'Arial', 'sans-serif'],
+        sans: ['Poppins', 'Arial', 'sans-serif'],
+        poppins: ['Poppins', 'Arial', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
+        'space-mono': ['Space Mono', 'monospace'],
+      },
+      borderRadius: {
+        lg: '1.5rem',
+        xl: '1.75rem',
+        '2xl': '2rem',
+        full: '9999px',
+      },
+      letterSpacing: {
+        tight: '-0.02em',
+        wide: '0.05em',
       },
       backdropBlur: {
         xs: '2px',
-      }
+      },
+      animation: {
+        'float-slow': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+      },
     },
   },
   plugins: [],
