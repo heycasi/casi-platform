@@ -1,1156 +1,584 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
-import AnimatedBackground from '@/components/AnimatedBackground'
-import BlurText from '@/components/BlurText'
-import GradientText from '@/components/GradientText'
+import Image from 'next/image'
+import { motion, useScroll, useTransform, useMotionTemplate, useMotionValue } from 'framer-motion'
+import { ArrowRight, BarChart3, Globe2, MessageSquare, ShieldCheck, Menu, X } from 'lucide-react'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+// --- Utility ---
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function Home() {
-  const [waitlistCount, setWaitlistCount] = useState(0)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
-  const heroRef = useRef<HTMLDivElement>(null)
+// --- Components ---
+
+const Navbar = () => {
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    fetchWaitlistCount()
-    setIsVisible(true)
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const fetchWaitlistCount = async () => {
-    try {
-      const { count, error } = await supabase
-        .from('waitlist')
-        .select('*', { count: 'exact', head: true })
-      if (error) {
-        console.error('Error fetching waitlist count:', error)
-        return
-      }
-      setWaitlistCount(count || 0)
-    } catch (error) {
-      console.error('Error:', error)
-    }
-  }
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        fontFamily: 'Poppins, sans-serif',
-        color: '#F7F7F7',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
+    <nav
+      className={cn(
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b',
+        scrolled
+          ? 'bg-[#0B0D14]/80 backdrop-blur-md border-white/10 py-4'
+          : 'bg-transparent border-transparent py-6'
+      )}
     >
-      {/* Animated Background */}
-      <AnimatedBackground />
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3">
+          <Image
+            src="/landing-logo.svg"
+            alt="Casi Logo"
+            width={40}
+            height={40}
+            className="w-auto h-10"
+            priority
+          />
+          <span className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent hidden sm:block tracking-tight">
+            Casi
+          </span>
+        </Link>
 
-      {/* Background Robot Mascot */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <img
-          src="/landing-robot.png"
-          alt=""
-          style={{
-            width: '850px',
-            height: 'auto',
-            objectFit: 'contain',
-            opacity: 0.06,
-            animation: 'robotWave 6s ease-in-out infinite',
-            filter: 'brightness(0.7)',
-          }}
-        />
-      </div>
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @keyframes robotWave {
-          0%, 100% {
-            opacity: 0.08;
-            transform: scale(1) rotate(0deg);
-          }
-          25% {
-            opacity: 0.12;
-            transform: scale(1.02) rotate(2deg);
-          }
-          50% {
-            opacity: 0.1;
-            transform: scale(1.03) rotate(0deg);
-          }
-          75% {
-            opacity: 0.12;
-            transform: scale(1.02) rotate(-2deg);
-          }
-        }
-
-        @keyframes gradientShift {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-      `,
-        }}
-      />
-
-      {/* Header */}
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-          background:
-            'linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15))',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(105, 50, 255, 0.3)',
-          padding: '1rem 1.5rem',
-        }}
-      >
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-          @media (min-width: 768px) {
-            header { padding: 1rem 3rem !important; }
-          }
-          @media (max-width: 767px) {
-            .desktop-nav { display: none !important; }
-            .mobile-logo { height: 60px !important; }
-            .mobile-menu-btn { display: flex !important; }
-          }
-          @media (min-width: 768px) {
-            .desktop-nav { display: flex !important; }
-            .mobile-logo { height: 100px !important; }
-            .mobile-menu-btn { display: none !important; }
-          }
-        `,
-          }}
-        />
-        <div
-          style={{
-            maxWidth: '1800px',
-            margin: '0 auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}
-        >
-          {/* Centered Logo */}
+        <div className="hidden md:flex items-center gap-8">
           <Link
-            href="/"
-            style={{
-              textDecoration: 'none',
-              zIndex: 10,
-            }}
-          >
-            <img
-              src="/landing-logo.png"
-              alt="Casi"
-              className="mobile-logo"
-              style={{ height: '100px', width: 'auto' }}
-            />
-          </Link>
-
-          {/* Right-aligned Navigation - Desktop Only */}
-          <nav
-            className="desktop-nav"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '2rem',
-              position: 'absolute',
-              right: 0,
-            }}
-          >
-            <Link
-              href="/features"
-              style={{
-                color: 'rgba(255,255,255,0.8)',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                transition: 'color 0.2s',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Features
-            </Link>
-            <Link
-              href="/pricing"
-              style={{
-                color: 'rgba(255,255,255,0.8)',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                transition: 'color 0.2s',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/login-email"
-              style={{
-                color: 'rgba(255,255,255,0.8)',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                transition: 'color 0.2s',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              style={{
-                padding: '0.65rem 1.5rem',
-                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                borderRadius: '50px',
-                color: 'white',
-                textDecoration: 'none',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                boxShadow: '0 4px 15px rgba(105, 50, 255, 0.4)',
-                transition: 'all 0.3s ease',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Sign Up
-            </Link>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="mobile-menu-btn"
-            style={{
-              display: 'none',
-              position: 'absolute',
-              right: 0,
-              width: '2.5rem',
-              height: '2.5rem',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              zIndex: 1001,
-            }}
-            aria-label="Toggle mobile menu"
-          >
-            <div
-              style={{
-                width: '1.5rem',
-                height: '2px',
-                background: 'white',
-                transition: 'all 0.3s ease',
-                transform: isMobileMenuOpen ? 'rotate(45deg) translateY(6px)' : 'rotate(0)',
-                marginBottom: '4px',
-              }}
-            />
-            <div
-              style={{
-                width: '1.5rem',
-                height: '2px',
-                background: 'white',
-                transition: 'all 0.3s ease',
-                opacity: isMobileMenuOpen ? 0 : 1,
-                marginBottom: '4px',
-              }}
-            />
-            <div
-              style={{
-                width: '1.5rem',
-                height: '2px',
-                background: 'white',
-                transition: 'all 0.3s ease',
-                transform: isMobileMenuOpen ? 'rotate(-45deg) translateY(-6px)' : 'rotate(0)',
-              }}
-            />
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          style={{
-            display: isMobileMenuOpen ? 'flex' : 'none',
-            flexDirection: 'column',
-            gap: '1rem',
-            padding: '1.5rem',
-            background: 'rgba(26, 26, 26, 0.98)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <Link
-            href="/features"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{
-              color: 'rgba(255,255,255,0.9)',
-              textDecoration: 'none',
-              fontSize: '1.1rem',
-              fontWeight: '500',
-              padding: '0.75rem',
-            }}
+            href="#features"
+            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
             Features
           </Link>
           <Link
             href="/pricing"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{
-              color: 'rgba(255,255,255,0.9)',
-              textDecoration: 'none',
-              fontSize: '1.1rem',
-              fontWeight: '500',
-              padding: '0.75rem',
-            }}
+            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
             Pricing
           </Link>
           <Link
-            href="/login-email"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{
-              color: 'rgba(255,255,255,0.9)',
-              textDecoration: 'none',
-              fontSize: '1.1rem',
-              fontWeight: '500',
-              padding: '0.75rem',
-            }}
+            href="/login"
+            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
-            Login
+            Log in
           </Link>
           <Link
-            href="/signup"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-              borderRadius: '50px',
-              color: 'white',
-              textDecoration: 'none',
-              fontSize: '1rem',
-              fontWeight: '600',
-              boxShadow: '0 4px 15px rgba(105, 50, 255, 0.4)',
-              textAlign: 'center',
-            }}
+            href="/beta-signup"
+            className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#6932FF] to-[#932FFE] px-6 font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#6932FF]/50"
           >
-            Sign Up
+            <span className="mr-2">Join Beta</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main style={{ position: 'relative', zIndex: 1 }}>
-        {/* Hero Section */}
-        <section
-          style={{
-            padding: '4rem 1.5rem',
-            maxWidth: '1400px',
-            margin: '0 auto',
-            textAlign: 'center',
-            minHeight: 'calc(100vh - 200px)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
+        <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? <X /> : <Menu />}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:hidden absolute top-full left-0 w-full bg-[#0B0D14]/95 backdrop-blur-md border-b border-white/10 p-6 flex flex-col gap-4"
         >
-          <div style={{ marginBottom: '3rem' }}>
-            <h1
-              style={{
-                fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-                fontWeight: '700',
-                lineHeight: '1.1',
-                marginBottom: '1.5rem',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              <BlurText
-                text="Turn Your Chat Into"
-                delay={100}
-                style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                }}
-              />
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #6932FF, #5EEAD4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundSize: '200% 200%',
-                  animation: 'gradientShift 3s ease infinite',
-                }}
-              >
-                Real-Time Growth
-              </span>
-            </h1>
+          <Link
+            href="#features"
+            className="text-lg font-medium text-zinc-400"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Features
+          </Link>
+          <Link
+            href="/pricing"
+            className="text-lg font-medium text-zinc-400"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/login"
+            className="text-lg font-medium text-zinc-400"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Log in
+          </Link>
+          <Link
+            href="/beta-signup"
+            className="text-lg font-semibold text-[#5EEAD4]"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Join Beta
+          </Link>
+        </motion.div>
+      )}
+    </nav>
+  )
+}
 
-            <BlurText
-              text="Casi turns your Twitch chat into live insights — tracking sentiment, questions, and engagement moments so you can focus on creating, not guessing."
-              delay={400}
-              style={{
-                fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
-                color: 'rgba(255, 255, 255, 0.8)',
-                maxWidth: '750px',
-                margin: '0 auto 3rem',
-                lineHeight: '1.6',
-              }}
+const Hero = () => {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const { scrollY } = useScroll()
+  const y1 = useTransform(scrollY, [0, 500], [0, 200])
+  const y2 = useTransform(scrollY, [0, 500], [0, -150])
+
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setStatus('loading')
+    try {
+      const { error } = await supabase.from('waitlist').insert([
+        {
+          email: email.toLowerCase().trim(),
+          source: 'homepage_v2_redesign',
+          created_at: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+        },
+      ])
+      if (error && error.code !== '23505') throw error
+      setStatus('success')
+      setEmail('')
+    } catch (e) {
+      setStatus('error')
+    }
+  }
+
+  return (
+    <section className="relative min-h-screen flex flex-col justify-center items-center pt-32 pb-20 overflow-hidden">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          style={{ y: y1 }}
+          className="absolute top-20 -left-20 w-96 h-96 bg-[#6932FF]/20 rounded-full blur-[120px]"
+        />
+        <motion.div
+          style={{ y: y2 }}
+          className="absolute bottom-20 -right-20 w-[500px] h-[500px] bg-[#5EEAD4]/10 rounded-full blur-[120px]"
+        />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-[#5EEAD4] mb-8 font-mono font-bold uppercase tracking-wide"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5EEAD4] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5EEAD4]"></span>
+          </span>
+          Multi-platform Live
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6"
+        >
+          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent">
+            Stop Ignoring
+          </span>
+          <br />
+          Your Best Viewers.
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10"
+        >
+          The only real-time intelligence engine that instantly highlights VIPs, flags toxic
+          messages, and detects viral moments so you never miss a sub or a clip.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="flex-1 bg-white/5 border border-white/10 rounded-full px-6 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#6932FF] focus:ring-2 focus:ring-[#6932FF]/20 transition-all"
             />
-
-            {/* Primary CTA */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '1.5rem',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-                marginBottom: '3rem',
-              }}
+            <button
+              disabled={status === 'loading' || status === 'success'}
+              className="bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white font-semibold rounded-full px-8 py-3 hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all disabled:opacity-70"
             >
-              <Link
-                href="/beta"
-                className="cta-button-primary"
-                style={{
-                  padding: '1rem 2.5rem',
-                  background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                  borderRadius: '50px',
-                  color: 'white',
-                  textDecoration: 'none',
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
-                  transition: 'all 0.3s ease',
-                  display: 'inline-block',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
-                  e.currentTarget.style.boxShadow = '0 12px 40px rgba(105, 50, 255, 0.7)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)'
-                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(105, 50, 255, 0.5)'
-                }}
-              >
-                Start Free Beta
-              </Link>
-            </div>
-
-            {/* Trust Indicators */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '2rem',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                fontSize: '0.9rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>✓</span> Free early access
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>✓</span> No credit card needed
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>✓</span> Built with Twitch creators
-              </div>
-            </div>
-          </div>
-
-          {/* Preview Image */}
-          <div
-            style={{
-              maxWidth: '1100px',
-              width: '100%',
-              marginTop: '2rem',
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                inset: '-20px',
-                background:
-                  'linear-gradient(135deg, rgba(105, 50, 255, 0.3), rgba(147, 47, 254, 0.3))',
-                borderRadius: '20px',
-                filter: 'blur(40px)',
-                opacity: '0.6',
-              }}
-            ></div>
-            <img
-              src="/wholedashboard.png"
-              alt="Casi Dashboard Preview"
-              style={{
-                width: '100%',
-                height: 'auto',
-                borderRadius: '16px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-                position: 'relative',
-                zIndex: 1,
-              }}
-            />
-          </div>
-        </section>
-
-        {/* Now in Beta Section */}
-        <section
-          style={{
-            padding: '4rem 1.5rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            background: 'rgba(255, 255, 255, 0.02)',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '900px',
-              margin: '0 auto',
-              textAlign: 'center',
-            }}
-          >
-            {/* Main Headline */}
-            <h2
-              style={{
-                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                fontWeight: '700',
-                marginBottom: '1rem',
-                lineHeight: '1.1',
-              }}
-            >
-              <GradientText animate={true}>Now in Beta</GradientText>
-            </h2>
-
-            {/* Subheadline */}
-            <p
-              style={{
-                fontSize: 'clamp(1.1rem, 2vw, 1.3rem)',
-                color: 'rgba(255, 255, 255, 0.8)',
-                marginBottom: '3rem',
-                lineHeight: '1.6',
-                maxWidth: '700px',
-                margin: '0 auto 3rem',
-              }}
-            >
-              Be one of the first creators shaping the future of live streaming analytics.
+              {status === 'loading'
+                ? 'Calculating...'
+                : status === 'success'
+                  ? '✓ Joined!'
+                  : 'Get Your Stream Intelligence Score'}
+            </button>
+          </form>
+          {status === 'success' && (
+            <p className="text-[#5EEAD4] text-sm font-medium">
+              🎉 You're on the list! Check your email.
             </p>
-
-            {/* Features Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '1.5rem',
-                marginBottom: '3rem',
-                textAlign: 'left',
-              }}
-            >
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(94, 234, 212, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                    color: '#5EEAD4',
-                  }}
-                >
-                  ✓
-                </div>
-                <div
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    marginBottom: '0.3rem',
-                    color: 'white',
-                  }}
-                >
-                  Real-time chat insights
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(184, 238, 138, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                    color: '#B8EE8A',
-                  }}
-                >
-                  ✓
-                </div>
-                <div
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    marginBottom: '0.3rem',
-                    color: 'white',
-                  }}
-                >
-                  AI-powered audience feedback
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(105, 50, 255, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                    color: '#6932FF',
-                  }}
-                >
-                  ✓
-                </div>
-                <div
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    marginBottom: '0.3rem',
-                    color: 'white',
-                  }}
-                >
-                  Automated post-stream reports
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                    color: '#EF4444',
-                  }}
-                >
-                  🏆
-                </div>
-                <div
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    marginBottom: '0.3rem',
-                    color: 'white',
-                  }}
-                >
-                  Community MVPs
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.9rem',
-                    color: 'rgba(255, 255, 255, 0.7)',
-                  }}
-                >
-                  See your most active chatters and recurring community members
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(139, 92, 246, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                    color: '#8B5CF6',
-                  }}
-                >
-                  📊
-                </div>
-                <div
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    marginBottom: '0.3rem',
-                    color: 'white',
-                  }}
-                >
-                  Chat Activity Timeline
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.9rem',
-                    color: 'rgba(255, 255, 255, 0.7)',
-                  }}
-                >
-                  Visualize engagement patterns throughout your stream
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(236, 72, 153, 0.2)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '0.5rem',
-                    color: '#EC4899',
-                  }}
-                >
-                  💬
-                </div>
-                <div
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    marginBottom: '0.3rem',
-                    color: 'white',
-                  }}
-                >
-                  Chat Highlights
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.9rem',
-                    color: 'rgba(255, 255, 255, 0.7)',
-                  }}
-                >
-                  Memorable messages - funniest, most thoughtful, and supportive moments
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Info */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem',
-                alignItems: 'center',
-              }}
-            >
-              <p
-                style={{
-                  fontSize: '0.95rem',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  maxWidth: '600px',
-                }}
-              >
-                Spots available for early testers • Full launch 2025
-              </p>
-
-              <p
-                style={{
-                  fontSize: '0.9rem',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontStyle: 'italic',
-                }}
-              >
-                Built with Twitch creators, tested across 13+ languages
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA - Founder-Led Mission */}
-        <section
-          style={{
-            padding: '5rem 1.5rem',
-            textAlign: 'center',
-            background:
-              'linear-gradient(135deg, rgba(105, 50, 255, 0.15), rgba(147, 47, 254, 0.1), rgba(30, 58, 138, 0.15))',
-            borderTop: '1px solid rgba(105, 50, 255, 0.3)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Subtle gradient overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background:
-                'radial-gradient(circle at 50% 50%, rgba(105, 50, 255, 0.1), transparent 70%)',
-              pointerEvents: 'none',
-            }}
-          ></div>
-
-          <div
-            style={{
-              position: 'relative',
-              zIndex: 1,
-              maxWidth: '700px',
-              margin: '0 auto',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontWeight: '700',
-                marginBottom: '1.5rem',
-                lineHeight: '1.2',
-              }}
-            >
-              <GradientText animate={true}>
-                Built for creators who care about their communities.
-              </GradientText>
-            </h2>
-            <p
-              style={{
-                fontSize: 'clamp(1.1rem, 2vw, 1.3rem)',
-                color: 'rgba(255, 255, 255, 0.8)',
-                marginBottom: '2.5rem',
-                lineHeight: '1.7',
-                maxWidth: '650px',
-                margin: '0 auto 2.5rem',
-              }}
-            >
-              Casi isn't just analytics — it's a new way to understand, respond, and grow with your
-              audience in real time.
+          )}
+          {status === 'error' && (
+            <p className="text-red-400 text-sm font-medium">
+              Something went wrong. Please try again.
             </p>
-            <Link
-              href="/beta"
-              style={{
-                padding: '1.1rem 3rem',
-                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-                borderRadius: '50px',
-                color: 'white',
-                textDecoration: 'none',
-                fontSize: '1.15rem',
-                fontWeight: '600',
-                boxShadow: '0 10px 40px rgba(105, 50, 255, 0.6)',
-                transition: 'all 0.3s ease',
-                display: 'inline-block',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)'
-                e.currentTarget.style.boxShadow = '0 15px 50px rgba(105, 50, 255, 0.8)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)'
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(105, 50, 255, 0.6)'
-              }}
-            >
-              Start Testing with Casi
-            </Link>
-          </div>
-        </section>
-      </main>
+          )}
+          <p className="text-zinc-500 text-sm font-mono tracking-wide">
+            NO CREDIT CARD • 14-DAY FREE TRIAL
+          </p>
+        </motion.div>
+      </div>
 
-      {/* Footer */}
-      <footer
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          padding: '3rem 1.5rem',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'rgba(11, 13, 20, 0.5)',
-          backdropFilter: 'blur(10px)',
-        }}
+      {/* Dashboard Preview with 3D Tilt */}
+      <motion.div
+        initial={{ opacity: 0, y: 100, rotateX: 20 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+        transition={{ duration: 0.8, delay: 0.4, type: 'spring' }}
+        className="relative z-10 mt-20 max-w-6xl mx-auto px-6"
       >
-        <div
-          style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '2rem',
-            marginBottom: '2rem',
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '1rem',
-              }}
-            >
-              <img src="/landing-logo.png" alt="Casi" style={{ height: '40px', width: 'auto' }} />
+        <div className="relative rounded-2xl border border-white/10 bg-[#0B0D14]/50 backdrop-blur-xl shadow-2xl shadow-[#6932FF]/20 overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D14] via-transparent to-transparent z-10" />
+          <Image
+            src="/wholedashboard.png"
+            alt="Casi Dashboard"
+            width={1400}
+            height={900}
+            className="w-full h-auto rounded-lg opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+            priority
+          />
+          {/* Floating UI Elements */}
+          <div className="absolute -right-12 top-20 hidden lg:block p-4 bg-[#1a1a2e]/90 backdrop-blur border border-white/10 rounded-2xl shadow-xl animate-float-slow">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-2 h-2 rounded-full bg-[#5EEAD4] animate-pulse" />
+              <span className="text-xs font-mono text-[#5EEAD4] font-bold uppercase tracking-wide">
+                LIVE ANALYSIS
+              </span>
             </div>
-            <p
-              style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-                lineHeight: '1.6',
-                marginBottom: '1.5rem',
-              }}
-            >
-              Your stream's brainy co-pilot. AI-powered chat analysis for better audience
-              engagement.
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <a
-                href="https://twitter.com/HeyCasi_"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  background: '#1DA1F2',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  textDecoration: 'none',
-                  transition: 'opacity 0.3s ease',
-                  fontSize: '1.2rem',
-                }}
-                aria-label="Follow us on Twitter"
-              >
-                𝕏
-              </a>
-              <a
-                href="https://tiktok.com/@HeyCasi_"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  background: '#000000',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  textDecoration: 'none',
-                  transition: 'opacity 0.3s ease',
-                  fontSize: '1.2rem',
-                }}
-                aria-label="Follow us on TikTok"
-              >
-                🎵
-              </a>
-              <a
-                href="https://linkedin.com/company/heycasi"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  background: '#0A66C2',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  textDecoration: 'none',
-                  transition: 'opacity 0.3s ease',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                }}
-                aria-label="Follow us on LinkedIn"
-              >
-                in
-              </a>
-            </div>
-          </div>
-          <div>
-            <h4
-              style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: 'white',
-              }}
-            >
-              Product
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Link
-                href="/features"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Features
-              </Link>
-              <Link
-                href="/pricing"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/beta"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Beta
-              </Link>
-              <Link
-                href="/dashboard"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-          <div>
-            <h4
-              style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: 'white',
-              }}
-            >
-              Company
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Link
-                href="/about"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Contact
-              </Link>
-              <a
-                href="mailto:casi@heycasi.com"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                casi@heycasi.com
-              </a>
-            </div>
-          </div>
-          <div>
-            <h4
-              style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: 'white',
-              }}
-            >
-              Legal
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <a
-                href="#"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="#"
-                style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Terms of Service
-              </a>
-            </div>
+            <div className="text-sm text-white font-medium">🔥 Sentiment Spike Detected</div>
           </div>
         </div>
-        <div
-          style={{
-            textAlign: 'center',
-            paddingTop: '2rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '0.9rem',
-          }}
-        >
-          © 2024 Casi. All rights reserved.
+      </motion.div>
+    </section>
+  )
+}
+
+const BentoCard = ({ title, description, icon: Icon, className, children }: any) => {
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect()
+    mouseX.set(clientX - left)
+    mouseY.set(clientY - top)
+  }
+
+  return (
+    <div
+      className={cn(
+        'group relative border border-white/10 bg-white/5 overflow-hidden rounded-2xl',
+        className
+      )}
+      onMouseMove={handleMouseMove}
+    >
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              650px circle at ${mouseX}px ${mouseY}px,
+              rgba(105, 50, 255, 0.15),
+              transparent 80%
+            )
+          `,
+        }}
+      />
+      <div className="relative h-full p-6 flex flex-col">
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6932FF]/20 to-[#932FFE]/20 text-[#932FFE]">
+          <Icon className="h-6 w-6" />
         </div>
-      </footer>
+        <h3 className="mb-2 text-lg font-bold text-white tracking-tight">{title}</h3>
+        <p className="text-sm text-zinc-400 mb-6">{description}</p>
+        <div className="flex-1 mt-auto">{children}</div>
+      </div>
     </div>
+  )
+}
+
+const Features = () => {
+  return (
+    <section id="features" className="py-32 relative bg-[#0B0D14]">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            Built for Speed. Not Show.
+          </h2>
+          <p className="text-zinc-400 max-w-2xl mx-auto">
+            While other tools waste time with AI prompts, Casi delivers instant intelligence you can
+            act on. Zero BS. Pure performance.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+          {/* Large Card 1 */}
+          <BentoCard
+            title="Instant Sentiment Detection"
+            description="Zero-latency analysis. Faster than GPT-4 because we don't use it. Track mood shifts during gameplay, reactions, and events in real-time."
+            icon={BarChart3}
+            className="md:col-span-2 md:row-span-2 h-full min-h-[400px]"
+          >
+            <div className="relative h-full w-full rounded-2xl bg-[#1a1a2e]/50 border border-white/5 p-4 overflow-hidden">
+              <Image
+                src="/casigraphs.png"
+                alt="Sentiment Analysis Graphs"
+                width={600}
+                height={300}
+                className="w-full h-full object-cover opacity-90 rounded"
+              />
+              <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#0B0D14] to-transparent" />
+            </div>
+          </BentoCard>
+
+          {/* Small Card 1 */}
+          <BentoCard
+            title="Global Translation"
+            description="Break language barriers with 13+ supported languages. English, Spanish, French, German, and more."
+            icon={Globe2}
+            className="md:col-span-1"
+          >
+            <div className="flex flex-wrap gap-2 mt-2">
+              {['🇺🇸', '🇪🇸', '🇫🇷', '🇩🇪', '🇯🇵', '🇰🇷'].map((flag) => (
+                <span
+                  key={flag}
+                  className="px-3 py-1.5 bg-white/5 rounded-lg text-xl hover:bg-white/10 transition-colors cursor-default"
+                >
+                  {flag}
+                </span>
+              ))}
+            </div>
+          </BentoCard>
+
+          {/* Small Card 2 */}
+          <BentoCard
+            title="VIP Tracking"
+            description="Spot your whales instantly. Track high-value chatters, recurring supporters, and engagement spikes in real-time."
+            icon={MessageSquare}
+            className="md:col-span-1"
+          >
+            <div className="mt-2 space-y-2">
+              <div className="bg-white/5 p-3 rounded-lg border-l-2 border-[#6932FF] text-xs text-zinc-300 hover:bg-white/10 transition-colors">
+                <span className="text-[#6932FF] font-bold">@user:</span>{' '}
+                <span>What specs do you use?</span>
+              </div>
+              <div className="bg-white/5 p-3 rounded-lg border-l-2 border-[#5EEAD4] text-xs text-zinc-300 hover:bg-white/10 transition-colors">
+                <span className="text-[#5EEAD4] font-bold">@fan:</span>{' '}
+                <span>When is the next stream?</span>
+              </div>
+            </div>
+          </BentoCard>
+
+          {/* Wide Card */}
+          <BentoCard
+            title="100% Privacy Focused"
+            description="Zero data training. Your chat is never used to train AI models. Processed in real-time and discarded. OAuth secured."
+            icon={ShieldCheck}
+            className="md:col-span-3"
+          >
+            <div className="grid grid-cols-3 gap-4 mt-4 opacity-50">
+              <div className="h-1.5 bg-[#5EEAD4] rounded-full animate-pulse" />
+              <div className="h-1.5 bg-[#6932FF] rounded-full animate-pulse delay-75" />
+              <div className="h-1.5 bg-[#932FFE] rounded-full animate-pulse delay-150" />
+            </div>
+          </BentoCard>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const TrustBadges = () => {
+  return (
+    <section className="py-12 border-y border-white/5 bg-[#0f1119]">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="p-6 bg-white/5 border border-white/10 rounded-2xl"
+          >
+            <div className="text-[#5EEAD4] text-3xl font-bold mb-2 font-mono">&lt;1ms</div>
+            <div className="text-white font-semibold mb-1">Zero-Latency Analysis</div>
+            <div className="text-sm text-zinc-500">
+              Faster than GPT-4. Local processing. No API delays.
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="p-6 bg-white/5 border border-white/10 rounded-2xl"
+          >
+            <div className="text-[#6932FF] text-3xl font-bold mb-2">🔒</div>
+            <div className="text-white font-semibold mb-1">100% Privacy Focused</div>
+            <div className="text-sm text-zinc-500">
+              No chat data training. Your streams stay yours.
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="p-6 bg-white/5 border border-white/10 rounded-2xl"
+          >
+            <div className="text-[#932FFE] text-3xl font-bold mb-2 font-mono">99.9%</div>
+            <div className="text-white font-semibold mb-1">Enterprise Uptime</div>
+            <div className="text-sm text-zinc-500">Built on Vercel + Supabase. Always online.</div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const Stats = () => {
+  return (
+    <section className="py-20 bg-[#0B0D14]">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        {[
+          { label: 'Languages', value: '13+' },
+          { label: 'Viral Moments Detected', value: '10K+' },
+          { label: 'Messages Processed', value: '1M+' },
+          { label: 'Creator Time Saved', value: '∞' },
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+          >
+            <div className="text-4xl font-bold text-white mb-2 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+              {stat.value}
+            </div>
+            <div className="text-sm text-zinc-500 font-medium uppercase tracking-wide font-mono">
+              {stat.label}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+const CTA = () => {
+  return (
+    <section className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D14] via-[#6932FF]/10 to-[#0B0D14]" />
+      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+          Ready to level up?
+        </h2>
+        <p className="text-xl text-zinc-400 mb-10">
+          Join the wave of data-driven creators building stronger communities today.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/beta-signup"
+            className="px-8 py-4 bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white rounded-full font-bold hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all"
+          >
+            Start Free Beta
+          </Link>
+          <Link
+            href="/pricing"
+            className="px-8 py-4 bg-transparent border-2 border-white/20 text-white rounded-full font-bold hover:bg-white/10 hover:border-white/40 transition-all"
+          >
+            View Pricing
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const Footer = () => {
+  return (
+    <footer className="py-12 border-t border-white/10 bg-[#0B0D14]">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/landing-logo.svg"
+              alt="Casi"
+              width={30}
+              height={30}
+              className="opacity-80"
+            />
+            <span className="text-zinc-500 text-sm">© 2025 Casi Platform</span>
+          </div>
+          <div className="flex gap-8 text-sm text-zinc-500">
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <a href="mailto:support@heycasi.com" className="hover:text-white transition-colors">
+              Contact
+            </a>
+          </div>
+        </div>
+
+        {/* COPPA Disclaimer */}
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <p className="text-xs text-zinc-600 text-center max-w-4xl mx-auto leading-relaxed">
+            <strong>COPPA Disclaimer:</strong> HeyCasi is an analytics tool for broadcasters. We do
+            not knowingly collect or profile PII of individuals under 13. All data is processed in
+            aggregate. Not affiliated with Twitch, Kick, or YouTube.
+          </p>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+// --- Main Page ---
+
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen bg-[#0B0D14] text-white selection:bg-[#6932FF] selection:text-white">
+      <Navbar />
+      <Hero />
+      <TrustBadges />
+      <Stats />
+      <Features />
+      <CTA />
+      <Footer />
+    </main>
   )
 }
