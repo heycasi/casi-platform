@@ -45,9 +45,9 @@ const Navbar = () => {
           <Image
             src="/landing-logo.svg"
             alt="Casi Logo"
-            width={40}
-            height={40}
-            className="w-auto h-10"
+            width={120}
+            height={48}
+            className="w-auto h-12"
             priority
           />
         </Link>
