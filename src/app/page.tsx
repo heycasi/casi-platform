@@ -47,7 +47,7 @@ const Navbar = () => {
             alt="Casi Logo"
             width={120}
             height={48}
-            className="w-auto h-12"
+            className="w-auto h-18"
             priority
           />
         </Link>
@@ -201,7 +201,7 @@ const Hero = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.2]"
         >
-          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2 pb-1">
+          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2 pb-3">
             Stop Ignoring
           </span>
           Your Best Viewers.
