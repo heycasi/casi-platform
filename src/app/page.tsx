@@ -47,7 +47,7 @@ const Navbar = () => {
             alt="Casi Logo"
             width={120}
             height={48}
-            className="w-auto h-15"
+            className="w-auto h-13"
             priority
           />
         </Link>
