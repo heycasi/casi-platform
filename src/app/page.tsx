@@ -50,9 +50,6 @@ const Navbar = () => {
             className="w-auto h-10"
             priority
           />
-          <span className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent hidden sm:block tracking-tight">
-            Casi
-          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
@@ -170,6 +167,18 @@ const Hero = () => {
           className="absolute bottom-20 -right-20 w-[500px] h-[500px] bg-[#5EEAD4]/10 rounded-full blur-[120px]"
         />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+
+        {/* Robot Background */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image
+            src="/landing-robot.png"
+            alt=""
+            width={850}
+            height={850}
+            className="w-[850px] h-auto object-contain opacity-[0.06] brightness-[0.7] animate-float-slow"
+            priority
+          />
+        </div>
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
