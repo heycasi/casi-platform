@@ -190,12 +190,11 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6"
+          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight"
         >
-          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2">
             Stop Ignoring
           </span>
-          <br />
           Your Best Viewers.
         </motion.h1>
 
@@ -244,9 +243,7 @@ const Hero = () => {
               Something went wrong. Please try again.
             </p>
           )}
-          <p className="text-zinc-500 text-sm font-mono tracking-wide">
-            NO CREDIT CARD • 14-DAY FREE TRIAL
-          </p>
+          <p className="text-zinc-500 text-sm font-mono tracking-wide">NO CREDIT CARD REQUIRED</p>
         </motion.div>
       </div>
 
