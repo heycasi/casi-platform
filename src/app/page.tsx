@@ -199,9 +199,9 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight"
+          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.2]"
         >
-          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2">
+          <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2 pb-1">
             Stop Ignoring
           </span>
           Your Best Viewers.
