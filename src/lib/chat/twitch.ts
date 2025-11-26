@@ -17,12 +17,14 @@ export class TwitchChatClient implements IChatClient {
   private connectionChangeCallback: ((connected: boolean) => void) | null = null
   private reconnectTimeout: number | null = null
   private shouldReconnect: boolean = true
+  private tier: 'Starter' | 'Pro' | 'Agency'
 
   // Bot usernames to filter out (same as dashboard)
   private readonly botUsernames = ['nightbot', 'streamelements', 'streamlabs', 'moobot', 'fossabot']
 
-  constructor(channelName: string) {
+  constructor(channelName: string, tier?: 'Starter' | 'Pro' | 'Agency') {
     this.channelName = channelName.toLowerCase()
+    this.tier = tier || 'Starter'
   }
 
   /**
@@ -160,8 +162,8 @@ export class TwitchChatClient implements IChatClient {
         return
       }
 
-      // Analyze message
-      const analysis = analyzeMessage(messageText)
+      // Analyze message with user's tier for feature gating
+      const analysis = analyzeMessage(messageText, this.tier)
 
       // Transform to UnifiedChatMessage format
       const unifiedMessage: UnifiedChatMessage = {

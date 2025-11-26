@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { generateMotivationalSuggestion } from '../../lib/multilingual'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
+import FeatureGate from '@/components/FeatureGate'
+import HistoryLimitBanner from '@/components/HistoryLimitBanner'
 import ActivityFeed from '@/components/ActivityFeed'
 import { createChatClient } from '@/lib/chat/factory'
 import type { IChatClient, UnifiedChatMessage, Platform } from '@/types/chat'
@@ -240,6 +242,7 @@ export default function Dashboard() {
   const [twitchUser, setTwitchUser] = useState<any>(null)
   const [showAccountDropdown, setShowAccountDropdown] = useState(false)
   const [tierStatus, setTierStatus] = useState<TierStatus | null>(null)
+  const [userTier, setUserTier] = useState<'Starter' | 'Pro' | 'Agency'>('Starter')
   const [previousMood, setPreviousMood] = useState<string>('Neutral')
   const [moodChanged, setMoodChanged] = useState(false)
   const [highlightedQuestionId, setHighlightedQuestionId] = useState<string | null>(null)
@@ -519,6 +522,10 @@ export default function Dashboard() {
 
         setAccessDetails(data)
         setHasAccess(data.has_access || false)
+
+        // Extract and set user tier (default to 'Starter' if not present)
+        const tier = (data.tier_name || 'Starter') as 'Starter' | 'Pro' | 'Agency'
+        setUserTier(tier)
 
         // If admin, always grant access
         if (isAdmin) {
@@ -822,7 +829,7 @@ export default function Dashboard() {
       try {
         console.log(`🟣 Connecting to Twitch: ${channelName}`)
 
-        const client = createChatClient('twitch', channelName)
+        const client = createChatClient('twitch', channelName, userTier)
         twitchClientRef.current = client
 
         client.onMessage(handleUnifiedMessage)
@@ -855,7 +862,7 @@ export default function Dashboard() {
       try {
         console.log(`🟢 Connecting to Kick: ${kickChannelToMonitor}`)
 
-        const client = createChatClient('kick', kickChannelToMonitor)
+        const client = createChatClient('kick', kickChannelToMonitor, userTier)
         kickClientRef.current = client
 
         client.onMessage(handleUnifiedMessage)
@@ -2102,6 +2109,9 @@ export default function Dashboard() {
                 >
                   <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>💬 Live Chat Feed</h3>
 
+                  {/* Show history limit banner for Starter users */}
+                  {userTier === 'Starter' && <HistoryLimitBanner />}
+
                   <div
                     ref={chatFeedRef}
                     style={{
@@ -2142,128 +2152,139 @@ export default function Dashboard() {
                           gap: '0.5rem',
                         }}
                       >
-                        {messages
-                          .slice(-50)
-                          .reverse()
-                          .map((msg) => (
-                            <div
-                              key={msg.id}
-                              style={{
-                                padding: '0.5rem',
-                                background: msg.isQuestion
-                                  ? 'rgba(255, 159, 159, 0.2)'
-                                  : msg.sentiment === 'positive'
-                                    ? 'rgba(184, 238, 138, 0.1)'
-                                    : msg.sentiment === 'negative'
-                                      ? 'rgba(255, 159, 159, 0.1)'
-                                      : 'rgba(255, 255, 255, 0.05)',
-                                borderRadius: '6px',
-                                borderLeft: `4px solid ${msg.platform === 'kick' ? '#53FC18' : '#6441A5'}`, // NEW: Platform color!
-                                border: msg.isQuestion
-                                  ? '1px solid rgba(255, 159, 159, 0.3)'
-                                  : msg.sentiment === 'positive'
-                                    ? '1px solid rgba(184, 238, 138, 0.2)'
-                                    : msg.sentiment === 'negative'
-                                      ? '1px solid rgba(255, 159, 159, 0.2)'
-                                      : '1px solid rgba(255, 255, 255, 0.1)',
-                                borderLeftWidth: '4px', // Thick platform border
-                                animation:
-                                  msg.id === highlightedQuestionId
-                                    ? 'questionPulse 1.5s ease'
-                                    : 'none',
-                                boxShadow:
-                                  msg.id === highlightedQuestionId
-                                    ? '0 0 20px rgba(255, 159, 159, 0.8)'
-                                    : 'none',
-                                transform:
-                                  msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
-                                transition: 'all 0.3s ease',
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.3rem',
-                                  marginBottom: '0.25rem',
-                                  flexWrap: 'wrap',
-                                }}
-                              >
-                                {/* NEW: Platform Icon */}
-                                <span style={{ fontSize: '0.9rem' }}>
-                                  {msg.platform === 'kick' ? '🟢' : '🟣'}
-                                </span>
+                        {(() => {
+                          // Filter messages for Starter users: only show last 24 hours
+                          const filteredMessages =
+                            userTier === 'Starter'
+                              ? messages.filter((msg) => {
+                                  const cutoffTime = Date.now() - 24 * 60 * 60 * 1000 // 24 hours ago
+                                  return msg.timestamp > cutoffTime
+                                })
+                              : messages
 
-                                <span
-                                  style={{
-                                    fontWeight: '600',
-                                    color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
-                                    fontSize: '0.8rem',
-                                  }}
-                                >
-                                  {msg.username}
-                                </span>
-                                {msg.isQuestion && (
-                                  <span
-                                    style={{
-                                      fontSize: '0.6rem',
-                                      background: '#FF9F9F',
-                                      padding: '0.1rem 0.25rem',
-                                      borderRadius: '3px',
-                                      color: '#151E3C',
-                                      fontWeight: '600',
-                                    }}
-                                  >
-                                    Q
-                                  </span>
-                                )}
-                                <span
-                                  style={{
-                                    fontSize: '0.6rem',
-                                    padding: '0.1rem 0.25rem',
-                                    borderRadius: '3px',
-                                    background:
-                                      msg.sentiment === 'positive'
-                                        ? '#B8EE8A'
-                                        : msg.sentiment === 'negative'
-                                          ? '#FF9F9F'
-                                          : 'rgba(107, 114, 128, 0.8)',
-                                  }}
-                                >
-                                  {msg.sentiment === 'positive'
-                                    ? '😊'
-                                    : msg.sentiment === 'negative'
-                                      ? '😢'
-                                      : '😐'}
-                                </span>
-                                {msg.engagementLevel === 'high' && (
-                                  <span
-                                    style={{
-                                      fontSize: '0.6rem',
-                                      background: '#FFD700',
-                                      padding: '0.1rem 0.25rem',
-                                      borderRadius: '3px',
-                                      color: '#000',
-                                      fontWeight: '600',
-                                    }}
-                                  >
-                                    🔥
-                                  </span>
-                                )}
-                              </div>
-                              <p
+                          return filteredMessages
+                            .slice(-50)
+                            .reverse()
+                            .map((msg) => (
+                              <div
+                                key={msg.id}
                                 style={{
-                                  margin: 0,
-                                  color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
-                                  lineHeight: '1.3',
-                                  fontSize: '0.8rem',
-                                  wordBreak: 'break-word',
+                                  padding: '0.5rem',
+                                  background: msg.isQuestion
+                                    ? 'rgba(255, 159, 159, 0.2)'
+                                    : msg.sentiment === 'positive'
+                                      ? 'rgba(184, 238, 138, 0.1)'
+                                      : msg.sentiment === 'negative'
+                                        ? 'rgba(255, 159, 159, 0.1)'
+                                        : 'rgba(255, 255, 255, 0.05)',
+                                  borderRadius: '6px',
+                                  borderLeft: `4px solid ${msg.platform === 'kick' ? '#53FC18' : '#6441A5'}`, // NEW: Platform color!
+                                  border: msg.isQuestion
+                                    ? '1px solid rgba(255, 159, 159, 0.3)'
+                                    : msg.sentiment === 'positive'
+                                      ? '1px solid rgba(184, 238, 138, 0.2)'
+                                      : msg.sentiment === 'negative'
+                                        ? '1px solid rgba(255, 159, 159, 0.2)'
+                                        : '1px solid rgba(255, 255, 255, 0.1)',
+                                  borderLeftWidth: '4px', // Thick platform border
+                                  animation:
+                                    msg.id === highlightedQuestionId
+                                      ? 'questionPulse 1.5s ease'
+                                      : 'none',
+                                  boxShadow:
+                                    msg.id === highlightedQuestionId
+                                      ? '0 0 20px rgba(255, 159, 159, 0.8)'
+                                      : 'none',
+                                  transform:
+                                    msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
+                                  transition: 'all 0.3s ease',
                                 }}
                               >
-                                {msg.message}
-                              </p>
-                            </div>
-                          ))}
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.3rem',
+                                    marginBottom: '0.25rem',
+                                    flexWrap: 'wrap',
+                                  }}
+                                >
+                                  {/* NEW: Platform Icon */}
+                                  <span style={{ fontSize: '0.9rem' }}>
+                                    {msg.platform === 'kick' ? '🟢' : '🟣'}
+                                  </span>
+
+                                  <span
+                                    style={{
+                                      fontWeight: '600',
+                                      color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
+                                      fontSize: '0.8rem',
+                                    }}
+                                  >
+                                    {msg.username}
+                                  </span>
+                                  {msg.isQuestion && (
+                                    <span
+                                      style={{
+                                        fontSize: '0.6rem',
+                                        background: '#FF9F9F',
+                                        padding: '0.1rem 0.25rem',
+                                        borderRadius: '3px',
+                                        color: '#151E3C',
+                                        fontWeight: '600',
+                                      }}
+                                    >
+                                      Q
+                                    </span>
+                                  )}
+                                  <span
+                                    style={{
+                                      fontSize: '0.6rem',
+                                      padding: '0.1rem 0.25rem',
+                                      borderRadius: '3px',
+                                      background:
+                                        msg.sentiment === 'positive'
+                                          ? '#B8EE8A'
+                                          : msg.sentiment === 'negative'
+                                            ? '#FF9F9F'
+                                            : 'rgba(107, 114, 128, 0.8)',
+                                    }}
+                                  >
+                                    {msg.sentiment === 'positive'
+                                      ? '😊'
+                                      : msg.sentiment === 'negative'
+                                        ? '😢'
+                                        : '😐'}
+                                  </span>
+                                  {msg.engagementLevel === 'high' && (
+                                    <span
+                                      style={{
+                                        fontSize: '0.6rem',
+                                        background: '#FFD700',
+                                        padding: '0.1rem 0.25rem',
+                                        borderRadius: '3px',
+                                        color: '#000',
+                                        fontWeight: '600',
+                                      }}
+                                    >
+                                      🔥
+                                    </span>
+                                  )}
+                                </div>
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
+                                    lineHeight: '1.3',
+                                    fontSize: '0.8rem',
+                                    wordBreak: 'break-word',
+                                  }}
+                                >
+                                  {msg.message}
+                                </p>
+                              </div>
+                            ))
+                        })()}
                       </div>
                     )}
                   </div>
@@ -2421,82 +2442,93 @@ export default function Dashboard() {
                 </div>
 
                 {/* Top Chatters & Topics */}
-                <div
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '16px',
-                    padding: '1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    height: '180px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                  }}
+                <FeatureGate
+                  requiredTier="Pro"
+                  currentTier={userTier}
+                  featureName="VIP Tracking"
+                  featureDescription="Track your top chatters, identify your most engaged viewers, and see what topics they're discussing."
                 >
-                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>
-                    🏆 Top Chatters & Topics
-                  </h3>
-                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-                    {topChatters.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
-                        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>
-                          Waiting for your first chatters...
-                        </p>
-                      </div>
-                    ) : (
-                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                        {topChatters.map((c) => (
-                          <li
-                            key={c.username}
-                            style={{
-                              padding: '0.5rem 0',
-                              borderBottom: '1px dashed rgba(255,255,255,0.1)',
-                            }}
-                          >
-                            <div
+                  <div
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '16px',
+                      padding: '1rem',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      height: '180px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>
+                      🏆 Top Chatters & Topics
+                    </h3>
+                    <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+                      {topChatters.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
+                          <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>
+                            Waiting for your first chatters...
+                          </p>
+                        </div>
+                      ) : (
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                          {topChatters.map((c) => (
+                            <li
+                              key={c.username}
                               style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '0.25rem',
+                                padding: '0.5rem 0',
+                                borderBottom: '1px dashed rgba(255,255,255,0.1)',
                               }}
                             >
-                              <span
-                                style={{ color: '#F7F7F7', fontSize: '0.9rem', fontWeight: '600' }}
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginBottom: '0.25rem',
+                                }}
                               >
-                                @{c.username}
-                              </span>
-                              <span
-                                style={{ color: '#5EEAD4', fontWeight: 700, fontSize: '0.85rem' }}
-                              >
-                                {c.count}
-                              </span>
-                            </div>
-                            {c.topics && c.topics.length > 0 && (
-                              <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                                {c.topics.map((topic, idx) => (
-                                  <span
-                                    key={idx}
-                                    style={{
-                                      fontSize: '0.65rem',
-                                      background: 'rgba(94, 234, 212, 0.15)',
-                                      color: '#5EEAD4',
-                                      padding: '0.1rem 0.4rem',
-                                      borderRadius: '4px',
-                                    }}
-                                  >
-                                    {topic}
-                                  </span>
-                                ))}
+                                <span
+                                  style={{
+                                    color: '#F7F7F7',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                  }}
+                                >
+                                  @{c.username}
+                                </span>
+                                <span
+                                  style={{ color: '#5EEAD4', fontWeight: 700, fontSize: '0.85rem' }}
+                                >
+                                  {c.count}
+                                </span>
                               </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                              {c.topics && c.topics.length > 0 && (
+                                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                  {c.topics.map((topic, idx) => (
+                                    <span
+                                      key={idx}
+                                      style={{
+                                        fontSize: '0.65rem',
+                                        background: 'rgba(94, 234, 212, 0.15)',
+                                        color: '#5EEAD4',
+                                        padding: '0.1rem 0.4rem',
+                                        borderRadius: '4px',
+                                      }}
+                                    >
+                                      {topic}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </FeatureGate>
               </div>
 
               {/* RIGHT COLUMN (25%) - Activity Feed */}

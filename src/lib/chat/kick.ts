@@ -13,9 +13,11 @@ export class KickChatClient implements IChatClient {
   private messageCallback: ((message: UnifiedChatMessage) => void) | null = null
   private errorCallback: ((error: Error) => void) | null = null
   private connectionChangeCallback: ((connected: boolean) => void) | null = null
+  private tier: 'Starter' | 'Pro' | 'Agency'
 
-  constructor(channelName: string) {
+  constructor(channelName: string, tier?: 'Starter' | 'Pro' | 'Agency') {
     this.channelName = channelName.toLowerCase()
+    this.tier = tier || 'Starter'
   }
 
   // Get chatroom ID from Kick API
@@ -159,8 +161,8 @@ export class KickChatClient implements IChatClient {
 
       console.log(`🟢 [Kick] @${username}: ${messageText}`)
 
-      // Analyze message
-      const analysis = analyzeMessage(messageText)
+      // Analyze message with user's tier for feature gating
+      const analysis = analyzeMessage(messageText, this.tier)
 
       // Transform to UnifiedChatMessage format
       const unifiedMessage: UnifiedChatMessage = {
