@@ -135,19 +135,24 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     const priceId = subscription.items.data[0].price.id
     const price = await stripe.prices.retrieve(priceId)
 
-    let planName = 'Creator'
+    let planName = 'Starter'
     if (
       priceId.includes('pro') ||
       priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
+      priceId === 'price_1SXiU8EEgFiyIrnTCRvQSSbj' || // USD Pro
+      priceId === 'price_1SXiU8EEgFiyIrnT7IaBAdsW' // GBP Pro
     ) {
       planName = 'Pro'
     } else if (
       priceId.includes('streamer') ||
+      priceId.includes('agency') ||
       priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY
+      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
+      priceId === 'price_1SXiWlEEgFiyIrnTxdUtTCZN' || // USD Agency
+      priceId === 'price_1SXiWlEEgFiyIrnTGeLeMEPT' // GBP Agency
     ) {
-      planName = 'Streamer+'
+      planName = 'Agency'
     }
 
     const amount = (price.unit_amount || 0) / 100
@@ -269,47 +274,45 @@ async function upsertSubscription(subscription: Stripe.Subscription, email?: str
   const price = await stripe.prices.retrieve(priceId)
 
   // Determine plan name from price ID - check exact matches first, then patterns
-  let planName = 'Creator' // Default
+  let planName = 'Starter' // Default
 
-  // Check for Creator plan (explicit match)
+  // Check for Starter plan (old Creator prices still valid)
   if (
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY ||
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY ||
     priceId === 'price_1Rlx2DEEgFiyIrnTAomiE2J3' ||
-    priceId === 'price_1Rlx2DEEgFiyIrnTGQZSVs8q'
+    priceId === 'price_1Rlx2DEEgFiyIrnTGQZSVs8q' ||
+    priceId.toLowerCase().includes('starter')
   ) {
-    planName = 'Creator'
+    planName = 'Starter'
   }
-  // Check for Pro plan
+  // Check for Pro plan (USD/GBP price IDs from pricing config)
   else if (
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
     priceId === 'price_1RlxA7EEgFiyIrnTVR20se38' ||
     priceId === 'price_1RlxA7EEgFiyIrnTSuiyywVq' ||
+    priceId === 'price_1SXiU8EEgFiyIrnTCRvQSSbj' || // USD Pro monthly
+    priceId === 'price_1SXiU8EEgFiyIrnT7IaBAdsW' || // GBP Pro monthly
     priceId.toLowerCase().includes('pro')
   ) {
     planName = 'Pro'
   }
-  // Check for Streamer+ plan
+  // Check for Agency plan (old Streamer+ prices + new Agency prices)
   else if (
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
     priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
     priceId === 'price_1RlzDHEEgFiyIrnThpPdz7gV' ||
     priceId === 'price_1RlzDHEEgFiyIrnT45NkAklL' ||
-    priceId.toLowerCase().includes('streamer')
+    priceId === 'price_1SXiWlEEgFiyIrnTxdUtTCZN' || // USD Agency monthly
+    priceId === 'price_1SXiWlEEgFiyIrnTGeLeMEPT' || // GBP Agency monthly
+    priceId.toLowerCase().includes('streamer') ||
+    priceId.toLowerCase().includes('agency')
   ) {
-    planName = 'Streamer+'
+    planName = 'Agency'
   }
 
   console.log(`[Stripe Webhook] Price ID ${priceId} determined as tier: ${planName}`)
-
-  // Determine viewer limit based on tier
-  let avgViewerLimit = 50 // Creator default
-  if (planName === 'Pro') {
-    avgViewerLimit = 250
-  } else if (planName === 'Streamer+') {
-    avgViewerLimit = 999999 // Unlimited
-  }
 
   const subscriptionData = {
     stripe_customer_id: subscription.customer as string,
@@ -317,10 +320,6 @@ async function upsertSubscription(subscription: Stripe.Subscription, email?: str
     stripe_price_id: priceId,
     plan_name: planName,
     tier_name: planName, // Set tier_name same as plan_name
-    avg_viewer_limit: avgViewerLimit, // Set tier limit
-    avg_viewers_30d: 0, // Start at 0
-    days_over_limit: 0, // Start at 0
-    tier_status: 'within_limit', // Default status
     billing_interval: price.recurring?.interval || 'month',
     status: subscription.status,
     current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
