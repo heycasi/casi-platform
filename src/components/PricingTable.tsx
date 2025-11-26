@@ -2,76 +2,88 @@
 import { useState } from 'react'
 
 export default function PricingTable() {
-  const [isYearly, setIsYearly] = useState(false)
+  const [currency, setCurrency] = useState<'USD' | 'GBP'>('USD')
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
+  const PRICING_CONFIG = {
+    USD: {
+      symbol: '$',
+      pro: {
+        price: '11.99',
+        priceId: 'price_1SXiU8EEgFiyIrnTCRvQSSbj',
+      },
+      agency: {
+        price: '49.99',
+        priceId: 'price_1SXiWlEEgFiyIrnTxdUtTCZN',
+      },
+    },
+    GBP: {
+      symbol: '£',
+      pro: {
+        price: '9.99',
+        priceId: 'price_1SXiU8EEgFiyIrnT7IaBAdsW',
+      },
+      agency: {
+        price: '39.99',
+        priceId: 'price_1SXiWlEEgFiyIrnTGeLeMEPT',
+      },
+    },
+  }
 
   const tiers = [
     {
-      name: '🟣 Creator',
-      monthlyPrice: 19,
-      yearlyPrice: 190,
-      monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY || 'price_1Rlx2DEEgFiyIrnTAomiE2J3',
-      yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY || 'price_1Rlx2DEEgFiyIrnTGQZSVs8q',
-      description: 'For streamers finding their audience',
-      viewerLimit: 'Up to 50 avg viewers',
+      name: 'Starter',
+      price: 'Free',
+      priceId: null,
+      description: 'For new affiliates',
       features: [
-        'Track sentiment in real time',
-        'Get automatic question alerts',
-        'View basic analytics dashboard',
-        'Receive post-stream summaries',
-        'Smart highlights after every stream',
-        'Email support • Up to 1,000 messages/hour'
+        'Unlimited Messages',
+        'Instant Sentiment Detection',
+        '24-Hour History',
+        'Twitch Only',
       ],
-      cta: 'Start Creator Plan',
-      popular: false
+      cta: 'Start Free',
+      popular: false,
+      ctaLink: '/beta-signup',
     },
     {
-      name: '💫 Pro',
-      monthlyPrice: 37,
-      yearlyPrice: 370,
-      monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || 'price_1RlxA7EEgFiyIrnTVR20se38',
-      yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY || 'price_1RlxA7EEgFiyIrnTSuiyywVq',
-      description: 'For creators growing fast and ready to scale',
-      viewerLimit: 'Up to 250 avg viewers',
+      name: 'Pro',
+      price: PRICING_CONFIG[currency].pro.price,
+      priceId: PRICING_CONFIG[currency].pro.priceId,
+      description: 'The no-brainer growth stack',
       features: [
-        'Everything in Creator',
-        'Get advanced sentiment insights',
-        'Receive priority question alerts',
-        'Export detailed analytics reports',
-        'Automated post-stream email reports',
-        'Connect multi-platform dashboard (Twitch, YouTube, Kick)',
-        'Priority support • Up to 5,000 messages/hour'
+        'Everything in Free',
+        'Unlimited History',
+        'VIP Tracking',
+        'Gaming Slang Dictionary',
+        'Multi-Platform (Kick Beta)',
       ],
-      cta: 'Start Pro Plan',
-      popular: true
+      cta: 'Get Pro',
+      popular: true,
+      ctaLink: null,
     },
     {
-      name: '🟡 Streamer+',
-      monthlyPrice: 75,
-      yearlyPrice: 750,
-      monthlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY || 'price_1RlzDHEEgFiyIrnThpPdz7gV',
-      yearlyPriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY || 'price_1RlzDHEEgFiyIrnT45NkAklL',
-      description: 'For established channels and teams who need everything automated',
-      viewerLimit: 'Unlimited viewers',
-      features: [
-        'Everything in Pro',
-        'Get AI-powered response suggestions',
-        'Custom AI coaching for engagement peaks',
-        'Integrate OBS overlay',
-        'Create custom alerts & webhooks',
-        'Access dedicated account manager',
-        'Use white-label & API access',
-        'Unlimited messages'
-      ],
-      cta: 'Start Streamer+ Plan',
-      popular: false
-    }
+      name: 'Agency',
+      price: PRICING_CONFIG[currency].agency.price,
+      priceId: PRICING_CONFIG[currency].agency.priceId,
+      description: 'For managers & teams',
+      features: ['Manage 5 Channels', 'White Label Reports', 'API Access', 'Priority Support'],
+      cta: 'Get Agency',
+      popular: false,
+      ctaLink: null,
+    },
   ]
 
-  const handleCheckout = async (tier: typeof tiers[0]) => {
+  const handleCheckout = async (tier: (typeof tiers)[0]) => {
+    // If it's the free tier, redirect to signup
+    if (tier.ctaLink) {
+      window.location.href = tier.ctaLink
+      return
+    }
+
     try {
       setLoadingPlan(tier.name)
-      const priceId = isYearly ? tier.yearlyPriceId : tier.monthlyPriceId
+      const priceId = tier.priceId
 
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
@@ -101,18 +113,20 @@ export default function PricingTable() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' }}>
-      {/* Billing Toggle */}
+      {/* Currency Toggle */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          padding: '0.5rem',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          display: 'inline-flex',
-          gap: '0.5rem'
-        }}>
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            padding: '0.5rem',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            display: 'inline-flex',
+            gap: '0.5rem',
+          }}
+        >
           <button
-            onClick={() => setIsYearly(false)}
+            onClick={() => setCurrency('USD')}
             style={{
               padding: '0.75rem 2rem',
               borderRadius: '8px',
@@ -120,17 +134,18 @@ export default function PricingTable() {
               fontSize: '1rem',
               fontFamily: 'Poppins, sans-serif',
               transition: 'all 0.3s ease',
-              background: !isYearly ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
+              background:
+                currency === 'USD' ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
-              boxShadow: !isYearly ? '0 4px 15px rgba(105, 50, 255, 0.4)' : 'none'
+              boxShadow: currency === 'USD' ? '0 4px 15px rgba(105, 50, 255, 0.4)' : 'none',
             }}
           >
-            Monthly
+            USD ($)
           </button>
           <button
-            onClick={() => setIsYearly(true)}
+            onClick={() => setCurrency('GBP')}
             style={{
               padding: '0.75rem 2rem',
               borderRadius: '8px',
@@ -138,37 +153,27 @@ export default function PricingTable() {
               fontSize: '1rem',
               fontFamily: 'Poppins, sans-serif',
               transition: 'all 0.3s ease',
-              background: isYearly ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
+              background:
+                currency === 'GBP' ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              boxShadow: isYearly ? '0 4px 15px rgba(105, 50, 255, 0.4)' : 'none'
+              boxShadow: currency === 'GBP' ? '0 4px 15px rgba(105, 50, 255, 0.4)' : 'none',
             }}
           >
-            Yearly
-            <span style={{
-              fontSize: '0.75rem',
-              background: '#10b981',
-              color: 'white',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '6px',
-              fontWeight: '700'
-            }}>
-              Save 16%
-            </span>
+            GBP (£)
           </button>
         </div>
       </div>
 
       {/* Pricing Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '2rem'
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '2rem',
+        }}
+      >
         {tiers.map((tier) => (
           <div
             key={tier.name}
@@ -179,82 +184,95 @@ export default function PricingTable() {
               border: tier.popular ? '2px solid #8b5cf6' : '1px solid rgba(255, 255, 255, 0.1)',
               padding: '2rem',
               transform: tier.popular ? 'scale(1.05)' : 'scale(1)',
-              transition: 'transform 0.3s ease'
+              transition: 'transform 0.3s ease',
             }}
           >
             {tier.popular && (
-              <div style={{
-                position: 'absolute',
-                top: '-1rem',
-                left: '50%',
-                transform: 'translateX(-50%)'
-              }}>
-                <span style={{
-                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                  color: 'white',
-                  padding: '0.25rem 1rem',
-                  borderRadius: '9999px',
-                  fontSize: '0.875rem',
-                  fontWeight: '500'
-                }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-1rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                }}
+              >
+                <span
+                  style={{
+                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                    color: 'white',
+                    padding: '0.25rem 1rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                  }}
+                >
                   Most Popular
                 </span>
               </div>
             )}
 
             <div style={{ textAlign: 'center' }}>
-              <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: 'white',
-                marginBottom: '0.5rem'
-              }}>{tier.name}</h3>
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.7)',
-                marginBottom: '0.5rem'
-              }}>{tier.description}</p>
-              <div style={{
-                background: tier.viewerLimit === 'Unlimited'
-                  ? 'linear-gradient(135deg, #FFD700, #FFA500)'
-                  : 'rgba(94, 234, 212, 0.2)',
-                border: tier.viewerLimit === 'Unlimited'
-                  ? '1px solid rgba(255, 215, 0, 0.4)'
-                  : '1px solid rgba(94, 234, 212, 0.4)',
-                borderRadius: '8px',
-                padding: '0.5rem 1rem',
-                marginBottom: '1rem',
-                display: 'inline-block'
-              }}>
-                <span style={{
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  color: tier.viewerLimit === 'Unlimited' ? '#000' : '#5EEAD4'
-                }}>
-                  {tier.viewerLimit === 'Unlimited' ? '♾️ ' : '👥 '}{tier.viewerLimit}
-                </span>
-              </div>
+              <h3
+                style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                {tier.name}
+              </h3>
+              <p
+                style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  marginBottom: '1.5rem',
+                  fontSize: '0.95rem',
+                }}
+              >
+                {tier.description}
+              </p>
 
               <div style={{ marginBottom: '1.5rem' }}>
-                <span style={{
-                  fontSize: '2.5rem',
-                  fontWeight: '800',
-                  color: 'white'
-                }}>
-                  £{isYearly ? tier.yearlyPrice : tier.monthlyPrice}
-                </span>
-                <span style={{
-                  color: 'rgba(255, 255, 255, 0.7)'
-                }}>
-                  /{isYearly ? 'year' : 'month'}
-                </span>
-                {isYearly && (
-                  <div style={{
-                    fontSize: '0.875rem',
-                    color: '#10b981',
-                    marginTop: '0.25rem'
-                  }}>
-                    Save £{(tier.monthlyPrice * 12) - tier.yearlyPrice} per year
-                  </div>
+                {tier.price === 'Free' ? (
+                  <span
+                    style={{
+                      fontSize: '2.5rem',
+                      fontWeight: '800',
+                      color: 'white',
+                    }}
+                  >
+                    Free
+                  </span>
+                ) : (
+                  <>
+                    <span
+                      style={{
+                        fontSize: '2.5rem',
+                        fontWeight: '800',
+                        color: 'white',
+                      }}
+                    >
+                      {PRICING_CONFIG[currency].symbol}
+                      {tier.price.split('.')[0]}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '1.5rem',
+                        fontWeight: '600',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      }}
+                    >
+                      .{tier.price.split('.')[1]}
+                    </span>
+                    <span
+                      style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      /month
+                    </span>
+                  </>
                 )}
               </div>
 
@@ -274,7 +292,7 @@ export default function PricingTable() {
                   color: 'white',
                   border: tier.popular ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
                   cursor: loadingPlan !== null ? 'not-allowed' : 'pointer',
-                  opacity: loadingPlan !== null && loadingPlan !== tier.name ? 0.5 : 1
+                  opacity: loadingPlan !== null && loadingPlan !== tier.name ? 0.5 : 1,
                 }}
                 data-event={`cta-pricing-${tier.name.toLowerCase()}`}
               >
@@ -284,21 +302,32 @@ export default function PricingTable() {
 
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {tier.features.map((feature, index) => (
-                <li key={index} style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  marginBottom: '0.75rem'
-                }}>
-                  <span style={{
-                    color: '#10b981',
-                    marginRight: '0.75rem',
-                    fontSize: '1.2rem',
-                    marginTop: '0.125rem'
-                  }}>✓</span>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    lineHeight: '1.5'
-                  }}>{feature}</span>
+                <li
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  <span
+                    style={{
+                      color: '#10b981',
+                      marginRight: '0.75rem',
+                      fontSize: '1.2rem',
+                      marginTop: '0.125rem',
+                    }}
+                  >
+                    ✓
+                  </span>
+                  <span
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      lineHeight: '1.5',
+                    }}
+                  >
+                    {feature}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -308,26 +337,33 @@ export default function PricingTable() {
 
       {/* Footer Message */}
       <div style={{ marginTop: '3rem', textAlign: 'center' }}>
-        <div style={{
-          background: 'rgba(94, 234, 212, 0.1)',
-          borderRadius: '0.75rem',
-          padding: '2rem',
-          border: '1px solid rgba(94, 234, 212, 0.3)'
-        }}>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.9)',
-            lineHeight: '1.8',
-            fontSize: '1rem'
-          }}>
-            All plans include real-time chat analysis, 13+ language support, and secure Twitch authentication.
+        <div
+          style={{
+            background: 'rgba(94, 234, 212, 0.1)',
+            borderRadius: '0.75rem',
+            padding: '2rem',
+            border: '1px solid rgba(94, 234, 212, 0.3)',
+          }}
+        >
+          <p
+            style={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              lineHeight: '1.8',
+              fontSize: '1rem',
+            }}
+          >
+            All paid plans include real-time chat analysis, 13+ language support, and secure
+            authentication.
             <br />
-            <span style={{
-              color: '#5EEAD4',
-              fontWeight: '600',
-              marginTop: '0.5rem',
-              display: 'inline-block'
-            }}>
-              Start free • No credit card required • Cancel anytime
+            <span
+              style={{
+                color: '#5EEAD4',
+                fontWeight: '600',
+                marginTop: '0.5rem',
+                display: 'inline-block',
+              }}
+            >
+              No credit card required for free tier • Cancel anytime
             </span>
           </p>
         </div>

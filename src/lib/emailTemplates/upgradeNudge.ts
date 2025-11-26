@@ -18,7 +18,7 @@ export async function sendUpgradeNudgeEmail(params: UpgradeNudgeParams) {
   const { email, userName, currentTier, avgViewers, viewerLimit } = params
 
   // Determine suggested tier
-  const suggestedTier = currentTier === 'Creator' ? 'Pro' : 'Streamer+'
+  const suggestedTier = currentTier === 'Starter' ? 'Pro' : 'Agency'
   const percentGrowth = Math.round(((avgViewers - viewerLimit) / viewerLimit) * 100)
 
   // Upgrade URL
@@ -39,7 +39,7 @@ export async function sendUpgradeNudgeEmail(params: UpgradeNudgeParams) {
     to: [email],
     subject: emailContent.subject,
     html: emailContent.html,
-    text: emailContent.text
+    text: emailContent.text,
   })
 
   if (error) {
@@ -109,21 +109,25 @@ function generateUpgradeNudgeEmail(
       </p>
 
       <ul class="feature-list">
-        ${currentTier === 'Creator' ? `
-          <li>Support for up to 250 average viewers</li>
-          <li>Advanced sentiment analysis for deeper insights</li>
-          <li>Priority question alerts so you never miss engagement</li>
-          <li>Export analytics reports to track your growth</li>
+        ${
+          currentTier === 'Starter'
+            ? `
+          <li>Unlimited History (vs 24-hour limit)</li>
+          <li>VIP Tracking for your top supporters</li>
+          <li>Gaming Slang Dictionary for accurate sentiment</li>
+          <li>Multi-Platform support (Kick Beta access)</li>
           <li>Priority support from our team</li>
-          <li>Multi-platform dashboard integrations</li>
-        ` : `
-          <li>Unlimited average viewers</li>
-          <li>AI response suggestions for chat interaction</li>
-          <li>OBS overlay integration for on-stream analytics</li>
-          <li>Custom alerts & webhook integrations</li>
-          <li>Dedicated account manager for personalized support</li>
-          <li>White-label options & full API access</li>
-        `}
+          <li>Everything you need to scale</li>
+        `
+            : `
+          <li>Manage 5 Channels (perfect for agencies)</li>
+          <li>White Label Reports for clients</li>
+          <li>Full API Access for custom integrations</li>
+          <li>Priority Support with faster response times</li>
+          <li>Dedicated account manager</li>
+          <li>Advanced analytics and exports</li>
+        `
+        }
       </ul>
 
       <div style="text-align: center;">
@@ -153,21 +157,25 @@ Fantastic news! Your stream is growing!
 Over the past 30 days, you've been averaging ${avgViewers} viewers - that's ${percentGrowth}% over your ${currentTier} tier limit of ${viewerLimit}.
 
 Upgrade to ${suggestedTier} to unlock:
-${currentTier === 'Creator' ? `
-- Support for up to 250 average viewers
-- Advanced sentiment analysis
-- Priority question alerts
-- Export analytics reports
-- Priority support
-- Multi-platform dashboard
-` : `
-- Unlimited average viewers
-- AI response suggestions
-- OBS overlay integration
-- Custom alerts & webhooks
+${
+  currentTier === 'Starter'
+    ? `
+- Unlimited History (vs 24-hour limit)
+- VIP Tracking for your top supporters
+- Gaming Slang Dictionary for accurate sentiment
+- Multi-Platform support (Kick Beta access)
+- Priority support from our team
+- Everything you need to scale
+`
+    : `
+- Manage 5 Channels (perfect for agencies)
+- White Label Reports for clients
+- Full API Access for custom integrations
+- Priority Support with faster response times
 - Dedicated account manager
-- White-label options & API access
-`}
+- Advanced analytics and exports
+`
+}
 
 Upgrade now: ${upgradeUrl}
 
@@ -175,6 +183,6 @@ Your current plan will continue working - we're just letting you know upgrading 
 
 Casi • Your stream's brainy co-pilot
 https://heycasi.com
-    `
+    `,
   }
 }

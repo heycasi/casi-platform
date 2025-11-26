@@ -1,8 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
 console.log('🔧 Initializing Supabase client...')
-console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing')
-console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Set' : '❌ Missing')
+console.log(
+  'NEXT_PUBLIC_SUPABASE_URL:',
+  process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing'
+)
+console.log(
+  'SUPABASE_SERVICE_ROLE_KEY:',
+  process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Set' : '❌ Missing'
+)
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,9 +16,9 @@ const supabase = createClient(
 )
 
 export const TIER_LIMITS = {
-  'Creator': { viewers: 50, messages: 1000 },
-  'Pro': { viewers: 250, messages: 5000 },
-  'Streamer+': { viewers: Infinity, messages: Infinity }
+  Starter: { viewers: Infinity, messages: Infinity },
+  Pro: { viewers: Infinity, messages: Infinity },
+  Agency: { viewers: Infinity, messages: Infinity },
 } as const
 
 export type TierName = keyof typeof TIER_LIMITS
@@ -104,7 +110,7 @@ export async function checkAndUpdateTierStatus(
       avg_viewers_30d: avgViewers,
       days_over_limit: newDaysOverLimit,
       tier_status: tierStatus,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('id', sub.id)
 
@@ -113,11 +119,12 @@ export async function checkAndUpdateTierStatus(
   }
 
   // Determine suggested tier
+  // Note: With new unlimited model, tier upgrades are based on feature needs, not viewer limits
   let suggestedTier: TierName | undefined
-  if (sub.tier_name === 'Creator' && avgViewers > 50) {
+  if (sub.tier_name === 'Starter' && avgViewers > 100) {
     suggestedTier = 'Pro'
-  } else if (sub.tier_name === 'Pro' && avgViewers > 250) {
-    suggestedTier = 'Streamer+'
+  } else if (sub.tier_name === 'Pro' && avgViewers > 500) {
+    suggestedTier = 'Agency'
   }
 
   const percentOver = limit > 0 ? Math.round(((avgViewers - limit) / limit) * 100) : 0
@@ -129,7 +136,7 @@ export async function checkAndUpdateTierStatus(
     daysOverLimit: newDaysOverLimit,
     shouldNudge: newDaysOverLimit >= 7, // Nudge after 7 days over limit
     suggestedTier,
-    percentOver
+    percentOver,
   }
 }
 
@@ -140,7 +147,9 @@ export async function getAllTierStatuses() {
   console.log('🔍 Fetching all active subscriptions...')
   const { data, error } = await supabase
     .from('subscriptions')
-    .select('id, email, stripe_subscription_id, tier_name, plan_name, status, avg_viewer_limit, avg_viewers_30d, days_over_limit, tier_status, last_nudge_sent_at')
+    .select(
+      'id, email, stripe_subscription_id, tier_name, plan_name, status, avg_viewer_limit, avg_viewers_30d, days_over_limit, tier_status, last_nudge_sent_at'
+    )
     .eq('status', 'active')
     .order('days_over_limit', { ascending: false })
 
@@ -174,7 +183,7 @@ export async function getUsersNeedingNudges() {
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  return (data || []).filter(sub => {
+  return (data || []).filter((sub) => {
     if (!sub.last_nudge_sent_at) return true
     const lastNudge = new Date(sub.last_nudge_sent_at)
     return lastNudge < sevenDaysAgo
@@ -188,7 +197,7 @@ export async function markNudgeSent(subscriptionId: string) {
   const { error } = await supabase
     .from('subscriptions')
     .update({
-      last_nudge_sent_at: new Date().toISOString()
+      last_nudge_sent_at: new Date().toISOString(),
     })
     .eq('id', subscriptionId)
 
@@ -217,10 +226,10 @@ export async function getUserTierStatus(userEmail: string): Promise<TierStatus |
   const isOverLimit = avgViewers > limit
 
   let suggestedTier: TierName | undefined
-  if (sub.tier_name === 'Creator' && avgViewers > 50) {
+  if (sub.tier_name === 'Starter' && avgViewers > 100) {
     suggestedTier = 'Pro'
-  } else if (sub.tier_name === 'Pro' && avgViewers > 250) {
-    suggestedTier = 'Streamer+'
+  } else if (sub.tier_name === 'Pro' && avgViewers > 500) {
+    suggestedTier = 'Agency'
   }
 
   const percentOver = limit > 0 ? Math.round(((avgViewers - limit) / limit) * 100) : 0
@@ -232,6 +241,6 @@ export async function getUserTierStatus(userEmail: string): Promise<TierStatus |
     daysOverLimit: sub.days_over_limit || 0,
     shouldNudge: (sub.days_over_limit || 0) >= 7,
     suggestedTier,
-    percentOver
+    percentOver,
   }
 }

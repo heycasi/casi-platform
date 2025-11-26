@@ -89,15 +89,12 @@ export function sanitizeString(input: string, maxLength: number = 1000): string 
     return ''
   }
 
-  return input
-    .trim()
-    .slice(0, maxLength)
-    .replace(/[<>]/g, '') // Remove angle brackets to prevent HTML injection
+  return input.trim().slice(0, maxLength).replace(/[<>]/g, '') // Remove angle brackets to prevent HTML injection
 }
 
 // Validate plan name
 export function validatePlanName(planName: string): string {
-  const validPlans = ['Creator', 'Pro', 'Streamer+']
+  const validPlans = ['Starter', 'Pro', 'Agency']
 
   if (!validPlans.includes(planName)) {
     throw new ValidationError(`Invalid plan name. Must be one of: ${validPlans.join(', ')}`)
@@ -111,7 +108,9 @@ export function validateBillingInterval(interval: string): string {
   const validIntervals = ['month', 'year']
 
   if (!validIntervals.includes(interval)) {
-    throw new ValidationError(`Invalid billing interval. Must be one of: ${validIntervals.join(', ')}`)
+    throw new ValidationError(
+      `Invalid billing interval. Must be one of: ${validIntervals.join(', ')}`
+    )
   }
 
   return interval
@@ -153,8 +152,12 @@ export function validateUrl(url: string, allowedDomains?: string[]): string {
     // Check allowed domains if specified
     if (allowedDomains && allowedDomains.length > 0) {
       const hostname = urlObj.hostname
-      if (!allowedDomains.some(domain => hostname === domain || hostname.endsWith(`.${domain}`))) {
-        throw new ValidationError(`URL domain not allowed. Must be one of: ${allowedDomains.join(', ')}`)
+      if (
+        !allowedDomains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`))
+      ) {
+        throw new ValidationError(
+          `URL domain not allowed. Must be one of: ${allowedDomains.join(', ')}`
+        )
       }
     }
 
@@ -168,11 +171,7 @@ export function validateUrl(url: string, allowedDomains?: string[]): string {
 }
 
 // Validate numeric ranges
-export function validateNumber(
-  value: any,
-  min?: number,
-  max?: number
-): number {
+export function validateNumber(value: any, min?: number, max?: number): number {
   const num = Number(value)
 
   if (isNaN(num)) {

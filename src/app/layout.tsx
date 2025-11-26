@@ -4,8 +4,31 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
-  title: 'Casi Platform - Real-time Streaming Analytics',
-  description: 'AI-powered chat analysis for streamers',
+  title: 'HeyCasi | Stop Ignoring Your Best Viewers',
+  description:
+    'The real-time stream intelligence engine. Instantly spot VIPs, flag toxic chat, and capture viral moments. Faster than GPT-4. Zero-latency.',
+  keywords: [
+    'Twitch Analytics',
+    'Streamer Tools',
+    'Chat Sentiment',
+    'VIP Tracking',
+    'Kick Streaming Tools',
+    'Stream Intelligence',
+    'Real-time Chat Analysis',
+  ],
+  openGraph: {
+    title: 'HeyCasi | Stop Ignoring Your Best Viewers',
+    description:
+      'The real-time stream intelligence engine. Instantly spot VIPs, flag toxic chat, and capture viral moments. Faster than GPT-4. Zero-latency.',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HeyCasi | Stop Ignoring Your Best Viewers',
+    description:
+      'The real-time stream intelligence engine. Instantly spot VIPs, flag toxic chat, and capture viral moments. Faster than GPT-4. Zero-latency.',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

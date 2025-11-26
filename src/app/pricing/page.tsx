@@ -32,7 +32,7 @@ export default function PricingPage() {
             <BlurText text=" Pricing" delay={100} style={{ display: 'inline' }} />
           </h1>
           <BlurText
-            text="Choose the plan that fits your streaming goals. Start with our free beta."
+            text="Choose the plan that fits your streaming goals. Start free, upgrade when you're ready to scale."
             delay={300}
             style={{
               fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
@@ -94,28 +94,28 @@ export default function PricingPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {[
               {
-                q: 'How does the beta pricing work?',
-                a: 'The beta is completely free for your first 2 weeks. No credit card required, just email signup. You can test all MVP features and help shape the product roadmap. After beta, you can choose any paid plan to continue.',
+                q: 'Can I try HeyCasi for free?',
+                a: 'Yes! Our Starter plan is completely free forever. No credit card required. You get instant sentiment detection, unlimited messages, and 24-hour history. Perfect for testing the platform before upgrading.',
               },
               {
                 q: 'Can I change plans anytime?',
-                a: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate the billing accordingly.",
+                a: "Absolutely. Upgrade or downgrade anytime. Changes take effect immediately, and we'll prorate the billing accordingly. No lock-in contracts.",
               },
               {
-                q: 'What happens if I exceed my message limits?',
-                a: "We'll notify you when you're approaching your limit. If you exceed it, we'll continue processing but may suggest upgrading to a higher tier for consistent performance.",
+                q: 'Why is HeyCasi faster than other tools?',
+                a: "We don't use GPT-4 or external AI APIs for sentiment analysis. Our custom gaming slang dictionary and rule-based engine delivers sub-millisecond analysis. Zero API delays. Zero training data. Pure speed.",
               },
               {
                 q: 'Do you offer refunds?',
-                a: "Yes, we offer a 30-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund.",
+                a: "Yes, we offer a 30-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund. No questions asked.",
               },
               {
                 q: 'Which platforms are supported?',
-                a: "Currently, we support Twitch with YouTube and Kick coming during the beta period. All plans include access to new platforms as they're added.",
+                a: 'Currently: Twitch (full support) and Kick (beta access on Pro+). YouTube support coming Q2 2025. All plans automatically get access to new platforms as they launch.',
               },
               {
-                q: 'What analytics features are included?',
-                a: 'All plans include: Real-time sentiment tracking, question detection, Community MVPs (top chatters with recurring user detection), Chat Activity Timeline (visualized engagement patterns), Chat Highlights (funniest, most thoughtful, supportive moments), and comprehensive post-stream reports. No feature restrictions - every tier gets the full analytics suite!',
+                q: 'What about data privacy?',
+                a: 'Your chat data is never used to train AI models. We process messages in real-time and discard them after analysis. OAuth secured. COPPA compliant. Your streams stay yours.',
               },
             ].map((faq, i) => (
               <div
@@ -170,10 +170,10 @@ export default function PricingPage() {
               color: 'white',
             }}
           >
-            <GradientText animate={true}>Ready to start your free beta?</GradientText>
+            <GradientText animate={true}>Ready to stop missing opportunities?</GradientText>
           </h2>
           <BlurText
-            text="Join streamers who are already improving their audience engagement."
+            text="Start free. Upgrade when you're crushing it."
             delay={200}
             style={{
               fontSize: '1.2rem',
@@ -193,7 +193,7 @@ export default function PricingPage() {
             }}
           >
             <Link
-              href="/beta"
+              href="/beta-signup"
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -207,10 +207,10 @@ export default function PricingPage() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Start Free Beta
+              Start Free
             </Link>
             <Link
-              href="/features"
+              href="/#features"
               style={{
                 display: 'inline-block',
                 background: 'transparent',
