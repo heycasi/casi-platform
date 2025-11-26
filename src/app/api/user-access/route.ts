@@ -18,10 +18,7 @@ export async function GET(req: NextRequest) {
     const email = searchParams.get('email')
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email parameter is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email parameter is required' }, { status: 400 })
     }
 
     // Get user's subscription/trial status
@@ -31,13 +28,44 @@ export async function GET(req: NextRequest) {
       .eq('email', email)
       .single()
 
-    // No subscription found
+    // No subscription found - auto-create Starter subscription for product-led growth
     if (subError || !subscription) {
+      console.log(`No subscription found for ${email}, creating Starter subscription...`)
+
+      const { data: newSub, error: createError } = await supabase
+        .from('subscriptions')
+        .insert({
+          email: email,
+          tier_name: 'Starter',
+          plan_name: 'Starter',
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
+
+      if (createError) {
+        console.error('Failed to create starter subscription:', createError)
+        return NextResponse.json(
+          {
+            has_access: false,
+            status: 'error',
+            message: 'Failed to create starter account. Please try again.',
+          },
+          { status: 500 }
+        )
+      }
+
+      console.log(`✅ Created Starter subscription for ${email}`)
+
       return NextResponse.json({
-        has_access: false,
-        status: 'no_subscription',
-        message: 'No subscription found. Please subscribe or use a beta code to access the dashboard.',
-        require_subscription: true
+        has_access: true,
+        status: 'active',
+        is_trial: false,
+        plan_name: 'Starter',
+        tier_name: 'Starter',
+        message: 'Welcome to Casi Starter!',
       })
     }
 
@@ -51,7 +79,9 @@ export async function GET(req: NextRequest) {
 
       if (trialEndsAt > now) {
         // Trial is still active
-        const daysRemaining = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        const daysRemaining = Math.ceil(
+          (trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        )
 
         return NextResponse.json({
           has_access: true,
@@ -61,7 +91,7 @@ export async function GET(req: NextRequest) {
           trial_days_remaining: daysRemaining,
           plan_name: subscription.plan_name || subscription.tier_name,
           beta_code: subscription.beta_code,
-          message: `You have ${daysRemaining} days remaining in your beta trial.`
+          message: `You have ${daysRemaining} days remaining in your beta trial.`,
         })
       } else {
         // Trial has expired
@@ -72,7 +102,7 @@ export async function GET(req: NextRequest) {
           trial_ended: true,
           trial_ends_at: trialEndDate,
           message: 'Your beta trial has expired. Please subscribe to continue using Casi.',
-          require_subscription: true
+          require_subscription: true,
         })
       }
     }
@@ -86,7 +116,7 @@ export async function GET(req: NextRequest) {
         plan_name: subscription.plan_name,
         tier_name: subscription.tier_name,
         current_period_end: subscription.current_period_end,
-        message: `Active ${subscription.plan_name} subscription`
+        message: `Active ${subscription.plan_name} subscription`,
       })
     }
 
@@ -96,9 +126,8 @@ export async function GET(req: NextRequest) {
       status: subscription.status,
       plan_name: subscription.plan_name,
       message: `Your subscription is ${subscription.status}. Please update your payment method or subscribe.`,
-      require_subscription: true
+      require_subscription: true,
     })
-
   } catch (error: any) {
     console.error('User access check error:', error)
     return NextResponse.json(

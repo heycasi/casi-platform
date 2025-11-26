@@ -8,7 +8,6 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [betaCode, setBetaCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -39,8 +38,8 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
-        }
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
       })
 
       if (signUpError) throw signUpError
@@ -55,43 +54,33 @@ export default function SignUpPage() {
             },
             body: JSON.stringify({
               email: email,
-              userId: data.user.id
-            })
+              userId: data.user.id,
+            }),
           })
 
           const linkData = await linkResponse.json()
 
           if (linkData.linked) {
-            setMessage(`Account created and your ${linkData.subscription.plan_name} subscription has been linked! Please check your email to verify your account.`)
+            setMessage(
+              `Account created and your ${linkData.subscription.plan_name} subscription has been linked! Please check your email to verify your account.`
+            )
           } else {
-            // If beta code was provided, redeem it
-            if (betaCode.trim()) {
-              try {
-                const betaResponse = await fetch('/api/beta-code/validate', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    code: betaCode.trim(),
-                    email: email,
-                    userId: data.user.id
-                  })
-                })
-
-                const betaData = await betaResponse.json()
-
-                if (betaResponse.ok && betaData.success) {
-                  setMessage(`Account created! ${betaData.message} Please check your email to verify your account.`)
-                } else {
-                  setMessage(`Account created! Note: ${betaData.error}. Please check your email to verify your account.`)
-                }
-              } catch (betaError) {
-                console.error('Error redeeming beta code:', betaError)
-                setMessage('Account created! Please check your email to verify your account.')
-              }
-            } else {
-              setMessage('Account created! Please check your email to verify your account. You will need a subscription to access the dashboard.')
+            // Create Starter subscription for new user
+            try {
+              await fetch('/api/create-starter-subscription', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: email,
+                  userId: data.user.id,
+                }),
+              })
+              setMessage('Account created! Please check your email to verify your account.')
+            } catch (starterError) {
+              console.error('Error creating starter subscription:', starterError)
+              setMessage('Account created! Please check your email to verify your account.')
             }
           }
         } catch (linkError) {
@@ -105,8 +94,6 @@ export default function SignUpPage() {
       setEmail('')
       setPassword('')
       setConfirmPassword('')
-      setBetaCode('')
-
     } catch (err: any) {
       setError(err.message || 'Failed to create account')
     } finally {
@@ -115,25 +102,29 @@ export default function SignUpPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'Poppins, sans-serif',
-      padding: '1rem',
-      position: 'relative'
-    }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, sans-serif',
+        padding: '1rem',
+        position: 'relative',
+      }}
+    >
       <AnimatedBackground />
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '3rem 2rem',
-        maxWidth: '420px',
-        width: '100%'
-      }}>
+      <div
+        style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '3rem 2rem',
+          maxWidth: '420px',
+          width: '100%',
+        }}
+      >
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <img
@@ -143,35 +134,41 @@ export default function SignUpPage() {
           />
         </div>
 
-        <h1 style={{
-          color: 'white',
-          fontSize: '1.75rem',
-          fontWeight: '700',
-          marginBottom: '0.5rem',
-          textAlign: 'center'
-        }}>
+        <h1
+          style={{
+            color: 'white',
+            fontSize: '1.75rem',
+            fontWeight: '700',
+            marginBottom: '0.5rem',
+            textAlign: 'center',
+          }}
+        >
           Create Account
         </h1>
 
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: '0.875rem',
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
+        <p
+          style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.875rem',
+            textAlign: 'center',
+            marginBottom: '2rem',
+          }}
+        >
           Start your free Casi account today
         </p>
 
         <form onSubmit={handleSignUp}>
           {/* Email */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
               Email
             </label>
             <input
@@ -187,7 +184,7 @@ export default function SignUpPage() {
                 borderRadius: '10px',
                 color: 'white',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
               }}
               placeholder="you@example.com"
             />
@@ -195,13 +192,15 @@ export default function SignUpPage() {
 
           {/* Password */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
               Password
             </label>
             <input
@@ -217,7 +216,7 @@ export default function SignUpPage() {
                 borderRadius: '10px',
                 color: 'white',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
               }}
               placeholder="At least 6 characters"
             />
@@ -225,13 +224,15 @@ export default function SignUpPage() {
 
           {/* Confirm Password */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
               Confirm Password
             </label>
             <input
@@ -247,74 +248,41 @@ export default function SignUpPage() {
                 borderRadius: '10px',
                 color: 'white',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
               }}
               placeholder="Re-enter password"
             />
           </div>
 
-          {/* Beta Code (Optional) */}
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>
-              Beta Code <span style={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: '400' }}>(Optional)</span>
-            </label>
-            <input
-              type="text"
-              value={betaCode}
-              onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
-              style={{
-                width: '100%',
-                padding: '0.875rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(184, 238, 138, 0.3)',
-                borderRadius: '10px',
-                color: 'white',
-                fontSize: '0.875rem',
-                outline: 'none',
-                textTransform: 'uppercase'
-              }}
-              placeholder="Enter your beta code"
-            />
-            <p style={{
-              fontSize: '0.75rem',
-              color: 'rgba(184, 238, 138, 0.7)',
-              margin: '0.5rem 0 0 0'
-            }}>
-              Have a beta code? Get 14 days free access!
-            </p>
-          </div>
-
           {/* Error/Message */}
           {error && (
-            <div style={{
-              padding: '0.75rem',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              color: '#ef4444',
-              fontSize: '0.875rem',
-              marginBottom: '1rem'
-            }}>
+            <div
+              style={{
+                padding: '0.75rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                color: '#ef4444',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}
+            >
               {error}
             </div>
           )}
 
           {message && (
-            <div style={{
-              padding: '0.75rem',
-              background: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: '8px',
-              color: '#10b981',
-              fontSize: '0.875rem',
-              marginBottom: '1rem'
-            }}>
+            <div
+              style={{
+                padding: '0.75rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '8px',
+                color: '#10b981',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}
+            >
               {message}
             </div>
           )}
@@ -334,7 +302,7 @@ export default function SignUpPage() {
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,
-              marginBottom: '1rem'
+              marginBottom: '1rem',
             }}
           >
             {loading ? 'Creating account...' : 'Create Account'}
@@ -342,14 +310,19 @@ export default function SignUpPage() {
         </form>
 
         {/* Footer */}
-        <div style={{
-          marginTop: '2rem',
-          textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.875rem'
-        }}>
+        <div
+          style={{
+            marginTop: '2rem',
+            textAlign: 'center',
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '0.875rem',
+          }}
+        >
           Already have an account?{' '}
-          <a href="/login-email" style={{ color: '#6932FF', textDecoration: 'none', fontWeight: '600' }}>
+          <a
+            href="/login-email"
+            style={{ color: '#6932FF', textDecoration: 'none', fontWeight: '600' }}
+          >
             Sign in
           </a>
         </div>

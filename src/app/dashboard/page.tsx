@@ -5,157 +5,9 @@ import { generateMotivationalSuggestion } from '../../lib/multilingual'
 import TierUpgradeNudge from '@/components/TierUpgradeNudge'
 import FeatureGate from '@/components/FeatureGate'
 import HistoryLimitBanner from '@/components/HistoryLimitBanner'
-import ActivityFeed from '@/components/ActivityFeed'
+import MultiPlatformActivityFeed from '@/components/MultiPlatformActivityFeed'
 import { createChatClient } from '@/lib/chat/factory'
 import type { IChatClient, UnifiedChatMessage, Platform } from '@/types/chat'
-
-// Beta Code Redemption Component
-function BetaCodeRedemption() {
-  const [betaCode, setBetaCode] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [messageType, setMessageType] = useState<'success' | 'error'>('error')
-
-  const handleRedeem = async () => {
-    if (!betaCode.trim()) {
-      setMessage('Please enter a beta code')
-      setMessageType('error')
-      return
-    }
-
-    setIsSubmitting(true)
-    setMessage('')
-
-    try {
-      // Get user email from localStorage
-      const userEmail = localStorage.getItem('casi_user_email')
-      const twitchUser = localStorage.getItem('twitch_user')
-      let userId = null
-
-      if (twitchUser) {
-        try {
-          const user = JSON.parse(twitchUser)
-          userId = user.id
-        } catch (e) {
-          console.error('Failed to parse twitch user:', e)
-        }
-      }
-
-      if (!userEmail) {
-        setMessage('Please log in first to redeem a beta code')
-        setMessageType('error')
-        setIsSubmitting(false)
-        return
-      }
-
-      const response = await fetch('/api/beta-code/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code: betaCode.toUpperCase(),
-          email: userEmail,
-          userId,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-        setMessage(`✅ ${data.message}`)
-        setMessageType('success')
-        setBetaCode('')
-        // Reload page after 2 seconds to show dashboard
-        setTimeout(() => window.location.reload(), 2000)
-      } else {
-        console.error('Beta code redemption failed:', data)
-        const errorMsg = data.details
-          ? `${data.error}: ${data.details}`
-          : data.error || 'Failed to redeem beta code'
-        setMessage(errorMsg)
-        setMessageType('error')
-      }
-    } catch (error) {
-      console.error('Beta code redemption error:', error)
-      setMessage('Something went wrong. Please try again.')
-      setMessageType('error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  return (
-    <div
-      style={{
-        background: 'rgba(184, 238, 138, 0.05)',
-        border: '1px solid rgba(184, 238, 138, 0.2)',
-        borderRadius: '12px',
-        padding: '1.5rem',
-      }}
-    >
-      <p style={{ color: '#B8EE8A', fontWeight: 600, margin: '0 0 1rem 0', fontSize: '1rem' }}>
-        Have a Beta Code?
-      </p>
-      <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
-        <input
-          type="text"
-          value={betaCode}
-          onChange={(e) => setBetaCode(e.target.value.toUpperCase())}
-          placeholder="Enter code (e.g., CASI-XXXXX)"
-          disabled={isSubmitting}
-          style={{
-            width: '100%',
-            padding: '0.875rem 1rem',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(184, 238, 138, 0.3)',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '1rem',
-            fontFamily: 'Poppins, monospace',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-          }}
-        />
-        <button
-          onClick={handleRedeem}
-          disabled={isSubmitting || !betaCode.trim()}
-          style={{
-            width: '100%',
-            padding: '0.875rem 1rem',
-            background: isSubmitting ? 'rgba(184, 238, 138, 0.3)' : 'rgba(184, 238, 138, 0.2)',
-            border: '1px solid rgba(184, 238, 138, 0.4)',
-            borderRadius: '8px',
-            color: '#B8EE8A',
-            fontSize: '1rem',
-            fontWeight: 600,
-            cursor: isSubmitting || !betaCode.trim() ? 'not-allowed' : 'pointer',
-            opacity: isSubmitting || !betaCode.trim() ? 0.6 : 1,
-          }}
-        >
-          {isSubmitting ? 'Activating...' : 'Activate Beta Code'}
-        </button>
-      </div>
-      {message && (
-        <div
-          style={{
-            marginTop: '1rem',
-            padding: '0.75rem',
-            borderRadius: '8px',
-            background:
-              messageType === 'success' ? 'rgba(184, 238, 138, 0.1)' : 'rgba(255, 159, 159, 0.1)',
-            border:
-              messageType === 'success'
-                ? '1px solid rgba(184, 238, 138, 0.3)'
-                : '1px solid rgba(255, 159, 159, 0.3)',
-            color: messageType === 'success' ? '#B8EE8A' : '#FF9F9F',
-            fontSize: '0.875rem',
-          }}
-        >
-          {message}
-        </div>
-      )}
-    </div>
-  )
-}
 
 interface TierStatus {
   avgViewers: number
@@ -266,6 +118,9 @@ export default function Dashboard() {
   const [kickConnected, setKickConnected] = useState(false)
   const twitchClientRef = useRef<IChatClient | null>(null)
   const kickClientRef = useRef<IChatClient | null>(null)
+
+  // Platform filter for chat feed
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'twitch' | 'kick'>('all')
 
   // Message batching for efficient API calls
   const messageBatchRef = useRef<any[]>([])
@@ -844,8 +699,14 @@ export default function Dashboard() {
       }
     }
 
-    // Connect to Kick
+    // Connect to Kick (Pro/Agency only)
     const connectToKick = async () => {
+      // Tier-gating: Kick is only available for Pro and Agency users
+      if (userTier === 'Starter') {
+        console.log('🟢 [Kick] Skipping - Kick is a Pro feature (Starter tier)')
+        return
+      }
+
       // Determine which Kick channel to connect to
       // If admin is monitoring a different channel, use that channel name
       // Otherwise use the user's configured Kick username
@@ -860,7 +721,7 @@ export default function Dashboard() {
       }
 
       try {
-        console.log(`🟢 Connecting to Kick: ${kickChannelToMonitor}`)
+        console.log(`🟢 Connecting to Kick: ${kickChannelToMonitor} (${userTier} tier)`)
 
         const client = createChatClient('kick', kickChannelToMonitor, userTier)
         kickClientRef.current = client
@@ -884,7 +745,7 @@ export default function Dashboard() {
 
     // Connect to both platforms
     connectToTwitch()
-    connectToKick()
+    connectToKick() // Will be skipped if Starter tier
 
     // Real viewer count from Twitch API
     // Always use the channelName (the channel we're monitoring) for viewer count
@@ -1284,8 +1145,6 @@ export default function Dashboard() {
             >
               View Plans & Subscribe
             </a>
-
-            {!accessDetails?.beta_code && <BetaCodeRedemption />}
 
             <a
               href="/"
@@ -2107,7 +1966,83 @@ export default function Dashboard() {
                     minWidth: 0,
                   }}
                 >
-                  <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>💬 Live Chat Feed</h3>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>💬 Live Chat Feed</h3>
+
+                    {/* Platform Filter Toggle */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '0.25rem',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        padding: '0.25rem',
+                        borderRadius: '6px',
+                      }}
+                    >
+                      <button
+                        onClick={() => setPlatformFilter('all')}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          background:
+                            platformFilter === 'all' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                          color: platformFilter === 'all' ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        All
+                      </button>
+                      <button
+                        onClick={() => setPlatformFilter('twitch')}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          background:
+                            platformFilter === 'twitch' ? 'rgba(100, 65, 165, 0.3)' : 'transparent',
+                          color:
+                            platformFilter === 'twitch' ? '#9147FF' : 'rgba(255, 255, 255, 0.6)',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        🟣 Twitch
+                      </button>
+                      {(userTier === 'Pro' || userTier === 'Agency') && kickConnected && (
+                        <button
+                          onClick={() => setPlatformFilter('kick')}
+                          style={{
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            background:
+                              platformFilter === 'kick' ? 'rgba(83, 252, 24, 0.2)' : 'transparent',
+                            color:
+                              platformFilter === 'kick' ? '#53FC18' : 'rgba(255, 255, 255, 0.6)',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          🟢 Kick
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Show history limit banner for Starter users */}
                   {userTier === 'Starter' && <HistoryLimitBanner />}
@@ -2153,14 +2088,21 @@ export default function Dashboard() {
                         }}
                       >
                         {(() => {
-                          // Filter messages for Starter users: only show last 24 hours
-                          const filteredMessages =
+                          // Filter messages by time (Starter users: only last 24 hours)
+                          let filteredMessages =
                             userTier === 'Starter'
                               ? messages.filter((msg) => {
                                   const cutoffTime = Date.now() - 24 * 60 * 60 * 1000 // 24 hours ago
                                   return msg.timestamp > cutoffTime
                                 })
                               : messages
+
+                          // Filter messages by platform
+                          if (platformFilter !== 'all') {
+                            filteredMessages = filteredMessages.filter(
+                              (msg) => msg.platform === platformFilter
+                            )
+                          }
 
                           return filteredMessages
                             .slice(-50)
@@ -2539,7 +2481,13 @@ export default function Dashboard() {
                   minHeight: 0,
                 }}
               >
-                <ActivityFeed channelName={channelName} maxHeight="650px" />
+                <MultiPlatformActivityFeed
+                  twitchChannelName={channelName}
+                  kickChannelName={kickUsername}
+                  userTier={userTier}
+                  kickConnected={kickConnected}
+                  maxHeight="650px"
+                />
               </div>
             </div>
           </>
