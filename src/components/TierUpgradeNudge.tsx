@@ -14,43 +14,49 @@ export default function TierUpgradeNudge({
   avgViewers,
   viewerLimit,
   daysOverLimit,
-  percentOver
+  percentOver,
 }: TierUpgradeNudgeProps) {
   const [isDismissed, setIsDismissed] = useState(false)
 
   if (isDismissed || avgViewers <= viewerLimit) return null
 
-  const suggestedTier = currentTier === 'Creator' ? 'Pro' : 'Streamer+'
+  const suggestedTier = currentTier === 'Starter' ? 'Pro' : 'Agency'
 
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15))',
-      borderRadius: '16px',
-      padding: '1.5rem',
-      border: '2px solid rgba(255, 215, 0, 0.4)',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1rem',
-      marginBottom: '1rem',
-      position: 'relative',
-      animation: 'slideIn 0.5s ease-out'
-    }}>
+    <div
+      style={{
+        background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15))',
+        borderRadius: '16px',
+        padding: '1.5rem',
+        border: '2px solid rgba(255, 215, 0, 0.4)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+        marginBottom: '1rem',
+        position: 'relative',
+        animation: 'slideIn 0.5s ease-out',
+      }}
+    >
       <div style={{ fontSize: '3rem' }}>🎉</div>
 
       <div style={{ flex: 1 }}>
-        <h3 style={{
-          margin: '0 0 0.5rem 0',
-          fontSize: '1.2rem',
-          color: '#FFD700',
-          fontWeight: '700'
-        }}>
+        <h3
+          style={{
+            margin: '0 0 0.5rem 0',
+            fontSize: '1.2rem',
+            color: '#FFD700',
+            fontWeight: '700',
+          }}
+        >
           Your stream is growing!
         </h3>
         <p style={{ margin: '0 0 0.75rem 0', color: '#F7F7F7', fontSize: '0.9rem' }}>
-          You're averaging <strong>{avgViewers} viewers</strong> — that's {percentOver}% over your {currentTier} tier limit of {viewerLimit}.
+          You're averaging <strong>{avgViewers} viewers</strong> — that's {percentOver}% over your{' '}
+          {currentTier} tier limit of {viewerLimit}.
         </p>
         <p style={{ margin: '0 0 1rem 0', color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.85rem' }}>
-          Upgrade to <strong>{suggestedTier}</strong> to unlock advanced analytics, priority support, and features built for your audience size!
+          Upgrade to <strong>{suggestedTier}</strong> to unlock advanced analytics, priority
+          support, and features built for your audience size!
         </p>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -66,7 +72,7 @@ export default function TierUpgradeNudge({
               fontSize: '0.9rem',
               display: 'inline-block',
               transition: 'transform 0.2s ease',
-              fontFamily: 'Poppins, Arial, sans-serif'
+              fontFamily: 'Poppins, Arial, sans-serif',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)'
@@ -90,7 +96,7 @@ export default function TierUpgradeNudge({
               fontWeight: '600',
               fontSize: '0.9rem',
               fontFamily: 'Poppins, Arial, sans-serif',
-              transition: 'background 0.2s ease'
+              transition: 'background 0.2s ease',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'
@@ -104,11 +110,13 @@ export default function TierUpgradeNudge({
         </div>
 
         {daysOverLimit > 0 && (
-          <p style={{
-            margin: '0.75rem 0 0 0',
-            fontSize: '0.75rem',
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
+          <p
+            style={{
+              margin: '0.75rem 0 0 0',
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.6)',
+            }}
+          >
             You've been over your limit for {daysOverLimit} day{daysOverLimit !== 1 ? 's' : ''}
           </p>
         )}
@@ -131,7 +139,7 @@ export default function TierUpgradeNudge({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'background 0.2s ease'
+          transition: 'background 0.2s ease',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'

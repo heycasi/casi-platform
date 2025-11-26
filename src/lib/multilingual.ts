@@ -611,7 +611,8 @@ export function detectLanguage(text: string): { language: string; confidence: nu
 // Enhanced sentiment analysis with detailed reasoning
 export function analyzeSentiment(
   text: string,
-  language: string
+  language: string,
+  tier?: 'Starter' | 'Pro' | 'Agency'
 ): {
   sentiment: 'positive' | 'negative' | 'neutral'
   score: number
@@ -621,25 +622,30 @@ export function analyzeSentiment(
   let score = 0
   let reasons: string[] = []
 
-  // PRIORITY 1: Check gaming slang FIRST (before everything else)
-  // Split message into words and check each one
-  const words = lowerText.split(/\s+/)
-  for (const word of words) {
-    const gamingScore = getGamingSentiment(word)
-    if (gamingScore !== null) {
-      // Gaming slang detected - use this score immediately and return
-      score = gamingScore
-      reasons.push(`gaming slang: "${word}" (${gamingScore > 0 ? 'positive' : 'negative'})`)
+  // PRIORITY 1: Check gaming slang FIRST (Pro+ tier only)
+  // Gaming slang dictionary is a Pro+ feature
+  const hasGamingDictionary = tier === 'Pro' || tier === 'Agency'
 
-      // Return immediately - gaming slang takes precedence
-      const sentiment: 'positive' | 'negative' | 'neutral' =
-        score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral'
-      const reason = reasons.length > 0 ? reasons.slice(0, 2).join(', ') : undefined
-      return { sentiment, score, reason }
+  if (hasGamingDictionary) {
+    // Split message into words and check each one
+    const words = lowerText.split(/\s+/)
+    for (const word of words) {
+      const gamingScore = getGamingSentiment(word)
+      if (gamingScore !== null) {
+        // Gaming slang detected - use this score immediately and return
+        score = gamingScore
+        reasons.push(`gaming slang: "${word}" (${gamingScore > 0 ? 'positive' : 'negative'})`)
+
+        // Return immediately - gaming slang takes precedence
+        const sentiment: 'positive' | 'negative' | 'neutral' =
+          score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral'
+        const reason = reasons.length > 0 ? reasons.slice(0, 2).join(', ') : undefined
+        return { sentiment, score, reason }
+      }
     }
   }
 
-  // PRIORITY 2: If no gaming slang found, proceed with standard analysis
+  // PRIORITY 2: If no gaming slang found (or Starter tier), proceed with standard analysis
 
   // Profanity/insult list with strong negative weighting
   const profanity = [
@@ -809,15 +815,18 @@ export function getEngagementLevel(text: string): 'high' | 'medium' | 'low' {
 }
 
 // Main analysis function
-export function analyzeMessage(text: string): LanguageDetection {
+export function analyzeMessage(
+  text: string,
+  tier?: 'Starter' | 'Pro' | 'Agency'
+): LanguageDetection {
   // Detect language (internal only; not shown in UI)
   const { language, confidence } = detectLanguage(text)
 
   // Check if it's a question
   const isQuestion = checkIsQuestion(text, language)
 
-  // Analyze sentiment
-  const sentimentAnalysis = analyzeSentiment(text, language)
+  // Analyze sentiment (with tier-gated gaming dictionary)
+  const sentimentAnalysis = analyzeSentiment(text, language, tier)
 
   // Detect topics
   const topics = detectTopics(text)

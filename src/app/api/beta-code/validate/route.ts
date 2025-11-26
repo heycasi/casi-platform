@@ -69,16 +69,16 @@ export async function POST(req: NextRequest) {
       email,
       status: 'trialing',
       plan_name: 'Beta Trial',
-      tier_name: 'Creator', // Give Creator tier features during trial
+      tier_name: 'Starter', // Free tier with 24-hour history limit
       is_beta_trial: true,
       beta_code: code.toUpperCase(),
       trial_ends_at: trialEndsAt.toISOString(),
       created_at: new Date().toISOString(),
       current_period_start: new Date().toISOString(),
       current_period_end: trialEndsAt.toISOString(),
-      // Viewer limit columns (handle both avg_viewer_limit and viewer_limit)
-      avg_viewer_limit: 50, // Creator tier limit
-      viewer_limit: 50, // In case DB has viewer_limit column instead
+      // Viewer limit columns (unlimited for all tiers now)
+      avg_viewer_limit: null, // No viewer limits in new pricing
+      viewer_limit: null, // No viewer limits in new pricing
       // Stripe columns are NULL for beta trials (migration makes them nullable)
       stripe_customer_id: null,
       stripe_subscription_id: null,
