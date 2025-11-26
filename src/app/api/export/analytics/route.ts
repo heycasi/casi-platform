@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Verify user has active Pro or Streamer+ subscription
+    // Verify user has active Pro or Agency subscription
     const { data: subscription } = await supabase
       .from('subscriptions')
       .select('plan_name, status')
@@ -30,9 +30,9 @@ export async function GET(req: NextRequest) {
       .eq('status', 'active')
       .single()
 
-    if (!subscription || subscription.plan_name === 'Creator') {
+    if (!subscription || subscription.plan_name === 'Starter') {
       return NextResponse.json(
-        { error: 'Analytics export requires Pro or Streamer+ subscription' },
+        { error: 'Analytics export requires Pro or Agency subscription' },
         { status: 403 }
       )
     }
@@ -40,11 +40,13 @@ export async function GET(req: NextRequest) {
     // Fetch analytics data
     let query = supabase
       .from('stream_report_sessions')
-      .select(`
+      .select(
+        `
         *,
         stream_chat_messages(*),
         stream_session_analytics(*)
-      `)
+      `
+      )
       .eq('streamer_email', email)
       .order('session_start', { ascending: false })
 
@@ -73,7 +75,7 @@ export async function GET(req: NextRequest) {
         exportedAt: new Date().toISOString(),
         email,
         totalSessions: sessions.length,
-        sessions
+        sessions,
       })
     } else {
       // Generate CSV
@@ -81,16 +83,13 @@ export async function GET(req: NextRequest) {
       return new NextResponse(csv, {
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="casi-analytics-${email}-${new Date().toISOString().split('T')[0]}.csv"`
-        }
+          'Content-Disposition': `attachment; filename="casi-analytics-${email}-${new Date().toISOString().split('T')[0]}.csv"`,
+        },
       })
     }
   } catch (error: any) {
     console.error('Export error:', error)
-    return NextResponse.json(
-      { error: 'Failed to export analytics' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to export analytics' }, { status: 500 })
   }
 }
 
@@ -108,10 +107,10 @@ function generateCSV(sessions: any[]): string {
     'Positive Messages',
     'Negative Messages',
     'Neutral Messages',
-    'Avg Sentiment Score'
+    'Avg Sentiment Score',
   ]
 
-  const rows = sessions.map(session => {
+  const rows = sessions.map((session) => {
     const analytics = session.stream_session_analytics?.[0] || {}
 
     return [
@@ -127,8 +126,8 @@ function generateCSV(sessions: any[]): string {
       analytics.positive_messages || 0,
       analytics.negative_messages || 0,
       analytics.neutral_messages || 0,
-      analytics.avg_sentiment_score || 0
-    ].map(val => {
+      analytics.avg_sentiment_score || 0,
+    ].map((val) => {
       // Escape quotes and wrap in quotes if contains comma
       const str = String(val || '')
       if (str.includes(',') || str.includes('"') || str.includes('\n')) {
@@ -138,8 +137,5 @@ function generateCSV(sessions: any[]): string {
     })
   })
 
-  return [
-    headers.join(','),
-    ...rows.map(row => row.join(','))
-  ].join('\n')
+  return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n')
 }

@@ -1850,7 +1850,7 @@ export default function Dashboard() {
             {/* Tier Upgrade Nudge */}
             {tierStatus && tierStatus.isOverLimit && (
               <TierUpgradeNudge
-                currentTier={tierStatus.suggestedTier === 'Pro' ? 'Creator' : 'Pro'}
+                currentTier={tierStatus.suggestedTier === 'Pro' ? 'Starter' : 'Pro'}
                 avgViewers={tierStatus.avgViewers}
                 viewerLimit={tierStatus.limit}
                 daysOverLimit={tierStatus.daysOverLimit}

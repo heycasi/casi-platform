@@ -65,7 +65,9 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/users?adminUsername=${twitchUser.login}&plan=${filterPlan}`)
+      const response = await fetch(
+        `/api/admin/users?adminUsername=${twitchUser.login}&plan=${filterPlan}`
+      )
       const data = await response.json()
 
       if (data.success) {
@@ -81,11 +83,15 @@ export default function AdminUsersPage() {
     }
   }
 
-  const handleUserAction = async (userId: string, email: string, action: 'suspend' | 'unsuspend' | 'delete') => {
+  const handleUserAction = async (
+    userId: string,
+    email: string,
+    action: 'suspend' | 'unsuspend' | 'delete'
+  ) => {
     const confirmMessages = {
       suspend: `Suspend user ${email}? They will no longer be able to log in.`,
       unsuspend: `Unsuspend user ${email}? They will regain access.`,
-      delete: `PERMANENTLY DELETE user ${email}? This cannot be undone!`
+      delete: `PERMANENTLY DELETE user ${email}? This cannot be undone!`,
     }
 
     if (!confirm(confirmMessages[action])) {
@@ -101,8 +107,8 @@ export default function AdminUsersPage() {
           adminUsername: twitchUser.login,
           action,
           userId,
-          email
-        })
+          email,
+        }),
       })
 
       const data = await response.json()
@@ -123,25 +129,47 @@ export default function AdminUsersPage() {
 
   const getTierColor = (tier: string) => {
     switch (tier.toLowerCase()) {
-      case 'creator': return '#B8A0FF'
-      case 'pro': return '#FF9FD4'
-      case 'streamer+': return '#FFD700'
-      default: return '#999'
+      case 'creator':
+        return '#B8A0FF'
+      case 'pro':
+        return '#FF9FD4'
+      case 'streamer+':
+        return '#FFD700'
+      default:
+        return '#999'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return '#B8EE8A'
-      case 'canceled': return '#FF9F9F'
-      case 'past_due': return '#FFA500'
-      case 'trialing': return '#5EEAD4'
-      default: return '#999'
+      case 'active':
+        return '#B8EE8A'
+      case 'canceled':
+        return '#FF9F9F'
+      case 'past_due':
+        return '#FFA500'
+      case 'trialing':
+        return '#5EEAD4'
+      default:
+        return '#999'
     }
   }
 
   if (!isAuthenticated || !isAdmin) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1a1a1a', color: 'white' }}>Loading...</div>
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#1a1a1a',
+          color: 'white',
+        }}
+      >
+        Loading...
+      </div>
+    )
   }
 
   return (
@@ -159,84 +187,147 @@ export default function AdminUsersPage() {
 
         {/* Stats */}
         {stats && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '1rem',
-            marginBottom: '2rem'
-          }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#5EEAD4' }}>{stats.total}</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.5rem' }}>Total Users</div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '1rem',
+              marginBottom: '2rem',
+            }}
+          >
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#5EEAD4' }}>
+                {stats.total}
+              </div>
+              <div
+                style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.85rem',
+                  marginTop: '0.5rem',
+                }}
+              >
+                Total Users
+              </div>
             </div>
-            <div style={{
-              background: 'rgba(184, 160, 255, 0.1)',
-              border: '1px solid rgba(184, 160, 255, 0.3)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#B8A0FF' }}>{stats.creator}</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.5rem' }}>Creator</div>
+            <div
+              style={{
+                background: 'rgba(184, 160, 255, 0.1)',
+                border: '1px solid rgba(184, 160, 255, 0.3)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#B8A0FF' }}>
+                {stats.starter}
+              </div>
+              <div
+                style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.85rem',
+                  marginTop: '0.5rem',
+                }}
+              >
+                Starter
+              </div>
             </div>
-            <div style={{
-              background: 'rgba(255, 159, 212, 0.1)',
-              border: '1px solid rgba(255, 159, 212, 0.3)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#FF9FD4' }}>{stats.pro}</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.5rem' }}>Pro</div>
+            <div
+              style={{
+                background: 'rgba(255, 159, 212, 0.1)',
+                border: '1px solid rgba(255, 159, 212, 0.3)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#FF9FD4' }}>
+                {stats.pro}
+              </div>
+              <div
+                style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.85rem',
+                  marginTop: '0.5rem',
+                }}
+              >
+                Pro
+              </div>
             </div>
-            <div style={{
-              background: 'rgba(255, 215, 0, 0.1)',
-              border: '1px solid rgba(255, 215, 0, 0.3)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#FFD700' }}>{stats.streamer_plus}</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.5rem' }}>Streamer+</div>
+            <div
+              style={{
+                background: 'rgba(255, 215, 0, 0.1)',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#FFD700' }}>
+                {stats.agency}
+              </div>
+              <div
+                style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.85rem',
+                  marginTop: '0.5rem',
+                }}
+              >
+                Agency
+              </div>
             </div>
-            <div style={{
-              background: 'rgba(184, 238, 138, 0.1)',
-              border: '1px solid rgba(184, 238, 138, 0.3)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#B8EE8A' }}>{stats.active}</div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.5rem' }}>Active Subs</div>
+            <div
+              style={{
+                background: 'rgba(184, 238, 138, 0.1)',
+                border: '1px solid rgba(184, 238, 138, 0.3)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#B8EE8A' }}>
+                {stats.active}
+              </div>
+              <div
+                style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.85rem',
+                  marginTop: '0.5rem',
+                }}
+              >
+                Active Subs
+              </div>
             </div>
           </div>
         )}
 
         {/* Filter Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          marginBottom: '1.5rem',
-          background: 'rgba(255, 255, 255, 0.05)',
-          padding: '0.5rem',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          flexWrap: 'wrap'
-        }}>
-          {['all', 'Creator', 'Pro', 'Streamer+', 'None'].map((plan) => (
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            padding: '0.5rem',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flexWrap: 'wrap',
+          }}
+        >
+          {['all', 'Starter', 'Pro', 'Agency', 'None'].map((plan) => (
             <button
               key={plan}
               onClick={() => setFilterPlan(plan)}
               style={{
-                background: filterPlan === plan
-                  ? 'linear-gradient(135deg, #6932FF, #932FFE)'
-                  : 'transparent',
+                background:
+                  filterPlan === plan ? 'linear-gradient(135deg, #6932FF, #932FFE)' : 'transparent',
                 border: 'none',
                 color: 'white',
                 padding: '0.75rem 1.5rem',
@@ -244,7 +335,7 @@ export default function AdminUsersPage() {
                 cursor: 'pointer',
                 fontWeight: '600',
                 textTransform: 'capitalize',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
               }}
             >
               {plan === 'all' ? 'All Users' : plan}
@@ -258,35 +349,41 @@ export default function AdminUsersPage() {
             Loading users...
           </div>
         ) : users.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '3rem',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '3rem',
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👥</div>
-            <div style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-              No users found
-            </div>
+            <div style={{ color: 'rgba(255, 255, 255, 0.7)' }}>No users found</div>
           </div>
         ) : (
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            overflow: 'auto'
-          }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '0.9rem'
-            }}>
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              overflow: 'auto',
+            }}
+          >
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '0.9rem',
+              }}
+            >
               <thead>
-                <tr style={{
-                  background: 'rgba(105, 50, 255, 0.2)',
-                  borderBottom: '2px solid rgba(105, 50, 255, 0.3)'
-                }}>
+                <tr
+                  style={{
+                    background: 'rgba(105, 50, 255, 0.2)',
+                    borderBottom: '2px solid rgba(105, 50, 255, 0.3)',
+                  }}
+                >
                   <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700' }}>User</th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700' }}>Email</th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '700' }}>Twitch</th>
@@ -301,7 +398,7 @@ export default function AdminUsersPage() {
                   <tr
                     key={user.id}
                     style={{
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                     }}
                   >
                     <td style={{ padding: '1rem' }}>
@@ -314,12 +411,14 @@ export default function AdminUsersPage() {
                               width: '32px',
                               height: '32px',
                               borderRadius: '50%',
-                              border: '2px solid rgba(255, 255, 255, 0.2)'
+                              border: '2px solid rgba(255, 255, 255, 0.2)',
                             }}
                           />
                         )}
                         <div>
-                          <div style={{ fontWeight: '600', color: 'white' }}>{user.display_name}</div>
+                          <div style={{ fontWeight: '600', color: 'white' }}>
+                            {user.display_name}
+                          </div>
                           <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
                             {user.id.slice(0, 8)}...
                           </div>
@@ -333,28 +432,32 @@ export default function AdminUsersPage() {
                       @{user.twitch_username}
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        background: getTierColor(user.subscription_tier),
-                        color: '#000',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        display: 'inline-block'
-                      }}>
+                      <span
+                        style={{
+                          background: getTierColor(user.subscription_tier),
+                          color: '#000',
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          display: 'inline-block',
+                        }}
+                      >
                         {user.subscription_tier}
                       </span>
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        background: getStatusColor(user.subscription_status),
-                        color: '#000',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        display: 'inline-block'
-                      }}>
+                      <span
+                        style={{
+                          background: getStatusColor(user.subscription_status),
+                          color: '#000',
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          display: 'inline-block',
+                        }}
+                      >
                         {user.subscription_status}
                       </span>
                       {user.cancel_at_period_end && (
@@ -363,7 +466,13 @@ export default function AdminUsersPage() {
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '1rem', color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem' }}>
+                    <td
+                      style={{
+                        padding: '1rem',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.85rem',
+                      }}
+                    >
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td style={{ padding: '1rem' }}>
@@ -380,7 +489,7 @@ export default function AdminUsersPage() {
                             cursor: actioningUserId === user.id ? 'not-allowed' : 'pointer',
                             fontWeight: '600',
                             fontSize: '0.75rem',
-                            opacity: actioningUserId === user.id ? 0.5 : 1
+                            opacity: actioningUserId === user.id ? 0.5 : 1,
                           }}
                         >
                           🚫 Suspend
@@ -397,7 +506,7 @@ export default function AdminUsersPage() {
                             cursor: actioningUserId === user.id ? 'not-allowed' : 'pointer',
                             fontWeight: '600',
                             fontSize: '0.75rem',
-                            opacity: actioningUserId === user.id ? 0.5 : 1
+                            opacity: actioningUserId === user.id ? 0.5 : 1,
                           }}
                         >
                           🗑️ Delete
@@ -422,7 +531,7 @@ export default function AdminUsersPage() {
               padding: '0.75rem 1.5rem',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
             }}
           >
             🔄 Refresh List

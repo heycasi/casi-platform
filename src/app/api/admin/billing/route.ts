@@ -10,7 +10,7 @@ const supabase = createClient(
 )
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia'
+  apiVersion: '2024-12-18.acacia',
 })
 
 // Admin usernames
@@ -24,10 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Verify admin access
     if (!adminUsername || !ADMIN_USERNAMES.includes(adminUsername.toLowerCase())) {
-      return NextResponse.json(
-        { error: 'Unauthorized - admin access required' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - admin access required' }, { status: 403 })
     }
 
     // Get subscription records from Supabase
@@ -39,10 +36,7 @@ export async function GET(request: NextRequest) {
 
     if (subsError) {
       console.error('Failed to fetch subscriptions:', subsError)
-      return NextResponse.json(
-        { error: 'Failed to fetch subscriptions' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch subscriptions' }, { status: 500 })
     }
 
     // Get subscription event logs
@@ -73,7 +67,7 @@ export async function GET(request: NextRequest) {
             stripe_canceled_at: stripeSub.canceled_at,
             stripe_latest_invoice: stripeSub.latest_invoice,
             customer_name: (customer as any).name || null,
-            customer_email: (customer as any).email || sub.user_email
+            customer_email: (customer as any).email || sub.user_email,
           }
         } catch (error) {
           console.error(`Failed to enrich subscription ${sub.id}:`, error)
@@ -85,31 +79,28 @@ export async function GET(request: NextRequest) {
     // Calculate stats
     const stats = {
       total_subscriptions: subscriptions.length,
-      active: subscriptions.filter(s => s.status === 'active').length,
-      canceled: subscriptions.filter(s => s.status === 'canceled').length,
-      past_due: subscriptions.filter(s => s.status === 'past_due').length,
-      trialing: subscriptions.filter(s => s.status === 'trialing').length,
+      active: subscriptions.filter((s) => s.status === 'active').length,
+      canceled: subscriptions.filter((s) => s.status === 'canceled').length,
+      past_due: subscriptions.filter((s) => s.status === 'past_due').length,
+      trialing: subscriptions.filter((s) => s.status === 'trialing').length,
       total_mrr: subscriptions
-        .filter(s => s.status === 'active')
+        .filter((s) => s.status === 'active')
         .reduce((sum, s) => {
-          const amount = s.tier === 'Creator' ? 19 : s.tier === 'Pro' ? 37 : s.tier === 'Streamer+' ? 75 : 0
+          const amount =
+            s.tier === 'Starter' ? 19 : s.tier === 'Pro' ? 37 : s.tier === 'Agency' ? 75 : 0
           return sum + amount
-        }, 0)
+        }, 0),
     }
 
     return NextResponse.json({
       success: true,
       subscriptions: enrichedSubscriptions,
       eventLogs: eventLogs || [],
-      stats
+      stats,
     })
-
   } catch (error) {
     console.error('[Admin Billing] Error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -120,22 +111,19 @@ export async function POST(request: NextRequest) {
 
     // Verify admin access
     if (!adminUsername || !ADMIN_USERNAMES.includes(adminUsername.toLowerCase())) {
-      return NextResponse.json(
-        { error: 'Unauthorized - admin access required' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - admin access required' }, { status: 403 })
     }
 
     if (action === 'get_invoices') {
       // Get all invoices for a customer
       const invoices = await stripe.invoices.list({
         customer: customerId,
-        limit: 20
+        limit: 20,
       })
 
       return NextResponse.json({
         success: true,
-        invoices: invoices.data.map(inv => ({
+        invoices: invoices.data.map((inv) => ({
           id: inv.id,
           amount: inv.amount_paid / 100,
           currency: inv.currency,
@@ -143,8 +131,8 @@ export async function POST(request: NextRequest) {
           created: inv.created,
           paid: inv.paid,
           invoice_pdf: inv.invoice_pdf,
-          hosted_invoice_url: inv.hosted_invoice_url
-        }))
+          hosted_invoice_url: inv.hosted_invoice_url,
+        })),
       })
     }
 
@@ -152,25 +140,18 @@ export async function POST(request: NextRequest) {
       // Generate Stripe Customer Portal link for admin access
       const session = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com'}/admin/billing`
+        return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://heycasi.com'}/admin/billing`,
       })
 
       return NextResponse.json({
         success: true,
-        url: session.url
+        url: session.url,
       })
     }
 
-    return NextResponse.json(
-      { error: 'Invalid action' },
-      { status: 400 }
-    )
-
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
     console.error('[Admin Billing Action] Error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
