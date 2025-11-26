@@ -14,6 +14,30 @@ const supabase = createClient(
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
+// Centralized Pricing Configuration - Source of Truth for Stripe Price IDs
+const PRICING_CONFIG = {
+  PRO_USD: 'price_1SXiU8EEgFiyIrnTCRvQSSbj',
+  PRO_GBP: 'price_1SXiU8EEgFiyIrnT7IaBAdsW',
+  AGENCY_USD: 'price_1SXiWlEEgFiyIrnTxdUtTCZN',
+  AGENCY_GBP: 'price_1SXiWlEEgFiyIrnTGeLeMEPT',
+} as const
+
+// Helper function to determine tier from price ID
+function getTierFromPriceId(priceId: string): 'Starter' | 'Pro' | 'Agency' {
+  // Check for Pro tier (USD or GBP)
+  if (priceId === PRICING_CONFIG.PRO_USD || priceId === PRICING_CONFIG.PRO_GBP) {
+    return 'Pro'
+  }
+
+  // Check for Agency tier (USD or GBP)
+  if (priceId === PRICING_CONFIG.AGENCY_USD || priceId === PRICING_CONFIG.AGENCY_GBP) {
+    return 'Agency'
+  }
+
+  // Default to Starter for any unrecognized price ID
+  return 'Starter'
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text()
   const signature = req.headers.get('stripe-signature')!
@@ -135,25 +159,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     const priceId = subscription.items.data[0].price.id
     const price = await stripe.prices.retrieve(priceId)
 
-    let planName = 'Starter'
-    if (
-      priceId.includes('pro') ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
-      priceId === 'price_1SXiU8EEgFiyIrnTCRvQSSbj' || // USD Pro
-      priceId === 'price_1SXiU8EEgFiyIrnT7IaBAdsW' // GBP Pro
-    ) {
-      planName = 'Pro'
-    } else if (
-      priceId.includes('streamer') ||
-      priceId.includes('agency') ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
-      priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
-      priceId === 'price_1SXiWlEEgFiyIrnTxdUtTCZN' || // USD Agency
-      priceId === 'price_1SXiWlEEgFiyIrnTGeLeMEPT' // GBP Agency
-    ) {
-      planName = 'Agency'
-    }
+    // Use centralized pricing config to determine plan name
+    const planName = getTierFromPriceId(priceId)
 
     const amount = (price.unit_amount || 0) / 100
     const billingInterval = price.recurring?.interval || 'month'
@@ -273,44 +280,8 @@ async function upsertSubscription(subscription: Stripe.Subscription, email?: str
   const priceId = subscription.items.data[0].price.id
   const price = await stripe.prices.retrieve(priceId)
 
-  // Determine plan name from price ID - check exact matches first, then patterns
-  let planName = 'Starter' // Default
-
-  // Check for Starter plan (old Creator prices still valid)
-  if (
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_MONTHLY ||
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_CREATOR_YEARLY ||
-    priceId === 'price_1Rlx2DEEgFiyIrnTAomiE2J3' ||
-    priceId === 'price_1Rlx2DEEgFiyIrnTGQZSVs8q' ||
-    priceId.toLowerCase().includes('starter')
-  ) {
-    planName = 'Starter'
-  }
-  // Check for Pro plan (USD/GBP price IDs from pricing config)
-  else if (
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ||
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ||
-    priceId === 'price_1RlxA7EEgFiyIrnTVR20se38' ||
-    priceId === 'price_1RlxA7EEgFiyIrnTSuiyywVq' ||
-    priceId === 'price_1SXiU8EEgFiyIrnTCRvQSSbj' || // USD Pro monthly
-    priceId === 'price_1SXiU8EEgFiyIrnT7IaBAdsW' || // GBP Pro monthly
-    priceId.toLowerCase().includes('pro')
-  ) {
-    planName = 'Pro'
-  }
-  // Check for Agency plan (old Streamer+ prices + new Agency prices)
-  else if (
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_MONTHLY ||
-    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STREAMER_YEARLY ||
-    priceId === 'price_1RlzDHEEgFiyIrnThpPdz7gV' ||
-    priceId === 'price_1RlzDHEEgFiyIrnT45NkAklL' ||
-    priceId === 'price_1SXiWlEEgFiyIrnTxdUtTCZN' || // USD Agency monthly
-    priceId === 'price_1SXiWlEEgFiyIrnTGeLeMEPT' || // GBP Agency monthly
-    priceId.toLowerCase().includes('streamer') ||
-    priceId.toLowerCase().includes('agency')
-  ) {
-    planName = 'Agency'
-  }
+  // Use centralized pricing config to determine plan name
+  const planName = getTierFromPriceId(priceId)
 
   console.log(`[Stripe Webhook] Price ID ${priceId} determined as tier: ${planName}`)
 
