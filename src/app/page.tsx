@@ -72,10 +72,10 @@ const Navbar = () => {
             Log in
           </Link>
           <Link
-            href="/beta-signup"
+            href="/signup"
             className="group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#6932FF] to-[#932FFE] px-6 font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#6932FF]/50"
           >
-            <span className="mr-2">Join Beta</span>
+            <span className="mr-2">Start Free</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -114,11 +114,11 @@ const Navbar = () => {
             Log in
           </Link>
           <Link
-            href="/beta-signup"
+            href="/signup"
             className="text-lg font-semibold text-[#5EEAD4]"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Join Beta
+            Start Free
           </Link>
         </motion.div>
       )}
@@ -515,10 +515,10 @@ const CTA = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/beta-signup"
+            href="/signup"
             className="px-8 py-4 bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white rounded-full font-bold hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all"
           >
-            Start Free Beta
+            Start Free Now
           </Link>
           <Link
             href="/pricing"

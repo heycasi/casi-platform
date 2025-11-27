@@ -143,7 +143,7 @@ export default function SignUpPage() {
             textAlign: 'center',
           }}
         >
-          Create Account
+          Create your account
         </h1>
 
         <p
@@ -154,7 +154,7 @@ export default function SignUpPage() {
             marginBottom: '2rem',
           }}
         >
-          Start your free Casi account today
+          Start analyzing your stream in seconds. No credit card required.
         </p>
 
         <form onSubmit={handleSignUp}>
