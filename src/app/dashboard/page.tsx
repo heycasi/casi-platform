@@ -2143,9 +2143,11 @@ export default function Dashboard() {
               </div>
 
               {/* RIGHT COL (span-4): ENGAGEMENT */}
-              <div className="col-span-1 md:col-span-4 h-[calc(100vh-140px)] flex flex-col gap-4">
-                {/* 1. Activity Feed (50% Height) */}
-                <div className="h-1/2 min-h-0">
+
+              <div className="col-span-1 md:col-span-4 flex flex-col gap-4 h-[calc(100vh-140px)]">
+                {/* 1. Activity Feed (55% Height) */}
+
+                <div className="h-[55%] min-h-0">
                   <MultiPlatformActivityFeed
                     twitchChannelName={channelName}
                     kickChannelName={kickUsername}
@@ -2155,22 +2157,25 @@ export default function Dashboard() {
                   />
                 </div>
 
-                {/* 2. VIP Tracking (50% Height) - Moved from Center */}
-                <div className="h-1/2 min-h-0 flex flex-col">
+                {/* 2. VIP Tracking (Fills remaining space) - Moved from Center */}
+
+                <div className="flex-1 min-h-0 flex flex-col">
                   <FeatureGate
                     requiredTier="Pro"
                     currentTier={userTier}
                     featureName="VIP Tracking"
                     featureDescription="Track your top chatters and identify your most engaged viewers."
                   >
-                    <div className="h-full bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col overflow-hidden">
+                    <div className="h-full w-full relative bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col overflow-hidden">
                       <h3 className="m-0 mb-3 text-base font-semibold shrink-0">
                         🏆 Top Chatters & Topics
                       </h3>
+
                       <div className="flex-1 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
                         {topChatters.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
                             <div className="text-2xl mb-2">🦗</div>
+
                             <p className="text-sm m-0">Waiting for data...</p>
                           </div>
                         ) : (
@@ -2184,10 +2189,12 @@ export default function Dashboard() {
                                   <span className="text-[#F7F7F7] text-sm font-semibold truncate max-w-[70%]">
                                     @{c.username}
                                   </span>
+
                                   <span className="text-[#5EEAD4] font-bold text-xs bg-[#5EEAD4]/10 px-1.5 py-0.5 rounded">
                                     {c.count} msgs
                                   </span>
                                 </div>
+
                                 {c.topics && c.topics.length > 0 && (
                                   <div className="flex gap-1 flex-wrap">
                                     {c.topics.map((topic, idx) => (
