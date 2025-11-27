@@ -81,10 +81,10 @@ export default function LoginPage() {
           <Image
             src="/landing-logo.svg"
             alt="Casi Logo"
-            width={250}
-            height={100}
+            width={220}
+            height={88}
             style={{
-              width: '250px',
+              width: '220px',
               height: 'auto',
               maxWidth: '100%',
               cursor: 'pointer',

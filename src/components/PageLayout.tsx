@@ -87,12 +87,12 @@ export default function PageLayout({ children }: PageLayoutProps) {
           }
           @media (max-width: 767px) {
             .desktop-nav { display: none !important; }
-            .mobile-logo { width: 80px !important; }
+            .mobile-logo { width: 120px !important; }
             .mobile-menu-btn { display: flex !important; }
           }
           @media (min-width: 768px) {
             .desktop-nav { display: flex !important; }
-            .mobile-logo { width: 120px !important; }
+            .mobile-logo { width: 180px !important; }
             .mobile-menu-btn { display: none !important; }
           }
         `,
@@ -119,10 +119,10 @@ export default function PageLayout({ children }: PageLayoutProps) {
             <Image
               src="/landing-logo.svg"
               alt="Casi Logo"
-              width={120}
-              height={48}
+              width={180}
+              height={72}
               className="mobile-logo"
-              style={{ height: 'auto', width: '120px' }}
+              style={{ height: 'auto', width: '180px' }}
               priority
             />
           </Link>
@@ -354,9 +354,9 @@ export default function PageLayout({ children }: PageLayoutProps) {
               <Image
                 src="/landing-logo.svg"
                 alt="Casi Logo"
-                width={80}
-                height={32}
-                style={{ height: 'auto', width: '80px' }}
+                width={120}
+                height={48}
+                style={{ height: 'auto', width: '120px' }}
               />
             </div>
             <p

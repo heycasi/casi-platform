@@ -40,19 +40,19 @@ const Navbar = () => {
           : 'bg-transparent border-transparent py-6'
       )}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-center relative">
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/landing-logo.svg"
             alt="Casi Logo"
-            width={120}
-            height={48}
-            className="w-auto h-12"
+            width={180}
+            height={72}
+            className="w-auto h-16"
             priority
           />
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-8 absolute right-6">
           <Link
             href="#features"
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
@@ -541,9 +541,9 @@ const Footer = () => {
             <Image
               src="/landing-logo.svg"
               alt="Casi"
-              width={30}
-              height={30}
-              className="opacity-80"
+              width={120}
+              height={48}
+              className="opacity-80 w-auto h-12"
             />
             <span className="text-zinc-500 text-sm">© 2025 Casi Platform</span>
           </div>

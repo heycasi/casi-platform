@@ -156,9 +156,9 @@ export default function SignUpPage() {
             <Image
               src="/landing-logo.svg"
               alt="Casi Logo"
-              width={180}
-              height={72}
-              style={{ width: '180px', height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
+              width={220}
+              height={88}
+              style={{ width: '220px', height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
               priority
             />
           </Link>

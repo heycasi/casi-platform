@@ -110,16 +110,16 @@ export default function BetaSignup() {
           <Image
             src="/landing-logo.svg"
             alt="Casi Logo"
-            width={100}
-            height={32}
-            style={{ height: '32px', width: 'auto' }}
+            width={160}
+            height={64}
+            style={{ height: '48px', width: 'auto' }}
             priority
           />
 
           <img
             src="/landing-robot.png"
             alt="Casi Robot"
-            style={{ width: '32px', height: '32px' }}
+            style={{ width: '48px', height: '48px' }}
           />
         </div>
 
