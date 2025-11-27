@@ -8,6 +8,7 @@ import { motion, useScroll, useTransform, useMotionTemplate, useMotionValue } fr
 import { ArrowRight, BarChart3, Globe2, MessageSquare, ShieldCheck, Menu, X } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import Footer from '@/components/Footer'
 
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
@@ -54,7 +55,7 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-8 absolute right-6">
           <Link
-            href="#features"
+            href="/features"
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
             Features
@@ -66,7 +67,7 @@ const Navbar = () => {
             Pricing
           </Link>
           <Link
-            href="/login"
+            href="/login-email"
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
             Log in
@@ -266,8 +267,8 @@ const Hero = () => {
         <div className="relative rounded-2xl border border-white/10 bg-[#0B0D14]/50 backdrop-blur-xl shadow-2xl shadow-[#6932FF]/20 overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D14] via-transparent to-transparent z-10" />
           <Image
-            src="/wholedashboard.png"
-            alt="Casi Dashboard"
+            src="/images/dashboard-hero.jpg"
+            alt="HeyCasi Command Center Dashboard"
             width={1400}
             height={900}
             className="w-full h-auto rounded-lg opacity-90 group-hover:opacity-100 transition-opacity duration-700"
@@ -355,7 +356,7 @@ const Features = () => {
           >
             <div className="relative h-full w-full rounded-2xl bg-[#1a1a2e]/50 border border-white/5 p-4 overflow-hidden">
               <Image
-                src="/casigraphs.png"
+                src="/images/feature-chat.jpg"
                 alt="Sentiment Analysis Graphs"
                 width={600}
                 height={300}
@@ -391,15 +392,13 @@ const Features = () => {
             icon={MessageSquare}
             className="md:col-span-1"
           >
-            <div className="mt-2 space-y-2">
-              <div className="bg-white/5 p-3 rounded-lg border-l-2 border-[#6932FF] text-xs text-zinc-300 hover:bg-white/10 transition-colors">
-                <span className="text-[#6932FF] font-bold">@user:</span>{' '}
-                <span>What specs do you use?</span>
-              </div>
-              <div className="bg-white/5 p-3 rounded-lg border-l-2 border-[#5EEAD4] text-xs text-zinc-300 hover:bg-white/10 transition-colors">
-                <span className="text-[#5EEAD4] font-bold">@fan:</span>{' '}
-                <span>When is the next stream?</span>
-              </div>
+            <div className="mt-2 relative h-full min-h-[150px] w-full rounded-lg overflow-hidden bg-white/5 border border-white/5">
+              <Image
+                src="/images/feature-vip.jpg"
+                alt="VIP Tracking Interface"
+                fill
+                className="object-cover opacity-90"
+              />
             </div>
           </BentoCard>
 
@@ -529,47 +528,6 @@ const CTA = () => {
         </div>
       </div>
     </section>
-  )
-}
-
-const Footer = () => {
-  return (
-    <footer className="py-12 border-t border-white/10 bg-[#0B0D14]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/landing-logo.svg"
-              alt="Casi"
-              width={120}
-              height={48}
-              className="opacity-80 w-auto h-12"
-            />
-            <span className="text-zinc-500 text-sm">© 2025 Casi Platform</span>
-          </div>
-          <div className="flex gap-8 text-sm text-zinc-500">
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms
-            </Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Privacy
-            </Link>
-            <a href="mailto:casi@heycasi.com" className="hover:text-white transition-colors">
-              Contact
-            </a>
-          </div>
-        </div>
-
-        {/* COPPA Disclaimer */}
-        <div className="mt-8 pt-6 border-t border-white/5">
-          <p className="text-xs text-zinc-600 text-center max-w-4xl mx-auto leading-relaxed">
-            <strong>COPPA Disclaimer:</strong> HeyCasi is an analytics tool for broadcasters. We do
-            not knowingly collect or profile PII of individuals under 13. All data is processed in
-            aggregate. Not affiliated with Twitch, Kick, or YouTube.
-          </p>
-        </div>
-      </div>
-    </footer>
   )
 }
 

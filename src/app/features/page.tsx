@@ -131,7 +131,7 @@ export default function FeaturesPage() {
           </div>
           <div>
             <img
-              src="/sentimentanalysis.png"
+              src="/images/feature-chat.jpg"
               alt="Sentiment Analysis"
               style={{
                 width: '100%',
@@ -404,20 +404,17 @@ export default function FeaturesPage() {
             </ul>
           </div>
           <div>
-            <div
+            <img
+              src="/images/feature-vip.jpg"
+              alt="Community MVPs"
               style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                width: '100%',
+                height: 'auto',
                 borderRadius: '12px',
-                padding: '2rem',
-                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
               }}
-            >
-              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
-                Identify your loyal community members and most engaged chatters. Perfect for
-                building relationships and recognizing your MVPs.
-              </p>
-            </div>
+            />
           </div>
         </div>
       </section>
