@@ -110,6 +110,7 @@ export default function StreamSummary({
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
           <h1
             style={{
+              fontFamily: 'var(--font-poppins)',
               fontSize: '2.5rem',
               fontWeight: '800',
               background: 'linear-gradient(135deg, #B8EE8A, #6932FF)',

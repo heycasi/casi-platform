@@ -200,7 +200,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.2]"
+          className="text-5xl md:text-7xl font-bold font-heading tracking-tight text-white mb-6 leading-[1.2]"
         >
           <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2 pb-3">
             Stop Ignoring
@@ -324,7 +324,7 @@ const BentoCard = ({ title, description, icon: Icon, className, children }: any)
         <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6932FF]/20 to-[#932FFE]/20 text-[#932FFE]">
           <Icon className="h-6 w-6" />
         </div>
-        <h3 className="mb-2 text-lg font-bold text-white tracking-tight">{title}</h3>
+        <h3 className="mb-2 text-lg font-bold font-heading text-white tracking-tight">{title}</h3>
         <p className="text-sm text-zinc-400 mb-6">{description}</p>
         <div className="flex-1 mt-auto">{children}</div>
       </div>
@@ -337,7 +337,7 @@ const Features = () => {
     <section id="features" className="py-32 relative bg-[#0B0D14]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-bold font-heading text-white mb-4 tracking-tight">
             Built for Speed. Not Show.
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
@@ -506,7 +506,7 @@ const CTA = () => {
     <section className="py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D14] via-[#6932FF]/10 to-[#0B0D14]" />
       <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+        <h2 className="text-4xl md:text-5xl font-bold font-heading text-white mb-6 tracking-tight">
           Ready to level up?
         </h2>
         <p className="text-xl text-zinc-400 mb-10">

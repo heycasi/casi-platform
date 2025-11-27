@@ -366,7 +366,6 @@ export default function SignUpPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'Poppins, sans-serif',
         padding: '1rem',
         position: 'relative',
       }}

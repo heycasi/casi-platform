@@ -64,8 +64,9 @@ module.exports = {
         'gradient-dark': 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       },
       fontFamily: {
-        sans: ['Poppins', 'Arial', 'sans-serif'],
-        poppins: ['Poppins', 'Arial', 'sans-serif'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+        heading: ['var(--font-poppins)', 'sans-serif'],
+        poppins: ['var(--font-poppins)', 'sans-serif'],
         mono: ['Space Mono', 'monospace'],
         'space-mono': ['Space Mono', 'monospace'],
       },

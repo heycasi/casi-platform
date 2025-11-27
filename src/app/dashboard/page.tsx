@@ -998,7 +998,7 @@ export default function Dashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Poppins, Arial, sans-serif',
+
           padding: '1rem',
         }}
       >
@@ -1088,7 +1088,7 @@ export default function Dashboard() {
               color: 'white',
               textDecoration: 'none',
               fontWeight: 600,
-              fontFamily: 'Poppins, Arial, sans-serif',
+
               boxSizing: 'border-box',
               border: 'none',
               cursor: 'pointer',
@@ -1121,7 +1121,7 @@ export default function Dashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Poppins, Arial, sans-serif',
+
           color: 'white',
         }}
       >
@@ -1143,7 +1143,7 @@ export default function Dashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Poppins, Arial, sans-serif',
+
           padding: '1rem',
         }}
       >
@@ -1248,7 +1248,7 @@ export default function Dashboard() {
       style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-        fontFamily: 'Poppins, Arial, sans-serif',
+
         color: 'white',
       }}
     >
@@ -1490,7 +1490,6 @@ export default function Dashboard() {
                       cursor: 'pointer',
                       textAlign: 'left',
                       transition: 'background 0.2s',
-                      fontFamily: 'Poppins, Arial, sans-serif',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
@@ -1717,7 +1716,7 @@ export default function Dashboard() {
                   cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
                   fontSize: '0.7rem',
                   fontWeight: '600',
-                  fontFamily: 'Poppins, Arial, sans-serif',
+
                   opacity: isGeneratingReport ? 0.7 : 1,
                   transition: 'all 0.3s ease',
                 }}
