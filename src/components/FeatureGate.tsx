@@ -149,18 +149,6 @@ export default function FeatureGate({
             <span>🔒</span>
             <span>Unlock VIP Tracking</span> {/* Changed text */}
           </Link>
-          {/* New subtext */}
-          <p
-            style={{
-              marginTop: '1rem',
-              fontSize: '0.85rem',
-              color: 'rgba(255,255,255,0.7)',
-              lineHeight: '1.4',
-              maxWidth: '280px',
-            }}
-          >
-            Identify your top spenders and most loyal viewers.
-          </p>
         </div>
       </div>
     </div>
