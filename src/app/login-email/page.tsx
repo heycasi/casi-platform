@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import AnimatedBackground from '@/components/AnimatedBackground'
 
@@ -45,7 +46,7 @@ export default function EmailLoginPage() {
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+        redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 
       if (resetError) throw resetError
@@ -59,63 +60,76 @@ export default function EmailLoginPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'Poppins, sans-serif',
-      padding: '1rem',
-      position: 'relative'
-    }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Poppins, sans-serif',
+        padding: '1rem',
+        position: 'relative',
+      }}
+    >
       <AnimatedBackground />
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '3rem 2rem',
-        maxWidth: '420px',
-        width: '100%'
-      }}>
+      <div
+        style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '3rem 2rem',
+          maxWidth: '420px',
+          width: '100%',
+        }}
+      >
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img
-            src="/landing-logo.png"
-            alt="Casi"
+          <Image
+            src="/landing-logo.svg"
+            alt="Casi Logo"
+            width={180}
+            height={72}
             style={{ width: '180px', height: 'auto', maxWidth: '100%' }}
+            priority
           />
         </div>
 
-        <h1 style={{
-          color: 'white',
-          fontSize: '1.75rem',
-          fontWeight: '700',
-          marginBottom: '0.5rem',
-          textAlign: 'center'
-        }}>
+        <h1
+          style={{
+            color: 'white',
+            fontSize: '1.75rem',
+            fontWeight: '700',
+            marginBottom: '0.5rem',
+            textAlign: 'center',
+          }}
+        >
           Welcome Back
         </h1>
 
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: '0.875rem',
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
+        <p
+          style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.875rem',
+            textAlign: 'center',
+            marginBottom: '2rem',
+          }}
+        >
           Log in to your Casi account
         </p>
 
         <form onSubmit={handleLogin}>
           {/* Email */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
               Email
             </label>
             <input
@@ -131,7 +145,7 @@ export default function EmailLoginPage() {
                 borderRadius: '10px',
                 color: 'white',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
               }}
               placeholder="you@example.com"
             />
@@ -139,13 +153,15 @@ export default function EmailLoginPage() {
 
           {/* Password */}
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{
-              display: 'block',
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '0.875rem',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
               Password
             </label>
             <input
@@ -161,7 +177,7 @@ export default function EmailLoginPage() {
                 borderRadius: '10px',
                 color: 'white',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
               }}
               placeholder="••••••••"
             />
@@ -179,7 +195,7 @@ export default function EmailLoginPage() {
                 color: '#6932FF',
                 fontSize: '0.875rem',
                 cursor: 'pointer',
-                textDecoration: 'underline'
+                textDecoration: 'underline',
               }}
             >
               Forgot password?
@@ -188,29 +204,33 @@ export default function EmailLoginPage() {
 
           {/* Error/Message */}
           {error && (
-            <div style={{
-              padding: '0.75rem',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              color: '#ef4444',
-              fontSize: '0.875rem',
-              marginBottom: '1rem'
-            }}>
+            <div
+              style={{
+                padding: '0.75rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                color: '#ef4444',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}
+            >
               {error}
             </div>
           )}
 
           {message && (
-            <div style={{
-              padding: '0.75rem',
-              background: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: '8px',
-              color: '#10b981',
-              fontSize: '0.875rem',
-              marginBottom: '1rem'
-            }}>
+            <div
+              style={{
+                padding: '0.75rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '8px',
+                color: '#10b981',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}
+            >
               {message}
             </div>
           )}
@@ -230,21 +250,22 @@ export default function EmailLoginPage() {
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,
-              marginBottom: '1rem'
+              marginBottom: '1rem',
             }}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-
         {/* Footer */}
-        <div style={{
-          marginTop: '2rem',
-          textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.875rem'
-        }}>
+        <div
+          style={{
+            marginTop: '2rem',
+            textAlign: 'center',
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '0.875rem',
+          }}
+        >
           Don't have an account?{' '}
           <a href="/signup" style={{ color: '#6932FF', textDecoration: 'none', fontWeight: '600' }}>
             Sign up free

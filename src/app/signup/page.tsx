@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import AnimatedBackground from '@/components/AnimatedBackground'
 
@@ -152,10 +153,13 @@ export default function SignUpPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link href="/" style={{ display: 'inline-block' }}>
-            <img
-              src="/landing-logo.png"
-              alt="Casi"
+            <Image
+              src="/landing-logo.svg"
+              alt="Casi Logo"
+              width={180}
+              height={72}
               style={{ width: '180px', height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
+              priority
             />
           </Link>
         </div>

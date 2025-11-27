@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const handleTwitchLogin = () => {
@@ -77,15 +78,18 @@ export default function LoginPage() {
 
         {/* Casi Logo */}
         <Link href="/" style={{ display: 'block', marginBottom: '2rem' }}>
-          <img
-            src="/landing-logo.png"
-            alt="Casi"
+          <Image
+            src="/landing-logo.svg"
+            alt="Casi Logo"
+            width={250}
+            height={100}
             style={{
               width: '250px',
               height: 'auto',
               maxWidth: '100%',
               cursor: 'pointer',
             }}
+            priority
           />
         </Link>
 
