@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import AnimatedBackground from '@/components/AnimatedBackground'
 
@@ -125,13 +126,38 @@ export default function SignUpPage() {
           width: '100%',
         }}
       >
+        {/* Back to Home Link */}
+        <Link
+          href="/"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.9rem',
+            textDecoration: 'none',
+            marginBottom: '1.5rem',
+            transition: 'color 0.2s ease',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'
+          }}
+        >
+          ← Back to Home
+        </Link>
+
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img
-            src="/landing-logo.png"
-            alt="Casi"
-            style={{ width: '180px', height: 'auto', maxWidth: '100%' }}
-          />
+          <Link href="/" style={{ display: 'inline-block' }}>
+            <img
+              src="/landing-logo.png"
+              alt="Casi"
+              style={{ width: '180px', height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
+            />
+          </Link>
         </div>
 
         <h1

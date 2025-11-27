@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 export default function LoginPage() {
   const handleTwitchLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
@@ -50,8 +52,31 @@ export default function LoginPage() {
           width: '100%',
         }}
       >
+        {/* Back to Home Link */}
+        <Link
+          href="/"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.9rem',
+            textDecoration: 'none',
+            marginBottom: '1.5rem',
+            transition: 'color 0.2s ease',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'
+          }}
+        >
+          ← Back to Home
+        </Link>
+
         {/* Casi Logo */}
-        <div style={{ marginBottom: '2rem' }}>
+        <Link href="/" style={{ display: 'block', marginBottom: '2rem' }}>
           <img
             src="/landing-logo.png"
             alt="Casi"
@@ -59,9 +84,10 @@ export default function LoginPage() {
               width: '250px',
               height: 'auto',
               maxWidth: '100%',
+              cursor: 'pointer',
             }}
           />
-        </div>
+        </Link>
 
         {/* Headline */}
         <div style={{ marginBottom: '2.5rem' }}>
@@ -174,8 +200,8 @@ export default function LoginPage() {
             color: 'rgba(255, 255, 255, 0.6)',
           }}
         >
-          <p style={{ fontWeight: '600', margin: '0 0 0.5rem 0' }}>Phase 1: MVP Development</p>
-          <p style={{ margin: 0 }}>Real-time Analytics • Privacy Protected • Beta Access</p>
+          <p style={{ fontWeight: '600', margin: '0 0 0.5rem 0' }}>Enterprise Analytics</p>
+          <p style={{ margin: 0 }}>Real-time Insights • Privacy Protected • Live Now</p>
         </div>
       </div>
     </div>

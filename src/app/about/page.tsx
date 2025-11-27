@@ -44,8 +44,7 @@ export default function AboutPage() {
               margin: '0 auto',
             }}
           >
-            We're building the future of streaming analytics to help creators connect better with
-            their communities.
+            Built for Speed. Powered by Logic.
           </p>
         </div>
       </section>
@@ -94,8 +93,7 @@ export default function AboutPage() {
                   fontStyle: 'italic',
                 }}
               >
-                "Transform how streamers connect with their communities through data-driven insights
-                and AI-powered engagement optimization."
+                "We help streamers stop guessing and start growing with zero-latency analytics."
               </p>
             </div>
             <p
@@ -105,9 +103,9 @@ export default function AboutPage() {
                 lineHeight: '1.6',
               }}
             >
-              We believe every streamer deserves to understand their audience better. By providing
-              real-time insights into chat sentiment and highlighting important questions, we help
-              creators build stronger, more engaged communities.
+              Every streamer deserves real-time intelligence about their audience. We provide
+              instant insights into chat sentiment, surface critical questions, and deliver
+              actionable data that helps creators make better decisions on the fly.
             </p>
           </div>
           <div>
@@ -219,7 +217,7 @@ export default function AboutPage() {
               {
                 emoji: '✓',
                 title: 'Now',
-                subtitle: 'Available in Beta',
+                subtitle: 'Live Now',
                 color: '#10b981',
                 features: [
                   'Real-time sentiment tracking',
@@ -228,6 +226,7 @@ export default function AboutPage() {
                   'Chat activity timeline',
                   'Chat highlights (funny, thoughtful, supportive)',
                   'Recurring user detection',
+                  'Multi-platform dashboard',
                 ],
               },
               {
@@ -236,7 +235,6 @@ export default function AboutPage() {
                 subtitle: 'Coming Soon',
                 color: '#3b82f6',
                 features: [
-                  'Multi-platform dashboard',
                   'Stream title performance analysis',
                   'Advanced trend analysis',
                   'Export & reporting tools',
@@ -453,7 +451,8 @@ export default function AboutPage() {
               lineHeight: '1.6',
             }}
           >
-            Help us build the future of streaming analytics by joining our beta program.
+            Start analyzing your stream in seconds. Zero-latency insights, real-time analytics, no
+            guessing.
           </p>
 
           <div
@@ -466,7 +465,7 @@ export default function AboutPage() {
             }}
           >
             <Link
-              href="/beta"
+              href="/signup"
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -480,7 +479,7 @@ export default function AboutPage() {
                 transition: 'all 0.3s ease',
               }}
             >
-              Join Beta Program
+              Start Free Now
             </Link>
             <Link
               href="/features"

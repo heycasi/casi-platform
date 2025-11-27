@@ -554,7 +554,7 @@ const Footer = () => {
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <a href="mailto:support@heycasi.com" className="hover:text-white transition-colors">
+            <a href="mailto:casi@heycasi.com" className="hover:text-white transition-colors">
               Contact
             </a>
           </div>
