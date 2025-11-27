@@ -1,8 +1,22 @@
 # Casi Platform - System Architecture
 
-**Version:** 1.0
-**Last Updated:** November 11, 2025
+**Version:** 2.0 (Emergency Refactor - Post-Beta)
+**Last Updated:** November 27, 2025
 **Platform:** Next.js 14 + Supabase + Vercel
+
+---
+
+## 🚨 CRITICAL: Emergency Refactor Summary (Nov 27, 2025)
+
+This document has been updated to reflect **3 critical architectural changes** implemented during the emergency refactor to fix production data ingestion bugs discovered during beta testing.
+
+### Changes Overview:
+
+1. **Chat Ingestion Schema Fixed** - Corrected database schema mapping in `/api/chat-messages`
+2. **Session Management Automated** - `stream.offline` EventSub webhook now auto-closes sessions
+3. **Reporting Strategy Pivot** - Disabled instant post-stream reports, moving to weekly digest model
+
+**⚠️ All previous documentation referring to `channel_name`/`channel_email` in `stream_chat_messages` is now outdated.**
 
 ---
 
@@ -24,14 +38,14 @@
 
 ## System Overview
 
-Casi is a **real-time streaming analytics platform** that helps Twitch and Kick streamers understand their audience through AI-powered chat analysis. The platform monitors live chat, performs multilingual sentiment analysis, detects questions, and generates comprehensive post-stream reports.
+Casi is a **real-time streaming analytics platform** that helps Twitch and Kick streamers understand their audience through AI-powered chat analysis. The platform monitors live chat, performs multilingual sentiment analysis, detects questions, and generates comprehensive weekly digest reports.
 
 ### Core Value Proposition
 
 - **Real-time Chat Monitoring** - Live chat ingestion and analysis during streams
 - **AI-Powered Analytics** - Sentiment analysis, question detection, engagement scoring (13+ languages)
 - **Community Insights** - Top chatters, recurring users, chat activity timelines
-- **Actionable Reports** - Post-stream email reports with highlights and recommendations
+- **Weekly Digest Reports** - Sunday email reports summarizing all streams from the past week
 - **Multi-Platform Support** - Twitch (live) + Kick (planned)
 
 ### System Components
@@ -56,7 +70,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │  │  • Kick API (WebSocket chat monitoring)             │       │
 │  │  • Resend (Email delivery)                          │       │
 │  │  • Stripe (Payments & subscriptions)                │       │
-│  │  • Vercel (Hosting & deployment)                    │       │
+│  │  • Vercel (Hosting + Cron Jobs)                     │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
@@ -70,7 +84,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript
-- **Styling:** Inline CSS with Casi brand colors (#6932FF, #932FFE, #5EEAD4)
+- **Styling:** Inline CSS with Casi brand colors (#6932FF, #932FFE, #B8EE8A)
 - **UI Components:** Custom React components
 - **State Management:** React hooks + URL params
 - **Authentication:** Supabase Auth (Twitch OAuth)
@@ -81,7 +95,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 - **Runtime:** Node.js 18+
 - **Language:** TypeScript
 - **API Design:** RESTful + Webhooks
-- **Rate Limiting:** Custom rate limiter (5-30 req/min)
+- **Rate Limiting:** Custom rate limiter (60 req/min for chat, 3 req/hour for reports)
 - **Validation:** Custom validation library
 
 ### Database
@@ -107,6 +121,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 - **Email:** Resend API
 - **Payments:** Stripe (Checkout + Customer Portal)
 - **Hosting:** Vercel (auto-deploy from GitHub)
+- **Cron Jobs:** Vercel Cron (weekly report generation)
 - **CDN:** Vercel Edge Network
 
 ---
@@ -170,7 +185,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2. Data Flow: Stream Monitoring → Analytics → Report
+### 2. 🔄 NEW: Data Flow - Stream Monitoring → Analytics → Weekly Report
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -191,7 +206,18 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
                                   ▼
          ┌──────────────────────────────────────────────┐
          │     /api/webhooks/twitch-events              │
-         │     /api/chat-messages (Kick)                │
+         │     • Processes EventSub notifications       │
+         │     • Stores stream events (subs/follows)    │
+         │     🆕 Auto-closes sessions on stream.offline │
+         └──────────────────────────────────────────────┘
+                                  │
+                                  ▼
+         ┌──────────────────────────────────────────────┐
+         │         /api/chat-messages                   │
+         │  • Batch saves messages from frontend        │
+         │  🆕 NO channel_name/channel_email stored     │
+         │  🆕 Sentiment as TEXT (not Float)            │
+         │  🆕 Engagement: high/medium/low              │
          └──────────────────────────────────────────────┘
                                   │
                                   ▼
@@ -200,7 +226,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
          │  • Language detection (13+ languages)        │
          │  • Sentiment analysis (pos/neg/neutral)      │
          │  • Question detection                        │
-         │  • Engagement scoring (high/med/low)         │
+         │  • Engagement scoring (high/medium/low)      │
          │  • Topic extraction                          │
          └──────────────────────────────────────────────┘
                                   │
@@ -208,55 +234,87 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
          ┌──────────────────────────────────────────────┐
          │          STORE IN DATABASE                   │
          │  • stream_chat_messages                      │
+         │    └─ session_id, username, message          │
+         │    └─ sentiment (TEXT), is_question          │
+         │    └─ engagement_level, language             │
          │  • stream_events                             │
          │  • stream_report_sessions                    │
+         │    └─ 🆕 session_end set by stream.offline   │
          └──────────────────────────────────────────────┘
                                   │
                                   ▼
          ┌──────────────────────────────────────────────┐
-         │      WHEN STREAM ENDS (Manual Trigger)       │
-         │      /api/generate-report                    │
+         │  🆕 WEEKLY REPORT GENERATION (Sundays)       │
+         │     /api/cron/weekly-report                  │
+         │  • Triggered by Vercel Cron                  │
+         │  • Fetches all sessions from past week       │
+         │  • Generates aggregate analytics             │
+         │  • Sends digest email via Resend             │
          └──────────────────────────────────────────────┘
                                   │
                                   ▼
          ┌──────────────────────────────────────────────┐
-         │         ANALYTICS GENERATION                 │
-         │  1. Stream metadata (Twitch Helix API)       │
-         │  2. Chat sentiment aggregation               │
-         │  3. Top chatters (recurring detection)       │
-         │  4. Chat activity timeline (2-min buckets)   │
-         │  5. Chat highlights (funny/thoughtful/hype)  │
-         │  6. Engagement peaks & insights              │
-         └──────────────────────────────────────────────┘
-                                  │
-                                  ▼
-         ┌──────────────────────────────────────────────┐
-         │      STORE ANALYTICS IN DATABASE             │
-         │  • stream_session_analytics                  │
-         │  • stream_top_chatters                       │
-         │  • stream_chat_timeline                      │
-         └──────────────────────────────────────────────┘
-                                  │
-                                  ▼
-         ┌──────────────────────────────────────────────┐
-         │       EMAIL REPORT GENERATION                │
-         │  • Fetch all analytics data                  │
-         │  • Render HTML email template                │
-         │  • Send via Resend API                       │
-         └──────────────────────────────────────────────┘
-                                  │
-                                  ▼
-         ┌──────────────────────────────────────────────┐
-         │      STREAMER RECEIVES EMAIL                 │
-         │  ✅ Stream summary                           │
-         │  ✅ Community MVPs                           │
-         │  ✅ Chat activity timeline                   │
-         │  ✅ Chat highlights                          │
-         │  ✅ Sentiment trends                         │
+         │      STREAMER RECEIVES WEEKLY EMAIL          │
+         │  ✅ All streams from past 7 days             │
+         │  ✅ Aggregate community MVPs                 │
+         │  ✅ Week-over-week trends                    │
+         │  ✅ Top moments across all streams           │
+         │  ✅ Engagement summary                       │
          └──────────────────────────────────────────────┘
 ```
 
-### 3. Authentication Flow
+### 3. 🆕 Session Lifecycle - Automated via EventSub
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│              AUTOMATED SESSION LIFECYCLE (Nov 2025)                   │
+└──────────────────────────────────────────────────────────────────────┘
+
+1. User goes live on Twitch
+         │
+         ▼
+2. Frontend Dashboard detects stream is live
+   • POST /api/sessions (create or reuse session)
+   • Returns session_id
+         │
+         ▼
+3. Chat messages flow in
+   • POST /api/chat-messages (batched every 5-10 seconds)
+   • Messages stored with session_id
+         │
+         ▼
+4. Stream events arrive
+   • POST /api/webhooks/twitch-events
+   • Subs, follows, bits, raids stored
+         │
+         ▼
+5. 🆕 STREAM ENDS - Twitch sends stream.offline event
+   • POST /api/webhooks/twitch-events
+   • subscription.type = 'stream.offline'
+         │
+         ▼
+6. 🆕 AUTO-CLOSE SESSION (lines 182-221 in twitch-events route)
+   • Find active session for broadcaster
+   • UPDATE stream_report_sessions
+     SET session_end = NOW()
+     WHERE id = activeSession.id
+   • Calculate duration_minutes
+         │
+         ▼
+7. ✅ Session closed automatically
+   • No frontend interaction required
+   • No manual "End Stream" button needed
+   • Data ready for weekly report generation
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                   PREVIOUS BEHAVIOR (Before Refactor)                 │
+│  ❌ Frontend had to manually call PUT /api/sessions                   │
+│  ❌ Users forgot to end sessions → corrupted data                     │
+│  ❌ Multiple active sessions per user caused issues                   │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### 4. Authentication Flow
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -320,7 +378,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 
 ## Database Schema
 
-### Entity Relationship Diagram
+### 🔄 UPDATED: Entity Relationship Diagram
 
 ```
 ┌─────────────────────┐
@@ -338,16 +396,18 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
          │ 1:N                     │
          ▼                         │
 ┌─────────────────────┐            │
-│ stripe_subscriptions│            │
+│ subscriptions       │            │
 │─────────────────────│            │
 │ id (UUID)           │            │
 │ user_id (FK)        │────────────┘
+│ user_email          │
 │ stripe_customer_id  │
 │ stripe_subscription │
-│ tier                │
-│ status              │
-│ viewer_limit        │
-│ messages_this_month │
+│ tier_name (TEXT)    │ Starter/Pro/Agency
+│ plan_name (TEXT)    │
+│ status (TEXT)       │ active/trialing/canceled
+│ trial_ends_at       │
+│ current_period_end  │
 └─────────────────────┘
          │
          │ 1:N
@@ -360,11 +420,12 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │ channel_name                │           │
 │ platform (twitch/kick)      │           │
 │ session_start               │           │
-│ session_end                 │           │
-│ stream_title                │ NEW       │
-│ stream_category             │ NEW       │
-│ stream_tags []              │ NEW       │
-│ avg_viewer_count            │ NEW       │
+│ session_end                 │ 🆕 AUTO   │
+│ stream_title                │           │
+│ stream_category             │           │
+│ stream_tags []              │           │
+│ peak_viewer_count           │           │
+│ avg_viewer_count            │           │
 │ total_messages              │           │
 │ unique_chatters             │           │
 │ report_generated (bool)     │           │
@@ -374,21 +435,21 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
          │ 1:N                            │
          ▼                                │
 ┌─────────────────────────────┐           │
-│ stream_chat_messages        │           │
+│ 🆕 stream_chat_messages     │           │
 │─────────────────────────────│           │
 │ id (UUID)                   │           │
 │ session_id (FK)             │───────────┘
-│ username                    │
-│ message                     │
+│ username                    │ 🆕 NO channel_name
+│ message                     │ 🆕 NO channel_email
 │ timestamp                   │
 │ language                    │
 │ language_confidence         │
-│ sentiment (pos/neg/neutral) │
-│ sentiment_score             │
+│ sentiment (TEXT) ⚠️         │ 🆕 'positive'/'negative'/'neutral'
+│ sentiment_score (FLOAT)     │
 │ sentiment_reason            │
 │ is_question (bool)          │
 │ question_type               │
-│ engagement_level            │
+│ engagement_level (TEXT) ⚠️  │ 🆕 'high'/'medium'/'low'
 │ topics []                   │
 └─────────────────────────────┘
          │
@@ -416,7 +477,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
          │ 1:N                            │
          ▼                                │
 ┌─────────────────────────────┐           │
-│ stream_top_chatters (NEW)   │           │
+│ stream_top_chatters         │           │
 │─────────────────────────────│           │
 │ id (UUID)                   │           │
 │ session_id (FK)             │───────────┤
@@ -433,7 +494,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 └─────────────────────────────┘           │
                                           │
 ┌─────────────────────────────┐           │
-│ stream_chat_timeline (NEW)  │           │
+│ stream_chat_timeline        │           │
 │─────────────────────────────│           │
 │ id (UUID)                   │           │
 │ session_id (FK)             │───────────┤
@@ -455,15 +516,14 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │ stream_events               │           │
 │─────────────────────────────│           │
 │ id (UUID)                   │           │
-│ session_id (FK)             │───────────┘
-│ channel_name                │
-│ channel_email               │
-│ event_type                  │
-│ event_data (JSON)           │
-│ event_timestamp             │
-│ user_id                     │
-│ user_name                   │
-│ user_display_name           │
+│ channel_name                │           │
+│ channel_email               │           │
+│ event_type                  │           │
+│ event_data (JSON)           │           │
+│ event_timestamp             │           │
+│ user_id                     │           │
+│ user_name                   │           │
+│ user_display_name           │           │
 └─────────────────────────────┘
 
 ┌─────────────────────────────┐
@@ -485,6 +545,59 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 └─────────────────────────────┘
 ```
 
+### 🔥 Critical Schema Changes (Emergency Refactor)
+
+#### ⚠️ `stream_chat_messages` Table - BREAKING CHANGES
+
+**REMOVED Columns:**
+
+- ❌ `channel_name` (was NOT NULL) - **DOES NOT EXIST IN PRODUCTION**
+- ❌ `channel_email` (was NOT NULL) - **DOES NOT EXIST IN PRODUCTION**
+
+**UPDATED Columns:**
+
+- ⚠️ `sentiment` - Changed from `FLOAT` to `TEXT CHECK (sentiment IN ('positive', 'negative', 'neutral'))`
+- ⚠️ `engagement_level` - Changed from generic to `TEXT CHECK (engagement_level IN ('high', 'medium', 'low'))`
+
+**Migration Impact:**
+
+```typescript
+// ❌ OLD CODE (BROKEN):
+const messagesToInsert = messages.map((msg) => ({
+  session_id: sessionId,
+  channel_name: session.channel_name, // ❌ Column doesn't exist!
+  channel_email: session.streamer_email, // ❌ Column doesn't exist!
+  sentiment: msg.sentiment, // ❌ Was sending Float!
+  engagement_level: 'normal', // ❌ Invalid value!
+}))
+
+// ✅ NEW CODE (CORRECT):
+const messagesToInsert = messages.map((msg) => {
+  // Map sentiment score to string
+  let sentimentString: 'positive' | 'negative' | 'neutral' = 'neutral'
+  if (msg.sentiment > 0) sentimentString = 'positive'
+  else if (msg.sentiment < 0) sentimentString = 'negative'
+
+  // Map engagement level
+  let engagementLevelString: 'high' | 'medium' | 'low' = 'medium'
+  if (msg.engagementLevel === 'high') engagementLevelString = 'high'
+  else if (msg.engagementLevel === 'low') engagementLevelString = 'low'
+
+  return {
+    session_id: sessionId,
+    username: msg.username,
+    message: msg.message,
+    timestamp: new Date(msg.timestamp).toISOString(),
+    sentiment: sentimentString,
+    is_question: msg.isQuestion || false,
+    language: msg.language || 'english',
+    engagement_level: engagementLevelString,
+  }
+})
+```
+
+**Location of Fix:** `/src/app/api/chat-messages/route.ts` (lines 57-78)
+
 ### Key Tables Explained
 
 #### 1. **auth.users** (Supabase managed)
@@ -493,24 +606,25 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 - Stores Twitch OAuth tokens in user_metadata
 - Primary authentication table
 
-#### 2. **stripe_subscriptions**
+#### 2. **subscriptions**
 
 - Manages paid subscriptions via Stripe
-- Tracks tier (free/streamer/streamer+/studio)
-- Enforces viewer limits and message quotas
+- Tracks tier (Starter/Pro/Agency)
+- New USD pricing: Starter ($11.99/mo), Pro ($49.99/mo), Agency (custom)
 - Links to Stripe Customer Portal
 
 #### 3. **stream_report_sessions**
 
 - Main table for stream sessions
 - Created when monitoring starts
-- Updated when stream ends
+- 🆕 **Auto-updated when stream ends** via `stream.offline` EventSub
 - Stores stream metadata (title, category, tags, CCV)
 
-#### 4. **stream_chat_messages**
+#### 4. **stream_chat_messages** 🆕
 
 - Every chat message stored here
-- Includes AI analysis (sentiment, language, questions)
+- **NO `channel_name` or `channel_email` columns** (common mistake!)
+- Includes AI analysis (sentiment as TEXT, language, questions)
 - Linked to session for analytics
 - Deleted when session is deleted (CASCADE)
 
@@ -520,13 +634,13 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 - Generated after stream ends
 - Contains sentiment summary, language breakdown, topics
 
-#### 6. **stream_top_chatters** (NEW - Nov 2025)
+#### 6. **stream_top_chatters**
 
 - Top 10 chatters per session
 - Recurring user detection (cross-session analysis)
 - Shows engagement metrics per user
 
-#### 7. **stream_chat_timeline** (NEW - Nov 2025)
+#### 7. **stream_chat_timeline**
 
 - 2-minute bucket analysis
 - Activity intensity categorization
@@ -535,6 +649,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 #### 8. **stream_events**
 
 - Twitch EventSub events (subs, follows, bits, raids)
+- 🆕 **stream.offline event triggers session closure**
 - Displayed in Activity Feed
 - Real-time event monitoring
 
@@ -553,7 +668,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │   └── /delete                    # Account deletion
 │
 ├── /admin                         # Admin-only endpoints
-│   ├── /billing                   # View all subscriptions
+│   ├── /billing                   # View all subscriptions & MRR
 │   ├── /grant-trial               # Grant trial to users
 │   ├── /link-accounts             # Link Twitch to email
 │   ├── /logs                      # System logs
@@ -561,19 +676,21 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │   ├── /sessions                  # View all sessions
 │   ├── /setup-raid-subscription   # Setup raid monitoring
 │   ├── /users                     # User management
+│   │   └── 🆕 POST grant_pro_trial # Grant 7-day Pro trial
 │   └── /backfill-subscriptions    # Backfill Stripe data
 │
 ├── /beta-code
 │   ├── /generate                  # Generate beta codes
 │   └── /validate                  # Validate beta code
 │
-├── /chat-messages                 # Store chat messages
+├── /chat-messages                 # 🆕 FIXED: Store chat messages (no channel fields)
 ├── /check-deployment              # Health check
 ├── /check-streamer-authorization  # Check EventSub auth
 │
 ├── /cron                          # Scheduled jobs
 │   ├── /check-tier-compliance     # Enforce tier limits
-│   └── /cleanup-stale-sessions    # Clean old sessions
+│   ├── /cleanup-stale-sessions    # Clean old sessions
+│   └── 🆕 /weekly-report          # Generate weekly digests (Sundays)
 │
 ├── /create-checkout-session       # Stripe checkout
 ├── /create-portal-session         # Stripe portal
@@ -581,7 +698,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 ├── /export
 │   └── /analytics                 # Export analytics as JSON/CSV
 │
-├── /generate-report               # Generate post-stream report
+├── /generate-report               # ⚠️ DEPRECATED: Generate post-stream report
 ├── /invoices                      # Fetch Stripe invoices
 │
 ├── /kick
@@ -597,7 +714,7 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │
 ├── /send-beta-code                # Send beta code email
 ├── /send-welcome-email            # Welcome email
-├── /sessions                      # List user sessions
+├── /sessions                      # 🆕 List/create/reuse sessions (12hr window)
 ├── /stream-events                 # Store EventSub events
 ├── /subscribe-user-events         # Setup EventSub subscriptions
 │
@@ -622,10 +739,10 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 │
 └── /webhooks
     ├── /stripe                    # Stripe webhook handler
-    └── /twitch-events             # Twitch EventSub webhook
+    └── /twitch-events             # 🆕 Twitch EventSub (auto-closes sessions)
 ```
 
-### API Categories
+### 🆕 API Categories
 
 #### **1. Authentication & User Management**
 
@@ -634,15 +751,16 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 - `/api/link-twitch-account` - Link Twitch to email account
 - `/api/account/delete` - Delete user account
 
-#### **2. Chat Monitoring**
+#### **2. Chat Monitoring** 🔄
 
-- `/api/chat-messages` - Store incoming chat messages
-- `/api/webhooks/twitch-events` - Receive Twitch EventSub webhooks
+- `/api/chat-messages` - **FIXED:** Store incoming chat messages (no `channel_name`/`channel_email`)
+- `/api/webhooks/twitch-events` - **ENHANCED:** Receive Twitch EventSub webhooks + auto-close sessions
 - Kick WebSocket client (backend agent process)
 
-#### **3. Analytics & Reporting**
+#### **3. Analytics & Reporting** 🔄
 
-- `/api/generate-report` - Generate post-stream analytics
+- `/api/generate-report` - ⚠️ **DEPRECATED** - Will be removed in next version
+- `/api/cron/weekly-report` - **NEW** - Weekly digest generation (Sundays)
 - `/api/report/[sessionId]` - Fetch report data
 - `/api/sessions` - List user's stream sessions
 - `/api/export/analytics` - Export analytics data
@@ -655,15 +773,18 @@ Casi is a **real-time streaming analytics platform** that helps Twitch and Kick 
 - `/api/invoices` - Fetch user invoices
 - `/api/tier-status` - Check tier compliance
 
-#### **5. Admin Operations**
+#### **5. Admin Operations** 🔄
 
+- `/api/admin/users` - **ENHANCED:** Added `grant_pro_trial` action
+- `/api/admin/billing` - **UPDATED:** USD pricing, MRR display
 - `/api/admin/*` - Various admin tools
 - Protected by authentication checks
 
-#### **6. Cron Jobs**
+#### **6. Cron Jobs** 🔄
 
 - `/api/cron/check-tier-compliance` - Daily tier enforcement
 - `/api/cron/cleanup-stale-sessions` - Weekly cleanup
+- `/api/cron/weekly-report` - **NEW:** Sunday weekly report generation
 
 ---
 
@@ -744,11 +865,11 @@ FOR ALL USING (
 
 ## Real-Time Processing
 
-### Twitch EventSub Webhook Flow
+### 🆕 Twitch EventSub Webhook Flow (Enhanced)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                 TWITCH EVENTSUB ARCHITECTURE                  │
+│             TWITCH EVENTSUB ARCHITECTURE (v2.0)               │
 └──────────────────────────────────────────────────────────────┘
 
 1. Twitch sends webhook POST to:
@@ -768,20 +889,66 @@ FOR ALL USING (
          │
          ▼
 4. Extract event data:
-   • Event type (channel.subscribe, channel.follow, etc.)
+   • Event type (channel.subscribe, channel.follow, stream.offline, etc.)
    • User info (username, user_id, display_name)
    • Event-specific data (tier, message, amount)
          │
          ▼
-5. Store in stream_events table
-   • Insert with session_id, channel_name, event_type
+5. 🆕 SPECIAL HANDLING: stream.offline event
+   IF subscription.type === 'stream.offline':
+     • Find active session for broadcaster
+     • UPDATE stream_report_sessions SET session_end = NOW()
+     • Calculate duration_minutes
+     • ✅ Session automatically closed
+     • RETURN (don't create stream_event record)
+         │
+         ▼
+6. FOR OTHER EVENTS: Store in stream_events table
+   • Insert with channel_name, channel_email, event_type
    • Store full event_data as JSON
          │
          ▼
-6. Frontend polls /api/stream-events every 10 seconds
+7. Frontend polls /api/stream-events every 10 seconds
          │
          ▼
-7. Activity Feed displays events in real-time
+8. Activity Feed displays events in real-time
+```
+
+**Code Reference:** `/src/app/api/webhooks/twitch-events/route.ts` (lines 182-221)
+
+```typescript
+// stream.offline handler (NEW)
+case 'stream.offline':
+  console.log(`🔴 Stream offline event received for broadcaster: ${event.broadcaster_user_login}`)
+
+  // Find the active session for this channel
+  const { data: activeSession, error: sessionError } = await supabase
+    .from('stream_report_sessions')
+    .select('id')
+    .eq('channel_name', event.broadcaster_user_login.toLowerCase())
+    .is('session_end', null) // Only consider active sessions
+    .order('session_start', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (sessionError || !activeSession) {
+    console.error(`❌ Could not find active session for offline stream`)
+    return NextResponse.json({ received: true })
+  }
+
+  // Update session with end time
+  const { error: updateSessionError } = await supabase
+    .from('stream_report_sessions')
+    .update({ session_end: new Date().toISOString() })
+    .eq('id', activeSession.id)
+
+  if (updateSessionError) {
+    console.error(`❌ Failed to update session with end time`)
+    return NextResponse.json({ received: true })
+  }
+
+  console.log(`✅ Session ${activeSession.id} closed for ${event.broadcaster_user_login}`)
+  return NextResponse.json({ received: true })
 ```
 
 ### Kick Chat Monitoring (WebSocket)
@@ -806,7 +973,7 @@ FOR ALL USING (
          │
          ▼
 4. Store in stream_chat_messages table via API call
-   POST /api/chat-messages
+   POST /api/chat-messages (uses FIXED schema mapping)
          │
          ▼
 5. Messages available for analytics generation
@@ -816,16 +983,103 @@ FOR ALL USING (
 
 ## Analytics Pipeline
 
-### Analytics Generation Flow
+### 🔄 NEW: Weekly Report Generation Flow
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│          POST-STREAM ANALYTICS GENERATION PIPELINE            │
+│            WEEKLY DIGEST REPORT PIPELINE (Sundays)            │
 └──────────────────────────────────────────────────────────────┘
 
-TRIGGER: User clicks "Generate Report" in dashboard
-         OR
-         Manual script: node scripts/send-millzaatv-report.js
+TRIGGER: Vercel Cron (every Sunday at 9:00 AM UTC)
+         Endpoint: GET /api/cron/weekly-report
+         Header: x-vercel-cron-secret (authentication)
+
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 1: Fetch All Users                                   │
+│  • Query auth.users for all active users                   │
+│  • Filter out unsubscribed emails                          │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 2: For Each User - Fetch Past Week Sessions          │
+│  • Query stream_report_sessions                             │
+│  • WHERE streamer_email = user.email                        │
+│  • AND session_start >= (NOW() - INTERVAL '7 days')        │
+│  • AND session_end IS NOT NULL (completed streams only)     │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 3: Aggregate Analytics Across All Sessions           │
+│  • Total streams this week                                  │
+│  • Total messages across all streams                        │
+│  • Average sentiment across all streams                     │
+│  • Top chatters (cross-session aggregation)                 │
+│  • Total viewer hours                                       │
+│  • Week-over-week growth metrics                            │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 4: Generate Weekly Highlights                        │
+│  • Best performing stream (highest engagement)              │
+│  • Funniest moment across all streams                       │
+│  • Most active community member                             │
+│  • New recurring users detected                             │
+│  • Stream title performance analysis                        │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 5: Render Weekly Digest Email Template               │
+│  • Week summary header (Nov 20-26, 2025)                    │
+│  • Key metrics cards (streams, hours, messages)             │
+│  • Week-over-week trend indicators                          │
+│  • Top 5 community MVPs                                     │
+│  • Stream performance breakdown                             │
+│  • Recommendations for next week                            │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 6: Send Email via Resend API                         │
+│  • POST to Resend API with HTML body                        │
+│  • From: reports@heycasi.com                                │
+│  • Subject: "Your Weekly Streaming Digest - Nov 20-26"     │
+│  • Check unsubscribe_emails table first                     │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+   ✅ WEEKLY DIGEST DELIVERED TO ALL ACTIVE STREAMERS
+```
+
+**Status:** 🚧 Placeholder implementation at `/src/app/api/cron/weekly-report/route.ts`
+
+**TODO:**
+
+- Implement user fetching logic
+- Build aggregate analytics queries
+- Design weekly digest email template
+- Add week-over-week comparison logic
+- Test with Vercel Cron locally
+
+### ⚠️ Deprecated: Instant Post-Stream Reports
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│        DEPRECATED: POST-STREAM REPORT GENERATION              │
+│              (Being replaced by weekly digests)               │
+└──────────────────────────────────────────────────────────────┘
+
+TRIGGER: ❌ User clicks "Generate Report" (being removed)
+         Endpoint: POST /api/generate-report
+
+⚠️ This endpoint still exists but will be removed in v3.0
+⚠️ Do not build new features relying on this flow
+⚠️ Use weekly report generation instead
 
          │
          ▼
@@ -894,9 +1148,6 @@ TRIGGER: User clicks "Generate Report" in dashboard
 │  • Check unsubscribe_emails table first                     │
 │  • Mark report_sent = true in stream_report_sessions        │
 └─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-   ✅ REPORT DELIVERED TO STREAMER INBOX
 ```
 
 ### Multilingual Analysis Details
@@ -922,6 +1173,7 @@ TRIGGER: User clicks "Generate Report" in dashboard
    • Negative keywords: "hate", "bad", "terrible", "worst"
    • Language-specific keywords (e.g., "jajaja" for Spanish)
    • Emoji analysis: 😀😂❤️ = positive, 😢😡 = negative
+   • 🆕 Returns TEXT: 'positive', 'negative', or 'neutral'
 
 3. Question Detection
    • Language-specific question markers
@@ -934,6 +1186,7 @@ TRIGGER: User clicks "Generate Report" in dashboard
    • High: Multiple exclamation marks, caps, emojis
    • Medium: Standard message with some emotion
    • Low: Short message, no emotion indicators
+   • 🆕 Returns TEXT: 'high', 'medium', or 'low'
 ```
 
 ---
@@ -947,7 +1200,12 @@ TRIGGER: User clicks "Generate Report" in dashboard
 ```
 Purpose: Real-time notifications for stream events
 Endpoint: https://www.heycasi.com/api/webhooks/twitch-events
-Events: channel.subscribe, channel.follow, channel.cheer, channel.raid
+Events:
+  • channel.subscribe
+  • channel.follow
+  • channel.cheer
+  • channel.raid
+  • 🆕 stream.offline (auto-closes sessions)
 
 Setup Process:
 1. User authorizes with required scopes
@@ -956,6 +1214,7 @@ Setup Process:
 4. Backend responds with challenge to confirm subscription
 5. Twitch sends event notifications to webhook
 6. Backend verifies HMAC signature and stores events
+7. 🆕 stream.offline events trigger automatic session closure
 ```
 
 **Helix API:**
@@ -983,7 +1242,7 @@ Process:
 1. Backend agent connects to Kick WebSocket
 2. Joins specific channel's chat room
 3. Receives chat messages in real-time
-4. Sends to /api/chat-messages for storage and analysis
+4. 🆕 Sends to /api/chat-messages (FIXED schema mapping)
 ```
 
 ### 3. Resend Email Integration
@@ -991,13 +1250,14 @@ Process:
 **Email Delivery:**
 
 ```
-Purpose: Send post-stream reports
+Purpose: Send weekly digest reports
 API Endpoint: https://api.resend.com/emails
 From Domain: heycasi.com (fully verified)
 From Address: reports@heycasi.com
 
 Email Types:
-  • Post-stream analytics reports (HTML)
+  • 🆕 Weekly digest reports (HTML) - Sundays
+  • ⚠️ Post-stream analytics reports (DEPRECATED)
   • Welcome emails
   • Beta code emails
 
@@ -1022,11 +1282,39 @@ Webhooks:
   • /api/webhooks/stripe
   • Events: checkout.session.completed, customer.subscription.*
 
-Pricing Tiers:
-  • Free: $0/mo - 100 viewers
-  • Streamer: $9/mo - 500 viewers
-  • Streamer+: $19/mo - 2000 viewers
-  • Studio: $49/mo - 10000 viewers
+🆕 Pricing Tiers (USD):
+  • Starter: $11.99/mo - Basic analytics
+  • Pro: $49.99/mo - Advanced features
+  • Agency: Custom pricing - Enterprise features
+```
+
+### 5. 🆕 Vercel Cron Integration
+
+**Scheduled Jobs:**
+
+```
+Purpose: Automated weekly report generation
+Endpoint: GET /api/cron/weekly-report
+Schedule: Every Sunday at 9:00 AM UTC
+Authentication: x-vercel-cron-secret header
+
+Configuration (vercel.json):
+{
+  "crons": [
+    {
+      "path": "/api/cron/weekly-report",
+      "schedule": "0 9 * * 0"
+    }
+  ]
+}
+
+How it works:
+1. Vercel triggers HTTP GET request on schedule
+2. Backend validates x-vercel-cron-secret header
+3. Fetches all users and their past week's streams
+4. Generates aggregate analytics
+5. Sends weekly digest emails via Resend
+6. Logs execution status
 ```
 
 ---
@@ -1049,9 +1337,10 @@ Pricing Tiers:
 
 **3. API Security:**
 
-- Rate limiting on all endpoints (5-30 req/min)
+- Rate limiting on all endpoints (60 req/min for chat, 3 req/hour for reports)
 - Input validation on all user inputs
 - Webhook signature verification (Twitch HMAC, Stripe)
+- 🆕 Cron endpoint authentication via x-vercel-cron-secret
 
 **4. Environment Variables:**
 
@@ -1069,6 +1358,7 @@ RESEND_API_KEY                    # Secret
 STRIPE_SECRET_KEY                 # Secret
 STRIPE_WEBHOOK_SECRET             # Secret
 ADMIN_EMAIL                       # Secret
+🆕 CRON_SECRET                    # Secret - Vercel cron authentication
 ```
 
 **5. Content Security:**
@@ -1111,6 +1401,7 @@ ADMIN_EMAIL                       # Secret
    • CDN: Static assets
    • Serverless: API routes
    • Edge: Middleware
+   • 🆕 Cron: Scheduled jobs
          │
          ▼
 5. Live at https://www.heycasi.com
@@ -1128,6 +1419,7 @@ ADMIN_EMAIL                       # Secret
 - Global edge network (CDN)
 - Auto SSL certificates
 - GitHub integration for CI/CD
+- 🆕 Integrated cron job scheduler
 
 **Database:** Supabase (PostgreSQL)
 
@@ -1156,6 +1448,7 @@ ADMIN_EMAIL                       # Secret
 - Error logging to console
 - Stripe webhook event logging
 - Admin panel for viewing logs (`/api/admin/logs`)
+- 🆕 Cron job execution logging
 
 **Future Improvements:**
 
@@ -1231,6 +1524,8 @@ cp .env.example .env.local
 
 # 4. Run database migrations
 # Execute SQL files in /database folder in Supabase SQL editor
+# ⚠️ IMPORTANT: Use database/schema.sql for correct structure
+# ⚠️ DO NOT add channel_name/channel_email to stream_chat_messages!
 
 # 5. Start dev server
 npm run dev
@@ -1240,12 +1535,15 @@ npm run dev
 
 **Key Files to Review:**
 
-1. `/ARCHITECTURE.md` - This file
+1. `/ARCHITECTURE.md` - This file (updated Nov 27, 2025)
 2. `/SESSION_LOG.md` - Development history
 3. `/CLAUDE.md` - Development guidelines
-4. `/database/schema.sql` - Database structure
+4. `/database/schema.sql` - 🆕 CORRECTED database structure
 5. `/src/lib/analytics.ts` - Analytics engine
 6. `/src/lib/multilingual.ts` - Language processing
+7. 🆕 `/src/app/api/chat-messages/route.ts` - FIXED chat ingestion
+8. 🆕 `/src/app/api/webhooks/twitch-events/route.ts` - Auto session closure
+9. 🆕 `/src/app/api/cron/weekly-report/route.ts` - Weekly report placeholder
 
 ---
 
@@ -1275,10 +1573,55 @@ npm run dev
 
 **Recurring User** - User who appeared in previous streams (loyalty indicator)
 
+**🆕 Weekly Digest** - Aggregate report of all streams from past 7 days
+
+**🆕 Emergency Refactor** - Nov 27, 2025 fix for production data ingestion bugs
+
+---
+
+## 🔧 Troubleshooting Common Issues
+
+### Issue 1: Chat messages not saving
+
+**Symptom:** `POST /api/chat-messages` returns 500 error with "column does not exist"
+
+**Cause:** Trying to insert `channel_name` or `channel_email` which don't exist in `stream_chat_messages` table
+
+**Solution:** Use the FIXED schema mapping in `/src/app/api/chat-messages/route.ts` (lines 57-78)
+
+### Issue 2: Sentiment validation errors
+
+**Symptom:** Database rejects INSERT with "sentiment must be positive, negative, or neutral"
+
+**Cause:** Sending Float values like `0.7` instead of TEXT values
+
+**Solution:** Map sentiment scores to strings before insertion (see fixed code above)
+
+### Issue 3: Sessions not closing
+
+**Symptom:** Multiple active sessions for one user, `session_end` remains NULL
+
+**Cause:** Frontend wasn't calling end session API, or stream.offline EventSub not configured
+
+**Solution:** Ensure `stream.offline` EventSub subscription is active for the broadcaster
+
+### Issue 4: Engagement level validation errors
+
+**Symptom:** Database rejects "normal" as engagement_level value
+
+**Cause:** Only 'high', 'medium', 'low' are valid
+
+**Solution:** Map "normal" → "medium" before insertion
+
 ---
 
 **End of Architecture Document**
 
-_Last Updated: November 11, 2025_
-_Version: 1.0_
+_Last Updated: November 27, 2025_
+_Version: 2.0 (Emergency Refactor Edition)_
 _Maintainer: Casi Platform Team_
+
+**Changelog:**
+
+- **v2.0 (Nov 27, 2025)**: Emergency refactor - Fixed chat ingestion schema, automated session closure, pivoted to weekly reports
+- **v1.0 (Nov 11, 2025)**: Initial architecture documentation

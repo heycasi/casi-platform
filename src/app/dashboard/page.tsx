@@ -6,6 +6,7 @@ import TierUpgradeNudge from '@/components/TierUpgradeNudge'
 import FeatureGate from '@/components/FeatureGate'
 import HistoryLimitBanner from '@/components/HistoryLimitBanner'
 import MultiPlatformActivityFeed from '@/components/MultiPlatformActivityFeed'
+import StreamSummary from '@/components/StreamSummary'
 import { createChatClient } from '@/lib/chat/factory'
 import type { IChatClient, UnifiedChatMessage, Platform } from '@/types/chat'
 
@@ -121,6 +122,10 @@ export default function Dashboard() {
 
   // Platform filter for chat feed
   const [platformFilter, setPlatformFilter] = useState<'all' | 'twitch' | 'kick'>('all')
+
+  // Stream Summary state
+  const [showSummary, setShowSummary] = useState(false)
+  const [sessionData, setSessionData] = useState<any>(null)
 
   // Message batching for efficient API calls
   const messageBatchRef = useRef<any[]>([])
@@ -396,6 +401,36 @@ export default function Dashboard() {
 
     checkAccess()
   }, [email, isAdmin])
+
+  // Poll for session status to detect stream end
+  useEffect(() => {
+    if (!email || !isConnected || showSummary) return
+
+    const pollSessionStatus = async () => {
+      try {
+        const response = await fetch(`/api/sessions/current?email=${encodeURIComponent(email)}`)
+        const data = await response.json()
+
+        if (data.status === 'finished' && data.session) {
+          // Stream has ended, show summary
+          console.log('Stream ended, showing summary')
+          setSessionData(data.session)
+          setShowSummary(true)
+          setIsConnected(false)
+        }
+      } catch (error) {
+        console.error('Failed to poll session status:', error)
+      }
+    }
+
+    // Poll every 60 seconds
+    const intervalId = setInterval(pollSessionStatus, 60000)
+
+    // Also check immediately
+    pollSessionStatus()
+
+    return () => clearInterval(intervalId)
+  }, [email, isConnected, showSummary])
 
   // NEW: Fetch Kick username from database
   useEffect(() => {
@@ -1173,6 +1208,36 @@ export default function Dashboard() {
         color: 'white',
       }}
     >
+      {/* Stream Summary Overlay */}
+      {showSummary && sessionData && currentSessionId && (
+        <StreamSummary
+          sessionId={currentSessionId}
+          sessionData={sessionData}
+          userTier={userTier}
+          onClose={() => {
+            setShowSummary(false)
+            setSessionData(null)
+            setCurrentSessionId(null)
+            setMessages([])
+            setQuestions([])
+            setStats({
+              totalMessages: 0,
+              questions: 0,
+              avgSentiment: 0,
+              positiveMessages: 0,
+              negativeMessages: 0,
+              viewerCount: 0,
+              activeUsers: 0,
+              currentMood: 'Neutral',
+            })
+            setTopChatters([])
+            setStreamStartTime(null)
+            // Clear localStorage session
+            localStorage.removeItem('casi_active_session')
+          }}
+        />
+      )}
+
       {/* Header with Navigation */}
       <div
         style={{
