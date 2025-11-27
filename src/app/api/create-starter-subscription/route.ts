@@ -6,12 +6,46 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+/**
+ * Wait for user to appear in public users table (handles DB trigger race condition)
+ * Retries up to 5 times with 500ms delay between attempts (max 2.5s wait)
+ */
+async function waitForUserInPublicTable(userId: string): Promise<boolean> {
+  const MAX_ATTEMPTS = 5
+  const DELAY_MS = 500
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single()
+
+    if (!error && user) {
+      console.log(`✅ User ${userId} found in public.users table (attempt ${attempt})`)
+      return true
+    }
+
+    if (attempt < MAX_ATTEMPTS) {
+      console.log(
+        `⏳ User ${userId} not yet in public.users table (attempt ${attempt}/${MAX_ATTEMPTS}), waiting ${DELAY_MS}ms...`
+      )
+      await new Promise((resolve) => setTimeout(resolve, DELAY_MS))
+    }
+  }
+
+  console.warn(
+    `⚠️ User ${userId} not found in public.users table after ${MAX_ATTEMPTS} attempts (${MAX_ATTEMPTS * DELAY_MS}ms)`
+  )
+  return false
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { email, userId } = await req.json()
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
 
-    // Check if exists
+    // Check if subscription already exists
     const { data: existing } = await supabase
       .from('subscriptions')
       .select('id')
@@ -19,12 +53,28 @@ export async function POST(req: NextRequest) {
       .single()
     if (existing) return NextResponse.json({ message: 'Subscription already exists' })
 
-    // Verify user exists if userId is provided
-    let validUserId = null
+    // Handle user_id validation with retry mechanism
+    let validUserId: string | null = null
     if (userId) {
-      const { data: user, error: userError } = await supabase.auth.admin.getUserById(userId)
-      if (!userError && user) {
-        validUserId = userId
+      // First verify user exists in auth.users
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId)
+
+      if (!authError && authUser) {
+        // User exists in auth.users, now wait for trigger to copy to public.users
+        const userExistsInPublicTable = await waitForUserInPublicTable(userId)
+
+        if (userExistsInPublicTable) {
+          validUserId = userId
+        } else {
+          // Fallback: User not in public.users yet, but we'll create subscription anyway
+          // Set user_id to null to avoid foreign key constraint violation
+          console.warn(
+            `⚠️ Creating subscription with user_id=null for ${email} (will be linked later via trigger/cron)`
+          )
+          validUserId = null
+        }
+      } else {
+        console.warn(`⚠️ User ${userId} not found in auth.users: ${authError?.message}`)
       }
     }
 
@@ -40,9 +90,18 @@ export async function POST(req: NextRequest) {
     })
 
     if (error) throw error
+
+    if (validUserId) {
+      console.log(`✅ Created Starter subscription for ${email} with user_id=${validUserId}`)
+    } else {
+      console.log(
+        `✅ Created Starter subscription for ${email} without user_id (will be linked later)`
+      )
+    }
+
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error('Error:', error)
+    console.error('Error creating starter subscription:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
