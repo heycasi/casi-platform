@@ -128,32 +128,9 @@ const Navbar = () => {
 }
 
 const Hero = () => {
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const { scrollY } = useScroll()
   const y1 = useTransform(scrollY, [0, 500], [0, 200])
   const y2 = useTransform(scrollY, [0, 500], [0, -150])
-
-  const handleJoin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-    setStatus('loading')
-    try {
-      const { error } = await supabase.from('waitlist').insert([
-        {
-          email: email.toLowerCase().trim(),
-          source: 'homepage_v2_redesign',
-          created_at: new Date().toISOString(),
-          user_agent: navigator.userAgent,
-        },
-      ])
-      if (error && error.code !== '23505') throw error
-      setStatus('success')
-      setEmail('')
-    } catch (e) {
-      setStatus('error')
-    }
-  }
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center items-center pt-32 pb-20 overflow-hidden">
@@ -224,35 +201,12 @@ const Hero = () => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col items-center gap-4"
         >
-          <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="flex-1 bg-white/5 border border-white/10 rounded-full px-6 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#6932FF] focus:ring-2 focus:ring-[#6932FF]/20 transition-all"
-            />
-            <button
-              disabled={status === 'loading' || status === 'success'}
-              className="bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white font-semibold rounded-full px-8 py-3 hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all disabled:opacity-70"
-            >
-              {status === 'loading'
-                ? 'Calculating...'
-                : status === 'success'
-                  ? '✓ Joined!'
-                  : 'Get Your Stream Intelligence Score'}
-            </button>
-          </form>
-          {status === 'success' && (
-            <p className="text-[#5EEAD4] text-sm font-medium">
-              🎉 You're on the list! Check your email.
-            </p>
-          )}
-          {status === 'error' && (
-            <p className="text-red-400 text-sm font-medium">
-              Something went wrong. Please try again.
-            </p>
-          )}
+          <Link
+            href="/signup"
+            className="bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white font-semibold rounded-full px-8 py-4 text-lg hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all"
+          >
+            Get Your Stream Intelligence Score
+          </Link>
           <p className="text-zinc-500 text-sm font-mono tracking-wide">NO CREDIT CARD REQUIRED</p>
         </motion.div>
       </div>
