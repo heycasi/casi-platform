@@ -42,7 +42,7 @@ async function waitForUserInPublicTable(userId: string): Promise<boolean> {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, userId } = await req.json()
+    const { email, userId, trialCode } = await req.json()
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
 
     // Check if subscription already exists
@@ -78,13 +78,29 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create Starter subscription
+    // Determine plan details based on trial code
+    let tierName = 'Starter'
+    let planName = 'Starter'
+    let status = 'active'
+    let trialEndsAt: string | null = null
+
+    if (trialCode === 'vip7') {
+      console.log(`🎁 Applying VIP7 trial for ${email}`)
+      tierName = 'Pro'
+      planName = 'Pro'
+      status = 'trialing'
+      // 7 days from now
+      trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    }
+
+    // Create Subscription
     const { error } = await supabase.from('subscriptions').insert({
       email,
       user_id: validUserId,
-      tier_name: 'Starter',
-      plan_name: 'Starter',
-      status: 'active',
+      tier_name: tierName,
+      plan_name: planName,
+      status: status,
+      trial_ends_at: trialEndsAt,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
@@ -92,16 +108,20 @@ export async function POST(req: NextRequest) {
     if (error) throw error
 
     if (validUserId) {
-      console.log(`✅ Created Starter subscription for ${email} with user_id=${validUserId}`)
+      console.log(
+        `✅ Created ${tierName} subscription for ${email} with user_id=${validUserId}${
+          trialCode ? ` (Trial: ${trialCode})` : ''
+        }`
+      )
     } else {
       console.log(
-        `✅ Created Starter subscription for ${email} without user_id (will be linked later)`
+        `✅ Created ${tierName} subscription for ${email} without user_id (will be linked later)`
       )
     }
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error('Error creating starter subscription:', error)
+    console.error('Error creating subscription:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
