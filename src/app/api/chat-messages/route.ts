@@ -54,18 +54,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare messages for insertion
-    const messagesToInsert = messages.map((msg) => ({
-      session_id: sessionId,
-      channel_name: session.channel_name,
-      channel_email: session.streamer_email,
-      username: msg.username,
-      message: msg.message,
-      timestamp: new Date(msg.timestamp).toISOString(),
-      sentiment: msg.sentiment || 0,
-      is_question: msg.isQuestion || false,
-      language: msg.language || 'english',
-      engagement_level: msg.engagementLevel || 'normal',
-    }))
+    const messagesToInsert = messages.map((msg) => {
+      // Map sentiment score to string (neutral by default if 0)
+      let sentimentString: 'positive' | 'negative' | 'neutral' = 'neutral'
+      if (msg.sentiment > 0) sentimentString = 'positive'
+      else if (msg.sentiment < 0) sentimentString = 'negative'
+
+      // Map engagement level to allowed values, default to 'medium' for 'normal'
+      let engagementLevelString: 'high' | 'medium' | 'low' = 'medium'
+      if (msg.engagementLevel === 'high') engagementLevelString = 'high'
+      else if (msg.engagementLevel === 'low') engagementLevelString = 'low'
+
+      return {
+        session_id: sessionId,
+        username: msg.username,
+        message: msg.message,
+        timestamp: new Date(msg.timestamp).toISOString(),
+        sentiment: sentimentString,
+        is_question: msg.isQuestion || false,
+        language: msg.language || 'english',
+        engagement_level: engagementLevelString,
+      }
+    })
 
     // Batch insert messages
     const { data, error } = await supabase

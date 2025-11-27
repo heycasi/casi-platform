@@ -179,6 +179,47 @@ export async function POST(request: NextRequest) {
           }
           break
 
+        case 'stream.offline':
+          console.log(
+            `🔴 Stream offline event received for broadcaster: ${event.broadcaster_user_login}`
+          )
+          const offlineBroadcasterId = event.broadcaster_user_id
+
+          // Find the active session for this channel
+          const { data: activeSession, error: sessionError } = await supabase
+            .from('stream_report_sessions')
+            .select('id')
+            .eq('channel_name', event.broadcaster_user_login.toLowerCase())
+            .is('session_end', null) // Only consider active sessions
+            .order('session_start', { ascending: false })
+            .limit(1)
+            .single()
+
+          if (sessionError || !activeSession) {
+            console.error(
+              `❌ Could not find active session for offline stream: ${event.broadcaster_user_login}`,
+              sessionError
+            )
+            return NextResponse.json({ received: true })
+          }
+
+          // Update session with end time
+          const { error: updateSessionError } = await supabase
+            .from('stream_report_sessions')
+            .update({ session_end: new Date().toISOString() })
+            .eq('id', activeSession.id)
+
+          if (updateSessionError) {
+            console.error(
+              `❌ Failed to update session ${activeSession.id} with end time:`,
+              updateSessionError
+            )
+            return NextResponse.json({ received: true })
+          }
+
+          console.log(`✅ Session ${activeSession.id} closed for ${event.broadcaster_user_login}`)
+          return NextResponse.json({ received: true })
+
         default:
           console.log(`⚠️ Unknown event type: ${subscription.type}`)
           return NextResponse.json({ received: true })
@@ -186,6 +227,12 @@ export async function POST(request: NextRequest) {
 
       // Get broadcaster email from user_id
       const broadcasterId = event.broadcaster_user_id
+
+      // For stream.offline events, we don't need to store a new stream_event record
+      // The session closure is the primary action. So we exit early.
+      if (subscription.type === 'stream.offline') {
+        return NextResponse.json({ received: true })
+      }
 
       // Find the channel email by looking up Twitch user ID in auth metadata
       const { data: users } = await supabase.auth.admin.listUsers()
