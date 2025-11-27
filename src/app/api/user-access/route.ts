@@ -94,15 +94,41 @@ export async function GET(req: NextRequest) {
           message: `You have ${daysRemaining} days remaining in your beta trial.`,
         })
       } else {
-        // Trial has expired
+        // Trial has expired - Auto-downgrade to Starter
+        console.log(`Trial expired for ${email}. Downgrading to Starter plan...`)
+
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({
+            tier_name: 'Starter',
+            plan_name: 'Starter',
+            status: 'active',
+            trial_ends_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('email', email)
+
+        if (updateError) {
+          console.error('Failed to downgrade expired trial:', updateError)
+          return NextResponse.json(
+            {
+              has_access: false,
+              status: 'error',
+              message: 'Failed to update subscription. Please contact support.',
+            },
+            { status: 500 }
+          )
+        }
+
+        console.log(`✅ Downgraded ${email} to Starter`)
+
         return NextResponse.json({
-          has_access: false,
-          status: 'trial_expired',
-          is_trial: true,
-          trial_ended: true,
-          trial_ends_at: trialEndDate,
-          message: 'Your beta trial has expired. Please subscribe to continue using Casi.',
-          require_subscription: true,
+          has_access: true,
+          status: 'active',
+          is_trial: false,
+          plan_name: 'Starter',
+          tier_name: 'Starter',
+          message: 'Your trial has ended. You have been moved to the free Starter plan.',
         })
       }
     }
