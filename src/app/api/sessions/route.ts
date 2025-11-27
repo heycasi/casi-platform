@@ -94,7 +94,7 @@ async function fetchTwitchStreamInfo(channelName: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { streamerEmail, channelName } = await request.json()
+    const { streamerEmail, channelName, forceNew } = await request.json() // Read forceNew
 
     if (!streamerEmail || !channelName) {
       return NextResponse.json(
@@ -105,28 +105,33 @@ export async function POST(request: NextRequest) {
 
     const normalizedChannelName = channelName.toLowerCase()
 
-    // Check for existing active session (no session_end)
-    const { data: existingSession } = await supabase
-      .from('stream_report_sessions')
-      .select('id, session_start')
-      .eq('channel_name', normalizedChannelName)
-      .is('session_end', null)
-      .order('session_start', { ascending: false })
-      .limit(1)
-      .single()
+    // If forceNew is true, skip existing session check and create a new one immediately
+    if (!forceNew) {
+      // Check for existing active session (no session_end)
+      const { data: existingSession } = await supabase
+        .from('stream_report_sessions')
+        .select('id, session_start')
+        .eq('channel_name', normalizedChannelName)
+        .is('session_end', null)
+        .order('session_start', { ascending: false })
+        .limit(1)
+        .single()
 
-    // If active session exists and is less than 12 hours old, reuse it
-    if (existingSession) {
-      const sessionAge = Date.now() - new Date(existingSession.session_start).getTime()
-      const twelveHoursMs = 12 * 60 * 60 * 1000
+      // If active session exists and is less than 12 hours old, reuse it
+      if (existingSession) {
+        const sessionAge = Date.now() - new Date(existingSession.session_start).getTime()
+        const twelveHoursMs = 12 * 60 * 60 * 1000
 
-      if (sessionAge < twelveHoursMs) {
-        console.log(`♻️ Reusing existing session: ${existingSession.id}`)
-        return NextResponse.json({
-          sessionId: existingSession.id,
-          reused: true,
-        })
+        if (sessionAge < twelveHoursMs) {
+          console.log(`♻️ Reusing existing session: ${existingSession.id}`)
+          return NextResponse.json({
+            sessionId: existingSession.id,
+            reused: true,
+          })
+        }
       }
+    } else {
+      console.log(`Bypassing session reuse due to forceNew flag for ${normalizedChannelName}`)
     }
 
     // Fetch stream info from Twitch (title, category, tags, viewer count)

@@ -646,6 +646,50 @@ export default function Dashboard() {
     localStorage.removeItem('casi_active_session')
   }
 
+  // Handle starting a new session from the summary screen
+  const handleStartNewSession = async () => {
+    if (!email || !channelName) {
+      console.error('Cannot start new session: Email or channel name missing.')
+      return
+    }
+    try {
+      const response = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ streamerEmail: email, channelName, forceNew: true }), // Force new session
+      })
+      if (!response.ok) {
+        throw new Error('Failed to start new session')
+      }
+      const { sessionId } = await response.json()
+      // Reset dashboard state to active
+      setCurrentSessionId(sessionId)
+      setIsConnected(true)
+      setShowSummary(false)
+      setSessionData(null) // Clear previous session summary data
+      setMessages([])
+      setQuestions([])
+      setMotivationalMessage(null)
+      setAdminChannelInput('')
+      setStreamStartTime(null)
+      setTopChatters([])
+      setStats({
+        totalMessages: 0,
+        questions: 0,
+        avgSentiment: 0,
+        positiveMessages: 0,
+        negativeMessages: 0,
+        viewerCount: 0,
+        activeUsers: 0,
+        currentMood: 'Neutral',
+      })
+      localStorage.removeItem('casi_active_session') // Clear any lingering old session
+      console.log('✅ Started new session from summary:', sessionId)
+    } catch (error) {
+      console.error('❌ Failed to start new session from summary:', error)
+    }
+  }
+
   // Duration ticker lifecycle
   useEffect(() => {
     if (!isConnected) return
@@ -1214,27 +1258,7 @@ export default function Dashboard() {
           sessionId={currentSessionId}
           sessionData={sessionData}
           userTier={userTier}
-          onClose={() => {
-            setShowSummary(false)
-            setSessionData(null)
-            setCurrentSessionId(null)
-            setMessages([])
-            setQuestions([])
-            setStats({
-              totalMessages: 0,
-              questions: 0,
-              avgSentiment: 0,
-              positiveMessages: 0,
-              negativeMessages: 0,
-              viewerCount: 0,
-              activeUsers: 0,
-              currentMood: 'Neutral',
-            })
-            setTopChatters([])
-            setStreamStartTime(null)
-            // Clear localStorage session
-            localStorage.removeItem('casi_active_session')
-          }}
+          onStartNewSession={handleStartNewSession}
         />
       )}
 

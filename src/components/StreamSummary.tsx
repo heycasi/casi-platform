@@ -19,6 +19,7 @@ interface StreamSummaryProps {
   }
   userTier: TierName
   onClose: () => void
+  onStartNewSession: () => void // New prop
 }
 
 interface SessionAnalytics {
@@ -36,6 +37,7 @@ export default function StreamSummary({
   sessionData,
   userTier,
   onClose,
+  onStartNewSession, // Destructure new prop
 }: StreamSummaryProps) {
   const [analytics, setAnalytics] = useState<SessionAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
@@ -416,7 +418,7 @@ export default function StreamSummary({
           }}
         >
           <button
-            onClick={onClose}
+            onClick={onStartNewSession}
             style={{
               background: 'linear-gradient(135deg, #6932FF, #932FFE)',
               color: 'white',
