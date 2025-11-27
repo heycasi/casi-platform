@@ -2164,7 +2164,7 @@ export default function Dashboard() {
                     requiredTier="Pro"
                     currentTier={userTier}
                     featureName="VIP Tracking"
-                    featureDescription="Track your top chatters and identify your most engaged viewers."
+                    featureDescription="Identify your top spenders and most loyal viewers."
                   >
                     <div className="h-full w-full relative bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col overflow-hidden">
                       <h3 className="m-0 mb-3 text-base font-semibold shrink-0">

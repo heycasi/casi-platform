@@ -38,15 +38,22 @@ export default function FeatureGate({
         position: 'relative',
         borderRadius: '16px',
         overflow: 'hidden',
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Blurred content */}
+      {/* Blurred content - absolute positioning to fill container behind overlay */}
       <div
         style={{
+          position: 'absolute',
+          inset: 0,
           filter: 'blur(8px)',
           pointerEvents: 'none',
           userSelect: 'none',
           opacity: 0.4,
+          zIndex: 0,
         }}
       >
         {children}
@@ -55,41 +62,43 @@ export default function FeatureGate({
       {/* Upgrade overlay */}
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
+          position: 'relative',
+          zIndex: 10,
+          flex: 1,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(11, 13, 20, 0.85)',
-          backdropFilter: 'blur(2px)',
+          flexDirection: 'column', // Added flex-col
+          alignItems: 'center', // Added items-center
+          justifyContent: 'center', // Added justify-center
+          height: '100%', // Added h-full
+          width: '100%', // Added w-full
+          background: 'rgba(11, 13, 20, 0.75)',
+          backdropFilter: 'blur(3px)',
+          padding: '1rem',
         }}
       >
         <div
           style={{
             background:
-              'linear-gradient(135deg, rgba(105, 50, 255, 0.2), rgba(147, 47, 254, 0.15))',
-            border: '2px solid rgba(105, 50, 255, 0.4)',
+              'linear-gradient(135deg, rgba(105, 50, 255, 0.1), rgba(147, 47, 254, 0.05))',
+            border: '1px solid rgba(105, 50, 255, 0.3)',
             borderRadius: '16px',
-            padding: '2rem',
-            maxWidth: '400px',
+            padding: '1.5rem',
+            maxWidth: '90%',
+            width: '100%',
             textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <div
-            style={{
-              fontSize: '3rem',
-              marginBottom: '1rem',
-            }}
-          >
-            🔒
-          </div>
-
           <h3
             style={{
-              fontSize: '1.5rem',
+              fontSize: '1.25rem',
               fontWeight: '700',
               color: 'white',
               marginBottom: '0.5rem',
+              marginTop: 0,
             }}
           >
             {featureName}
@@ -98,73 +107,59 @@ export default function FeatureGate({
           {featureDescription && (
             <p
               style={{
-                fontSize: '0.95rem',
+                fontSize: '0.9rem',
                 color: 'rgba(255, 255, 255, 0.7)',
-                marginBottom: '1.5rem',
-                lineHeight: '1.5',
+                marginBottom: '1.25rem',
+                lineHeight: '1.4',
+                maxWidth: '280px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
               }}
             >
               {featureDescription}
             </p>
           )}
 
-          <div
-            style={{
-              display: 'inline-block',
-              background: 'rgba(105, 50, 255, 0.15)',
-              border: '1px solid rgba(105, 50, 255, 0.3)',
-              borderRadius: '12px',
-              padding: '0.75rem 1.25rem',
-              marginBottom: '1.5rem',
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                color: '#a78bfa',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}
-            >
-              Requires {requiredTier} Plan
-            </span>
-          </div>
-
           <Link
             href="/pricing"
             style={{
-              display: 'inline-block',
-              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)', // Primary purple CTA
               color: 'white',
-              padding: '0.875rem 2rem',
+              padding: '0.75rem 1.5rem',
               borderRadius: '12px',
-              fontWeight: '700',
-              fontSize: '1rem',
+              fontWeight: 'bold', // Changed to bold
+              fontSize: '1rem', // Slightly larger font
               textDecoration: 'none',
-              boxShadow: '0 8px 24px rgba(105, 50, 255, 0.4)',
+              boxShadow: '0 4px 12px rgba(105, 50, 255, 0.4)',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              whiteSpace: 'nowrap',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 12px 32px rgba(105, 50, 255, 0.5)'
+              e.currentTarget.style.transform = 'translateY(-2px)' // More pronounced lift
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(105, 50, 255, 0.6)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(105, 50, 255, 0.4)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(105, 50, 255, 0.4)'
             }}
           >
-            Upgrade to {requiredTier}
+            <span>🔒</span>
+            <span>Unlock VIP Tracking</span> {/* Changed text */}
           </Link>
-
+          {/* New subtext */}
           <p
             style={{
               marginTop: '1rem',
-              fontSize: '0.75rem',
-              color: 'rgba(255, 255, 255, 0.5)',
+              fontSize: '0.85rem',
+              color: 'rgba(255,255,255,0.7)',
+              lineHeight: '1.4',
+              maxWidth: '280px',
             }}
           >
-            Unlock this feature and more
+            Identify your top spenders and most loyal viewers.
           </p>
         </div>
       </div>
