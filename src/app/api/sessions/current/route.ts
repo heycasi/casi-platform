@@ -43,6 +43,22 @@ export async function GET(request: NextRequest) {
     const isActive = !session.session_end
     const isFinished = !!session.session_end
 
+    // If session is finished, check if it ended less than 60 minutes ago
+    if (isFinished) {
+      const sessionEndTime = new Date(session.session_end).getTime()
+      const currentTime = new Date().getTime()
+      const timeSinceEnd = currentTime - sessionEndTime
+      const sixtyMinutesInMs = 60 * 60 * 1000
+
+      // If more than 60 minutes have passed, treat as no active session
+      if (timeSinceEnd > sixtyMinutesInMs) {
+        return NextResponse.json({
+          status: 'no_session',
+          session: null,
+        })
+      }
+    }
+
     return NextResponse.json({
       status: isActive ? 'active' : 'finished',
       session: {

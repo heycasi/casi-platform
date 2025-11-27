@@ -402,6 +402,30 @@ export default function Dashboard() {
     checkAccess()
   }, [email, isAdmin])
 
+  // Check for recently finished sessions on page load
+  useEffect(() => {
+    if (!email || isConnected || showSummary) return
+
+    const checkForFinishedSession = async () => {
+      try {
+        const response = await fetch(`/api/sessions/current?email=${encodeURIComponent(email)}`)
+        const data = await response.json()
+
+        // If there's a finished session within the 60-minute window, show the summary
+        if (data.status === 'finished' && data.session) {
+          console.log('Found recently finished session, showing summary')
+          setCurrentSessionId(data.session.id)
+          setSessionData(data.session)
+          setShowSummary(true)
+        }
+      } catch (error) {
+        console.error('Failed to check for finished session:', error)
+      }
+    }
+
+    checkForFinishedSession()
+  }, [email, isConnected, showSummary])
+
   // Poll for session status to detect stream end
   useEffect(() => {
     if (!email || !isConnected || showSummary) return
