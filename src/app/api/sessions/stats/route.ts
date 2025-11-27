@@ -14,7 +14,7 @@ export async function PATCH(request: NextRequest) {
   try {
     // Rate limiting
     const clientId = getClientIdentifier(request)
-    const rateLimitResult = await rateLimiters.general.check(clientId)
+    const rateLimitResult = await rateLimiters.api.check(clientId)
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
