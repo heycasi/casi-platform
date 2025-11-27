@@ -30,6 +30,19 @@ interface SessionAnalytics {
   questionsCount: number
   languagesDetected: Record<string, number>
   topicsDiscussed: Record<string, number>
+  engagement_peaks?: Array<{
+    timestamp: string
+    message_count: number
+    intensity: number
+  }>
+}
+
+interface ChatTimelineBucket {
+  time_bucket: string
+  minute_offset: number
+  message_count: number
+  avg_sentiment: number
+  activity_intensity: 'peak' | 'high' | 'medium' | 'low'
 }
 
 export default function StreamSummary({
@@ -40,6 +53,7 @@ export default function StreamSummary({
   onStartNewSession, // Destructure new prop
 }: StreamSummaryProps) {
   const [analytics, setAnalytics] = useState<SessionAnalytics | null>(null)
+  const [chatTimeline, setChatTimeline] = useState<ChatTimelineBucket[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -50,6 +64,13 @@ export default function StreamSummary({
         if (response.ok) {
           const data = await response.json()
           setAnalytics(data.analytics)
+
+          // Fetch chat timeline from database
+          const timelineResponse = await fetch(`/api/analytics/timeline/${sessionId}`)
+          if (timelineResponse.ok) {
+            const timelineData = await timelineResponse.json()
+            setChatTimeline(timelineData.timeline || [])
+          }
         }
       } catch (error) {
         console.error('Failed to fetch analytics:', error)
@@ -259,6 +280,197 @@ export default function StreamSummary({
             </div>
           )}
         </div>
+
+        {/* Chat Activity Timeline - Full Width */}
+        <FeatureGate
+          currentTier={userTier}
+          requiredTier="Pro"
+          featureName="🔒 Unlock Engagement Timeline"
+          featureDescription="See exactly when your chat went crazy to find viral clips"
+        >
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '1.2rem',
+                fontWeight: '700',
+                color: 'white',
+                marginBottom: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <span>📊</span>
+              <span>Chat Activity Timeline</span>
+            </h3>
+            <p
+              style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '0.85rem',
+                marginBottom: '1.5rem',
+              }}
+            >
+              2-minute activity buckets showing when chat was most engaged
+            </p>
+
+            {/* Timeline Graph */}
+            <div
+              style={{
+                height: '200px',
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: '12px',
+                padding: '1rem',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {chatTimeline.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    height: '100%',
+                    gap: '4px',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  {chatTimeline.map((bucket, index) => {
+                    const maxMessages = Math.max(...chatTimeline.map((b) => b.message_count))
+                    const heightPercent = (bucket.message_count / maxMessages) * 100
+                    const getColor = () => {
+                      switch (bucket.activity_intensity) {
+                        case 'peak':
+                          return '#FF6B6B'
+                        case 'high':
+                          return '#FFD93D'
+                        case 'medium':
+                          return '#6932FF'
+                        default:
+                          return 'rgba(255, 255, 255, 0.2)'
+                      }
+                    }
+
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          flex: 1,
+                          height: `${Math.max(heightPercent, 5)}%`,
+                          background: getColor(),
+                          borderRadius: '4px 4px 0 0',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                        title={`${bucket.minute_offset}min: ${bucket.message_count} messages (${bucket.activity_intensity})`}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = '0.8'
+                          e.currentTarget.style.transform = 'translateY(-4px)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = '1'
+                          e.currentTarget.style.transform = 'translateY(0)'
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              ) : (
+                // Dummy data for visual appeal when no timeline
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    height: '100%',
+                    gap: '4px',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  {[
+                    30, 45, 60, 80, 95, 70, 55, 90, 75, 85, 60, 40, 65, 88, 92, 78, 66, 55, 45, 35,
+                  ].map((height, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        flex: 1,
+                        height: `${height}%`,
+                        background:
+                          height > 85
+                            ? '#FF6B6B'
+                            : height > 70
+                              ? '#FFD93D'
+                              : height > 50
+                                ? '#6932FF'
+                                : 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: '4px 4px 0 0',
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Axis labels */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-24px',
+                  left: 0,
+                  right: 0,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  fontSize: '0.7rem',
+                  paddingTop: '8px',
+                }}
+              >
+                <span>Start</span>
+                <span>End</span>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                marginTop: '2rem',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                fontSize: '0.75rem',
+              }}
+            >
+              {[
+                { label: '🔥 Peak', color: '#FF6B6B' },
+                { label: '⚡ High', color: '#FFD93D' },
+                { label: '📊 Medium', color: '#6932FF' },
+                { label: '🌙 Low', color: 'rgba(255, 255, 255, 0.2)' },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <div
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      background: item.color,
+                      borderRadius: '2px',
+                    }}
+                  />
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FeatureGate>
 
         {/* Pro Features - Gated */}
         <div
