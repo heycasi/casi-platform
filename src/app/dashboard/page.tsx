@@ -1933,401 +1933,208 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Main Content Area - 3 Column Layout */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: window.innerWidth < 900 ? 'column' : 'row',
-                gap: '1rem',
-                flex: 1,
-                minHeight: '400px',
-                minWidth: 0,
-              }}
-            >
-              {/* LEFT COLUMN - Chat Feed + Questions (40%) */}
-              <div
-                style={{
-                  flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 40%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  minWidth: 0,
-                }}
-              >
-                <div
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '16px',
-                    padding: '1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    height: '300px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minWidth: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '1rem',
-                    }}
-                  >
-                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>💬 Live Chat Feed</h3>
+            {/* Main Content Area - 3 Column Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-1 min-h-[600px] w-full">
+              {/* LEFT COL (span-3): LIVE CHAT FEED */}
+              <div className="col-span-1 md:col-span-3 h-[calc(100vh-140px)] flex flex-col bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+                {/* Chat Header */}
+                <div className="p-3 border-b border-white/10 flex justify-between items-center bg-[#1a1a1a]/40 backdrop-blur-sm">
+                  <h3 className="m-0 text-base font-semibold">💬 Live Chat</h3>
 
-                    {/* Platform Filter Toggle */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '0.25rem',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        padding: '0.25rem',
-                        borderRadius: '6px',
-                      }}
+                  {/* Platform Filter Toggle */}
+                  <div className="flex gap-1 bg-black/30 p-1 rounded-lg">
+                    <button
+                      onClick={() => setPlatformFilter('all')}
+                      className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                        platformFilter === 'all'
+                          ? 'bg-white/20 text-white'
+                          : 'text-white/60 hover:text-white'
+                      } transition-all`}
                     >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setPlatformFilter('twitch')}
+                      className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                        platformFilter === 'twitch'
+                          ? 'bg-[#6441A5]/30 text-[#9147FF]'
+                          : 'text-white/60 hover:text-white'
+                      } transition-all`}
+                    >
+                      Twitch
+                    </button>
+                    {(userTier === 'Pro' || userTier === 'Agency') && kickConnected && (
                       <button
-                        onClick={() => setPlatformFilter('all')}
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          background:
-                            platformFilter === 'all' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                          color: platformFilter === 'all' ? 'white' : 'rgba(255, 255, 255, 0.6)',
-                          transition: 'all 0.2s ease',
-                        }}
+                        onClick={() => setPlatformFilter('kick')}
+                        className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                          platformFilter === 'kick'
+                            ? 'bg-[#53FC18]/20 text-[#53FC18]'
+                            : 'text-white/60 hover:text-white'
+                        } transition-all`}
                       >
-                        All
+                        Kick
                       </button>
-                      <button
-                        onClick={() => setPlatformFilter('twitch')}
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          background:
-                            platformFilter === 'twitch' ? 'rgba(100, 65, 165, 0.3)' : 'transparent',
-                          color:
-                            platformFilter === 'twitch' ? '#9147FF' : 'rgba(255, 255, 255, 0.6)',
-                          transition: 'all 0.2s ease',
-                        }}
-                      >
-                        🟣 Twitch
-                      </button>
-                      {(userTier === 'Pro' || userTier === 'Agency') && kickConnected && (
-                        <button
-                          onClick={() => setPlatformFilter('kick')}
-                          style={{
-                            padding: '0.25rem 0.75rem',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            background:
-                              platformFilter === 'kick' ? 'rgba(83, 252, 24, 0.2)' : 'transparent',
-                            color:
-                              platformFilter === 'kick' ? '#53FC18' : 'rgba(255, 255, 255, 0.6)',
-                            transition: 'all 0.2s ease',
-                          }}
-                        >
-                          🟢 Kick
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Show history limit banner for Starter users */}
-                  {userTier === 'Starter' && <HistoryLimitBanner />}
-
-                  <div
-                    ref={chatFeedRef}
-                    style={{
-                      flex: 1,
-                      overflowY: 'auto',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      borderRadius: '8px',
-                      padding: '0.75rem',
-                      minHeight: 0,
-                    }}
-                  >
-                    {messages.length === 0 ? (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: '100%',
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          textAlign: 'center',
-                        }}
-                      >
-                        <div>
-                          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</div>
-                          <p style={{ fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>
-                            Chat's quiet for now... 🤔
-                          </p>
-                          <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0' }}>
-                            Casi's ready to analyze as soon as someone says hi!
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.5rem',
-                        }}
-                      >
-                        {(() => {
-                          // Filter messages by time (Starter users: only last 24 hours)
-                          let filteredMessages =
-                            userTier === 'Starter'
-                              ? messages.filter((msg) => {
-                                  const cutoffTime = Date.now() - 24 * 60 * 60 * 1000 // 24 hours ago
-                                  return msg.timestamp > cutoffTime
-                                })
-                              : messages
-
-                          // Filter messages by platform
-                          if (platformFilter !== 'all') {
-                            filteredMessages = filteredMessages.filter(
-                              (msg) => msg.platform === platformFilter
-                            )
-                          }
-
-                          return filteredMessages
-                            .slice(-50)
-                            .reverse()
-                            .map((msg) => (
-                              <div
-                                key={msg.id}
-                                style={{
-                                  padding: '0.5rem',
-                                  background: msg.isQuestion
-                                    ? 'rgba(255, 159, 159, 0.2)'
-                                    : msg.sentiment === 'positive'
-                                      ? 'rgba(184, 238, 138, 0.1)'
-                                      : msg.sentiment === 'negative'
-                                        ? 'rgba(255, 159, 159, 0.1)'
-                                        : 'rgba(255, 255, 255, 0.05)',
-                                  borderRadius: '6px',
-                                  borderLeft: `4px solid ${msg.platform === 'kick' ? '#53FC18' : '#6441A5'}`, // NEW: Platform color!
-                                  border: msg.isQuestion
-                                    ? '1px solid rgba(255, 159, 159, 0.3)'
-                                    : msg.sentiment === 'positive'
-                                      ? '1px solid rgba(184, 238, 138, 0.2)'
-                                      : msg.sentiment === 'negative'
-                                        ? '1px solid rgba(255, 159, 159, 0.2)'
-                                        : '1px solid rgba(255, 255, 255, 0.1)',
-                                  borderLeftWidth: '4px', // Thick platform border
-                                  animation:
-                                    msg.id === highlightedQuestionId
-                                      ? 'questionPulse 1.5s ease'
-                                      : 'none',
-                                  boxShadow:
-                                    msg.id === highlightedQuestionId
-                                      ? '0 0 20px rgba(255, 159, 159, 0.8)'
-                                      : 'none',
-                                  transform:
-                                    msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
-                                  transition: 'all 0.3s ease',
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.3rem',
-                                    marginBottom: '0.25rem',
-                                    flexWrap: 'wrap',
-                                  }}
-                                >
-                                  {/* NEW: Platform Icon */}
-                                  <span style={{ fontSize: '0.9rem' }}>
-                                    {msg.platform === 'kick' ? '🟢' : '🟣'}
-                                  </span>
-
-                                  <span
-                                    style={{
-                                      fontWeight: '600',
-                                      color: msg.isQuestion ? '#F7F7F7' : '#E5E7EB',
-                                      fontSize: '0.8rem',
-                                    }}
-                                  >
-                                    {msg.username}
-                                  </span>
-                                  {msg.isQuestion && (
-                                    <span
-                                      style={{
-                                        fontSize: '0.6rem',
-                                        background: '#FF9F9F',
-                                        padding: '0.1rem 0.25rem',
-                                        borderRadius: '3px',
-                                        color: '#151E3C',
-                                        fontWeight: '600',
-                                      }}
-                                    >
-                                      Q
-                                    </span>
-                                  )}
-                                  <span
-                                    style={{
-                                      fontSize: '0.6rem',
-                                      padding: '0.1rem 0.25rem',
-                                      borderRadius: '3px',
-                                      background:
-                                        msg.sentiment === 'positive'
-                                          ? '#B8EE8A'
-                                          : msg.sentiment === 'negative'
-                                            ? '#FF9F9F'
-                                            : 'rgba(107, 114, 128, 0.8)',
-                                    }}
-                                  >
-                                    {msg.sentiment === 'positive'
-                                      ? '😊'
-                                      : msg.sentiment === 'negative'
-                                        ? '😢'
-                                        : '😐'}
-                                  </span>
-                                  {msg.engagementLevel === 'high' && (
-                                    <span
-                                      style={{
-                                        fontSize: '0.6rem',
-                                        background: '#FFD700',
-                                        padding: '0.1rem 0.25rem',
-                                        borderRadius: '3px',
-                                        color: '#000',
-                                        fontWeight: '600',
-                                      }}
-                                    >
-                                      🔥
-                                    </span>
-                                  )}
-                                </div>
-                                <p
-                                  style={{
-                                    margin: 0,
-                                    color: msg.isQuestion ? '#F7F7F7' : '#F3F4F6',
-                                    lineHeight: '1.3',
-                                    fontSize: '0.8rem',
-                                    wordBreak: 'break-word',
-                                  }}
-                                >
-                                  {msg.message}
-                                </p>
-                              </div>
-                            ))
-                        })()}
-                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Questions Panel - Moved to Left Column */}
-                <div
-                  style={{
-                    background:
-                      'linear-gradient(135deg, rgba(255, 159, 159, 0.2), rgba(255, 159, 159, 0.1))',
-                    borderRadius: '16px',
-                    padding: '1rem',
-                    border: '1px solid rgba(255, 159, 159, 0.3)',
-                    height: '350px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '1rem',
-                    }}
-                  >
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#F7F7F7' }}>
-                      🚨 Questions ({questions.length})
+                {/* Sticky Upgrade Banner for Starter Users */}
+                {userTier === 'Starter' && (
+                  <div className="sticky top-0 z-10 bg-[#1a1a1a] border-b border-white/10">
+                    <HistoryLimitBanner />
+                  </div>
+                )}
+
+                {/* Chat Messages Area */}
+                <div ref={chatFeedRef} className="flex-1 overflow-y-auto p-2 bg-black/20">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-white/50 text-center p-4">
+                      <div className="text-3xl mb-2">💭</div>
+                      <p className="text-sm font-medium m-0">Chat's quiet for now...</p>
+                      <p className="text-xs mt-1 opacity-70">Casi's listening!</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      {(() => {
+                        // Filter messages by time (Starter users: only last 24 hours)
+                        let filteredMessages =
+                          userTier === 'Starter'
+                            ? messages.filter((msg) => {
+                                const cutoffTime = Date.now() - 24 * 60 * 60 * 1000 // 24 hours ago
+                                return msg.timestamp > cutoffTime
+                              })
+                            : messages
+
+                        // Filter messages by platform
+                        if (platformFilter !== 'all') {
+                          filteredMessages = filteredMessages.filter(
+                            (msg) => msg.platform === platformFilter
+                          )
+                        }
+
+                        return filteredMessages
+                          .slice(-50)
+                          .reverse()
+                          .map((msg) => (
+                            <div
+                              key={msg.id}
+                              className="py-1 px-2 rounded-md transition-all duration-300"
+                              style={{
+                                background: msg.isQuestion
+                                  ? 'rgba(255, 159, 159, 0.15)'
+                                  : msg.sentiment === 'positive'
+                                    ? 'rgba(184, 238, 138, 0.08)'
+                                    : msg.sentiment === 'negative'
+                                      ? 'rgba(255, 159, 159, 0.08)'
+                                      : 'rgba(255, 255, 255, 0.03)',
+                                borderLeft: `3px solid ${msg.platform === 'kick' ? '#53FC18' : '#6441A5'}`,
+                                animation:
+                                  msg.id === highlightedQuestionId
+                                    ? 'questionPulse 1.5s ease'
+                                    : 'none',
+                                transform:
+                                  msg.id === highlightedQuestionId ? 'scale(1.02)' : 'scale(1)',
+                              }}
+                            >
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                {/* Platform Icon */}
+                                <span className="text-xs opacity-80">
+                                  {msg.platform === 'kick' ? '🟢' : '🟣'}
+                                </span>
+
+                                <span
+                                  className={`text-xs font-bold ${msg.isQuestion ? 'text-[#F7F7F7]' : 'text-gray-300'}`}
+                                >
+                                  {msg.username}
+                                </span>
+
+                                {msg.isQuestion && (
+                                  <span className="text-[10px] bg-[#FF9F9F] text-[#151E3C] px-1 rounded font-bold">
+                                    Q
+                                  </span>
+                                )}
+
+                                {msg.sentiment !== 'neutral' && (
+                                  <span className="text-[10px] opacity-80">
+                                    {msg.sentiment === 'positive' ? '😊' : '😢'}
+                                  </span>
+                                )}
+
+                                {msg.engagementLevel === 'high' && (
+                                  <span className="text-[10px] bg-[#FFD700] text-black px-1 rounded font-bold">
+                                    🔥
+                                  </span>
+                                )}
+                              </div>
+                              <p
+                                className={`m-0 text-sm leading-snug break-words ${msg.isQuestion ? 'text-white' : 'text-gray-200'}`}
+                              >
+                                {msg.message}
+                              </p>
+                            </div>
+                          ))
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* CENTER COL (span-5): VISUALS */}
+              <div className="col-span-1 md:col-span-5 h-[calc(100vh-140px)] flex flex-col gap-4">
+                {/* 1. Stream Preview (Natural Height) */}
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/10 shrink-0">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="m-0 text-base font-semibold">📺 Preview</h3>
+                    <span className="text-xs text-white/40">{channelName}</span>
+                  </div>
+                  <div className="relative w-full pt-[56.25%] bg-black rounded-lg overflow-hidden shadow-lg">
+                    <iframe
+                      src={`https://player.twitch.tv/?channel=${channelName}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'heycasi.com'}&parent=localhost&muted=true`}
+                      className="absolute top-0 left-0 w-full h-full border-none"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Questions Queue (Fills remaining space) */}
+                <div className="flex-1 bg-gradient-to-br from-[rgba(255,159,159,0.15)] to-[rgba(255,159,159,0.05)] rounded-2xl p-4 border border-[rgba(255,159,159,0.2)] flex flex-col min-h-0 overflow-hidden">
+                  <div className="flex items-center justify-between mb-3 shrink-0">
+                    <h3 className="m-0 text-base font-semibold text-[#F7F7F7]">
+                      🚨 Priority Queue ({questions.length})
                     </h3>
-                    <div
-                      style={{
-                        background: '#FF9F9F',
-                        color: '#151E3C',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '8px',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
-                      }}
-                    >
-                      PRIORITY
+                    <div className="bg-[#FF9F9F] text-[#151E3C] px-2 py-0.5 rounded text-xs font-bold">
+                      HIGH PRIORITY
                     </div>
                   </div>
-                  <div
-                    style={{
-                      flex: 1,
-                      overflowY: 'auto',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem',
-                      minHeight: 0,
-                    }}
-                  >
+
+                  <div className="flex-1 overflow-y-auto flex flex-col gap-2 min-h-0 pr-1">
                     {questions.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👀</div>
-                        <p
-                          style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', fontWeight: '500' }}
-                        >
-                          No questions yet — looks like chat's chill for now 😌
-                        </p>
+                      <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
+                        <div className="text-2xl mb-2">👀</div>
+                        <p className="text-sm font-medium m-0">No questions pending</p>
+                        <p className="text-xs mt-1">Chat is chilling...</p>
                       </div>
                     ) : (
                       questions
-                        .slice(-10)
+                        .slice(-20) // Show more questions since we have space
                         .reverse()
                         .map((q) => (
                           <div
                             key={q.id}
-                            style={{
-                              background: 'rgba(255, 255, 255, 0.1)',
-                              borderRadius: '8px',
-                              padding: '0.75rem',
-                              border: '1px solid rgba(255, 159, 159, 0.3)',
-                            }}
+                            className="bg-white/10 rounded-lg p-3 border border-[rgba(255,159,159,0.2)] hover:bg-white/15 transition-colors"
                           >
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                marginBottom: '0.5rem',
-                                flexWrap: 'wrap',
-                              }}
-                            >
-                              <span
-                                style={{ fontWeight: '600', color: '#F7F7F7', fontSize: '0.8rem' }}
-                              >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-[#F7F7F7] text-xs">
                                 @{q.username}
                               </span>
+                              <span className="text-[10px] text-white/50">
+                                {new Date(q.timestamp).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
                             </div>
-                            <p
-                              style={{
-                                margin: 0,
-                                color: '#F7F7F7',
-                                fontSize: '0.8rem',
-                                lineHeight: '1.3',
-                              }}
-                            >
-                              {q.message}
-                            </p>
+                            <p className="m-0 text-white text-sm leading-snug">{q.message}</p>
                           </div>
                         ))
                     )}
@@ -2335,159 +2142,72 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* MIDDLE COLUMN (30%) - Stream Preview + Top Chatters */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 30%',
-                  minWidth: 0,
-                  minHeight: 0,
-                }}
-              >
-                {/* Stream Preview */}
-                <div
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '16px',
-                    padding: '1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
-                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>📺 Preview</h3>
-                  <div
-                    style={{
-                      position: 'relative',
-                      paddingBottom: '56.25%',
-                      height: 0,
-                      overflow: 'hidden',
-                      borderRadius: '8px',
-                      background: '#000',
-                    }}
-                  >
-                    <iframe
-                      src={`https://player.twitch.tv/?channel=${channelName}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'heycasi.com'}&parent=localhost&muted=true`}
-                      height="100%"
-                      width="100%"
-                      allowFullScreen
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                      }}
-                    />
-                  </div>
+              {/* RIGHT COL (span-4): ENGAGEMENT */}
+              <div className="col-span-1 md:col-span-4 h-[calc(100vh-140px)] flex flex-col gap-4">
+                {/* 1. Activity Feed (50% Height) */}
+                <div className="h-1/2 min-h-0">
+                  <MultiPlatformActivityFeed
+                    twitchChannelName={channelName}
+                    kickChannelName={kickUsername}
+                    userTier={userTier}
+                    kickConnected={kickConnected}
+                    maxHeight="100%"
+                  />
                 </div>
 
-                {/* Top Chatters & Topics */}
-                <FeatureGate
-                  requiredTier="Pro"
-                  currentTier={userTier}
-                  featureName="VIP Tracking"
-                  featureDescription="Track your top chatters, identify your most engaged viewers, and see what topics they're discussing."
-                >
-                  <div
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '16px',
-                      padding: '1rem',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      height: '180px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      overflow: 'hidden',
-                    }}
+                {/* 2. VIP Tracking (50% Height) - Moved from Center */}
+                <div className="h-1/2 min-h-0 flex flex-col">
+                  <FeatureGate
+                    requiredTier="Pro"
+                    currentTier={userTier}
+                    featureName="VIP Tracking"
+                    featureDescription="Track your top chatters and identify your most engaged viewers."
                   >
-                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem' }}>
-                      🏆 Top Chatters & Topics
-                    </h3>
-                    <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-                      {topChatters.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🦗</div>
-                          <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>
-                            Waiting for your first chatters...
-                          </p>
-                        </div>
-                      ) : (
-                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                          {topChatters.map((c) => (
-                            <li
-                              key={c.username}
-                              style={{
-                                padding: '0.5rem 0',
-                                borderBottom: '1px dashed rgba(255,255,255,0.1)',
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                  marginBottom: '0.25rem',
-                                }}
+                    <div className="h-full bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col overflow-hidden">
+                      <h3 className="m-0 mb-3 text-base font-semibold shrink-0">
+                        🏆 Top Chatters & Topics
+                      </h3>
+                      <div className="flex-1 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
+                        {topChatters.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
+                            <div className="text-2xl mb-2">🦗</div>
+                            <p className="text-sm m-0">Waiting for data...</p>
+                          </div>
+                        ) : (
+                          <ul className="list-none p-0 m-0 flex flex-col gap-2">
+                            {topChatters.map((c) => (
+                              <li
+                                key={c.username}
+                                className="bg-white/5 p-2 rounded-lg border border-white/5"
                               >
-                                <span
-                                  style={{
-                                    color: '#F7F7F7',
-                                    fontSize: '0.9rem',
-                                    fontWeight: '600',
-                                  }}
-                                >
-                                  @{c.username}
-                                </span>
-                                <span
-                                  style={{ color: '#5EEAD4', fontWeight: 700, fontSize: '0.85rem' }}
-                                >
-                                  {c.count}
-                                </span>
-                              </div>
-                              {c.topics && c.topics.length > 0 && (
-                                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                                  {c.topics.map((topic, idx) => (
-                                    <span
-                                      key={idx}
-                                      style={{
-                                        fontSize: '0.65rem',
-                                        background: 'rgba(94, 234, 212, 0.15)',
-                                        color: '#5EEAD4',
-                                        padding: '0.1rem 0.4rem',
-                                        borderRadius: '4px',
-                                      }}
-                                    >
-                                      {topic}
-                                    </span>
-                                  ))}
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="text-[#F7F7F7] text-sm font-semibold truncate max-w-[70%]">
+                                    @{c.username}
+                                  </span>
+                                  <span className="text-[#5EEAD4] font-bold text-xs bg-[#5EEAD4]/10 px-1.5 py-0.5 rounded">
+                                    {c.count} msgs
+                                  </span>
                                 </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                                {c.topics && c.topics.length > 0 && (
+                                  <div className="flex gap-1 flex-wrap">
+                                    {c.topics.map((topic, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-[10px] bg-[#5EEAD4]/10 text-[#5EEAD4] px-1.5 py-0.5 rounded"
+                                      >
+                                        {topic}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </FeatureGate>
-              </div>
-
-              {/* RIGHT COLUMN (25%) - Activity Feed */}
-              <div
-                style={{
-                  flex: window.innerWidth < 900 ? '1 1 auto' : '0 0 25%',
-                  minWidth: 0,
-                  minHeight: 0,
-                }}
-              >
-                <MultiPlatformActivityFeed
-                  twitchChannelName={channelName}
-                  kickChannelName={kickUsername}
-                  userTier={userTier}
-                  kickConnected={kickConnected}
-                  maxHeight="650px"
-                />
+                  </FeatureGate>
+                </div>
               </div>
             </div>
           </>
