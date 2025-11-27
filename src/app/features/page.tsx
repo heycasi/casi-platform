@@ -728,11 +728,12 @@ export default function FeaturesPage() {
               lineHeight: '1.6',
             }}
           >
-            Join the beta to access these features and help shape the roadmap.
+            Start analyzing your stream in seconds. Zero-latency insights, real-time analytics, no
+            guessing.
           </p>
 
           <Link
-            href="/beta"
+            href="/signup"
             style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -746,7 +747,7 @@ export default function FeaturesPage() {
               transition: 'all 0.3s ease',
             }}
           >
-            Join Beta Program
+            Start Free Now
           </Link>
         </div>
       </section>

@@ -94,7 +94,7 @@ const Navbar = () => {
           className="md:hidden absolute top-full left-0 w-full bg-[#0B0D14]/95 backdrop-blur-md border-b border-white/10 p-6 flex flex-col gap-4"
         >
           <Link
-            href="#features"
+            href="/features"
             className="text-lg font-medium text-zinc-400"
             onClick={() => setMobileMenuOpen(false)}
           >
@@ -108,7 +108,7 @@ const Navbar = () => {
             Pricing
           </Link>
           <Link
-            href="/login"
+            href="/login-email"
             className="text-lg font-medium text-zinc-400"
             onClick={() => setMobileMenuOpen(false)}
           >
