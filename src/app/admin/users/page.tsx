@@ -86,12 +86,13 @@ export default function AdminUsersPage() {
   const handleUserAction = async (
     userId: string,
     email: string,
-    action: 'suspend' | 'unsuspend' | 'delete'
+    action: 'suspend' | 'unsuspend' | 'delete' | 'grant_pro_trial'
   ) => {
     const confirmMessages = {
       suspend: `Suspend user ${email}? They will no longer be able to log in.`,
       unsuspend: `Unsuspend user ${email}? They will regain access.`,
       delete: `PERMANENTLY DELETE user ${email}? This cannot be undone!`,
+      grant_pro_trial: `Grant ${email} Pro access for 7 days?`,
     }
 
     if (!confirm(confirmMessages[action])) {
@@ -129,14 +130,14 @@ export default function AdminUsersPage() {
 
   const getTierColor = (tier: string) => {
     switch (tier.toLowerCase()) {
-      case 'creator':
-        return '#B8A0FF'
+      case 'starter':
+        return '#999'
       case 'pro':
-        return '#FF9FD4'
-      case 'streamer+':
+        return '#B8A0FF'
+      case 'agency':
         return '#FFD700'
       default:
-        return '#999'
+        return '#666'
     }
   }
 
@@ -477,6 +478,23 @@ export default function AdminUsersPage() {
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => handleUserAction(user.id, user.email, 'grant_pro_trial')}
+                          disabled={actioningUserId === user.id}
+                          style={{
+                            background: 'rgba(184, 160, 255, 0.2)',
+                            border: '1px solid rgba(184, 160, 255, 0.4)',
+                            color: '#B8A0FF',
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '6px',
+                            cursor: actioningUserId === user.id ? 'not-allowed' : 'pointer',
+                            fontWeight: '600',
+                            fontSize: '0.75rem',
+                            opacity: actioningUserId === user.id ? 0.5 : 1,
+                          }}
+                        >
+                          ⭐ Grant Pro (7d)
+                        </button>
                         <button
                           onClick={() => handleUserAction(user.id, user.email, 'suspend')}
                           disabled={actioningUserId === user.id}

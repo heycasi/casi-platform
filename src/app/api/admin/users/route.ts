@@ -194,6 +194,66 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      case 'grant_pro_trial': {
+        // Grant Pro access for 7 days
+        const trialEndsAt = new Date()
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7)
+
+        // Find or create subscription record
+        const { data: existingSub, error: findError } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .or(`user_email.eq.${email},email.eq.${email}`)
+          .single()
+
+        if (findError && findError.code !== 'PGRST116') {
+          console.error('Failed to find subscription:', findError)
+          return NextResponse.json({ error: 'Failed to find subscription' }, { status: 500 })
+        }
+
+        if (existingSub) {
+          // Update existing subscription
+          const { error: updateError } = await supabase
+            .from('subscriptions')
+            .update({
+              tier_name: 'Pro',
+              plan_name: 'Pro',
+              status: 'trialing',
+              trial_ends_at: trialEndsAt.toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingSub.id)
+
+          if (updateError) {
+            console.error('Failed to update subscription:', updateError)
+            return NextResponse.json({ error: 'Failed to grant Pro access' }, { status: 500 })
+          }
+        } else {
+          // Create new subscription
+          const { error: createError } = await supabase.from('subscriptions').insert({
+            user_id: userId,
+            user_email: email,
+            email: email,
+            tier_name: 'Pro',
+            plan_name: 'Pro',
+            status: 'trialing',
+            trial_ends_at: trialEndsAt.toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+
+          if (createError) {
+            console.error('Failed to create subscription:', createError)
+            return NextResponse.json({ error: 'Failed to grant Pro access' }, { status: 500 })
+          }
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: `Pro access granted to ${email} for 7 days (expires ${trialEndsAt.toLocaleDateString()})`,
+        })
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
