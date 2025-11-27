@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import PageLayout from '../../components/PageLayout'
-import EmailCapture from '../../components/EmailCapture'
 
 export default function BetaPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
@@ -176,14 +175,26 @@ export default function BetaPage() {
             </div>
           </div>
 
-          {/* Email Capture */}
+          {/* Email Capture replaced with direct signup link */}
           <div>
-            <EmailCapture
-              source="beta-page"
-              title="Start Your Free Beta"
-              description="Join the exclusive beta program and start improving your stream today"
-              buttonText="Join Beta Program"
-            />
+            <Link
+              href="/signup"
+              style={{
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+                color: 'white',
+                padding: '1rem 3rem',
+                borderRadius: '9999px',
+                fontWeight: '700',
+                fontSize: '1.1rem',
+                textDecoration: 'none',
+                boxShadow: '0 8px 30px rgba(105, 50, 255, 0.5)',
+                transition: 'all 0.3s ease',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Start Your Free Beta
+            </Link>
           </div>
         </div>
       </section>
@@ -435,8 +446,8 @@ export default function BetaPage() {
               alignItems: 'center',
             }}
           >
-            <a
-              href="#email-capture"
+            <Link
+              href="/signup"
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',
@@ -451,7 +462,7 @@ export default function BetaPage() {
               }}
             >
               Start Free Beta
-            </a>
+            </Link>
             <Link
               href="/features"
               style={{
