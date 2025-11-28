@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+const resend = new Resend(process.env.RESEND_API_KEY!)
 
 /**
  * Wait for user to appear in public users table (handles DB trigger race condition)
@@ -117,6 +120,28 @@ export async function POST(req: NextRequest) {
       console.log(
         `✅ Created ${tierName} subscription for ${email} without user_id (will be linked later)`
       )
+    }
+
+    // Send admin notification email (non-blocking)
+    try {
+      await resend.emails.send({
+        from: 'System <system@heycasi.com>',
+        to: 'casi@heycasi.com',
+        subject: `🚀 New User Signup: ${email}`,
+        html: `
+          <h2>🎉 New User Joined!</h2>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Tier:</strong> ${tierName}</p>
+          ${trialCode ? `<p><strong>Trial Code:</strong> ${trialCode}</p>` : ''}
+          ${validUserId ? `<p><strong>User ID:</strong> ${validUserId}</p>` : '<p><em>User ID pending (will be linked)</em></p>'}
+          <p><strong>Status:</strong> ${status}</p>
+          ${trialEndsAt ? `<p><strong>Trial Ends:</strong> ${new Date(trialEndsAt).toLocaleString()}</p>` : ''}
+        `,
+      })
+      console.log(`📧 Admin notification sent for new signup: ${email}`)
+    } catch (emailError) {
+      // Don't fail the signup if email notification fails
+      console.error('Failed to send admin notification email:', emailError)
     }
 
     return NextResponse.json({ success: true })
