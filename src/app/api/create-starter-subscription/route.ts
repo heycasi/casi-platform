@@ -129,13 +129,116 @@ export async function POST(req: NextRequest) {
         to: 'casi@heycasi.com',
         subject: `🚀 New User Signup: ${email}`,
         html: `
-          <h2>🎉 New User Joined!</h2>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Tier:</strong> ${tierName}</p>
-          ${trialCode ? `<p><strong>Trial Code:</strong> ${trialCode}</p>` : ''}
-          ${validUserId ? `<p><strong>User ID:</strong> ${validUserId}</p>` : '<p><em>User ID pending (will be linked)</em></p>'}
-          <p><strong>Status:</strong> ${status}</p>
-          ${trialEndsAt ? `<p><strong>Trial Ends:</strong> ${new Date(trialEndsAt).toLocaleString()}</p>` : ''}
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>New User Signup</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0f0f12;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f0f12; padding: 40px 20px;">
+                <tr>
+                  <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; border: 1px solid rgba(105, 50, 255, 0.3); box-shadow: 0 8px 32px rgba(105, 50, 255, 0.2);">
+
+                      <!-- Header with Logo -->
+                      <tr>
+                        <td style="padding: 40px 40px 24px 40px; text-align: center;">
+                          <img src="https://heycasi.com/landing-logo.png" alt="Casi" style="max-width: 160px; height: auto; margin-bottom: 20px; filter: brightness(1.2);" />
+                        </td>
+                      </tr>
+
+                      <!-- Title -->
+                      <tr>
+                        <td style="padding: 0 40px 32px 40px; text-align: center;">
+                          <h1 style="margin: 0; background: linear-gradient(135deg, #6932FF 0%, #932FFE 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 32px; font-weight: 900; letter-spacing: -0.5px;">
+                            🎉 New User Joined!
+                          </h1>
+                        </td>
+                      </tr>
+
+                      <!-- Details Section -->
+                      <tr>
+                        <td style="padding: 0 40px 32px 40px;">
+                          <div style="background: rgba(105, 50, 255, 0.1); border: 2px solid rgba(105, 50, 255, 0.3); border-radius: 12px; padding: 24px;">
+
+                            <!-- Email -->
+                            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                              <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Email</div>
+                              <div style="color: white; font-size: 16px; font-weight: 600;">${email}</div>
+                            </div>
+
+                            <!-- Tier -->
+                            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                              <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Tier</div>
+                              <div style="color: white; font-size: 16px; font-weight: 600;">${tierName}</div>
+                            </div>
+
+                            ${
+                              trialCode
+                                ? `
+                            <!-- Trial Code -->
+                            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                              <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Trial Code</div>
+                              <div style="display: inline-block; background: #932FFE; color: white; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 700;">${trialCode}</div>
+                            </div>
+                            `
+                                : ''
+                            }
+
+                            <!-- User ID -->
+                            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                              <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">User ID</div>
+                              <div style="color: white; font-size: 14px; font-weight: 500; font-family: monospace;">${validUserId || '<em style="color: rgba(255, 255, 255, 0.5);">Pending (will be linked)</em>'}</div>
+                            </div>
+
+                            <!-- Status -->
+                            <div style="margin-bottom: ${trialEndsAt ? '16px' : '0'}; ${trialEndsAt ? 'padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);' : ''}">
+                              <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Status</div>
+                              <div style="display: inline-block; background: ${status === 'active' ? '#10B981' : '#f59e0b'}; color: white; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 700; text-transform: uppercase;">${status}</div>
+                            </div>
+
+                            ${
+                              trialEndsAt
+                                ? `
+                            <!-- Trial Ends -->
+                            <div>
+                              <div style="color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Trial Ends</div>
+                              <div style="color: white; font-size: 16px; font-weight: 600;">${new Date(
+                                trialEndsAt
+                              ).toLocaleString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}</div>
+                            </div>
+                            `
+                                : ''
+                            }
+
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td style="padding: 24px 40px; background: rgba(0, 0, 0, 0.3); text-align: center; border-radius: 0 0 16px 16px;">
+                          <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px;">
+                            Admin notification from Casi Platform
+                          </p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+          </html>
         `,
       })
       console.log(`📧 Admin notification sent for new signup: ${email}`)
