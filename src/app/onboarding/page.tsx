@@ -34,13 +34,19 @@ export default function OnboardingPage() {
 
   const handleConnectTwitch = async () => {
     try {
-      // Use Supabase OAuth which handles identity linking automatically
+      // Use Supabase OAuth which handles identity linking automatically for logged-in users
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'twitch',
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
+          // Ensure user:read:email is present so Twitch returns the email
           scopes:
             'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
+          // Force consent to ensure we get a fresh refresh token and explicit linking approval
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       })
 

@@ -432,13 +432,17 @@ function IntegrationsTab({ user }: { user: User }) {
 
   const handleConnectTwitch = async () => {
     try {
-      // Use Supabase OAuth which handles identity linking automatically
+      // Use Supabase OAuth which handles identity linking automatically for logged-in users
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'twitch',
         options: {
           redirectTo: `${window.location.origin}/account`,
           scopes:
             'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       })
 
