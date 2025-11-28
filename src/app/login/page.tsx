@@ -1,55 +1,86 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
+import AnimatedBackground from '@/components/AnimatedBackground'
 
 export default function LoginPage() {
-  const handleTwitchLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '8lmg8rwlkhlom3idj51xka2eipxd18'
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const supabase = createClient()
 
-    // Use the actual current origin to handle all environments correctly
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://heycasi.com'
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
-    const redirectUri = `${baseUrl}/auth/callback`
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      response_type: 'code',
-      scope:
-        'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
-      force_verify: 'true',
-    })
+      if (signInError) throw signInError
 
-    const authUrl = `https://id.twitch.tv/oauth2/authorize?${params.toString()}`
+      // Redirect to dashboard
+      window.location.href = '/dashboard'
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    console.log('Base URL detected:', baseUrl)
-    console.log('Redirect URI:', redirectUri)
-    console.log('Full auth URL:', authUrl)
-    window.location.href = authUrl
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address first')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+
+      if (resetError) throw resetError
+
+      setMessage('Password reset email sent! Check your inbox.')
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset email')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontFamily: 'Poppins, sans-serif',
         padding: '1rem',
+        position: 'relative',
       }}
     >
+      <AnimatedBackground />
       <div
         style={{
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(10px)',
           borderRadius: '20px',
-          border: '2px solid rgba(255, 255, 255, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           padding: '3rem 2rem',
-          textAlign: 'center',
-          maxWidth: '400px',
+          maxWidth: '420px',
           width: '100%',
         }}
       >
@@ -76,136 +107,195 @@ export default function LoginPage() {
           ← Back to Home
         </Link>
 
-        {/* Casi Logo */}
-        <Link href="/" style={{ display: 'block', marginBottom: '2rem' }}>
-          <Image
-            src="/landing-logo.svg"
-            alt="Casi Logo"
-            width={220}
-            height={88}
-            style={{
-              width: '220px',
-              height: 'auto',
-              maxWidth: '100%',
-              cursor: 'pointer',
-            }}
-            priority
-          />
-        </Link>
-
-        {/* Headline */}
-        <div style={{ marginBottom: '2.5rem' }}>
-          <h2
-            style={{
-              fontSize: '1.8rem',
-              fontWeight: '600',
-              marginBottom: '1rem',
-              background: 'linear-gradient(135deg, #5EEAD4, #FF9F9F, #932FFE)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Connect Your Stream
-          </h2>
-          <p
-            style={{
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '1rem',
-              lineHeight: '1.6',
-              fontWeight: '400',
-              margin: 0,
-            }}
-          >
-            Get real-time chat analysis, AI-powered insights, and boost your audience engagement.
-          </p>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <Link href="/" style={{ display: 'inline-block' }}>
+            <Image
+              src="/landing-logo.svg"
+              alt="Casi Logo"
+              width={220}
+              height={88}
+              style={{ width: '220px', height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
+              priority
+            />
+          </Link>
         </div>
 
-        {/* Twitch Connect Button */}
-        <div style={{ marginBottom: '2rem' }}>
-          <button
-            onClick={handleTwitchLogin}
-            style={{
-              width: '100%',
-              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
-              border: 'none',
-              borderRadius: '50px',
-              color: 'white',
-              fontSize: '1rem',
-              fontWeight: '600',
-              padding: '1rem 2rem',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
-              boxShadow: '0 8px 25px rgba(105, 50, 255, 0.3)',
-              fontFamily: 'Poppins, sans-serif',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 12px 35px rgba(105, 50, 255, 0.4)'
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0px)'
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(105, 50, 255, 0.3)'
-            }}
-          >
-            <svg style={{ width: '24px', height: '24px' }} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z" />
-            </svg>
-            Connect with Twitch
-          </button>
-        </div>
-
-        {/* Security Features */}
-        <div
+        <h1
           style={{
-            fontSize: '0.9rem',
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: 'white',
+            fontSize: '1.75rem',
+            fontWeight: '700',
+            marginBottom: '0.5rem',
+            textAlign: 'center',
+          }}
+        >
+          Welcome Back
+        </h1>
+
+        <p
+          style={{
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontSize: '0.875rem',
+            textAlign: 'center',
             marginBottom: '2rem',
           }}
         >
-          <div
+          Log in to your Casi account
+        </p>
+
+        <form onSubmit={handleLogin}>
+          {/* Email */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '0.875rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '10px',
+                color: 'white',
+                fontSize: '0.875rem',
+                outline: 'none',
+              }}
+              placeholder="you@example.com"
+            />
+          </div>
+
+          {/* Password */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              style={{
+                display: 'block',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.875rem',
+                marginBottom: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '0.875rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '10px',
+                color: 'white',
+                fontSize: '0.875rem',
+                outline: 'none',
+              }}
+              placeholder="••••••••"
+            />
+          </div>
+
+          {/* Forgot Password */}
+          <div style={{ textAlign: 'right', marginBottom: '1.5rem' }}>
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={loading}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#6932FF',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+            >
+              Forgot password?
+            </button>
+          </div>
+
+          {/* Error/Message */}
+          {error && (
+            <div
+              style={{
+                padding: '0.75rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                color: '#ef4444',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {message && (
+            <div
+              style={{
+                padding: '0.75rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '8px',
+                color: '#10b981',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}
+            >
+              {message}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '0.5rem',
+              width: '100%',
+              padding: '1rem',
+              background: 'linear-gradient(135deg, #6932FF, #932FFE)',
+              border: 'none',
+              borderRadius: '10px',
+              color: 'white',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+              marginBottom: '1rem',
             }}
           >
-            <span style={{ color: '#5EEAD4', marginRight: '8px' }}>✓</span>
-            <span>Secure OAuth authentication</span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <span style={{ color: '#5EEAD4', marginRight: '8px' }}>✓</span>
-            <span>Read-only access to chat</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#5EEAD4', marginRight: '8px' }}>✓</span>
-            <span>No posting permissions required</span>
-          </div>
-        </div>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
 
         {/* Footer */}
         <div
           style={{
-            paddingTop: '1.5rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            fontSize: '0.8rem',
-            color: 'rgba(255, 255, 255, 0.6)',
+            marginTop: '2rem',
+            textAlign: 'center',
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '0.875rem',
           }}
         >
-          <p style={{ fontWeight: '600', margin: '0 0 0.5rem 0' }}>Enterprise Analytics</p>
-          <p style={{ margin: 0 }}>Real-time Insights • Privacy Protected • Live Now</p>
+          Don't have an account?{' '}
+          <a href="/signup" style={{ color: '#6932FF', textDecoration: 'none', fontWeight: '600' }}>
+            Sign up free
+          </a>
         </div>
       </div>
     </div>

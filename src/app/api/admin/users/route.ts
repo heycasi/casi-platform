@@ -254,6 +254,138 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      case 'grant_agency': {
+        // Step A: UPSERT subscription to Agency tier
+        // Try to find existing subscription by user_id first (most reliable)
+        const { data: existingSubById } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle()
+
+        // If not found by user_id, try by email
+        let existingSub = existingSubById
+        if (!existingSub) {
+          const { data: existingSubByEmail } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_email', email)
+            .maybeSingle()
+          existingSub = existingSubByEmail
+
+          // Also try the 'email' column as fallback
+          if (!existingSub) {
+            const { data: existingSubByEmailAlt } = await supabase
+              .from('subscriptions')
+              .select('*')
+              .eq('email', email)
+              .maybeSingle()
+            existingSub = existingSubByEmailAlt
+          }
+        }
+
+        if (existingSub) {
+          // Update existing subscription
+          const { error: updateError } = await supabase
+            .from('subscriptions')
+            .update({
+              user_id: userId, // Ensure user_id is set
+              tier_name: 'Agency',
+              plan_name: 'Agency',
+              status: 'active',
+              trial_ends_at: null, // Clear any trial
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingSub.id)
+
+          if (updateError) {
+            console.error('Failed to update subscription:', updateError)
+            return NextResponse.json({ error: 'Failed to grant Agency access' }, { status: 500 })
+          }
+        } else {
+          // Create new subscription
+          const { error: createError } = await supabase.from('subscriptions').insert({
+            user_id: userId,
+            user_email: email,
+            email: email,
+            tier_name: 'Agency',
+            plan_name: 'Agency',
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+
+          if (createError) {
+            console.error('Failed to create subscription:', createError)
+            return NextResponse.json({ error: 'Failed to grant Agency access' }, { status: 500 })
+          }
+        }
+
+        // Step B: Check if user already owns an organization
+        const { data: existingOrg, error: orgCheckError } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('owner_id', userId)
+          .single()
+
+        if (orgCheckError && orgCheckError.code !== 'PGRST116') {
+          console.error('Failed to check existing organization:', orgCheckError)
+          return NextResponse.json({ error: 'Failed to check organization' }, { status: 500 })
+        }
+
+        let organizationId = existingOrg?.id
+
+        if (!existingOrg) {
+          // Create new organization
+          const { data: authUser } = await supabase.auth.admin.getUserById(userId)
+          const displayName =
+            authUser.user?.user_metadata?.display_name ||
+            authUser.user?.user_metadata?.preferred_username ||
+            email.split('@')[0]
+
+          const { data: newOrg, error: orgCreateError } = await supabase
+            .from('organizations')
+            .insert({
+              owner_id: userId,
+              name: `${displayName}'s Agency`,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single()
+
+          if (orgCreateError) {
+            console.error('Failed to create organization:', orgCreateError)
+            return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 })
+          }
+
+          organizationId = newOrg.id
+
+          // Add owner as member
+          const { error: memberError } = await supabase.from('organization_members').insert({
+            organization_id: organizationId,
+            user_id: userId,
+            role: 'owner',
+            joined_at: new Date().toISOString(),
+          })
+
+          if (memberError) {
+            console.error('Failed to add owner as member:', memberError)
+            // Don't fail the whole operation if this fails
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: `🏢 Agency access granted to ${email}! Organization "${displayName}'s Agency" created.`,
+          })
+        } else {
+          return NextResponse.json({
+            success: true,
+            message: `🏢 Agency access granted to ${email}! Using existing organization "${existingOrg.name}".`,
+          })
+        }
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }

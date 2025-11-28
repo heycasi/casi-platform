@@ -430,6 +430,28 @@ function IntegrationsTab({ user }: { user: User }) {
     }
   }, [user.email])
 
+  const handleConnectTwitch = async () => {
+    try {
+      // Use Supabase OAuth which handles identity linking automatically
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'twitch',
+        options: {
+          redirectTo: `${window.location.origin}/account`,
+          scopes:
+            'user:read:email chat:read channel:read:subscriptions moderator:read:followers bits:read',
+        },
+      })
+
+      if (error) {
+        console.error('OAuth error:', error)
+        alert('Failed to connect Twitch account. Please try again.')
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      alert('Failed to connect Twitch account. Please try again.')
+    }
+  }
+
   return (
     <div>
       <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem', fontWeight: '600' }}>Integrations</h2>
@@ -502,7 +524,7 @@ function IntegrationsTab({ user }: { user: User }) {
             </button>
           ) : (
             <button
-              onClick={() => (window.location.href = '/api/auth/twitch')}
+              onClick={handleConnectTwitch}
               style={{
                 padding: '0.625rem 1.25rem',
                 background: '#9146FF',

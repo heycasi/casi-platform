@@ -13,8 +13,10 @@ function AuthCallbackContent() {
       try {
         const code = searchParams.get('code')
         const error = searchParams.get('error')
+        const stateParam = searchParams.get('state')
+        const next = searchParams.get('next') // Check for redirect destination
 
-        console.log('OAuth callback received:', { code, error })
+        console.log('OAuth callback received:', { code, error, state: stateParam, next })
 
         if (error) {
           setStatus(`❌ Authorization failed: ${error}`)
@@ -24,6 +26,44 @@ function AuthCallbackContent() {
         if (!code) {
           setStatus('❌ No authorization code received')
           return
+        }
+
+        // SCENARIO 1: Supabase Email Verification (Sign Up)
+        // We detect this by the presence of the 'next' parameter (e.g., /onboarding)
+        if (next) {
+          setStatus('📧 Verifying email...')
+
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+
+          const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (sessionError) {
+            console.error('Email verification error:', sessionError)
+            setStatus(`❌ Email verification failed: ${sessionError.message}`)
+            return
+          }
+
+          setStatus('✅ Email verified! Redirecting...')
+          setTimeout(() => router.push(next), 1000)
+          return
+        }
+
+        // SCENARIO 2: Twitch OAuth (Legacy or Linking)
+        // Proceed with existing Twitch logic if no 'next' param
+
+        // Parse state parameter to check if this is a linking operation
+        let linkMode = false
+        let returnTo = '/dashboard'
+        if (stateParam) {
+          try {
+            const state = JSON.parse(stateParam)
+            linkMode = state.mode === 'link'
+            returnTo = state.returnTo || '/dashboard'
+            console.log('Parsed state:', { linkMode, returnTo })
+          } catch (e) {
+            console.warn('Failed to parse state parameter:', e)
+          }
         }
 
         setStatus('🔄 Exchanging authorization code...')
@@ -55,6 +95,91 @@ function AuthCallbackContent() {
           console.error('Missing user data in token response:', tokenData)
           setStatus(`❌ Failed to get user data from Twitch. Please try again.`)
           return
+        }
+
+        // NEW FLOW: If user is already authenticated and this is a link operation
+        if (linkMode) {
+          setStatus('🔗 Linking Twitch to your account...')
+          console.log('Link mode detected - checking for existing session')
+
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+
+          // Check if user is already logged in
+          const {
+            data: { user: currentUser },
+          } = await supabase.auth.getUser()
+
+          if (currentUser) {
+            console.log('User already authenticated:', currentUser.email)
+            console.log('Linking Twitch account:', tokenData.user.login)
+
+            // Update user metadata with Twitch information via API
+            setStatus('💾 Updating your account with Twitch data...')
+
+            try {
+              const updateResponse = await fetch('/api/update-user-tokens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: currentUser.id, // Use current authenticated user's ID
+                  tokens: {
+                    access_token: tokenData.access_token,
+                    refresh_token: tokenData.refresh_token,
+                  },
+                  userData: tokenData.user,
+                  linkMode: true, // Indicate this is a linking operation
+                }),
+              })
+
+              const updateResult = await updateResponse.json()
+
+              if (updateResult.error) {
+                console.error('Failed to update user metadata:', updateResult.error)
+                setStatus('⚠️ Warning: Failed to link Twitch account')
+                setTimeout(() => router.push(returnTo), 2000)
+                return
+              }
+
+              console.log('✅ Twitch account linked successfully')
+
+              // Subscribe to EventSub for this user
+              setStatus('🔔 Subscribing to Twitch event notifications...')
+              try {
+                await fetch('/api/subscribe-user-events', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    broadcaster_user_id: tokenData.user.id,
+                    user_access_token: tokenData.access_token,
+                  }),
+                })
+                console.log('✅ EventSub subscription created')
+              } catch (error) {
+                console.error('Failed to subscribe to events:', error)
+              }
+
+              // Store tokens in localStorage for backward compatibility
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('twitch_access_token', tokenData.access_token)
+                localStorage.setItem('twitch_user', JSON.stringify(tokenData.user))
+                localStorage.setItem('casi_user_email', currentUser.email || '')
+                console.log('📧 Stored email for sessions:', currentUser.email)
+              }
+
+              setStatus('✅ Twitch account linked successfully! Redirecting...')
+              setTimeout(() => router.push(returnTo), 1500)
+              return
+            } catch (error) {
+              console.error('Error linking Twitch account:', error)
+              setStatus('❌ Failed to link Twitch account')
+              setTimeout(() => router.push(returnTo), 2000)
+              return
+            }
+          } else {
+            console.log('No active session found - falling back to legacy flow')
+            // Fall through to legacy flow if no active session
+          }
         }
 
         setStatus('🔍 Checking for existing account...')

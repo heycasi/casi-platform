@@ -86,13 +86,14 @@ export default function AdminUsersPage() {
   const handleUserAction = async (
     userId: string,
     email: string,
-    action: 'suspend' | 'unsuspend' | 'delete' | 'grant_pro_trial'
+    action: 'suspend' | 'unsuspend' | 'delete' | 'grant_pro_trial' | 'grant_agency'
   ) => {
     const confirmMessages = {
       suspend: `Suspend user ${email}? They will no longer be able to log in.`,
       unsuspend: `Unsuspend user ${email}? They will regain access.`,
       delete: `PERMANENTLY DELETE user ${email}? This cannot be undone!`,
       grant_pro_trial: `Grant ${email} Pro access for 7 days?`,
+      grant_agency: `🏢 Upgrade ${email} to AGENCY tier? This will create their organization and grant full Agency features.`,
     }
 
     if (!confirm(confirmMessages[action])) {
@@ -494,6 +495,23 @@ export default function AdminUsersPage() {
                           }}
                         >
                           ⭐ Grant Pro (7d)
+                        </button>
+                        <button
+                          onClick={() => handleUserAction(user.id, user.email, 'grant_agency')}
+                          disabled={actioningUserId === user.id}
+                          style={{
+                            background: 'rgba(255, 215, 0, 0.2)',
+                            border: '1px solid rgba(255, 215, 0, 0.4)',
+                            color: '#FFD700',
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '6px',
+                            cursor: actioningUserId === user.id ? 'not-allowed' : 'pointer',
+                            fontWeight: '600',
+                            fontSize: '0.75rem',
+                            opacity: actioningUserId === user.id ? 0.5 : 1,
+                          }}
+                        >
+                          🏢 Make Agency
                         </button>
                         <button
                           onClick={() => handleUserAction(user.id, user.email, 'suspend')}
