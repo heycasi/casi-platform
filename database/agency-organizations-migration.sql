@@ -265,7 +265,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION get_user_organization IS 'Get current user\'s organization details';
+COMMENT ON FUNCTION get_user_organization IS 'Get current user''s organization details';
 
 -- ============================================================================
 -- STEP 12: Create view for organization overview
