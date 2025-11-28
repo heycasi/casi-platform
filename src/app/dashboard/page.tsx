@@ -391,6 +391,39 @@ export default function Dashboard() {
         if (isAdmin) {
           setHasAccess(true)
         }
+
+        // Redirect Agency owners to the Agency dashboard
+        if (tier === 'Agency') {
+          // Check if they're an organization owner
+          const {
+            data: { session },
+          } = await (await import('@supabase/supabase-js'))
+            .createClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            )
+            .auth.getSession()
+
+          if (session?.access_token) {
+            try {
+              const orgResponse = await fetch('/api/agency/organization', {
+                headers: {
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+              })
+
+              const orgData = await orgResponse.json()
+
+              // If they own an organization, redirect to agency dashboard
+              if (orgData.organization && orgData.role === 'owner') {
+                window.location.href = '/dashboard/agency'
+                return // Stop further execution
+              }
+            } catch (error) {
+              console.error('Error checking organization:', error)
+            }
+          }
+        }
       } catch (error) {
         console.error('Failed to check user access:', error)
         setHasAccess(false)
