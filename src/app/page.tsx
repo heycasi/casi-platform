@@ -180,9 +180,9 @@ const Hero = () => {
           className="text-5xl md:text-7xl font-bold font-heading tracking-tight text-white mb-6 leading-[1.2]"
         >
           <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent block mb-2 pb-3">
-            Stop Ignoring
+            Twitch Delivers the Chat.
           </span>
-          Your Best Viewers.
+          Casi Decodes It.
         </motion.h1>
 
         <motion.p
@@ -191,8 +191,9 @@ const Hero = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10"
         >
-          The only real-time intelligence engine that instantly highlights VIPs, flags toxic
-          messages, and detects viral moments so you never miss a sub or a clip.
+          Reduce your mental load. While you broadcast, Casi acts as your Intelligence
+          Officer—flagging questions, tracking the 'vibe,' and marking clip moments automatically.
+          Don't just read chat; understand it.
         </motion.p>
 
         <motion.div
@@ -205,9 +206,12 @@ const Hero = () => {
             href="/signup"
             className="bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white font-semibold rounded-full px-8 py-4 text-lg hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all"
           >
-            Get Your Stream Intelligence Score
+            Analyze My Chat Free
           </Link>
-          <p className="text-zinc-500 text-sm font-mono tracking-wide">NO CREDIT CARD REQUIRED</p>
+          <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+            <ShieldCheck className="w-3 h-3 text-[#5EEAD4]" />
+            <span>100% Compliant Support Layer. We make your mods smarter, not obsolete.</span>
+          </div>
         </motion.div>
       </div>
 

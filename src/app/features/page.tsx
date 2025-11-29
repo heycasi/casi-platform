@@ -45,7 +45,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Feature 1: Sentiment Tracking */}
+      {/* Feature 1: Room Tone Monitor */}
       <section
         style={{
           padding: '4rem 2rem',
@@ -87,7 +87,7 @@ export default function FeaturesPage() {
                 color: 'white',
               }}
             >
-              <GradientText animate={false}>Real-time Sentiment Tracking</GradientText>
+              <GradientText animate={false}>Room Tone Monitor</GradientText>
             </h2>
             <p
               style={{
@@ -97,14 +97,15 @@ export default function FeaturesPage() {
                 lineHeight: '1.6',
               }}
             >
-              Watch your audience's mood change in real-time as you stream. Our AI analyzes every
-              chat message to provide instant sentiment feedback.
+              You can't read every message during a boss fight. Casi watches the emotional
+              temperature of the room and alerts you if the vibe shifts, so you can adjust content
+              before viewers leave.
             </p>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {[
-                'Live sentiment analysis',
-                'Positive/neutral/negative breakdown',
-                'Historical trends & patterns',
+                'Real-time emotional temperature check',
+                'Instant vibe shift alerts',
+                'Historical mood tracking',
               ].map((item, i) => (
                 <li
                   key={i}
@@ -132,7 +133,7 @@ export default function FeaturesPage() {
           <div>
             <img
               src="/images/feature-chat.jpg"
-              alt="Sentiment Analysis"
+              alt="Room Tone Monitor"
               style={{
                 width: '100%',
                 height: 'auto',
@@ -145,7 +146,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Feature 2: Question Detection */}
+      {/* Feature 2: Interaction Engine */}
       <section
         style={{
           padding: '4rem 2rem',
@@ -187,7 +188,7 @@ export default function FeaturesPage() {
                 color: 'white',
               }}
             >
-              Question Detection & Alerts
+              Interaction Engine
             </h2>
             <p
               style={{
@@ -197,14 +198,14 @@ export default function FeaturesPage() {
                 lineHeight: '1.6',
               }}
             >
-              Never miss important questions from your viewers. Smart AI identifies and prioritizes
-              questions that need your attention.
+              Turn chaotic chat into a structured Q&A. We filter out the noise and queue up genuine
+              questions, turning your stream into a conversation, not just a broadcast.
             </p>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {[
-                'Automatic question detection',
-                'Priority-based alerts',
-                'Queue management system',
+                'Smart question filtering',
+                'Priority queue for subscribers',
+                'Conversation starter prompts',
               ].map((item, i) => (
                 <li
                   key={i}
@@ -232,7 +233,7 @@ export default function FeaturesPage() {
           <div style={{ order: 1 }}>
             <img
               src="/missedquestions-topchatters.png"
-              alt="Question Detection"
+              alt="Interaction Engine"
               style={{
                 width: '100%',
                 height: 'auto',
@@ -245,7 +246,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Feature 3: Live Chat Feed */}
+      {/* Feature 3: Community CRM */}
       <section
         style={{
           padding: '4rem 2rem',
@@ -287,7 +288,7 @@ export default function FeaturesPage() {
                 color: 'white',
               }}
             >
-              Live Chat Feed
+              Community CRM
             </h2>
             <p
               style={{
@@ -297,14 +298,14 @@ export default function FeaturesPage() {
                 lineHeight: '1.6',
               }}
             >
-              See your entire chat stream with sentiment indicators in real-time. Filter, search,
-              and track top chatters all in one place.
+              Twitch highlights who pays (Subs). Casi highlights who engages (Super Fans). Identify
+              the behavioral VIPs driving your chat so you can recognize them before they churn.
             </p>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {[
-                'Real-time chat monitoring',
-                'Sentiment indicators per message',
-                'Top chatters tracking',
+                'Behavioral VIP tracking',
+                'Churn risk detection',
+                'Engagement history per viewer',
               ].map((item, i) => (
                 <li
                   key={i}
@@ -332,7 +333,7 @@ export default function FeaturesPage() {
           <div>
             <img
               src="/livechatfeed.png"
-              alt="Live Chat Feed"
+              alt="Community CRM"
               style={{
                 width: '100%',
                 height: 'auto',
@@ -345,7 +346,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Community MVPs Section */}
+      {/* The Data Safety Net Section */}
       <section style={{ padding: '5rem 2rem' }}>
         <div
           style={{
@@ -374,7 +375,7 @@ export default function FeaturesPage() {
                 marginBottom: '1.5rem',
               }}
             >
-              Community MVPs
+              The Data Safety Net
             </h2>
             <p
               style={{
@@ -384,8 +385,8 @@ export default function FeaturesPage() {
                 marginBottom: '2rem',
               }}
             >
-              Discover your most active and loyal community members with detailed engagement
-              analytics.
+              Twitch deletes chat logs after 60 days. We store your history securely for the life of
+              your account, allowing you to track year-over-year growth. 100% Your Data.
             </p>
             <ul
               style={{
@@ -395,18 +396,15 @@ export default function FeaturesPage() {
                 fontSize: '1.1rem',
               }}
             >
-              <li style={{ marginBottom: '0.8rem' }}>
-                ✓ Top chatters with message counts and stats
-              </li>
-              <li style={{ marginBottom: '0.8rem' }}>✓ Recurring user detection across streams</li>
-              <li style={{ marginBottom: '0.8rem' }}>✓ Question and sentiment analysis per user</li>
-              <li style={{ marginBottom: '0.8rem' }}>✓ Medal rankings and achievement badges</li>
+              <li style={{ marginBottom: '0.8rem' }}>✓ Lifetime chat history storage</li>
+              <li style={{ marginBottom: '0.8rem' }}>✓ Year-over-year growth tracking</li>
+              <li style={{ marginBottom: '0.8rem' }}>✓ Secure, exportable data</li>
             </ul>
           </div>
           <div>
             <img
               src="/images/feature-vip.jpg"
-              alt="Community MVPs"
+              alt="The Data Safety Net"
               style={{
                 width: '100%',
                 height: 'auto',
@@ -419,89 +417,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Chat Activity Timeline Section */}
-      <section
-        style={{
-          padding: '5rem 2rem',
-          background: 'rgba(255, 255, 255, 0.02)',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '3rem',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ order: 2 }}>
-            <div
-              style={{
-                background: 'rgba(139, 92, 246, 0.1)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                borderRadius: '12px',
-                padding: '2rem',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
-                See exactly when your chat was most active. Perfect for finding the best moments to
-                clip and understanding viewer engagement patterns.
-              </p>
-            </div>
-          </div>
-          <div style={{ order: 1 }}>
-            <div
-              style={{
-                fontSize: '2.5rem',
-                marginBottom: '1rem',
-              }}
-            >
-              📊
-            </div>
-            <h2
-              style={{
-                fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-                fontWeight: '700',
-                color: 'white',
-                marginBottom: '1.5rem',
-              }}
-            >
-              Chat Activity Timeline
-            </h2>
-            <p
-              style={{
-                fontSize: '1.2rem',
-                color: 'rgba(255, 255, 255, 0.8)',
-                lineHeight: '1.8',
-                marginBottom: '2rem',
-              }}
-            >
-              Visualize engagement patterns throughout your entire stream with smart highlights
-              showing peak moments.
-            </p>
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                color: '#5EEAD4',
-                fontSize: '1.1rem',
-              }}
-            >
-              <li style={{ marginBottom: '0.8rem' }}>✓ 2-minute activity buckets</li>
-              <li style={{ marginBottom: '0.8rem' }}>
-                ✓ Peak, high, medium, and low activity detection
-              </li>
-              <li style={{ marginBottom: '0.8rem' }}>
-                ✓ Smart highlights showing key moments only
-              </li>
-              <li style={{ marginBottom: '0.8rem' }}>✓ Actual timestamps for easy VOD review</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+      {/* Chat Activity Timeline Section (Removed/Replaced) */}
 
       {/* Chat Highlights Section */}
       <section style={{ padding: '5rem 2rem' }}>
@@ -633,7 +549,8 @@ export default function FeaturesPage() {
               {
                 emoji: '🌐',
                 title: 'Multi-platform Dashboard',
-                desc: 'Unified analytics across Twitch, YouTube, and Kick in one dashboard',
+                desc: 'Unified analytics across Twitch and Kick (Available Now). YouTube coming soon.',
+                status: 'Available Now',
               },
             ].map((feature, i) => (
               <div
@@ -686,15 +603,19 @@ export default function FeaturesPage() {
                 </p>
                 <span
                   style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    background:
+                      feature.status === 'Available Now'
+                        ? 'rgba(184, 238, 138, 0.2)'
+                        : 'rgba(255, 255, 255, 0.1)',
+                    color:
+                      feature.status === 'Available Now' ? '#B8EE8A' : 'rgba(255, 255, 255, 0.8)',
                     padding: '0.25rem 0.75rem',
                     borderRadius: '9999px',
                     fontSize: '0.75rem',
                     fontWeight: '600',
                   }}
                 >
-                  Coming Later
+                  {feature.status || 'Coming Later'}
                 </span>
               </div>
             ))}
@@ -718,7 +639,7 @@ export default function FeaturesPage() {
               color: 'white',
             }}
           >
-            Ready to get started?
+            Ready to upgrade your stream intelligence?
           </h2>
           <p
             style={{
@@ -728,8 +649,7 @@ export default function FeaturesPage() {
               lineHeight: '1.6',
             }}
           >
-            Start analyzing your stream in seconds. Zero-latency insights, real-time analytics, no
-            guessing.
+            Stop guessing what your chat wants. Start knowing.
           </p>
 
           <Link

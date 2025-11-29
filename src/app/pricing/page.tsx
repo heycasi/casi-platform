@@ -111,7 +111,7 @@ export default function PricingPage() {
               },
               {
                 q: 'Which platforms are supported?',
-                a: 'Currently: Twitch (full support) and Kick (beta access on Pro+). YouTube support coming Q2 2025. All plans automatically get access to new platforms as they launch.',
+                a: 'Currently: Twitch (full support) and Kick (Available on Pro+). YouTube support coming Q2 2025. All plans automatically get access to new platforms as they launch.',
               },
               {
                 q: 'What about data privacy?',
@@ -193,7 +193,7 @@ export default function PricingPage() {
             }}
           >
             <Link
-              href="/beta-signup"
+              href="/signup"
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #6932FF, #932FFE)',

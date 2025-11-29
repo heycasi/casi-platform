@@ -35,7 +35,7 @@ export default function PricingTable() {
       name: 'Starter',
       price: 'Free',
       priceId: null,
-      description: 'For new affiliates',
+      description: 'The Safety Net',
       features: [
         'Unlimited Messages',
         'Instant Sentiment Detection',
@@ -44,13 +44,13 @@ export default function PricingTable() {
       ],
       cta: 'Start Free',
       popular: false,
-      ctaLink: '/beta-signup',
+      ctaLink: '/signup',
     },
     {
       name: 'Pro',
       price: PRICING_CONFIG[currency].pro.price,
       priceId: PRICING_CONFIG[currency].pro.priceId,
-      description: 'The no-brainer growth stack',
+      description: 'The Co-Pilot',
       features: [
         'Everything in Free',
         'Unlimited History',
@@ -66,7 +66,7 @@ export default function PricingTable() {
       name: 'Agency',
       price: PRICING_CONFIG[currency].agency.price,
       priceId: PRICING_CONFIG[currency].agency.priceId,
-      description: 'For managers & teams',
+      description: 'Mission Control',
       features: ['Manage 5 Channels', 'White Label Reports', 'API Access', 'Priority Support'],
       cta: 'Get Agency',
       popular: false,
