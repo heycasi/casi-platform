@@ -9,6 +9,7 @@ import { ArrowRight, BarChart3, Globe2, MessageSquare, ShieldCheck, Menu, X } fr
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import Footer from '@/components/Footer'
+import BookDemoModal from '@/components/BookDemoModal'
 
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
@@ -459,6 +460,451 @@ const Stats = () => {
   )
 }
 
+const AgencySection = () => {
+  const [showBookDemo, setShowBookDemo] = useState(false)
+
+  return (
+    <>
+      <BookDemoModal isOpen={showBookDemo} onClose={() => setShowBookDemo(false)} />
+      <section className="py-32 relative overflow-hidden border-y border-white/5">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D14] via-[#1a0f2e] to-[#0B0D14]" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          {/* Hook Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16 text-center"
+          >
+            <p className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-zinc-500">
+              SCALABLE INFRASTRUCTURE FOR MODERN TALENT AGENCIES
+            </p>
+          </motion.div>
+
+          {/* Headline Block */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-6xl font-bold font-heading text-white mb-6 tracking-tight">
+              <span className="bg-gradient-to-r from-[#6932FF] via-[#932FFE] to-[#5EEAD4] bg-clip-text text-transparent">
+                Unified Roster Intelligence
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto mb-10 leading-relaxed">
+              The spreadsheet era is over. Casi provides a single, secure Command Center to monitor
+              performance, manage permissions, and streamline reporting across your entire talent
+              portfolio—whether you manage 5 creators or 500.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/signup"
+                className="group px-8 py-4 bg-gradient-to-r from-[#6932FF] to-[#932FFE] text-white rounded-full font-bold hover:shadow-lg hover:shadow-[#6932FF]/50 transition-all inline-flex items-center justify-center gap-2"
+              >
+                Explore Agency Solutions
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <button
+                onClick={() => setShowBookDemo(true)}
+                className="px-8 py-4 bg-transparent border-2 border-white/20 text-white rounded-full font-bold hover:bg-white/10 hover:border-white/40 transition-all"
+              >
+                Book a Demo
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Feature Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {/* Portfolio-Wide Visibility */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all duration-300"
+            >
+              {/* Icon */}
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+                <svg
+                  className="w-7 h-7 text-purple-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                Portfolio-Wide Visibility
+              </h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Gain a bird's-eye view of your entire roster's performance in real-time. Aggregate
+                data across 5, 50, or 500 creators to identify macro trends, spot breakout talent,
+                and report to stakeholders with zero friction.
+              </p>
+
+              {/* Hover effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-600/0 to-purple-600/0 group-hover:from-purple-600/5 group-hover:to-transparent transition-all duration-300 pointer-events-none" />
+            </motion.div>
+
+            {/* Granular Team Permissions */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all duration-300"
+            >
+              {/* Icon */}
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20">
+                <svg
+                  className="w-7 h-7 text-emerald-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                  />
+                </svg>
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                Granular Team Permissions
+              </h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Built for the modern agency structure. Assign specific roster managers to specific
+                talent pods. Ensure your team sees exactly what they need to see—nothing more,
+                nothing less—with enterprise-grade seat management.
+              </p>
+
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-600/0 to-emerald-600/0 group-hover:from-emerald-600/5 group-hover:to-transparent transition-all duration-300 pointer-events-none" />
+            </motion.div>
+
+            {/* Automated Partner Reporting */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all duration-300"
+            >
+              {/* Icon */}
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+                <svg
+                  className="w-7 h-7 text-amber-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 3L15.75 5.25M13.5 3l3.5 3.5"
+                  />
+                </svg>
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                Automated Partner Reporting
+              </h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Your brand partners demand data. Give it to them faster. Generate white-labeled,
+                agency-branded PDF reports for campaign sponsorships across your entire roster with
+                a single click.
+              </p>
+
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-600/0 to-amber-600/0 group-hover:from-amber-600/5 group-hover:to-transparent transition-all duration-300 pointer-events-none" />
+            </motion.div>
+          </div>
+
+          {/* Campaign Intelligence Introduction */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+            className="mb-20"
+          >
+            <div className="max-w-4xl mx-auto text-center">
+              <h3 className="text-3xl md:text-4xl font-bold font-heading text-white mb-4">
+                Prove Your Roster's Value with Campaign Intelligence
+              </h3>
+              <p className="text-lg text-zinc-400 leading-relaxed">
+                Move beyond basic view counts. Track aggregated deliverables across your entire
+                talent portfolio and benchmark specific campaigns against historical performance in
+                real-time.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Section 1: The Macro View (Text Left, Image Right) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.7 }}
+            className="mb-32"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Text Content */}
+              <div className="order-2 lg:order-1">
+                <h3 className="text-3xl md:text-4xl font-bold font-heading text-white mb-6">
+                  The Agency Command Center
+                </h3>
+                <p className="text-lg text-zinc-400 leading-relaxed mb-8">
+                  Stop aggregating data manually. Get a real-time pulse on your entire organization
+                  with unified metrics. Monitor total deliverables, aggregated viewership, and
+                  active campaign benchmarks from a single pane of glass.
+                </p>
+
+                {/* Key Features */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mt-1">
+                      <svg
+                        className="w-3 h-3 text-purple-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold mb-1">Portfolio Aggregation</p>
+                      <p className="text-sm text-zinc-500">
+                        Instantly visualize total reach, engagement volume, and average viewership
+                        across all active talent slots.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                      <svg
+                        className="w-3 h-3 text-emerald-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold mb-1">Sponsorship Benchmarking</p>
+                      <p className="text-sm text-zinc-500">
+                        Compare live campaign metrics against previous quarterly baselines to prove
+                        ROI to clients.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mt-1">
+                      <svg
+                        className="w-3 h-3 text-amber-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold mb-1">Automated Reporting</p>
+                      <p className="text-sm text-zinc-500">
+                        Turn raw data into client-ready sponsor reports with a single click.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image */}
+              <div className="order-1 lg:order-2">
+                <div className="relative rounded-2xl border border-white/20 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl shadow-purple-900/20 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D14] via-transparent to-transparent z-10 pointer-events-none" />
+                  <div className="relative">
+                    <Image
+                      src="/agencydashboard top.png"
+                      alt="Agency Command Center - Campaign Intelligence Dashboard"
+                      width={1400}
+                      height={400}
+                      className="w-full h-auto opacity-90"
+                      priority
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500 italic mt-3 text-center">
+                  Automated benchmarking tracks campaign health against quarterly goals.
+                  <br />
+                  Illustrative dashboard view. Campaign data and benchmarks are customizable per
+                  client.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Section 2: The Micro View (Image Left, Text Right) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.8 }}
+            className="mb-20"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Image */}
+              <div className="order-1">
+                <div
+                  className="relative rounded-2xl border border-white/20 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl shadow-purple-900/20 overflow-hidden group"
+                  style={{ perspective: '2000px' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D14] via-transparent to-transparent z-10 pointer-events-none" />
+                  <div className="relative aspect-video">
+                    <Image
+                      src="/agencydashboard.png"
+                      alt="Granular Roster Management - Individual Creator View"
+                      fill
+                      className="object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+                      priority
+                    />
+                  </div>
+
+                  {/* Floating metric badge */}
+                  <div className="absolute top-6 right-6 z-20 px-4 py-3 bg-[#1a1a2e]/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-xl hidden lg:block">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-xs font-mono text-emerald-300 font-bold uppercase tracking-wide">
+                        LIVE STATUS
+                      </span>
+                    </div>
+                    <div className="text-xl font-bold text-white">5 Active</div>
+                    <div className="text-xs text-zinc-400 mt-0.5">Creators streaming</div>
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500 italic mt-3 text-center">
+                  Live status indicators and 'Health Scores' update in real-time.
+                </p>
+              </div>
+
+              {/* Text Content */}
+              <div className="order-2">
+                <h3 className="text-3xl md:text-4xl font-bold font-heading text-white mb-6">
+                  Granular Roster Management
+                </h3>
+                <p className="text-lg text-zinc-400 leading-relaxed mb-8">
+                  Drill down from the portfolio level to the individual creator in one click.
+                  Instantly see who is live, check health scores, and manage team permissions.
+                  Whether you have 5 talent or 50, keep your roster organized and your operations
+                  distinct.
+                </p>
+
+                {/* Key Features */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mt-1">
+                      <svg
+                        className="w-3 h-3 text-purple-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold mb-1">
+                        Individual Performance Tracking
+                      </p>
+                      <p className="text-sm text-zinc-500">
+                        View detailed analytics for each creator including stream history, viewer
+                        metrics, and engagement trends.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                      <svg
+                        className="w-3 h-3 text-emerald-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold mb-1">Health Score Monitoring</p>
+                      <p className="text-sm text-zinc-500">
+                        Automated alerts for sentiment shifts, viewer drops, and toxicity spikes to
+                        protect your talent and brand partnerships.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mt-1">
+                      <svg
+                        className="w-3 h-3 text-blue-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold mb-1">One-Click Dashboard Access</p>
+                      <p className="text-sm text-zinc-500">
+                        Jump directly into any creator's full analytics dashboard with agency admin
+                        privileges—no separate logins required.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
+  )
+}
+
 const CTA = () => {
   return (
     <section className="py-32 relative overflow-hidden">
@@ -499,6 +945,7 @@ export default function LandingPage() {
       <TrustBadges />
       <Stats />
       <Features />
+      <AgencySection />
       <CTA />
       <Footer />
     </main>

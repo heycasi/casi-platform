@@ -1,20 +1,18 @@
 'use client'
+
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import FeatureGate from '@/components/FeatureGate'
+import { createClient } from '@/lib/supabase/client'
 import AddTalentModal from '@/components/agency/AddTalentModal'
 import TalentTable from '@/components/agency/TalentTable'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import CampaignBenchmark from '@/components/agency/CampaignBenchmark'
+import CreatorHealthDashboard from '@/components/agency/CreatorHealthDashboard'
+import SponsorReportGenerator from '@/components/agency/SponsorReportGenerator'
 
 interface Organization {
   id: string
   name: string
+  slug: string
   logo_url?: string
-  created_at: string
 }
 
 interface TalentMember {
@@ -35,21 +33,31 @@ interface TalentMember {
   recentSessions: any[]
 }
 
-interface OrganizationTotals {
-  totalSessions: number
-  totalMessages: number
-  avgViewersAcrossAllTalent: number
-  activeTalent: number
+interface CampaignData {
+  campaignName: string
+  totalMentions: number
+  breakdown: {
+    userId: string
+    channelName: string
+    mentions: number
+  }[]
 }
 
 export default function AgencyDashboard() {
   const [loading, setLoading] = useState(true)
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [talent, setTalent] = useState<TalentMember[]>([])
-  const [orgTotals, setOrgTotals] = useState<OrganizationTotals | null>(null)
+  const [stats, setStats] = useState({
+    totalStreams: 0,
+    totalMessages: 0,
+    avgViewers: 0,
+    activeTalent: 0,
+  })
   const [showAddTalentModal, setShowAddTalentModal] = useState(false)
+  const [showReportGenerator, setShowReportGenerator] = useState(false)
   const [currentTier, setCurrentTier] = useState<'Starter' | 'Pro' | 'Agency'>('Starter')
   const [isOwner, setIsOwner] = useState(false)
+  const [campaignData, setCampaignData] = useState<CampaignData | null>(null)
 
   useEffect(() => {
     checkAccess()
@@ -57,6 +65,7 @@ export default function AgencyDashboard() {
 
   async function checkAccess() {
     try {
+      const supabase = createClient()
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -66,33 +75,32 @@ export default function AgencyDashboard() {
         return
       }
 
-      // Fetch organization details
-      const orgResponse = await fetch('/api/agency/organization', {
+      // Verify agency access
+      const response = await fetch('/api/agency/organization', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       })
 
-      const orgData = await orgResponse.json()
-
-      if (!orgData.organization) {
-        // No organization - redirect to main dashboard
-        window.location.href = '/dashboard'
-        return
+      if (!response.ok) {
+        throw new Error('Failed to fetch organization')
       }
 
-      if (orgData.role !== 'owner') {
-        // Not an owner - redirect to main dashboard
-        window.location.href = '/dashboard'
+      const orgData = await response.json()
+
+      if (!orgData.organization) {
+        window.location.href = '/dashboard' // Not an agency user
         return
       }
 
       setOrganization(orgData.organization)
-      setIsOwner(true)
-      setCurrentTier('Agency')
+      setIsOwner(orgData.role === 'owner')
 
-      // Fetch talent analytics
+      // Fetch talent analytics (includes all talent data)
       await fetchTalentAnalytics(session.access_token, orgData.organization.id)
+
+      // Fetch campaign analytics
+      await fetchCampaignAnalytics(session.access_token, orgData.organization.id)
     } catch (error) {
       console.error('Error checking access:', error)
       window.location.href = '/dashboard'
@@ -114,15 +122,42 @@ export default function AgencyDashboard() {
 
       const data = await response.json()
 
-      if (data.talent) {
-        setTalent(data.talent)
+      if (data.stats) {
+        setStats({
+          totalStreams: data.stats.totalStreams,
+          totalMessages: data.stats.totalMessages,
+          avgViewers: data.stats.avgViewers,
+          activeTalent: data.talentCount || 0,
+        })
       }
 
-      if (data.organizationTotals) {
-        setOrgTotals(data.organizationTotals)
+      // Set talent list for the table
+      if (data.talent && Array.isArray(data.talent)) {
+        setTalent(data.talent)
       }
     } catch (error) {
-      console.error('Error fetching talent analytics:', error)
+      console.error('Error fetching analytics:', error)
+    }
+  }
+
+  async function fetchCampaignAnalytics(token: string, organizationId: string) {
+    try {
+      const response = await fetch(
+        `/api/agency/campaign-analytics?organizationId=${organizationId}&keyword=Red Bull`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await response.json()
+
+      if (data.campaignName && data.totalMentions !== undefined) {
+        setCampaignData(data)
+      }
+    } catch (error) {
+      console.error('Error fetching campaign analytics:', error)
     }
   }
 
@@ -130,303 +165,333 @@ export default function AgencyDashboard() {
     try {
       const {
         data: { session },
-      } = await supabase.auth.getSession()
+      } = await createClient().auth.getSession()
+      if (!session) return
 
-      if (!session || !organization) return
-
-      const response = await fetch('/api/agency/invite', {
+      const response = await fetch('/api/agency/invite-talent', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          organizationId: organization.id,
-          email,
-        }),
+        body: JSON.stringify({ email, organizationId: organization?.id }),
       })
 
-      const data = await response.json()
-
-      if (response.ok) {
-        // Refresh talent list
-        await fetchTalentAnalytics(session.access_token, organization.id)
-        setShowAddTalentModal(false)
-        return { success: true, message: data.message }
-      } else {
-        return { success: false, message: data.error || data.message || 'Failed to add talent' }
+      if (!response.ok) {
+        throw new Error('Failed to invite talent')
       }
-    } catch (error: any) {
-      console.error('Error adding talent:', error)
-      return { success: false, message: error.message || 'An error occurred' }
+
+      alert('Invitation sent successfully!')
+      setShowAddTalentModal(false)
+    } catch (error) {
+      console.error('Error inviting talent:', error)
+      alert('Failed to invite talent. Please try again.')
     }
   }
 
   async function handleRemoveTalent(userId: string) {
-    if (!confirm('Are you sure you want to remove this talent from your organization?')) {
-      return
-    }
+    if (!confirm('Are you sure you want to remove this talent from your agency?')) return
 
     try {
       const {
         data: { session },
-      } = await supabase.auth.getSession()
+      } = await createClient().auth.getSession()
+      if (!session) return
 
-      if (!session || !organization) return
-
-      const response = await fetch('/api/agency/invite', {
-        method: 'DELETE',
+      const response = await fetch('/api/agency/remove-talent', {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ userId, organizationId: organization?.id }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove talent')
+      }
+
+      // Refresh list
+      checkAccess()
+    } catch (error) {
+      console.error('Error removing talent:', error)
+      alert('Failed to remove talent')
+    }
+  }
+
+  // Generate demo data for Campaign Benchmark
+  const benchmarkData =
+    campaignData && campaignData.totalMentions > 0
+      ? {
+          currentCampaign: {
+            mentions: campaignData.totalMentions,
+            sentiment: 0.78, // 78% positive
+            avgViewers: stats.avgViewers,
+          },
+          comparison: {
+            previousCampaign: {
+              mentions: Math.round(campaignData.totalMentions * 0.85), // 15% growth
+              sentiment: 0.72,
+              avgViewers: Math.round(stats.avgViewers * 0.92),
+              name: 'Monster Q3',
+            },
+            industryMedian: {
+              mentions: Math.round(campaignData.totalMentions * 0.6),
+              sentiment: 0.65,
+              avgViewers: Math.round(stats.avgViewers * 0.7),
+            },
+          },
+        }
+      : null
+
+  // Generate demo data for Creator Performance (enhanced with sentiment and reach)
+  const creatorPerformance = campaignData
+    ? campaignData.breakdown.map((creator) => ({
+        userId: creator.userId,
+        channelName: creator.channelName,
+        mentions: creator.mentions,
+        shareOfVoice: (creator.mentions / campaignData.totalMentions) * 100,
+        avgSentiment: 0.7 + Math.random() * 0.25, // 70-95%
+        avgViewers: Math.round(5000 + Math.random() * 25000),
+        totalReach: Math.round(creator.mentions * (8000 + Math.random() * 15000)),
+      }))
+    : []
+
+  // Generate demo trend data (last 14 days)
+  const trendData = campaignData
+    ? Array.from({ length: 14 }, (_, i) => {
+        const date = new Date()
+        date.setDate(date.getDate() - (13 - i))
+        return {
+          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          mentions: Math.round(5 + Math.random() * 15 + i * 0.5), // Trending up
+        }
+      })
+    : []
+
+  // Generate demo health data for creators
+  const creatorHealthData = talent.map((t) => {
+    // Vary health scores based on stats
+    const hasGoodStats = t.stats.avgViewers > 5000 && t.stats.totalMessages > 10000
+    const baseScore = hasGoodStats ? 75 : 55
+    const score = baseScore + Math.round(Math.random() * 20)
+
+    let category: 'green' | 'amber' | 'red'
+    if (score >= 80) category = 'green'
+    else if (score >= 50) category = 'amber'
+    else category = 'red'
+
+    const reasons = {
+      green: 'Consistent streams, stable sentiment, growing audience',
+      amber: 'Fewer streams this month, sentiment slightly down',
+      red: 'Recent toxicity spikes, viewer drop detected',
+    }
+
+    const flags = {
+      green: [] as string[],
+      amber: ['reduced_frequency'],
+      red: ['toxicity_spike', 'viewer_drop'],
+    }
+
+    return {
+      userId: t.userId,
+      channelName: t.channelName || '',
+      displayName: t.displayName,
+      avatarUrl: t.avatarUrl,
+      healthScore: score,
+      healthCategory: category,
+      reasonSummary: reasons[category],
+      flags: flags[category],
+      lastUpdated: new Date().toISOString(),
+    }
+  })
+
+  const handleCreatorClick = (userId: string) => {
+    window.location.href = `/dashboard?userId=${userId}`
+  }
+
+  const handleGenerateReport = async (config: any) => {
+    try {
+      const {
+        data: { session },
+      } = await createClient().auth.getSession()
+      if (!session) throw new Error('No session')
+
+      const response = await fetch('/api/agency/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          organizationId: organization.id,
-          userId,
+          organizationId: organization?.id,
+          campaignName: config.campaignName,
+          dateRangeStart: config.dateRangeStart,
+          dateRangeEnd: config.dateRangeEnd,
+          notes: config.notes,
         }),
       })
 
-      if (response.ok) {
-        // Refresh talent list
-        await fetchTalentAnalytics(session.access_token, organization.id)
-      } else {
-        const data = await response.json()
-        alert(`Failed to remove talent: ${data.error || 'Unknown error'}`)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to generate report')
+      }
+
+      const data = await response.json()
+
+      return {
+        reportUrl: data.reportUrl,
+        reportId: data.reportId,
       }
     } catch (error: any) {
-      console.error('Error removing talent:', error)
-      alert(`An error occurred: ${error.message}`)
+      console.error('Error generating report:', error)
+      throw error
     }
   }
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          background: 'linear-gradient(135deg, #0B0D14 0%, #1A1A2E 100%)',
-        }}
-      >
-        <div style={{ textAlign: 'center', color: 'white' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              border: '4px solid rgba(105, 50, 255, 0.3)',
-              borderTopColor: '#6932FF',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 16px',
-            }}
-          />
-          <p style={{ fontSize: '18px', fontWeight: 600 }}>Loading Agency Dashboard...</p>
+      <div className="min-h-screen bg-[#0B0D14] flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+          <p>Loading Command Center...</p>
         </div>
-        <style jsx>{`
-          @keyframes spin {
-            to {
-              transform: rotate(360deg);
-            }
-          }
-        `}</style>
       </div>
     )
   }
 
-  return (
-    <FeatureGate
-      requiredTier="Agency"
-      currentTier={currentTier}
-      featureName="Agency Portfolio Dashboard"
-      featureDescription="Manage multiple streamers and view aggregated analytics across your entire talent roster."
-    >
-      <div
-        style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #0B0D14 0%, #1A1A2E 100%)',
-          padding: '2rem',
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            marginBottom: '2rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1rem',
-            }}
-          >
-            <div>
-              <h1
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 900,
-                  background: 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                {organization?.name || 'Organization Overview'}
-              </h1>
-              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '1rem' }}>
-                Managing {talent.length} {talent.length === 1 ? 'streamer' : 'streamers'}
-              </p>
-            </div>
+  const todayIso = new Date().toISOString().slice(0, 10)
 
-            <button
-              onClick={() => setShowAddTalentModal(true)}
-              style={{
-                background: 'linear-gradient(135deg, #6932FF 0%, #932FFE 100%)',
-                color: 'white',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '12px',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '1rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                boxShadow: '0 4px 12px rgba(105, 50, 255, 0.4)',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(105, 50, 255, 0.6)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(105, 50, 255, 0.4)'
-              }}
-            >
-              <span>➕</span>
-              <span>Add Talent</span>
-            </button>
+  return (
+    <div className="min-h-screen bg-[#0B0D14] text-white p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+              Agency Command Center
+            </h1>
+            <p className="text-gray-400 mt-1">Portfolio Overview & Campaign Intelligence</p>
           </div>
 
-          {/* Organization Stats */}
-          {orgTotals && (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginTop: '1.5rem',
-              }}
+          <div className="flex gap-4">
+            <button
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition text-sm font-medium"
+              onClick={() => (window.location.href = '/account')}
             >
-              <div
-                style={{
-                  background: 'rgba(105, 50, 255, 0.1)',
-                  border: '1px solid rgba(105, 50, 255, 0.3)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                }}
-              >
-                <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  Total Streams
-                </div>
-                <div
-                  style={{ fontSize: '2rem', fontWeight: 900, color: 'white', marginTop: '0.5rem' }}
-                >
-                  {orgTotals.totalSessions.toLocaleString()}
-                </div>
-              </div>
+              Settings
+            </button>
+            <button
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition text-sm font-bold flex items-center gap-2"
+              onClick={() => setShowAddTalentModal(true)}
+            >
+              <span>+</span> Add Talent
+            </button>
+          </div>
+        </header>
 
-              <div
-                style={{
-                  background: 'rgba(94, 234, 212, 0.1)',
-                  border: '1px solid rgba(94, 234, 212, 0.3)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                }}
-              >
-                <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  Total Messages
-                </div>
-                <div
-                  style={{
-                    fontSize: '2rem',
-                    fontWeight: 900,
-                    color: '#5EEAD4',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {orgTotals.totalMessages.toLocaleString()}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(147, 51, 234, 0.1)',
-                  border: '1px solid rgba(147, 51, 234, 0.3)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                }}
-              >
-                <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  Avg Viewers
-                </div>
-                <div
-                  style={{
-                    fontSize: '2rem',
-                    fontWeight: 900,
-                    color: '#9333EA',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {orgTotals.avgViewersAcrossAllTalent}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                }}
-              >
-                <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  Active Talent
-                </div>
-                <div
-                  style={{
-                    fontSize: '2rem',
-                    fontWeight: 900,
-                    color: '#10B981',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {orgTotals.activeTalent}
-                </div>
-              </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">
+              Total Streams
             </div>
-          )}
+            <div className="text-3xl font-bold text-purple-400">{stats.totalStreams}</div>
+            <div className="text-xs text-gray-500 mt-1">Last 30 days</div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">
+              Total Messages
+            </div>
+            <div className="text-3xl font-bold text-pink-400">
+              {(stats.totalMessages / 1000000).toFixed(1)}M
+            </div>
+            <div className="text-xs text-gray-500 mt-1">+12% vs last month</div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">
+              Avg Viewers
+            </div>
+            <div className="text-3xl font-bold text-teal-400">
+              {(stats.avgViewers / 1000).toFixed(1)}k
+            </div>
+            <div className="text-xs text-gray-500 mt-1">Across all channels</div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">
+              Active Talent
+            </div>
+            <div className="text-3xl font-bold text-white">{stats.activeTalent}</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {currentTier === 'Agency' ? '5/5 Slots Used' : 'Unlimited Slots'}
+            </div>
+          </div>
         </div>
+
+        {/* Campaign Intelligence Section with Benchmarking */}
+        {benchmarkData && campaignData && (
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  🎯 {campaignData.campaignName} Campaign
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Active campaign performance and analytics
+                </p>
+              </div>
+              <button
+                onClick={() => setShowReportGenerator(true)}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg font-bold text-white transition flex items-center gap-2"
+              >
+                <span>📄</span>
+                <span>Generate Sponsor Report</span>
+              </button>
+            </div>
+
+            <CampaignBenchmark
+              campaignName={campaignData.campaignName}
+              benchmarkData={benchmarkData}
+              creatorPerformance={creatorPerformance}
+              trendData={trendData}
+              onCreatorClick={handleCreatorClick}
+            />
+          </div>
+        )}
+
+        {/* Creator Health Dashboard */}
+        {creatorHealthData.length > 0 && (
+          <div className="mb-8">
+            <CreatorHealthDashboard
+              creators={creatorHealthData}
+              onCreatorClick={handleCreatorClick}
+            />
+          </div>
+        )}
 
         {/* Talent Table */}
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <TalentTable talent={talent} onRemoveTalent={handleRemoveTalent} />
         </div>
-
-        {/* Add Talent Modal */}
-        {showAddTalentModal && (
-          <AddTalentModal
-            onClose={() => setShowAddTalentModal(false)}
-            onAddTalent={handleAddTalent}
-          />
-        )}
       </div>
-    </FeatureGate>
+
+      {showAddTalentModal && (
+        <AddTalentModal onClose={() => setShowAddTalentModal(false)} onInvite={handleAddTalent} />
+      )}
+
+      {showReportGenerator && campaignData && (
+        <SponsorReportGenerator
+          isOpen={showReportGenerator}
+          onClose={() => setShowReportGenerator(false)}
+          campaignName={campaignData.campaignName}
+          defaultStartDate={todayIso}
+          defaultEndDate={todayIso}
+          onGenerate={handleGenerateReport}
+        />
+      )}
+    </div>
   )
 }

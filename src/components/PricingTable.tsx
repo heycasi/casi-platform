@@ -66,8 +66,16 @@ export default function PricingTable() {
       name: 'Agency',
       price: PRICING_CONFIG[currency].agency.price,
       priceId: PRICING_CONFIG[currency].agency.priceId,
-      description: 'Mission Control',
-      features: ['Manage 5 Channels', 'White Label Reports', 'API Access', 'Priority Support'],
+      description: 'Complete infrastructure for talent managers & networks',
+      features: [
+        'Unified Command Center',
+        'White-Label Sponsor Reports',
+        'Campaign Benchmarking',
+        'Team Roles & Permissions',
+        'Unlimited Historical Data',
+        'Priority Support & Onboarding',
+        'Full API Access',
+      ],
       cta: 'Get Agency',
       popular: false,
       ctaLink: null,
@@ -272,6 +280,19 @@ export default function PricingTable() {
                     >
                       /month
                     </span>
+                    {tier.name === 'Agency' && (
+                      <div
+                        style={{
+                          fontSize: '0.75rem',
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          marginTop: '0.5rem',
+                          fontWeight: '400',
+                        }}
+                      >
+                        Includes 3 roster slots. Add more for {PRICING_CONFIG[currency].symbol}
+                        7.99/mo.
+                      </div>
+                    )}
                   </>
                 )}
               </div>
