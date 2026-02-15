@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia'
+  apiVersion: '2024-12-18.acacia',
 })
 
 const supabase = createClient(
@@ -16,23 +16,20 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json()
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Get the subscription for this email
+    // Get the subscription for this email (allow active, trialing, or past_due)
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('stripe_customer_id')
       .eq('email', email)
-      .eq('status', 'active')
+      .in('status', ['active', 'trialing', 'past_due'])
       .single()
 
     if (subError || !subscription) {
       return NextResponse.json(
-        { error: 'No active subscription found' },
+        { error: 'No subscription found. Please subscribe first.' },
         { status: 404 }
       )
     }
@@ -46,9 +43,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: portalSession.url })
   } catch (error: any) {
     console.error('Error creating portal session:', error)
-    return NextResponse.json(
-      { error: 'Failed to create portal session' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 })
   }
 }

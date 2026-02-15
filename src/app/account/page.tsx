@@ -216,8 +216,27 @@ function ProfileTab({ user }: { user: User }) {
       return
     }
 
-    // TODO: Implement account deletion API
-    alert('Account deletion will be implemented with proper data cleanup')
+    try {
+      const response = await fetch('/api/account/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user.email,
+          confirmEmail: user.email,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        alert('Your account has been deleted. You will be redirected to the home page.')
+        window.location.href = '/'
+      } else {
+        alert(`Error: ${data.error || 'Failed to delete account'}`)
+      }
+    } catch (error: any) {
+      alert(`Error: ${error.message}`)
+    }
   }
 
   return (
@@ -408,7 +427,10 @@ function ProfileTab({ user }: { user: User }) {
 }
 
 function IntegrationsTab({ user }: { user: User }) {
-  const twitchConnected = !!user.app_metadata?.provider && user.app_metadata.provider === 'twitch'
+  // Check both app_metadata (OAuth signup) and user_metadata (linked account)
+  const twitchConnected = !!(
+    user.app_metadata?.provider === 'twitch' || user.user_metadata?.twitch_id
+  )
   const [userTier, setUserTier] = useState<'Starter' | 'Pro' | 'Agency'>('Starter')
   const supabase = createClient()
 
@@ -731,7 +753,9 @@ function SubscriptionTab({ user }: { user: User }) {
                   {subscription.plan_name} Plan
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                  Renews on {new Date(subscription.current_period_end).toLocaleDateString()}
+                  {subscription.current_period_end
+                    ? `Renews on ${new Date(subscription.current_period_end).toLocaleDateString()}`
+                    : 'Renewal date unavailable'}
                 </p>
               </div>
               <div
